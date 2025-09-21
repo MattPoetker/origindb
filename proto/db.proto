@@ -1,0 +1,330 @@
+syntax = "proto3";
+
+package instantdb;
+
+import "google/protobuf/timestamp.proto";
+
+// Admin service for module management
+service Admin {
+  rpc UploadModule(UploadModuleRequest) returns (UploadModuleResponse);
+  rpc InstallModule(InstallModuleRequest) returns (InstallModuleResponse);
+  rpc ListModules(ListModulesRequest) returns (ListModulesResponse);
+  rpc RevokeModule(RevokeModuleRequest) returns (RevokeModuleResponse);
+  rpc GetClusterStatus(GetClusterStatusRequest) returns (GetClusterStatusResponse);
+}
+
+// SQL service for query execution
+service SQL {
+  rpc Execute(SQLRequest) returns (SQLResponse);
+  rpc StreamExecute(SQLRequest) returns (stream SQLResponse);
+  rpc BeginTransaction(BeginTransactionRequest) returns (BeginTransactionResponse);
+  rpc Commit(CommitRequest) returns (CommitResponse);
+  rpc Rollback(RollbackRequest) returns (RollbackResponse);
+}
+
+// Subscription service for changefeeds
+service Subscription {
+  rpc Subscribe(stream SubscriptionRequest) returns (stream SubscriptionEvent);
+  rpc ListSubscriptions(ListSubscriptionsRequest) returns (ListSubscriptionsResponse);
+  rpc UnSubscribe(UnSubscribeRequest) returns (UnSubscribeResponse);
+}
+
+// Module management messages
+message UploadModuleRequest {
+  string module_id = 1;
+  string version = 2;
+  bytes wasm_binary = 3;
+  ModuleManifest manifest = 4;
+  bytes signature = 5; // Optional signature for verification
+}
+
+message UploadModuleResponse {
+  bool success = 1;
+  string digest = 2;
+  string error = 3;
+}
+
+message InstallModuleRequest {
+  string module_id = 1;
+  string version = 2;
+  string digest = 3;
+}
+
+message InstallModuleResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message ListModulesRequest {
+  bool include_revoked = 1;
+}
+
+message ListModulesResponse {
+  repeated ModuleInfo modules = 1;
+}
+
+message RevokeModuleRequest {
+  string module_id = 1;
+  string version = 2;
+  string reason = 3;
+}
+
+message RevokeModuleResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message ModuleInfo {
+  string module_id = 1;
+  string version = 2;
+  string digest = 3;
+  google.protobuf.Timestamp uploaded_at = 4;
+  google.protobuf.Timestamp installed_at = 5;
+  bool is_revoked = 6;
+  ModuleManifest manifest = 7;
+}
+
+message ModuleManifest {
+  repeated string allowed_tables = 1;
+  bool read_only = 2;
+  bool can_emit_events = 3;
+  uint64 max_memory_bytes = 4;
+  uint64 max_cpu_nanoseconds = 5;
+  repeated string entry_points = 6;
+}
+
+// SQL execution messages
+message SQLRequest {
+  string sql = 1;
+  repeated Value params = 2;
+  string transaction_id = 3; // Optional, for transactional execution
+  map<string, string> options = 4;
+}
+
+message SQLResponse {
+  bool success = 1;
+  ResultSet result_set = 2;
+  string error = 3;
+  string leader_address = 4; // For redirect if not leader
+  ExecutionMetadata metadata = 5;
+}
+
+message ResultSet {
+  repeated Column columns = 1;
+  repeated Row rows = 2;
+  uint64 rows_affected = 3;
+}
+
+message Column {
+  string name = 1;
+  string type = 2;
+  bool nullable = 3;
+}
+
+message Row {
+  repeated Value values = 1;
+}
+
+message Value {
+  oneof value {
+    bool null_value = 1;
+    int64 int_value = 2;
+    double double_value = 3;
+    string string_value = 4;
+    bytes bytes_value = 5;
+    bool bool_value = 6;
+    google.protobuf.Timestamp timestamp_value = 7;
+  }
+}
+
+message ExecutionMetadata {
+  uint64 execution_time_ms = 1;
+  uint64 rows_scanned = 2;
+  uint64 bytes_processed = 3;
+}
+
+// Transaction messages
+message BeginTransactionRequest {
+  IsolationLevel isolation_level = 1;
+  bool read_only = 2;
+}
+
+message BeginTransactionResponse {
+  string transaction_id = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message CommitRequest {
+  string transaction_id = 1;
+}
+
+message CommitResponse {
+  bool success = 1;
+  string error = 2;
+  uint64 commit_timestamp = 3;
+}
+
+message RollbackRequest {
+  string transaction_id = 1;
+}
+
+message RollbackResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+enum IsolationLevel {
+  READ_UNCOMMITTED = 0;
+  READ_COMMITTED = 1;
+  REPEATABLE_READ = 2;
+  SERIALIZABLE = 3;
+  SNAPSHOT = 4;
+}
+
+// Subscription/Changefeed messages
+message SubscriptionRequest {
+  oneof request {
+    Subscribe subscribe = 1;
+    Acknowledge acknowledge = 2;
+    FlowControl flow_control = 3;
+  }
+}
+
+message Subscribe {
+  string subscription_id = 1;
+  string sql_filter = 2; // SQL WHERE clause
+  uint64 start_offset = 3;
+  DeliveryMode mode = 4;
+}
+
+message Acknowledge {
+  string subscription_id = 1;
+  uint64 offset = 2;
+}
+
+message FlowControl {
+  string subscription_id = 1;
+  uint32 credits = 2; // Number of messages client can receive
+}
+
+message SubscriptionEvent {
+  oneof event {
+    SubscriptionAck ack = 1;
+    ChangeEvent change_event = 2;
+    SubscriptionError error = 3;
+  }
+}
+
+message SubscriptionAck {
+  string subscription_id = 1;
+  uint64 start_offset = 2;
+}
+
+message ChangeEvent {
+  string subscription_id = 1;
+  uint64 offset = 2;
+  string transaction_id = 3;
+  string table = 4;
+  Operation operation = 5;
+  bytes key = 6;
+  Value old_value = 7; // For UPDATE
+  Value new_value = 8;
+  google.protobuf.Timestamp timestamp = 9;
+}
+
+message SubscriptionError {
+  string subscription_id = 1;
+  string error = 2;
+  ErrorCode code = 3;
+}
+
+enum Operation {
+  INSERT = 0;
+  UPDATE = 1;
+  DELETE = 2;
+  CUSTOM = 3;
+}
+
+enum DeliveryMode {
+  AT_LEAST_ONCE = 0;
+  EXACTLY_ONCE = 1;
+}
+
+enum ErrorCode {
+  UNKNOWN = 0;
+  SUBSCRIPTION_NOT_FOUND = 1;
+  INVALID_FILTER = 2;
+  BACKPRESSURE = 3;
+  INTERNAL_ERROR = 4;
+}
+
+message ListSubscriptionsRequest {
+  bool include_inactive = 1;
+}
+
+message ListSubscriptionsResponse {
+  repeated SubscriptionInfo subscriptions = 1;
+}
+
+message SubscriptionInfo {
+  string subscription_id = 1;
+  string sql_filter = 2;
+  uint64 current_offset = 3;
+  uint64 lag = 4;
+  bool is_active = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message UnSubscribeRequest {
+  string subscription_id = 1;
+}
+
+message UnSubscribeResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+// Cluster status
+message GetClusterStatusRequest {}
+
+message GetClusterStatusResponse {
+  repeated NodeInfo nodes = 1;
+  repeated ShardInfo shards = 2;
+  ClusterHealth health = 3;
+}
+
+message NodeInfo {
+  string node_id = 1;
+  string address = 2;
+  NodeRole role = 3;
+  NodeState state = 4;
+  google.protobuf.Timestamp last_heartbeat = 5;
+}
+
+message ShardInfo {
+  string shard_id = 1;
+  string leader_node_id = 2;
+  repeated string follower_node_ids = 3;
+  uint64 raft_term = 4;
+  uint64 raft_index = 5;
+}
+
+enum NodeRole {
+  LEADER = 0;
+  FOLLOWER = 1;
+  CANDIDATE = 2;
+  LEARNER = 3;
+}
+
+enum NodeState {
+  HEALTHY = 0;
+  UNHEALTHY = 1;
+  DISCONNECTED = 2;
+}
+
+enum ClusterHealth {
+  GREEN = 0;  // All shards have leader and sufficient replicas
+  YELLOW = 1; // All shards have leader but missing replicas
+  RED = 2;    // Some shards have no leader
+}

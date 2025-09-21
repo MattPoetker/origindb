@@ -1,0 +1,253 @@
+syntax = "proto3";
+
+package instantdb.internal;
+
+import "google/protobuf/timestamp.proto";
+
+// Internal Raft log entry format
+message RaftEntry {
+  uint64 term = 1;
+  uint64 index = 2;
+  google.protobuf.Timestamp timestamp = 3;
+
+  oneof payload {
+    ModuleInvocation module_invocation = 10;
+    DDLCommand ddl = 11;
+    DMLCommand dml = 12;
+    SnapshotMarker snapshot = 13;
+    ConfigChange config_change = 14;
+  }
+}
+
+// Module execution log entry (leader executes, followers apply results)
+message ModuleInvocation {
+  string module_id = 1;
+  string module_version = 2;
+  string transaction_id = 3;
+  bytes input_args = 4;
+
+  // Deterministic inputs for replay
+  uint64 deterministic_timestamp = 5;
+  bytes deterministic_seed = 6;
+
+  // Results from leader execution (followers apply these directly)
+  repeated TableWrite staged_writes = 10;
+  repeated EmittedEvent emitted_events = 11;
+
+  // Execution metadata
+  uint64 execution_time_ns = 20;
+  uint64 memory_used_bytes = 21;
+}
+
+message TableWrite {
+  string table_name = 1;
+  TableOperation operation = 2;
+  bytes key = 3;
+  bytes old_value = 4; // For UPDATE
+  bytes new_value = 5;
+}
+
+enum TableOperation {
+  TABLE_INSERT = 0;
+  TABLE_UPDATE = 1;
+  TABLE_DELETE = 2;
+  TABLE_UPSERT = 3;
+}
+
+message EmittedEvent {
+  string topic = 1;
+  uint64 sequence_in_tx = 2;
+  string operation = 3;
+  bytes key = 4;
+  bytes payload = 5;
+}
+
+// DDL commands
+message DDLCommand {
+  oneof command {
+    CreateTable create_table = 1;
+    DropTable drop_table = 2;
+    AlterTable alter_table = 3;
+    CreateIndex create_index = 4;
+    DropIndex drop_index = 5;
+  }
+}
+
+message CreateTable {
+  string table_name = 1;
+  repeated ColumnDefinition columns = 2;
+  repeated string primary_key = 3;
+  map<string, string> options = 4;
+}
+
+message ColumnDefinition {
+  string name = 1;
+  DataType type = 2;
+  bool nullable = 3;
+  bytes default_value = 4;
+}
+
+enum DataType {
+  INT32 = 0;
+  INT64 = 1;
+  FLOAT = 2;
+  DOUBLE = 3;
+  STRING = 4;
+  BYTES = 5;
+  BOOLEAN = 6;
+  TIMESTAMP = 7;
+  JSON = 8;
+}
+
+message DropTable {
+  string table_name = 1;
+  bool if_exists = 2;
+}
+
+message AlterTable {
+  string table_name = 1;
+  oneof alteration {
+    AddColumn add_column = 2;
+    DropColumn drop_column = 3;
+    ModifyColumn modify_column = 4;
+  }
+}
+
+message AddColumn {
+  ColumnDefinition column = 1;
+}
+
+message DropColumn {
+  string column_name = 1;
+}
+
+message ModifyColumn {
+  string column_name = 1;
+  ColumnDefinition new_definition = 2;
+}
+
+message CreateIndex {
+  string index_name = 1;
+  string table_name = 2;
+  repeated string columns = 3;
+  IndexType type = 4;
+  bool unique = 5;
+}
+
+enum IndexType {
+  BTREE = 0;
+  HASH = 1;
+  FULLTEXT = 2;
+}
+
+message DropIndex {
+  string index_name = 1;
+  string table_name = 2;
+}
+
+// DML commands (for non-module SQL)
+message DMLCommand {
+  string table_name = 1;
+  oneof command {
+    Insert insert = 2;
+    Update update = 3;
+    Delete delete = 4;
+  }
+}
+
+message Insert {
+  repeated string columns = 1;
+  repeated bytes values = 2;
+}
+
+message Update {
+  bytes where_clause = 1; // Serialized predicate
+  map<string, bytes> set_values = 2;
+}
+
+message Delete {
+  bytes where_clause = 1; // Serialized predicate
+}
+
+// Snapshot management
+message SnapshotMarker {
+  uint64 snapshot_index = 1;
+  string snapshot_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+// Cluster configuration changes
+message ConfigChange {
+  oneof change {
+    AddNode add_node = 1;
+    RemoveNode remove_node = 2;
+    UpdateNode update_node = 3;
+    ShardRebalance shard_rebalance = 4;
+  }
+}
+
+message AddNode {
+  string node_id = 1;
+  string address = 2;
+  NodeCapabilities capabilities = 3;
+}
+
+message RemoveNode {
+  string node_id = 1;
+  string reason = 2;
+}
+
+message UpdateNode {
+  string node_id = 1;
+  string new_address = 2;
+  NodeCapabilities new_capabilities = 3;
+}
+
+message NodeCapabilities {
+  bool can_be_leader = 1;
+  uint64 max_memory_bytes = 2;
+  uint32 max_concurrent_modules = 3;
+}
+
+message ShardRebalance {
+  string shard_id = 1;
+  string from_node_id = 2;
+  string to_node_id = 3;
+}
+
+// WAL and Snapshot formats
+message WALEntry {
+  uint64 sequence = 1;
+  RaftEntry entry = 2;
+  uint32 crc32 = 3;
+}
+
+message SnapshotMetadata {
+  uint64 last_included_index = 1;
+  uint64 last_included_term = 2;
+  repeated ShardState shards = 3;
+  repeated ModuleState modules = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message ShardState {
+  string shard_id = 1;
+  bytes key_range_start = 2;
+  bytes key_range_end = 3;
+  repeated TableSnapshot tables = 4;
+}
+
+message TableSnapshot {
+  string table_name = 1;
+  uint64 row_count = 2;
+  uint64 size_bytes = 3;
+  string data_file = 4; // Reference to data file in snapshot
+}
+
+message ModuleState {
+  string module_id = 1;
+  string version = 2;
+  string digest = 3;
+  bool is_installed = 4;
+  bool is_revoked = 5;
+}
