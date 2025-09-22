@@ -1,9 +1,11 @@
 #include "sql/sql_engine.h"
 #include "storage/storage_engine.h"
+#include "changefeed/changefeed_engine.h"
 #include <spdlog/spdlog.h>
 #include <regex>
 #include <algorithm>
 #include <cctype>
+#include <nlohmann/json.hpp>
 
 namespace instantdb {
 
@@ -16,8 +18,8 @@ struct TxnEntry {
 
 class SqlEngine::Impl {
 public:
-    Impl(std::shared_ptr<StorageEngine> storage)
-        : storage_(storage), next_txn_id_(1) {}
+    Impl(std::shared_ptr<StorageEngine> storage, std::shared_ptr<ChangefeedEngine> changefeed)
+        : storage_(storage), changefeed_(changefeed), next_txn_id_(1) {}
 
     bool Initialize() {
         spdlog::info("SQL Engine initialized");
@@ -210,13 +212,69 @@ private:
 
     void EmitChangeEvent(const std::string& table, const std::string& op,
                         const std::string& key, const Row& row) {
-        // TODO: Connect to changefeed engine when implemented
-        spdlog::debug("Change event: {} on table {} key {}",
+        if (!changefeed_) {
+            spdlog::debug("Changefeed not available - skipping change event: {} on table {} key {}",
+                         op, table, key);
+            return;
+        }
+
+        // Create a changefeed event
+        ChangefeedEvent event;
+        event.table = table;
+        event.operation = op;
+        event.transaction_id = "txn-" + std::to_string(next_txn_id_.load());
+        event.timestamp = std::chrono::system_clock::now();
+
+        // Convert key to bytes
+        event.key = std::vector<uint8_t>(key.begin(), key.end());
+
+        // Serialize row data as JSON for new_value
+        nlohmann::json row_json;
+        row_json["key"] = row.key;
+
+        // Convert columns to JSON
+        nlohmann::json columns_json;
+        for (const auto& [col_name, col_value] : row.columns) {
+            std::visit([&columns_json, &col_name](const auto& v) {
+                using T = std::decay_t<decltype(v)>;
+                if constexpr (std::is_same_v<T, std::monostate>) {
+                    columns_json[col_name] = nullptr;
+                } else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>) {
+                    columns_json[col_name] = v;
+                } else if constexpr (std::is_same_v<T, std::string>) {
+                    columns_json[col_name] = v;
+                } else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
+                    columns_json[col_name] = v;
+                } else if constexpr (std::is_same_v<T, bool>) {
+                    columns_json[col_name] = v;
+                } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
+                    // Encode binary data as base64 or hex string
+                    columns_json[col_name] = "binary_data";
+                }
+            }, col_value);
+        }
+        row_json["columns"] = columns_json;
+
+        std::string json_str = row_json.dump();
+        event.new_value = std::vector<uint8_t>(json_str.begin(), json_str.end());
+
+        // For INSERT, old_value is empty
+        // For UPDATE/DELETE, we'd need to fetch the old value first
+        if (op != "INSERT") {
+            // TODO: Fetch old value for UPDATE/DELETE
+            event.old_value = {};
+        }
+
+        // Publish the event
+        changefeed_->PublishEvent(event);
+
+        spdlog::debug("Published changefeed event: {} on table {} key {}",
                      op, table, key);
     }
 
 private:
     std::shared_ptr<StorageEngine> storage_;
+    std::shared_ptr<ChangefeedEngine> changefeed_;
     std::unordered_map<std::string, std::shared_ptr<Transaction>> active_transactions_;
     std::atomic<uint64_t> next_txn_id_;
 };
@@ -236,7 +294,6 @@ std::optional<SqlStatement> SqlParser::Parse(const std::string& sql) {
     if (std::regex_search(upper_sql, match, insert_regex)) {
         stmt.type = StatementType::INSERT;
         std::string table_name = match[1].str();
-        std::transform(table_name.begin(), table_name.end(), table_name.begin(), ::tolower);
         stmt.table_name = table_name;
 
         // Parse values (simplified)
@@ -302,7 +359,6 @@ std::optional<SqlStatement> SqlParser::Parse(const std::string& sql) {
     if (std::regex_search(upper_sql, match, select_regex)) {
         stmt.type = StatementType::SELECT;
         std::string table_name = match[1].str();
-        std::transform(table_name.begin(), table_name.end(), table_name.begin(), ::tolower);
         stmt.table_name = table_name;
         return stmt;
     }
@@ -315,8 +371,9 @@ std::string SqlParser::FormatError(const std::string& error, size_t position) {
 }
 
 // SqlEngine public interface
-SqlEngine::SqlEngine(std::shared_ptr<StorageEngine> storage)
-    : impl_(std::make_unique<Impl>(storage)) {}
+SqlEngine::SqlEngine(std::shared_ptr<StorageEngine> storage,
+                     std::shared_ptr<ChangefeedEngine> changefeed)
+    : impl_(std::make_unique<Impl>(storage, changefeed)) {}
 
 SqlEngine::~SqlEngine() = default;
 

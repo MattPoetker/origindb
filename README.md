@@ -1,104 +1,128 @@
 # InstantDB
 
-A high-performance, in-memory SQL RDBMS with WASM module execution and real-time changefeeds.
+A high-performance, in-memory SQL database with real-time changefeeds and WebSocket streaming capabilities.
 
-## Features
+## Current Features (v0.1.0)
 
-- **In-Memory Storage**: Fast, in-memory table storage with WAL persistence
+- **In-Memory Storage Engine** with MVCC (Multi-Version Concurrency Control)
+- **Write-Ahead Logging (WAL)** for persistence and crash recovery
+- **SQL Query Engine** for standard SQL operations (CREATE TABLE, INSERT, SELECT)
+- **Real-Time Changefeed Engine** for live data updates
+- **WebSocket Server** for streaming changes to connected clients
+- **Production Server** with CLI configuration and graceful shutdown
+- **Thread-Safe Operations** with concurrent read/write access
+
+## Planned Features (Future Versions)
+
 - **Distributed Consensus**: Raft-based replication for high availability
 - **WASM Modules**: Execute user-defined WASM modules within transactions
-- **SQL Interface**: Standard SQL support with extensions for modules
-- **Real-time Changefeeds**: WebSocket-based change streaming
-- **Strong Consistency**: Linearizable reads and writes
+- **Complete SQL Interface**: Full SQL:2016 compliance with extensions
+- **Strong Consistency**: Linearizable reads and writes across cluster
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────┐
-│                    Client Layer                       │
-│  ┌─────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │  gRPC   │  │WebSocket │  │  Admin CLI       │   │
-│  └─────────┘  └──────────┘  └──────────────────┘   │
-└──────────────────────────────────────────────────────┘
-                           │
-┌──────────────────────────────────────────────────────┐
-│                    SQL Engine                         │
-│  ┌─────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │ Parser  │  │ Planner  │  │    Executor      │   │
-│  └─────────┘  └──────────┘  └──────────────────┘   │
-└──────────────────────────────────────────────────────┘
-                           │
-┌──────────────────────────────────────────────────────┐
-│              Transaction & Storage Layer              │
-│  ┌─────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │MemTable │  │   WAL    │  │   Snapshots      │   │
-│  └─────────┘  └──────────┘  └──────────────────┘   │
-└──────────────────────────────────────────────────────┘
-                           │
-┌──────────────────────────────────────────────────────┐
-│                 Consensus Layer (Raft)                │
-│  ┌─────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │ Leader  │  │ Follower │  │  Log Replication │   │
-│  └─────────┘  └──────────┘  └──────────────────┘   │
-└──────────────────────────────────────────────────────┘
-                           │
-┌──────────────────────────────────────────────────────┐
-│                   WASM Runtime                        │
-│  ┌─────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │Wasmtime │  │ Host API │  │  Module Store    │   │
-│  └─────────┘  └──────────┘  └──────────────────┘   │
-└──────────────────────────────────────────────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   SQL Engine    │───▶│  Storage Engine  │───▶│  WAL (Persist)  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       ▼                       │
+         │              ┌──────────────────┐             │
+         │              │ Changefeed Engine│◀────────────┘
+         │              └──────────────────┘
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐
+│  Client Query   │    │ WebSocket Server │
+│    Response     │    │   (Port 8080)    │
+└─────────────────┘    └──────────────────┘
+                                │
+                                ▼
+                       ┌──────────────────┐
+                       │  Connected       │
+                       │  WebSocket       │
+                       │  Clients         │
+                       └──────────────────┘
 ```
 
-## Building
+## Quick Start
 
 ### Prerequisites
 
-- CMake 3.20+
-- C++20 compiler (GCC 10+, Clang 12+)
-- Protobuf
-- gRPC
-- Boost
-- spdlog
+- **CMake 3.20+**
+- **C++20 compiler** (GCC 10+ or Clang 12+)
+- **OpenSSL** (for WebSocket handshake)
 
-### Build Steps
+The following dependencies are automatically fetched during build:
+- **spdlog** (logging)
+- **nlohmann/json** (JSON handling)
+- **fmt** (formatting)
+
+### Building
 
 ```bash
-# Create build directory
-mkdir build && cd build
+# Generate build files
+cmake -B build -S .
 
-# Configure
-cmake .. -DCMAKE_BUILD_TYPE=Release
+# Build the project
+cmake --build build
 
-# Build
-make -j$(nproc)
-
-# Run tests
-make test
-
-# Install
-sudo make install
+# Or use make if available
+make
 ```
 
-## Usage
-
-### Starting a Single Node
+### Running the Demo
 
 ```bash
-./instantdb --data-dir ./data --grpc-addr 0.0.0.0:50051 --ws-addr 0.0.0.0:8080
+# Run interactive demo (default port 8080)
+./build/instantdb_demo
+
+# Run demo on custom port
+./build/instantdb_demo 9090
 ```
 
-### Starting a Cluster
+### Running the Production Server
 
 ```bash
-# Node 1 (initial leader)
-./instantdb --node-id node1 --data-dir ./data1 --grpc-addr 0.0.0.0:50051
+# Start server with defaults
+./build/instantdb_server
 
-# Node 2
-./instantdb --node-id node2 --data-dir ./data2 --grpc-addr 0.0.0.0:50052 --join node1:9001
+# Start on custom port
+./build/instantdb_server -p 9090
+./build/instantdb_server --port 9090
+./build/instantdb_server 9090
 
-# Node 3
-./instantdb --node-id node3 --data-dir ./data3 --grpc-addr 0.0.0.0:50053 --join node1:9001
+# Show help
+./build/instantdb_server --help
+```
+
+## Configuration
+
+### Command Line Options
+
+```bash
+Usage: instantdb_server [OPTIONS]
+
+Options:
+  -p, --port PORT          WebSocket port (default: 8080)
+  -d, --data-dir DIR       Data directory (default: ./instantdb_data)
+  -l, --log-level LEVEL    Log level: trace,debug,info,warn,error (default: info)
+  -c, --config FILE        Config file path (default: instantdb.conf)
+  -h, --help               Show help message
+
+Examples:
+  instantdb_server                    # Start with defaults
+  instantdb_server -p 9090            # Start on port 9090
+  instantdb_server --port 9090        # Start on port 9090
+  instantdb_server 9090               # Start on port 9090 (short form)
+```
+
+### Environment Variables
+
+```bash
+export INSTANTDB_WS_PORT=9090        # WebSocket port
+export INSTANTDB_DATA_DIR=/data/db   # Data directory
+export INSTANTDB_LOG_LEVEL=debug     # Log level
 ```
 
 ## SQL Examples
@@ -107,97 +131,101 @@ sudo make install
 
 ```sql
 CREATE TABLE users (
-    id INT PRIMARY KEY,
-    name VARCHAR(100),
-    email VARCHAR(100),
-    created_at TIMESTAMP DEFAULT NOW()
+    id INT64 PRIMARY KEY,
+    name STRING
 );
-
-CREATE INDEX idx_users_email ON users(email);
 ```
 
-### WASM Module Operations
+### Data Operations
 
 ```sql
--- Upload and install a module
-CREATE MODULE transfer_funds FROM 'path/to/module.wasm'
-WITH (
-    capabilities = 'read_write',
-    max_memory = 268435456,
-    allowed_tables = 'accounts,transactions'
-);
+-- Insert data
+INSERT INTO users VALUES (1, 'Alice');
+INSERT INTO users VALUES (2, 'Bob');
+INSERT INTO users VALUES (3, 'Charlie');
 
--- Call a module
-CALL transfer_funds('account1', 'account2', 100.00);
+-- Query data
+SELECT * FROM users;
 ```
 
-### Subscriptions
+## WebSocket API
 
-```sql
--- Create a subscription for user changes
-CREATE SUBSCRIPTION user_updates
-FOR SELECT * FROM users WHERE country = 'US';
-```
+### Connecting to Changefeeds
 
-## WebSocket Changefeed Protocol
+Connect to the WebSocket endpoint to receive real-time changefeed events:
 
 ```javascript
-// Connect to WebSocket
-const ws = new WebSocket('ws://localhost:8080/changefeed');
+// Connect to server
+const ws = new WebSocket('ws://localhost:8080');
 
-// Subscribe
-ws.send(JSON.stringify({
-    action: 'subscribe',
-    subscription: 'user_updates',
-    sql: 'SELECT * FROM users WHERE active = true',
-    start_offset: 0
-}));
-
-// Receive events
-ws.onmessage = (event) => {
+// Receive changefeed events
+ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
-    console.log('Change event:', data);
+    console.log('Changefeed event:', data);
 
-    // Acknowledge
-    ws.send(JSON.stringify({
-        action: 'ack',
-        subscription: 'user_updates',
-        offset: data.offset
-    }));
+    // Example event structure:
+    // {
+    //   "type": "changefeed_event",
+    //   "table": "users",
+    //   "operation": "INSERT"
+    // }
+};
+
+ws.onopen = function() {
+    console.log('Connected to InstantDB WebSocket');
+};
+
+ws.onclose = function() {
+    console.log('Disconnected from InstantDB WebSocket');
 };
 ```
 
-## Configuration
+### Testing with curl
 
-See `config.yaml` for full configuration options:
-
-```yaml
-node:
-  id: node1
-  data_dir: ./data
-
-storage:
-  max_memory_bytes: 4294967296  # 4GB
-  wal_buffer_size: 67108864     # 64MB
-  snapshot_interval: 10000
-
-raft:
-  election_timeout_ms: 3000
-  heartbeat_interval_ms: 1000
-
-wasm:
-  max_instances: 100
-  instance_memory_limit: 268435456  # 256MB
-  max_execution_time_ns: 5000000000 # 5 seconds
-
-grpc:
-  listen_address: 0.0.0.0:50051
-  max_message_size: 104857600  # 100MB
-
-websocket:
-  listen_address: 0.0.0.0:8080
-  max_connections: 10000
+```bash
+# Test WebSocket connection
+curl --include \
+     --no-buffer \
+     --header "Connection: Upgrade" \
+     --header "Upgrade: websocket" \
+     --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
+     --header "Sec-WebSocket-Version: 13" \
+     http://localhost:8080/
 ```
+
+## Monitoring
+
+### Server Statistics
+
+The server provides runtime statistics every 30 seconds:
+
+```
+📈 Server Stats: 1 tables, 3 rows, 156 bytes, 0 WS connections, 1 subscriptions, 3 events
+```
+
+### Logging
+
+Structured logging with configurable levels:
+
+```
+[2024-01-15 10:30:45.123] [info] 🚀 Starting InstantDB Server
+[2024-01-15 10:30:45.124] [info] 📦 Initializing Storage Engine...
+[2024-01-15 10:30:45.125] [info] ✅ Storage Engine ready
+[2024-01-15 10:30:45.126] [info] 🔍 Initializing SQL Engine...
+[2024-01-15 10:30:45.127] [info] ✅ SQL Engine ready
+[2024-01-15 10:30:45.128] [info] 📡 Initializing Changefeed Engine...
+[2024-01-15 10:30:45.129] [info] ✅ Changefeed Engine ready
+[2024-01-15 10:30:45.130] [info] 🌐 Initializing WebSocket Server...
+[2024-01-15 10:30:45.131] [info] ✅ WebSocket Server ready on 0.0.0.0:8080
+```
+
+### Available Log Levels
+
+- `trace` - Very detailed debug information
+- `debug` - Debug information including WAL operations
+- `info` - General information (default)
+- `warn` - Warning messages
+- `error` - Error messages only
 
 ## Development
 
@@ -205,30 +233,108 @@ websocket:
 
 ```
 instant_db/
-├── include/        # Header files
-├── src/           # Implementation files
-│   ├── cmd/       # Main entry point
-│   ├── storage/   # Storage engine
-│   ├── raft/      # Consensus layer
-│   ├── sql/       # SQL engine
-│   ├── wasm/      # WASM runtime
-│   ├── modules/   # Module management
-│   ├── net/       # Network servers
-│   ├── changefeed/# Changefeed engine
-│   └── admin/     # Admin services
-├── proto/         # Protocol buffers
-├── tests/         # Unit tests
-└── deploy/        # Deployment configs
+├── src/
+│   ├── cmd/                    # Executables
+│   │   ├── instantdb_demo.cpp  # Interactive demo
+│   │   └── instantdb_server.cpp # Production server
+│   ├── storage/                # Storage engine
+│   │   ├── storage_engine.cpp  # Main storage implementation
+│   │   └── wal_impl.cpp        # Write-ahead log
+│   ├── sql/                    # SQL engine
+│   │   └── sql_engine.cpp      # SQL parser and executor
+│   ├── changefeed/             # Changefeed engine
+│   │   └── changefeed_engine.cpp # Real-time change tracking
+│   ├── websocket/              # WebSocket server
+│   │   └── websocket_server.cpp # WebSocket protocol implementation
+│   └── common/                 # Shared utilities
+│       └── config.h            # Configuration structures
+├── include/                    # Header files
+├── docs/                       # Documentation
+├── CMakeLists.txt             # Build configuration
+├── PROJECT.md                 # Original project specification
+└── README.md                  # This file
 ```
 
-### Contributing
+### Building from Source
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd instant_db
+
+# Create build directory
+mkdir build && cd build
+
+# Configure
+cmake ..
+
+# Build
+make -j$(nproc)
+
+# Run demo
+./instantdb_demo
+
+# Run production server
+./instantdb_server --help
+```
+
+### Key Components
+
+#### Storage Engine (`src/storage/storage_engine.cpp`)
+- In-memory table storage with thread-safe operations
+- MVCC implementation for concurrent access
+- WAL integration for persistence
+- Schema management and validation
+
+#### WebSocket Server (`src/websocket/websocket_server.cpp`)
+- Raw socket WebSocket implementation
+- OpenSSL integration for handshake
+- Real-time changefeed broadcasting
+- Connection management and cleanup
+
+#### Changefeed Engine (`src/changefeed/changefeed_engine.cpp`)
+- Subscription management
+- Event filtering and publishing
+- Metrics tracking
+
+#### WAL Implementation (`src/storage/wal_impl.cpp`)
+- JSON-based entry serialization
+- Hex encoding for binary data
+- Crash recovery and replay
+- Sequence number management
+
+## Roadmap
+
+### Current Version (v0.1.0)
+- ✅ In-memory storage with WAL persistence
+- ✅ Basic SQL operations (CREATE TABLE, INSERT, SELECT)
+- ✅ Real-time changefeeds via WebSocket
+- ✅ Production server with CLI configuration
+- ✅ Thread-safe operations
+
+### Next Version (v0.2.0)
+- [ ] **gRPC API** - High-performance RPC interface for SQL operations
+- [ ] **Configuration Files** - JSON/YAML configuration support
+- [ ] **Enhanced SQL** - UPDATE, DELETE, complex queries
+- [ ] **Authentication** - Basic user management
+
+### Future Versions
+- [ ] **Raft Consensus** - Distributed consensus for clustering
+- [ ] **WASM Modules** - User-defined functions and triggers
+- [ ] **Complete SQL Parser** - Full SQL:2016 compliance
+- [ ] **Metrics API** - Prometheus-compatible metrics
+- [ ] **Admin Interface** - Web-based administration
+
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Add tests
-5. Submit a pull request
+4. Add tests if applicable
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
 ## License
 
-MIT License - see LICENSE file for details
+[Add your license here]

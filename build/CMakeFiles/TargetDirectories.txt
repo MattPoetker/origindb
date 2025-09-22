@@ -1,9 +1,13 @@
 /Users/a12042/Development/instant_db/build/CMakeFiles/storage.dir
-/Users/a12042/Development/instant_db/build/CMakeFiles/sql_engine.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/changefeed_engine.dir
+/Users/a12042/Development/instant_db/build/CMakeFiles/sql_engine.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/websocket_server.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/common_lib.dir
+/Users/a12042/Development/instant_db/build/CMakeFiles/grpc_service.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_demo.dir
+/Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_sql.dir
+/Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_server.dir
+/Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_client.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/edit_cache.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/rebuild_cache.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/list_install_components.dir

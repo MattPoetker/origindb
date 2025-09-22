@@ -15,6 +15,7 @@ class StorageEngine;
 class ModuleStore;
 class RaftNode;
 class Transaction;
+class ChangefeedEngine;
 
 // SQL statement types
 enum class StatementType {
@@ -71,7 +72,8 @@ struct SqlResult {
 // SQL Engine
 class SqlEngine {
 public:
-    SqlEngine(std::shared_ptr<StorageEngine> storage);
+    SqlEngine(std::shared_ptr<StorageEngine> storage,
+              std::shared_ptr<ChangefeedEngine> changefeed = nullptr);
     ~SqlEngine();
 
     bool Initialize();

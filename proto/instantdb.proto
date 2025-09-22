@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package instantdb.grpc;
+
+// SQL execution service
+service SQLService {
+  // Execute a SQL statement and return results
+  rpc Execute(SQLRequest) returns (SQLResponse);
+
+  // Execute multiple SQL statements in a transaction
+  rpc ExecuteTransaction(SQLTransactionRequest) returns (SQLTransactionResponse);
+
+  // Get server status and statistics
+  rpc GetStatus(StatusRequest) returns (StatusResponse);
+}
+
+// SQL execution request
+message SQLRequest {
+  string sql = 1;
+}
+
+// SQL execution response
+message SQLResponse {
+  bool success = 1;
+  string error = 2;
+  repeated Row rows = 3;
+  int32 rows_affected = 4;
+  int64 execution_time_micros = 5;
+}
+
+// Transaction request with multiple SQL statements
+message SQLTransactionRequest {
+  repeated string sql_statements = 1;
+}
+
+// Transaction response
+message SQLTransactionResponse {
+  bool success = 1;
+  string error = 2;
+  repeated SQLResponse results = 3;
+  int64 transaction_id = 4;
+}
+
+// Status request (empty for now)
+message StatusRequest {
+}
+
+// Server status response
+message StatusResponse {
+  string version = 1;
+  int64 uptime_seconds = 2;
+  ServerStats stats = 3;
+}
+
+// Row data structure
+message Row {
+  string key = 1;
+  map<string, ColumnValue> columns = 2;
+}
+
+// Column value with type information
+message ColumnValue {
+  oneof value {
+    int64 int64_value = 1;
+    string string_value = 2;
+    double double_value = 3;
+    bool bool_value = 4;
+    bytes bytes_value = 5;
+  }
+}
+
+// Server statistics
+message ServerStats {
+  int64 total_tables = 1;
+  int64 total_rows = 2;
+  int64 storage_bytes = 3;
+  int64 active_connections = 4;
+  int64 active_subscriptions = 5;
+  int64 events_published = 6;
+  int64 total_queries = 7;
+  int64 successful_queries = 8;
+  int64 failed_queries = 9;
+}

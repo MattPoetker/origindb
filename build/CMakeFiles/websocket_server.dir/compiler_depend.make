@@ -1131,65 +1131,67 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: /Users/a12
   /Users/a12042/Development/instant_db/include/changefeed/changefeed_engine.h \
   /Users/a12042/Development/instant_db/include/common/config.h \
   /Users/a12042/Development/instant_db/include/websocket/websocket_server.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/asn1.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/asn1err.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/bio.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/bioerr.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/bn.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/bnerr.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/buffer.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/buffererr.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/configuration.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/core.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/core_dispatch.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/crypto.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/cryptoerr.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/cryptoerr_legacy.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/e_os2.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/evp.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/evperr.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/indicator.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/macros.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/obj_mac.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/objects.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/objectserr.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/opensslconf.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/opensslv.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/params.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/safestack.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/sha.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/stack.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/symhacks.h \
-  /usr/local/Cellar/openssl@3/3.5.1/include/openssl/types.h
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/asn1.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/asn1err.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/bio.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/bioerr.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/bn.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/bnerr.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/buffer.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/buffererr.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/configuration.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/core.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/core_dispatch.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/crypto.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/cryptoerr.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/cryptoerr_legacy.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/e_os2.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/evp.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/evperr.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/indicator.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/macros.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/obj_mac.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/objects.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/objectserr.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/opensslconf.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/opensslv.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/params.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/safestack.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/sha.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/stack.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/symhacks.h \
+  /usr/local/Cellar/openssl@3/3.5.2/include/openssl/types.h
 
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/symhacks.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/types.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/sha.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/params.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/safestack.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/opensslv.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/objectserr.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/objects.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/obj_mac.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/obj_mac.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/macros.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/indicator.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/indicator.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/evperr.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/e_os2.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/evp.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/cryptoerr.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/e_os2.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/core.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/crypto.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/configuration.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/buffererr.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/bnerr.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/buffer.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/bn.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/bn.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/bioerr.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/bioerr.h:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/bio.h:
 
 /Users/a12042/Development/instant_db/include/websocket/websocket_server.h:
 
@@ -1203,11 +1205,15 @@ _deps/spdlog-src/include/spdlog/spdlog.h:
 
 _deps/spdlog-src/include/spdlog/fmt/fmt.h:
 
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/symhacks.h:
+
 _deps/spdlog-src/include/spdlog/fmt/bundled/format.h:
 
 _deps/spdlog-src/include/spdlog/fmt/bundled/core.h:
 
 _deps/spdlog-src/include/spdlog/details/synchronous_factory.h:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/opensslconf.h:
 
 _deps/spdlog-src/include/spdlog/details/log_msg_buffer.h:
 
@@ -1234,6 +1240,8 @@ _deps/json-src/include/nlohmann/detail/output/serializer.hpp:
 _deps/json-src/include/nlohmann/detail/output/binary_writer.hpp:
 
 _deps/json-src/include/nlohmann/detail/meta/void_t.hpp:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/asn1err.h:
 
 _deps/json-src/include/nlohmann/detail/meta/type_traits.hpp:
 
@@ -1271,11 +1279,7 @@ _deps/json-src/include/nlohmann/detail/input/parser.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/ptrcheck.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/asn1.h:
-
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/limits.h:
-
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/asn1err.h:
 
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/__stddef_wchar_t.h:
 
@@ -1286,8 +1290,6 @@ _deps/json-src/include/nlohmann/detail/meta/std_fs.hpp:
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/__stddef_ptrdiff_t.h:
 
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/__stddef_nullptr_t.h:
-
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/opensslconf.h:
 
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/__stddef_max_align_t.h:
 
@@ -1413,7 +1415,7 @@ _deps/json-src/include/nlohmann/detail/iterators/iterator_traits.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/pthread.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/bio.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/cryptoerr_legacy.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/xlocale/_wctype.h:
 
@@ -1509,6 +1511,8 @@ _deps/json-src/include/nlohmann/detail/input/json_sax.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/mutex:
 
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/configuration.h:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/math.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/sys/_types/_time_t.h:
@@ -1557,8 +1561,6 @@ _deps/json-src/include/nlohmann/detail/input/json_sax.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/cstdio:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/buffererr.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/cstdarg:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/condition_variable:
@@ -1591,7 +1593,7 @@ _deps/json-src/include/nlohmann/detail/input/json_sax.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__utility/priority_tag.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/core_dispatch.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/asn1.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__utility/piecewise_construct.h:
 
@@ -1658,6 +1660,8 @@ _deps/json-src/include/nlohmann/detail/input/position_t.hpp:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/is_volatile.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/is_void.h:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/safestack.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/is_unsigned_integer.h:
 
@@ -1766,6 +1770,8 @@ _deps/json-src/include/nlohmann/detail/conversions/from_json.hpp:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/add_const.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__tuple/tuple_types.h:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/cryptoerr.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/is_member_pointer.h:
 
@@ -1889,8 +1895,6 @@ _deps/json-src/include/nlohmann/detail/input/lexer.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/data.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/cryptoerr_legacy.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/dangling.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/concepts.h:
@@ -1993,6 +1997,8 @@ _deps/json-src/include/nlohmann/detail/input/lexer.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__memory/allocator_arg_t.h:
 
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/stack.h:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/ostream:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__chrono/hh_mm_ss.h:
@@ -2059,8 +2065,6 @@ _deps/json-src/include/nlohmann/detail/input/lexer.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__iterator/sortable.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/opensslv.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__stop_token/intrusive_list_view.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__iterator/istreambuf_iterator.h:
@@ -2124,6 +2128,8 @@ _deps/json-src/include/nlohmann/ordered_map.hpp:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__iterator/back_insert_iterator.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__hash_table:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/bnerr.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/ranges_for_each_n.h:
 
@@ -2269,8 +2275,6 @@ _deps/json-src/include/nlohmann/ordered_map.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__functional/perfect_forward.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/crypto.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/sys/_types/_size_t.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/is_object.h:
@@ -2371,8 +2375,6 @@ _deps/json-src/include/nlohmann/detail/output/output_adapters.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/recursive_directory_iterator.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/evperr.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__condition_variable/condition_variable.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/path_iterator.h:
@@ -2437,6 +2439,8 @@ _deps/spdlog-src/include/spdlog/details/null_mutex.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__iterator/istream_iterator.h:
 
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/sha.h:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__config:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__charconv/to_chars.h:
@@ -2470,8 +2474,6 @@ _deps/spdlog-src/include/spdlog/details/null_mutex.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__compare/weak_order.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/_types/_intmax_t.h:
-
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/evp.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__concepts/common_reference_with.h:
 
@@ -2747,6 +2749,8 @@ _deps/spdlog-src/include/spdlog/details/backtracer.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__iterator/aliasing_iterator.h:
 
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/macros.h:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/unique_copy.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/three_way_comp_ref_type.h:
@@ -2759,9 +2763,9 @@ _deps/spdlog-src/include/spdlog/details/backtracer.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/negation.h:
 
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/sort_heap.h:
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/core_dispatch.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/types.h:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/sort_heap.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/shift_right.h:
 
@@ -3009,8 +3013,6 @@ _deps/json-src/include/nlohmann/detail/abi_macros.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__system_error/error_category.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/stack.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/ranges_none_of.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/is_bounded_array.h:
@@ -3024,8 +3026,6 @@ _deps/json-src/include/nlohmann/detail/abi_macros.hpp:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__iterator/access.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/count.h:
-
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/objects.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/ranges_any_of.h:
 
@@ -3309,8 +3309,6 @@ _deps/json-src/include/nlohmann/detail/meta/call_std/begin.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/partial_sort_copy.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/buffer.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/ranges_make_heap.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/find_end.h:
@@ -3361,6 +3359,8 @@ _deps/json-src/include/nlohmann/detail/meta/call_std/begin.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/directory_entry.h:
 
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/core.h:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__format/enable_insertable.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/any_of.h:
@@ -3409,11 +3409,11 @@ _deps/json-src/include/nlohmann/detail/meta/call_std/begin.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/has_virtual_destructor.h:
 
-/usr/local/Cellar/openssl@3/3.5.1/include/openssl/params.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/lexicographical_compare_three_way.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/_types/_nl_item.h:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/objectserr.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/u8path.h:
 

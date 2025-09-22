@@ -101,8 +101,8 @@ instantdb_demo: _deps/spdlog-build/libspdlogd.a
 instantdb_demo: _deps/fmt-build/libfmtd.a
 instantdb_demo: libchangefeed_engine.a
 instantdb_demo: libstorage.a
-instantdb_demo: /usr/local/Cellar/openssl@3/3.5.1/lib/libssl.dylib
-instantdb_demo: /usr/local/Cellar/openssl@3/3.5.1/lib/libcrypto.dylib
+instantdb_demo: /usr/local/Cellar/openssl@3/3.5.2/lib/libssl.dylib
+instantdb_demo: /usr/local/Cellar/openssl@3/3.5.2/lib/libcrypto.dylib
 instantdb_demo: _deps/spdlog-build/libspdlogd.a
 instantdb_demo: _deps/fmt-build/libfmtd.a
 instantdb_demo: CMakeFiles/instantdb_demo.dir/link.txt

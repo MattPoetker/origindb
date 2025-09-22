@@ -175,19 +175,6 @@ storage/fast:
 .PHONY : storage/fast
 
 #=============================================================================
-# Target rules for targets named sql_engine
-
-# Build rule for target.
-sql_engine: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sql_engine
-.PHONY : sql_engine
-
-# fast build rule for target.
-sql_engine/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/build
-.PHONY : sql_engine/fast
-
-#=============================================================================
 # Target rules for targets named changefeed_engine
 
 # Build rule for target.
@@ -199,6 +186,19 @@ changefeed_engine: cmake_check_build_system
 changefeed_engine/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/build
 .PHONY : changefeed_engine/fast
+
+#=============================================================================
+# Target rules for targets named sql_engine
+
+# Build rule for target.
+sql_engine: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sql_engine
+.PHONY : sql_engine
+
+# fast build rule for target.
+sql_engine/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/build
+.PHONY : sql_engine/fast
 
 #=============================================================================
 # Target rules for targets named websocket_server
@@ -227,6 +227,19 @@ common_lib/fast:
 .PHONY : common_lib/fast
 
 #=============================================================================
+# Target rules for targets named grpc_service
+
+# Build rule for target.
+grpc_service: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 grpc_service
+.PHONY : grpc_service
+
+# fast build rule for target.
+grpc_service/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/build
+.PHONY : grpc_service/fast
+
+#=============================================================================
 # Target rules for targets named instantdb_demo
 
 # Build rule for target.
@@ -238,6 +251,45 @@ instantdb_demo: cmake_check_build_system
 instantdb_demo/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_demo.dir/build.make CMakeFiles/instantdb_demo.dir/build
 .PHONY : instantdb_demo/fast
+
+#=============================================================================
+# Target rules for targets named instantdb_sql
+
+# Build rule for target.
+instantdb_sql: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 instantdb_sql
+.PHONY : instantdb_sql
+
+# fast build rule for target.
+instantdb_sql/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_sql.dir/build.make CMakeFiles/instantdb_sql.dir/build
+.PHONY : instantdb_sql/fast
+
+#=============================================================================
+# Target rules for targets named instantdb_server
+
+# Build rule for target.
+instantdb_server: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 instantdb_server
+.PHONY : instantdb_server
+
+# fast build rule for target.
+instantdb_server/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_server.dir/build.make CMakeFiles/instantdb_server.dir/build
+.PHONY : instantdb_server/fast
+
+#=============================================================================
+# Target rules for targets named instantdb_client
+
+# Build rule for target.
+instantdb_client: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 instantdb_client
+.PHONY : instantdb_client
+
+# fast build rule for target.
+instantdb_client/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/build
+.PHONY : instantdb_client/fast
 
 #=============================================================================
 # Target rules for targets named spdlog
@@ -265,6 +317,60 @@ fmt/fast:
 	$(MAKE) $(MAKESILENT) -f _deps/fmt-build/CMakeFiles/fmt.dir/build.make _deps/fmt-build/CMakeFiles/fmt.dir/build
 .PHONY : fmt/fast
 
+generated/instantdb.grpc.pb.o: generated/instantdb.grpc.pb.cc.o
+.PHONY : generated/instantdb.grpc.pb.o
+
+# target to build an object file
+generated/instantdb.grpc.pb.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/generated/instantdb.grpc.pb.cc.o
+.PHONY : generated/instantdb.grpc.pb.cc.o
+
+generated/instantdb.grpc.pb.i: generated/instantdb.grpc.pb.cc.i
+.PHONY : generated/instantdb.grpc.pb.i
+
+# target to preprocess a source file
+generated/instantdb.grpc.pb.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/generated/instantdb.grpc.pb.cc.i
+.PHONY : generated/instantdb.grpc.pb.cc.i
+
+generated/instantdb.grpc.pb.s: generated/instantdb.grpc.pb.cc.s
+.PHONY : generated/instantdb.grpc.pb.s
+
+# target to generate assembly for a file
+generated/instantdb.grpc.pb.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/generated/instantdb.grpc.pb.cc.s
+.PHONY : generated/instantdb.grpc.pb.cc.s
+
+generated/instantdb.pb.o: generated/instantdb.pb.cc.o
+.PHONY : generated/instantdb.pb.o
+
+# target to build an object file
+generated/instantdb.pb.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/generated/instantdb.pb.cc.o
+.PHONY : generated/instantdb.pb.cc.o
+
+generated/instantdb.pb.i: generated/instantdb.pb.cc.i
+.PHONY : generated/instantdb.pb.i
+
+# target to preprocess a source file
+generated/instantdb.pb.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/generated/instantdb.pb.cc.i
+.PHONY : generated/instantdb.pb.cc.i
+
+generated/instantdb.pb.s: generated/instantdb.pb.cc.s
+.PHONY : generated/instantdb.pb.s
+
+# target to generate assembly for a file
+generated/instantdb.pb.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/generated/instantdb.pb.cc.s
+.PHONY : generated/instantdb.pb.cc.s
+
 src/changefeed/changefeed_engine.o: src/changefeed/changefeed_engine.cpp.o
 .PHONY : src/changefeed/changefeed_engine.o
 
@@ -289,6 +395,54 @@ src/changefeed/changefeed_engine.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.s
 .PHONY : src/changefeed/changefeed_engine.cpp.s
 
+src/cmd/grpc_client.o: src/cmd/grpc_client.cpp.o
+.PHONY : src/cmd/grpc_client.o
+
+# target to build an object file
+src/cmd/grpc_client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/src/cmd/grpc_client.cpp.o
+.PHONY : src/cmd/grpc_client.cpp.o
+
+src/cmd/grpc_client.i: src/cmd/grpc_client.cpp.i
+.PHONY : src/cmd/grpc_client.i
+
+# target to preprocess a source file
+src/cmd/grpc_client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/src/cmd/grpc_client.cpp.i
+.PHONY : src/cmd/grpc_client.cpp.i
+
+src/cmd/grpc_client.s: src/cmd/grpc_client.cpp.s
+.PHONY : src/cmd/grpc_client.s
+
+# target to generate assembly for a file
+src/cmd/grpc_client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/src/cmd/grpc_client.cpp.s
+.PHONY : src/cmd/grpc_client.cpp.s
+
+src/cmd/instantdb_server.o: src/cmd/instantdb_server.cpp.o
+.PHONY : src/cmd/instantdb_server.o
+
+# target to build an object file
+src/cmd/instantdb_server.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_server.dir/build.make CMakeFiles/instantdb_server.dir/src/cmd/instantdb_server.cpp.o
+.PHONY : src/cmd/instantdb_server.cpp.o
+
+src/cmd/instantdb_server.i: src/cmd/instantdb_server.cpp.i
+.PHONY : src/cmd/instantdb_server.i
+
+# target to preprocess a source file
+src/cmd/instantdb_server.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_server.dir/build.make CMakeFiles/instantdb_server.dir/src/cmd/instantdb_server.cpp.i
+.PHONY : src/cmd/instantdb_server.cpp.i
+
+src/cmd/instantdb_server.s: src/cmd/instantdb_server.cpp.s
+.PHONY : src/cmd/instantdb_server.s
+
+# target to generate assembly for a file
+src/cmd/instantdb_server.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_server.dir/build.make CMakeFiles/instantdb_server.dir/src/cmd/instantdb_server.cpp.s
+.PHONY : src/cmd/instantdb_server.cpp.s
+
 src/cmd/prototype_demo.o: src/cmd/prototype_demo.cpp.o
 .PHONY : src/cmd/prototype_demo.o
 
@@ -312,6 +466,30 @@ src/cmd/prototype_demo.s: src/cmd/prototype_demo.cpp.s
 src/cmd/prototype_demo.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_demo.dir/build.make CMakeFiles/instantdb_demo.dir/src/cmd/prototype_demo.cpp.s
 .PHONY : src/cmd/prototype_demo.cpp.s
+
+src/cmd/sql_demo.o: src/cmd/sql_demo.cpp.o
+.PHONY : src/cmd/sql_demo.o
+
+# target to build an object file
+src/cmd/sql_demo.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_sql.dir/build.make CMakeFiles/instantdb_sql.dir/src/cmd/sql_demo.cpp.o
+.PHONY : src/cmd/sql_demo.cpp.o
+
+src/cmd/sql_demo.i: src/cmd/sql_demo.cpp.i
+.PHONY : src/cmd/sql_demo.i
+
+# target to preprocess a source file
+src/cmd/sql_demo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_sql.dir/build.make CMakeFiles/instantdb_sql.dir/src/cmd/sql_demo.cpp.i
+.PHONY : src/cmd/sql_demo.cpp.i
+
+src/cmd/sql_demo.s: src/cmd/sql_demo.cpp.s
+.PHONY : src/cmd/sql_demo.s
+
+# target to generate assembly for a file
+src/cmd/sql_demo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_sql.dir/build.make CMakeFiles/instantdb_sql.dir/src/cmd/sql_demo.cpp.s
+.PHONY : src/cmd/sql_demo.cpp.s
 
 src/common/config.o: src/common/config.cpp.o
 .PHONY : src/common/config.o
@@ -360,6 +538,30 @@ src/common/metrics.s: src/common/metrics.cpp.s
 src/common/metrics.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/common_lib.dir/build.make CMakeFiles/common_lib.dir/src/common/metrics.cpp.s
 .PHONY : src/common/metrics.cpp.s
+
+src/grpc/grpc_server.o: src/grpc/grpc_server.cpp.o
+.PHONY : src/grpc/grpc_server.o
+
+# target to build an object file
+src/grpc/grpc_server.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o
+.PHONY : src/grpc/grpc_server.cpp.o
+
+src/grpc/grpc_server.i: src/grpc/grpc_server.cpp.i
+.PHONY : src/grpc/grpc_server.i
+
+# target to preprocess a source file
+src/grpc/grpc_server.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.i
+.PHONY : src/grpc/grpc_server.cpp.i
+
+src/grpc/grpc_server.s: src/grpc/grpc_server.cpp.s
+.PHONY : src/grpc/grpc_server.s
+
+# target to generate assembly for a file
+src/grpc/grpc_server.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.s
+.PHONY : src/grpc/grpc_server.cpp.s
 
 src/sql/sql_engine.o: src/sql/sql_engine.cpp.o
 .PHONY : src/sql/sql_engine.o
@@ -520,23 +722,45 @@ help:
 	@echo "... changefeed_engine"
 	@echo "... common_lib"
 	@echo "... fmt"
+	@echo "... grpc_service"
+	@echo "... instantdb_client"
 	@echo "... instantdb_demo"
+	@echo "... instantdb_server"
+	@echo "... instantdb_sql"
 	@echo "... spdlog"
 	@echo "... sql_engine"
 	@echo "... storage"
 	@echo "... websocket_server"
+	@echo "... generated/instantdb.grpc.pb.o"
+	@echo "... generated/instantdb.grpc.pb.i"
+	@echo "... generated/instantdb.grpc.pb.s"
+	@echo "... generated/instantdb.pb.o"
+	@echo "... generated/instantdb.pb.i"
+	@echo "... generated/instantdb.pb.s"
 	@echo "... src/changefeed/changefeed_engine.o"
 	@echo "... src/changefeed/changefeed_engine.i"
 	@echo "... src/changefeed/changefeed_engine.s"
+	@echo "... src/cmd/grpc_client.o"
+	@echo "... src/cmd/grpc_client.i"
+	@echo "... src/cmd/grpc_client.s"
+	@echo "... src/cmd/instantdb_server.o"
+	@echo "... src/cmd/instantdb_server.i"
+	@echo "... src/cmd/instantdb_server.s"
 	@echo "... src/cmd/prototype_demo.o"
 	@echo "... src/cmd/prototype_demo.i"
 	@echo "... src/cmd/prototype_demo.s"
+	@echo "... src/cmd/sql_demo.o"
+	@echo "... src/cmd/sql_demo.i"
+	@echo "... src/cmd/sql_demo.s"
 	@echo "... src/common/config.o"
 	@echo "... src/common/config.i"
 	@echo "... src/common/config.s"
 	@echo "... src/common/metrics.o"
 	@echo "... src/common/metrics.i"
 	@echo "... src/common/metrics.s"
+	@echo "... src/grpc/grpc_server.o"
+	@echo "... src/grpc/grpc_server.i"
+	@echo "... src/grpc/grpc_server.s"
 	@echo "... src/sql/sql_engine.o"
 	@echo "... src/sql/sql_engine.i"
 	@echo "... src/sql/sql_engine.s"

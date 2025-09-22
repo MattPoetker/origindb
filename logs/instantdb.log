@@ -1,0 +1,632 @@
+[2025-09-21 00:12:08.111] [info] [38598768] 🚀 Starting InstantDB Server
+[2025-09-21 00:12:08.112] [info] [38598768] =====================================
+[2025-09-21 00:12:08.112] [info] [38598768] 📦 Initializing Storage Engine...
+[2025-09-21 00:12:08.112] [info] [38598768] Read 0 entries from WAL
+[2025-09-21 00:12:08.113] [info] [38598768] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 1
+[2025-09-21 00:12:08.113] [info] [38598768] Read 0 entries from WAL
+[2025-09-21 00:12:08.113] [info] [38598768] Recovering 0 WAL entries
+[2025-09-21 00:12:08.113] [info] [38598768] WAL recovery complete
+[2025-09-21 00:12:08.113] [info] [38598768] Storage engine initialized with 0 tables
+[2025-09-21 00:12:08.113] [info] [38598768] ✅ Storage Engine ready
+[2025-09-21 00:12:08.113] [info] [38598768] 🔍 Initializing SQL Engine...
+[2025-09-21 00:12:08.113] [info] [38598768] SQL Engine initialized
+[2025-09-21 00:12:08.113] [info] [38598768] ✅ SQL Engine ready
+[2025-09-21 00:12:08.113] [info] [38598768] 📡 Initializing Changefeed Engine...
+[2025-09-21 00:12:08.113] [info] [38598768] Changefeed engine initializing
+[2025-09-21 00:12:08.113] [info] [38598768] Changefeed engine started
+[2025-09-21 00:12:08.113] [info] [38598768] ✅ Changefeed Engine ready
+[2025-09-21 00:12:08.113] [info] [38598768] 🌐 Initializing WebSocket Server...
+[2025-09-21 00:12:08.113] [info] [38598768] WebSocket server created on port 8080
+[2025-09-21 00:12:08.113] [info] [38598768] WebSocket server connected to changefeed engine
+[2025-09-21 00:12:08.113] [info] [38598768] Created subscription sub-1 with filter table=*
+[2025-09-21 00:12:08.113] [info] [38598768] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 00:12:08.113] [error] [38598768] Failed to bind socket to port 8080
+[2025-09-21 00:12:08.113] [error] [38598768] ❌ Failed to start WebSocket server
+[2025-09-21 00:12:08.113] [error] [38598768] 💥 Failed to initialize server
+[2025-09-21 00:12:08.113] [info] [38598768] 🛑 Shutting down InstantDB Server...
+[2025-09-21 00:12:08.113] [info] [38598768] ✅ WebSocket server stopped
+[2025-09-21 00:12:08.113] [info] [38598768] Changefeed engine stopped
+[2025-09-21 00:12:08.113] [info] [38598768] ✅ Changefeed engine stopped
+[2025-09-21 00:12:08.113] [info] [38598768] ✅ Storage engine shutdown
+[2025-09-21 00:12:08.113] [info] [38598768] 🏁 Server shutdown complete
+[2025-09-21 00:12:20.941] [info] [38599448] 🚀 Starting InstantDB Server
+[2025-09-21 00:12:20.942] [info] [38599448] =====================================
+[2025-09-21 00:12:20.942] [info] [38599448] 📦 Initializing Storage Engine...
+[2025-09-21 00:12:20.942] [info] [38599448] Read 0 entries from WAL
+[2025-09-21 00:12:20.942] [info] [38599448] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 1
+[2025-09-21 00:12:20.942] [info] [38599448] Read 0 entries from WAL
+[2025-09-21 00:12:20.942] [info] [38599448] Recovering 0 WAL entries
+[2025-09-21 00:12:20.942] [info] [38599448] WAL recovery complete
+[2025-09-21 00:12:20.942] [info] [38599448] Storage engine initialized with 0 tables
+[2025-09-21 00:12:20.942] [info] [38599448] ✅ Storage Engine ready
+[2025-09-21 00:12:20.942] [info] [38599448] 🔍 Initializing SQL Engine...
+[2025-09-21 00:12:20.942] [info] [38599448] SQL Engine initialized
+[2025-09-21 00:12:20.942] [info] [38599448] ✅ SQL Engine ready
+[2025-09-21 00:12:20.942] [info] [38599448] 📡 Initializing Changefeed Engine...
+[2025-09-21 00:12:20.942] [info] [38599448] Changefeed engine initializing
+[2025-09-21 00:12:20.942] [info] [38599448] Changefeed engine started
+[2025-09-21 00:12:20.942] [info] [38599448] ✅ Changefeed Engine ready
+[2025-09-21 00:12:20.942] [info] [38599448] 🌐 Initializing WebSocket Server...
+[2025-09-21 00:12:20.942] [info] [38599448] WebSocket server created on port 8080
+[2025-09-21 00:12:20.942] [info] [38599448] WebSocket server connected to changefeed engine
+[2025-09-21 00:12:20.942] [info] [38599448] Created subscription sub-1 with filter table=*
+[2025-09-21 00:12:20.942] [info] [38599448] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 00:12:20.942] [error] [38599448] Failed to bind socket to port 8080
+[2025-09-21 00:12:20.942] [error] [38599448] ❌ Failed to start WebSocket server
+[2025-09-21 00:12:20.942] [error] [38599448] 💥 Failed to initialize server
+[2025-09-21 00:12:20.942] [info] [38599448] 🛑 Shutting down InstantDB Server...
+[2025-09-21 00:12:20.943] [info] [38599448] ✅ WebSocket server stopped
+[2025-09-21 00:12:20.943] [info] [38599448] Changefeed engine stopped
+[2025-09-21 00:12:20.943] [info] [38599448] ✅ Changefeed engine stopped
+[2025-09-21 00:12:20.943] [info] [38599448] ✅ Storage engine shutdown
+[2025-09-21 00:12:20.943] [info] [38599448] 🏁 Server shutdown complete
+[2025-09-21 00:16:54.776] [info] [38613577] 🚀 Starting InstantDB Server
+[2025-09-21 00:16:54.777] [info] [38613577] =====================================
+[2025-09-21 00:16:54.777] [info] [38613577] 📦 Initializing Storage Engine...
+[2025-09-21 00:16:54.777] [info] [38613577] Read 0 entries from WAL
+[2025-09-21 00:16:54.777] [info] [38613577] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 1
+[2025-09-21 00:16:54.777] [info] [38613577] Read 0 entries from WAL
+[2025-09-21 00:16:54.778] [info] [38613577] Recovering 0 WAL entries
+[2025-09-21 00:16:54.778] [info] [38613577] WAL recovery complete
+[2025-09-21 00:16:54.778] [info] [38613577] Storage engine initialized with 0 tables
+[2025-09-21 00:16:54.778] [info] [38613577] ✅ Storage Engine ready
+[2025-09-21 00:16:54.778] [info] [38613577] 🔍 Initializing SQL Engine...
+[2025-09-21 00:16:54.778] [info] [38613577] SQL Engine initialized
+[2025-09-21 00:16:54.778] [info] [38613577] ✅ SQL Engine ready
+[2025-09-21 00:16:54.778] [info] [38613577] 📡 Initializing Changefeed Engine...
+[2025-09-21 00:16:54.778] [info] [38613577] Changefeed engine initializing
+[2025-09-21 00:16:54.778] [info] [38613577] Changefeed engine started
+[2025-09-21 00:16:54.778] [info] [38613577] ✅ Changefeed Engine ready
+[2025-09-21 00:16:54.778] [info] [38613577] 🌐 Initializing WebSocket Server...
+[2025-09-21 00:16:54.778] [info] [38613577] WebSocket server created on port 9090
+[2025-09-21 00:16:54.778] [info] [38613577] WebSocket server connected to changefeed engine
+[2025-09-21 00:16:54.778] [info] [38613577] Created subscription sub-1 with filter table=*
+[2025-09-21 00:16:54.778] [info] [38613577] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 00:16:54.778] [info] [38613577] WebSocket server started on port 9090
+[2025-09-21 00:16:54.778] [info] [38613577] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-21 00:16:54.778] [info] [38613577] 
+[2025-09-21 00:16:54.778] [info] [38613577] 🎯 InstantDB Server fully initialized!
+[2025-09-21 00:16:54.778] [info] [38613577] =====================================
+[2025-09-21 00:16:54.778] [info] [38613577] 📊 Server Status:
+[2025-09-21 00:16:54.778] [info] [38613589] WebSocket server listening on port 9090
+[2025-09-21 00:16:54.778] [info] [38613577]   Storage: 0 tables
+[2025-09-21 00:16:54.778] [info] [38613577]   WebSocket: 0 active connections
+[2025-09-21 00:16:54.778] [info] [38613577]   Changefeed: 1 active subscriptions
+[2025-09-21 00:16:54.778] [info] [38613577] 
+[2025-09-21 00:16:54.778] [info] [38613577] 🔗 Endpoints:
+[2025-09-21 00:16:54.778] [info] [38613577]   WebSocket: ws://localhost:9090
+[2025-09-21 00:16:54.778] [info] [38613577] 
+[2025-09-21 00:16:54.778] [info] [38613577] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-21 00:17:10.611] [info] [38613577] Received signal 2, requesting graceful shutdown...
+[2025-09-21 00:17:10.837] [info] [38613577] WebSocket server stopped
+[2025-09-21 00:46:13.363] [info] [38713184] 🚀 Starting InstantDB Server
+[2025-09-21 00:46:13.364] [info] [38713184] =====================================
+[2025-09-21 00:46:13.364] [info] [38713184] 📦 Initializing Storage Engine...
+[2025-09-21 00:46:13.364] [info] [38713184] Read 0 entries from WAL
+[2025-09-21 00:46:13.364] [info] [38713184] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 1
+[2025-09-21 00:46:13.364] [info] [38713184] Read 0 entries from WAL
+[2025-09-21 00:46:13.364] [info] [38713184] Recovering 0 WAL entries
+[2025-09-21 00:46:13.364] [info] [38713184] WAL recovery complete
+[2025-09-21 00:46:13.364] [info] [38713184] Storage engine initialized with 0 tables
+[2025-09-21 00:46:13.364] [info] [38713184] ✅ Storage Engine ready
+[2025-09-21 00:46:13.364] [info] [38713184] 🔍 Initializing SQL Engine...
+[2025-09-21 00:46:13.364] [info] [38713184] SQL Engine initialized
+[2025-09-21 00:46:13.364] [info] [38713184] ✅ SQL Engine ready
+[2025-09-21 00:46:13.364] [info] [38713184] 📡 Initializing Changefeed Engine...
+[2025-09-21 00:46:13.364] [info] [38713184] Changefeed engine initializing
+[2025-09-21 00:46:13.364] [info] [38713184] Changefeed engine started
+[2025-09-21 00:46:13.364] [info] [38713184] ✅ Changefeed Engine ready
+[2025-09-21 00:46:13.364] [info] [38713184] 🌐 Initializing WebSocket Server...
+[2025-09-21 00:46:13.364] [info] [38713184] WebSocket server created on port 9090
+[2025-09-21 00:46:13.364] [info] [38713184] WebSocket server connected to changefeed engine
+[2025-09-21 00:46:13.364] [info] [38713184] Created subscription sub-1 with filter table=*
+[2025-09-21 00:46:13.364] [info] [38713184] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 00:46:13.364] [info] [38713184] WebSocket server started on port 9090
+[2025-09-21 00:46:13.364] [info] [38713184] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-21 00:46:13.364] [info] [38713197] WebSocket server listening on port 9090
+[2025-09-21 00:46:13.364] [info] [38713184] ℹ️  gRPC Server not available (compiled without gRPC support)
+[2025-09-21 00:46:13.364] [info] [38713184] 
+[2025-09-21 00:46:13.364] [info] [38713184] 🎯 InstantDB Server fully initialized!
+[2025-09-21 00:46:13.364] [info] [38713184] =====================================
+[2025-09-21 00:46:13.364] [info] [38713184] 📊 Server Status:
+[2025-09-21 00:46:13.364] [info] [38713184]   Storage: 0 tables
+[2025-09-21 00:46:13.364] [info] [38713184]   WebSocket: 0 active connections
+[2025-09-21 00:46:13.364] [info] [38713184]   Changefeed: 1 active subscriptions
+[2025-09-21 00:46:13.364] [info] [38713184] 
+[2025-09-21 00:46:13.364] [info] [38713184] 🔗 Endpoints:
+[2025-09-21 00:46:13.364] [info] [38713184]   WebSocket: ws://localhost:9090
+[2025-09-21 00:46:13.364] [info] [38713184] 
+[2025-09-21 00:46:13.364] [info] [38713184] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-21 00:46:26.329] [info] [38714020] WebSocket client connected. Total connections: 1
+[2025-09-21 00:46:44.487] [info] [38713184] 📈 Server Stats: 0 tables, 0 rows, 0 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 00:47:14.600] [info] [38713184] 📈 Server Stats: 0 tables, 0 rows, 0 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 00:47:44.722] [info] [38713184] 📈 Server Stats: 0 tables, 0 rows, 0 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 00:48:14.841] [info] [38713184] 📈 Server Stats: 0 tables, 0 rows, 0 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 00:48:44.968] [info] [38713184] 📈 Server Stats: 0 tables, 0 rows, 0 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 00:49:15.080] [info] [38713184] 📈 Server Stats: 0 tables, 0 rows, 0 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 00:49:45.197] [info] [38713184] 📈 Server Stats: 0 tables, 0 rows, 0 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 00:49:49.478] [info] [38713184] Received signal 2, requesting graceful shutdown...
+[2025-09-21 00:49:50.218] [info] [38713184] WebSocket server stopped
+[2025-09-21 09:04:03.398] [info] [40453633] 🚀 Starting InstantDB Server
+[2025-09-21 09:04:03.399] [info] [40453633] =====================================
+[2025-09-21 09:04:03.399] [info] [40453633] 📦 Initializing Storage Engine...
+[2025-09-21 09:04:03.401] [info] [40453633] Read 1 entries from WAL
+[2025-09-21 09:04:03.401] [info] [40453633] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 2
+[2025-09-21 09:04:03.401] [info] [40453633] Read 1 entries from WAL
+[2025-09-21 09:04:03.401] [info] [40453633] Recovering 1 WAL entries
+[2025-09-21 09:04:03.402] [info] [40453633] Recovered table 'USERS' from WAL
+[2025-09-21 09:04:03.402] [info] [40453633] WAL recovery complete
+[2025-09-21 09:04:03.402] [info] [40453633] Storage engine initialized with 1 tables
+[2025-09-21 09:04:03.402] [info] [40453633] ✅ Storage Engine ready
+[2025-09-21 09:04:03.402] [info] [40453633] 🔍 Initializing SQL Engine...
+[2025-09-21 09:04:03.403] [info] [40453633] SQL Engine initialized
+[2025-09-21 09:04:03.403] [info] [40453633] ✅ SQL Engine ready
+[2025-09-21 09:04:03.403] [info] [40453633] 📡 Initializing Changefeed Engine...
+[2025-09-21 09:04:03.403] [info] [40453633] Changefeed engine initializing
+[2025-09-21 09:04:03.403] [info] [40453633] Changefeed engine started
+[2025-09-21 09:04:03.403] [info] [40453633] ✅ Changefeed Engine ready
+[2025-09-21 09:04:03.403] [info] [40453633] 🌐 Initializing WebSocket Server...
+[2025-09-21 09:04:03.403] [info] [40453633] WebSocket server created on port 9090
+[2025-09-21 09:04:03.403] [info] [40453633] WebSocket server connected to changefeed engine
+[2025-09-21 09:04:03.403] [info] [40453633] Created subscription sub-1 with filter table=*
+[2025-09-21 09:04:03.403] [info] [40453633] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 09:04:03.403] [info] [40453633] WebSocket server started on port 9090
+[2025-09-21 09:04:03.403] [info] [40453633] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-21 09:04:03.403] [info] [40453645] WebSocket server listening on port 9090
+[2025-09-21 09:04:03.403] [info] [40453633] ℹ️  gRPC Server not available (compiled without gRPC support)
+[2025-09-21 09:04:03.403] [info] [40453633] 
+[2025-09-21 09:04:03.403] [info] [40453633] 🎯 InstantDB Server fully initialized!
+[2025-09-21 09:04:03.403] [info] [40453633] =====================================
+[2025-09-21 09:04:03.403] [info] [40453633] 📊 Server Status:
+[2025-09-21 09:04:03.403] [info] [40453633]   Storage: 1 tables
+[2025-09-21 09:04:03.403] [info] [40453633]   WebSocket: 0 active connections
+[2025-09-21 09:04:03.403] [info] [40453633]   Changefeed: 1 active subscriptions
+[2025-09-21 09:04:03.403] [info] [40453633] 
+[2025-09-21 09:04:03.403] [info] [40453633] 🔗 Endpoints:
+[2025-09-21 09:04:03.403] [info] [40453633]   WebSocket: ws://localhost:9090
+[2025-09-21 09:04:03.403] [info] [40453633] 
+[2025-09-21 09:04:03.403] [info] [40453633] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-21 09:04:34.511] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:05:04.624] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:05:34.745] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:06:04.867] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:06:34.989] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:07:05.141] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:07:35.268] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:08:05.390] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:08:35.494] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:09:05.612] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:09:35.737] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:10:05.859] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:10:35.984] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:11:06.105] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:11:36.233] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:12:06.351] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:12:36.444] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:13:06.568] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:15:05.690] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:15:35.916] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:16:06.161] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:43:18.998] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:43:49.619] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:44:19.848] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:59:16.396] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 09:59:46.598] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:00:16.839] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:15:13.377] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:15:43.625] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:16:13.860] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:31:09.359] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:31:39.577] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:32:09.838] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:47:06.362] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:47:36.650] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 10:48:06.851] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:03:03.350] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:03:33.543] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:04:03.791] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:14:05.343] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:14:35.585] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:15:05.825] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:30:02.334] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:30:32.546] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:31:02.767] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:46:38.305] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:47:08.601] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 11:47:38.822] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:03:59.366] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:04:29.555] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:04:59.767] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:15:06.377] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:15:36.609] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:16:06.817] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:33:54.376] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:34:24.589] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:34:54.830] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:36:47.403] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:37:17.595] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:37:47.827] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:54:28.397] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:54:58.506] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 12:55:28.691] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:13:22.304] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:13:52.499] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:14:22.727] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:16:08.302] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:16:38.544] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:17:08.766] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:34:06.283] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:34:36.504] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:35:06.713] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:51:22.276] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:51:52.474] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 13:52:22.682] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:08:21.228] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:08:51.461] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:09:21.635] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:17:10.244] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:17:40.450] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:18:10.698] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:19:22.291] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:19:52.516] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:20:22.726] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:24:19.428] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:24:48.672] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:25:18.982] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:26:39.065] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:27:07.789] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 14:27:37.939] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:18:11.235] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:18:41.390] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:19:11.619] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:20:40.907] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:21:09.121] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:21:39.294] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:23:04.909] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:23:34.202] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 15:24:04.542] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:14:21.669] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:14:51.815] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:15:21.912] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:15:52.030] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:16:22.155] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:16:52.274] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:17:22.395] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:17:52.505] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:18:22.610] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:18:52.809] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:19:22.978] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:19:53.084] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:20:23.197] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:20:53.367] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:21:23.482] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:21:53.605] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:22:23.714] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:22:53.822] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:23:23.945] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:23:54.063] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:24:24.179] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:24:54.300] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:25:24.423] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:25:54.541] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:26:24.665] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:26:54.797] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:27:24.925] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:27:55.047] [info] [40453633] 📈 Server Stats: 1 tables, 0 rows, 0 bytes, 0 WS connections, 1 subscriptions, 0 events
+[2025-09-21 16:27:56.270] [info] [40453633] Received signal 2, requesting graceful shutdown...
+[2025-09-21 16:27:57.056] [info] [40453633] WebSocket server stopped
+[2025-09-21 19:16:17.386] [info] [41253614] 🚀 Starting InstantDB Server
+[2025-09-21 19:16:17.387] [info] [41253614] =====================================
+[2025-09-21 19:16:17.387] [info] [41253614] 📦 Initializing Storage Engine...
+[2025-09-21 19:16:17.387] [info] [41253614] Read 2 entries from WAL
+[2025-09-21 19:16:17.387] [info] [41253614] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 3
+[2025-09-21 19:16:17.387] [info] [41253614] Read 2 entries from WAL
+[2025-09-21 19:16:17.387] [info] [41253614] Recovering 2 WAL entries
+[2025-09-21 19:16:17.387] [info] [41253614] Recovered table 'USERS' from WAL
+[2025-09-21 19:16:17.388] [info] [41253614] WAL recovery complete
+[2025-09-21 19:16:17.388] [info] [41253614] Storage engine initialized with 1 tables
+[2025-09-21 19:16:17.388] [info] [41253614] ✅ Storage Engine ready
+[2025-09-21 19:16:17.388] [info] [41253614] 🔍 Initializing SQL Engine...
+[2025-09-21 19:16:17.388] [info] [41253614] SQL Engine initialized
+[2025-09-21 19:16:17.388] [info] [41253614] ✅ SQL Engine ready
+[2025-09-21 19:16:17.388] [info] [41253614] 📡 Initializing Changefeed Engine...
+[2025-09-21 19:16:17.388] [info] [41253614] Changefeed engine initializing
+[2025-09-21 19:16:17.388] [info] [41253614] Changefeed engine started
+[2025-09-21 19:16:17.388] [info] [41253614] ✅ Changefeed Engine ready
+[2025-09-21 19:16:17.388] [info] [41253614] 🌐 Initializing WebSocket Server...
+[2025-09-21 19:16:17.388] [info] [41253614] WebSocket server created on port 9090
+[2025-09-21 19:16:17.388] [info] [41253614] WebSocket server connected to changefeed engine
+[2025-09-21 19:16:17.388] [info] [41253614] Created subscription sub-1 with filter table=*
+[2025-09-21 19:16:17.388] [info] [41253614] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 19:16:17.388] [info] [41253614] WebSocket server started on port 9090
+[2025-09-21 19:16:17.388] [info] [41253614] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-21 19:16:17.388] [info] [41253614] 🔌 Initializing gRPC Server...
+[2025-09-21 19:16:17.388] [info] [41253631] WebSocket server listening on port 9090
+[2025-09-21 19:16:17.394] [info] [41253614] gRPC server listening on 0.0.0.0:50051
+[2025-09-21 19:16:17.394] [info] [41253614] ✅ gRPC Server ready on 0.0.0.0:50051
+[2025-09-21 19:16:17.394] [info] [41253614] 
+[2025-09-21 19:16:17.394] [info] [41253614] 🎯 InstantDB Server fully initialized!
+[2025-09-21 19:16:17.394] [info] [41253614] =====================================
+[2025-09-21 19:16:17.394] [info] [41253614] 📊 Server Status:
+[2025-09-21 19:16:17.394] [info] [41253614]   Storage: 1 tables
+[2025-09-21 19:16:17.394] [info] [41253614]   WebSocket: 0 active connections
+[2025-09-21 19:16:17.394] [info] [41253614]   Changefeed: 1 active subscriptions
+[2025-09-21 19:16:17.394] [info] [41253614] 
+[2025-09-21 19:16:17.394] [info] [41253614] 🔗 Endpoints:
+[2025-09-21 19:16:17.394] [info] [41253614]   WebSocket: ws://localhost:9090
+[2025-09-21 19:16:17.394] [info] [41253614]   gRPC API: localhost:50051
+[2025-09-21 19:16:17.394] [info] [41253614] 
+[2025-09-21 19:16:17.394] [info] [41253614] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-21 19:16:28.450] [info] [41254364] WebSocket client connected. Total connections: 1
+[2025-09-21 19:16:48.507] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:17:18.628] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:17:48.743] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:18:18.867] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:18:48.992] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:19:19.108] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:19:49.222] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:20:19.337] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:20:49.473] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:21:19.586] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:21:49.773] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:22:19.890] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:22:49.995] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:23:20.110] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:23:50.230] [info] [41253614] 📈 Server Stats: 1 tables, 1 rows, 36 bytes, 1 WS connections, 1 subscriptions, 0 events
+[2025-09-21 19:23:56.279] [info] [41253614] Received signal 2, requesting graceful shutdown...
+[2025-09-21 19:23:57.257] [info] [41253614] Stopping gRPC server...
+[2025-09-21 19:23:57.258] [info] [41253614] gRPC server stopped
+[2025-09-21 19:23:57.260] [info] [41253614] WebSocket server stopped
+[2025-09-21 19:24:01.612] [info] [41283213] 🚀 Starting InstantDB Server
+[2025-09-21 19:24:01.612] [info] [41283213] =====================================
+[2025-09-21 19:24:01.612] [info] [41283213] 📦 Initializing Storage Engine...
+[2025-09-21 19:24:01.613] [info] [41283213] Read 4 entries from WAL
+[2025-09-21 19:24:01.613] [info] [41283213] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 5
+[2025-09-21 19:24:01.613] [info] [41283213] Read 4 entries from WAL
+[2025-09-21 19:24:01.613] [info] [41283213] Recovering 4 WAL entries
+[2025-09-21 19:24:01.613] [info] [41283213] Recovered table 'USERS' from WAL
+[2025-09-21 19:24:01.614] [info] [41283213] WAL recovery complete
+[2025-09-21 19:24:01.614] [info] [41283213] Storage engine initialized with 1 tables
+[2025-09-21 19:24:01.614] [info] [41283213] ✅ Storage Engine ready
+[2025-09-21 19:24:01.614] [info] [41283213] 📡 Initializing Changefeed Engine...
+[2025-09-21 19:24:01.614] [info] [41283213] Changefeed engine initializing
+[2025-09-21 19:24:01.614] [info] [41283213] Changefeed engine started
+[2025-09-21 19:24:01.614] [info] [41283213] ✅ Changefeed Engine ready
+[2025-09-21 19:24:01.614] [info] [41283213] 🔍 Initializing SQL Engine...
+[2025-09-21 19:24:01.614] [info] [41283213] SQL Engine initialized
+[2025-09-21 19:24:01.614] [info] [41283213] ✅ SQL Engine ready with changefeed support
+[2025-09-21 19:24:01.614] [info] [41283213] 🌐 Initializing WebSocket Server...
+[2025-09-21 19:24:01.614] [info] [41283213] WebSocket server created on port 8080
+[2025-09-21 19:24:01.614] [info] [41283213] WebSocket server connected to changefeed engine
+[2025-09-21 19:24:01.614] [info] [41283213] Created subscription sub-1 with filter table=*
+[2025-09-21 19:24:01.614] [info] [41283213] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 19:24:01.614] [error] [41283213] Failed to bind socket to port 8080
+[2025-09-21 19:24:01.614] [error] [41283213] ❌ Failed to start WebSocket server
+[2025-09-21 19:24:01.614] [error] [41283213] 💥 Failed to initialize server
+[2025-09-21 19:24:01.614] [info] [41283213] 🛑 Shutting down InstantDB Server...
+[2025-09-21 19:24:01.614] [info] [41283213] ✅ WebSocket server stopped
+[2025-09-21 19:24:01.614] [info] [41283213] Changefeed engine stopped
+[2025-09-21 19:24:01.614] [info] [41283213] ✅ Changefeed engine stopped
+[2025-09-21 19:24:01.614] [info] [41283213] ✅ Storage engine shutdown
+[2025-09-21 19:24:01.614] [info] [41283213] 🏁 Server shutdown complete
+[2025-09-21 19:25:03.807] [info] [41287432] 🚀 Starting InstantDB Server
+[2025-09-21 19:25:03.808] [info] [41287432] =====================================
+[2025-09-21 19:25:03.808] [info] [41287432] 📦 Initializing Storage Engine...
+[2025-09-21 19:25:03.809] [info] [41287432] Read 4 entries from WAL
+[2025-09-21 19:25:03.809] [info] [41287432] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 5
+[2025-09-21 19:25:03.809] [info] [41287432] Read 4 entries from WAL
+[2025-09-21 19:25:03.809] [info] [41287432] Recovering 4 WAL entries
+[2025-09-21 19:25:03.809] [info] [41287432] Recovered table 'USERS' from WAL
+[2025-09-21 19:25:03.809] [info] [41287432] WAL recovery complete
+[2025-09-21 19:25:03.809] [info] [41287432] Storage engine initialized with 1 tables
+[2025-09-21 19:25:03.809] [info] [41287432] ✅ Storage Engine ready
+[2025-09-21 19:25:03.809] [info] [41287432] 📡 Initializing Changefeed Engine...
+[2025-09-21 19:25:03.810] [info] [41287432] Changefeed engine initializing
+[2025-09-21 19:25:03.810] [info] [41287432] Changefeed engine started
+[2025-09-21 19:25:03.810] [info] [41287432] ✅ Changefeed Engine ready
+[2025-09-21 19:25:03.810] [info] [41287432] 🔍 Initializing SQL Engine...
+[2025-09-21 19:25:03.810] [info] [41287432] SQL Engine initialized
+[2025-09-21 19:25:03.810] [info] [41287432] ✅ SQL Engine ready with changefeed support
+[2025-09-21 19:25:03.810] [info] [41287432] 🌐 Initializing WebSocket Server...
+[2025-09-21 19:25:03.810] [info] [41287432] WebSocket server created on port 9090
+[2025-09-21 19:25:03.810] [info] [41287432] WebSocket server connected to changefeed engine
+[2025-09-21 19:25:03.810] [info] [41287432] Created subscription sub-1 with filter table=*
+[2025-09-21 19:25:03.810] [info] [41287432] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 19:25:03.810] [info] [41287432] WebSocket server started on port 9090
+[2025-09-21 19:25:03.810] [info] [41287432] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-21 19:25:03.810] [info] [41287440] WebSocket server listening on port 9090
+[2025-09-21 19:25:03.810] [info] [41287432] 🔌 Initializing gRPC Server...
+[2025-09-21 19:25:03.812] [info] [41287432] gRPC server listening on 0.0.0.0:50051
+[2025-09-21 19:25:03.812] [info] [41287432] ✅ gRPC Server ready on 0.0.0.0:50051
+[2025-09-21 19:25:03.812] [info] [41287432] 
+[2025-09-21 19:25:03.812] [info] [41287432] 🎯 InstantDB Server fully initialized!
+[2025-09-21 19:25:03.812] [info] [41287432] =====================================
+[2025-09-21 19:25:03.812] [info] [41287432] 📊 Server Status:
+[2025-09-21 19:25:03.812] [info] [41287432]   Storage: 1 tables
+[2025-09-21 19:25:03.812] [info] [41287432]   WebSocket: 0 active connections
+[2025-09-21 19:25:03.812] [info] [41287432]   Changefeed: 1 active subscriptions
+[2025-09-21 19:25:03.812] [info] [41287432] 
+[2025-09-21 19:25:03.812] [info] [41287432] 🔗 Endpoints:
+[2025-09-21 19:25:03.812] [info] [41287432]   WebSocket: ws://localhost:9090
+[2025-09-21 19:25:03.812] [info] [41287432]   gRPC API: localhost:50051
+[2025-09-21 19:25:03.812] [info] [41287432] 
+[2025-09-21 19:25:03.812] [info] [41287432] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-21 19:25:23.391] [info] [41288605] WebSocket client connected. Total connections: 1
+[2025-09-21 19:25:29.994] [info] [41287460] SQL Execute: Starting execution of: INSERT INTO USERS VALUES (11, 'GrpcUser')
+[2025-09-21 19:25:29.995] [info] [41287460] SQL Execute: Parsed statement type: 1
+[2025-09-21 19:25:29.995] [info] [41287460] SQL Execute: Executing INSERT
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Starting INSERT for table USERS
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Converting key from first value
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Key converted to: 11
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Found table USERS
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Mapping 2 values to columns
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Mapped column id to value
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Mapped column name to value
+[2025-09-21 19:25:29.995] [info] [41287460] ExecuteInsert: Calling storage->Insert
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Insert: Starting transaction for table=USERS, key=11
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Insert: Created transaction
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Insert: Transaction insert succeeded, committing
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Starting commit for transaction
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Write set has 1 operations
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Acquiring tables lock
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Tables lock acquired
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Processing write for table USERS
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Getting table USERS
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Table found, applying write operation 0
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Calling table->Insert for key 11
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: table->Insert returned true
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Write applied successfully, logging to WAL
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Serializing row for WAL
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: Row serialized, appending to WAL
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Commit: WAL append completed
+[2025-09-21 19:25:29.995] [info] [41287460] StorageEngine::Insert: Commit result=true
+[2025-09-21 19:25:29.995] [info] [41287439] Broadcast changefeed event: USERS INSERT key=11 to 1 clients
+[2025-09-21 19:25:34.925] [info] [41287432] 📈 Server Stats: 1 tables, 4 rows, 149 bytes, 1 WS connections, 1 subscriptions, 1 events
+[2025-09-21 19:26:05.048] [info] [41287432] 📈 Server Stats: 1 tables, 4 rows, 149 bytes, 1 WS connections, 1 subscriptions, 1 events
+[2025-09-21 19:26:25.957] [info] [41292926] 🚀 Starting InstantDB Server
+[2025-09-21 19:26:25.958] [info] [41292926] =====================================
+[2025-09-21 19:26:25.958] [info] [41292926] 📦 Initializing Storage Engine...
+[2025-09-21 19:26:25.958] [info] [41292926] Read 6 entries from WAL
+[2025-09-21 19:26:25.958] [info] [41292926] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 6
+[2025-09-21 19:26:25.959] [info] [41292926] Read 6 entries from WAL
+[2025-09-21 19:26:25.959] [info] [41292926] Recovering 6 WAL entries
+[2025-09-21 19:26:25.959] [info] [41292926] Recovered table 'USERS' from WAL
+[2025-09-21 19:26:25.959] [info] [41292926] WAL recovery complete
+[2025-09-21 19:26:25.959] [info] [41292926] Storage engine initialized with 1 tables
+[2025-09-21 19:26:25.959] [info] [41292926] ✅ Storage Engine ready
+[2025-09-21 19:26:25.959] [info] [41292926] 📡 Initializing Changefeed Engine...
+[2025-09-21 19:26:25.959] [info] [41292926] Changefeed engine initializing
+[2025-09-21 19:26:25.959] [info] [41292926] Changefeed engine started
+[2025-09-21 19:26:25.959] [info] [41292926] ✅ Changefeed Engine ready
+[2025-09-21 19:26:25.959] [info] [41292926] 🔍 Initializing SQL Engine...
+[2025-09-21 19:26:25.959] [info] [41292926] SQL Engine initialized
+[2025-09-21 19:26:25.959] [info] [41292926] ✅ SQL Engine ready with changefeed support
+[2025-09-21 19:26:25.959] [info] [41292926] 🌐 Initializing WebSocket Server...
+[2025-09-21 19:26:25.959] [info] [41292926] WebSocket server created on port 9090
+[2025-09-21 19:26:25.959] [info] [41292926] WebSocket server connected to changefeed engine
+[2025-09-21 19:26:25.960] [info] [41292926] Created subscription sub-1 with filter table=*
+[2025-09-21 19:26:25.960] [info] [41292926] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 19:26:25.960] [error] [41292926] Failed to bind socket to port 9090
+[2025-09-21 19:26:25.960] [error] [41292926] ❌ Failed to start WebSocket server
+[2025-09-21 19:26:25.960] [error] [41292926] 💥 Failed to initialize server
+[2025-09-21 19:26:25.960] [info] [41292926] 🛑 Shutting down InstantDB Server...
+[2025-09-21 19:26:25.960] [info] [41292926] ✅ WebSocket server stopped
+[2025-09-21 19:26:25.960] [info] [41292926] Changefeed engine stopped
+[2025-09-21 19:26:25.960] [info] [41292926] ✅ Changefeed engine stopped
+[2025-09-21 19:26:25.960] [info] [41292926] ✅ Storage engine shutdown
+[2025-09-21 19:26:25.960] [info] [41292926] 🏁 Server shutdown complete
+[2025-09-21 19:26:31.196] [info] [41293380] 🚀 Starting InstantDB Server
+[2025-09-21 19:26:31.197] [info] [41293380] =====================================
+[2025-09-21 19:26:31.197] [info] [41293380] 📦 Initializing Storage Engine...
+[2025-09-21 19:26:31.197] [info] [41293380] Read 6 entries from WAL
+[2025-09-21 19:26:31.197] [info] [41293380] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 6
+[2025-09-21 19:26:31.197] [info] [41293380] Read 6 entries from WAL
+[2025-09-21 19:26:31.197] [info] [41293380] Recovering 6 WAL entries
+[2025-09-21 19:26:31.198] [info] [41293380] Recovered table 'USERS' from WAL
+[2025-09-21 19:26:31.198] [info] [41293380] WAL recovery complete
+[2025-09-21 19:26:31.198] [info] [41293380] Storage engine initialized with 1 tables
+[2025-09-21 19:26:31.198] [info] [41293380] ✅ Storage Engine ready
+[2025-09-21 19:26:31.198] [info] [41293380] 📡 Initializing Changefeed Engine...
+[2025-09-21 19:26:31.198] [info] [41293380] Changefeed engine initializing
+[2025-09-21 19:26:31.198] [info] [41293380] Changefeed engine started
+[2025-09-21 19:26:31.198] [info] [41293380] ✅ Changefeed Engine ready
+[2025-09-21 19:26:31.198] [info] [41293380] 🔍 Initializing SQL Engine...
+[2025-09-21 19:26:31.198] [info] [41293380] SQL Engine initialized
+[2025-09-21 19:26:31.198] [info] [41293380] ✅ SQL Engine ready with changefeed support
+[2025-09-21 19:26:31.198] [info] [41293380] 🌐 Initializing WebSocket Server...
+[2025-09-21 19:26:31.198] [info] [41293380] WebSocket server created on port 9090
+[2025-09-21 19:26:31.198] [info] [41293380] WebSocket server connected to changefeed engine
+[2025-09-21 19:26:31.198] [info] [41293380] Created subscription sub-1 with filter table=*
+[2025-09-21 19:26:31.198] [info] [41293380] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 19:26:31.198] [error] [41293380] Failed to bind socket to port 9090
+[2025-09-21 19:26:31.198] [error] [41293380] ❌ Failed to start WebSocket server
+[2025-09-21 19:26:31.198] [error] [41293380] 💥 Failed to initialize server
+[2025-09-21 19:26:31.198] [info] [41293380] 🛑 Shutting down InstantDB Server...
+[2025-09-21 19:26:31.198] [info] [41293380] ✅ WebSocket server stopped
+[2025-09-21 19:26:31.198] [info] [41293380] Changefeed engine stopped
+[2025-09-21 19:26:31.198] [info] [41293380] ✅ Changefeed engine stopped
+[2025-09-21 19:26:31.198] [info] [41293380] ✅ Storage engine shutdown
+[2025-09-21 19:26:31.198] [info] [41293380] 🏁 Server shutdown complete
+[2025-09-21 19:26:35.169] [info] [41287432] 📈 Server Stats: 1 tables, 4 rows, 149 bytes, 1 WS connections, 1 subscriptions, 1 events
+[2025-09-21 19:26:37.520] [info] [41288605] Received WebSocket close frame, disconnecting client
+[2025-09-21 19:26:37.520] [info] [41288605] WebSocket client disconnected. Total connections: 0
+[2025-09-21 19:26:39.797] [info] [41294004] 🚀 Starting InstantDB Server
+[2025-09-21 19:26:39.798] [info] [41294004] =====================================
+[2025-09-21 19:26:39.798] [info] [41294004] 📦 Initializing Storage Engine...
+[2025-09-21 19:26:39.799] [info] [41294004] Read 6 entries from WAL
+[2025-09-21 19:26:39.799] [info] [41294004] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 6
+[2025-09-21 19:26:39.799] [info] [41294004] Read 6 entries from WAL
+[2025-09-21 19:26:39.799] [info] [41294004] Recovering 6 WAL entries
+[2025-09-21 19:26:39.799] [info] [41294004] Recovered table 'USERS' from WAL
+[2025-09-21 19:26:39.800] [info] [41294004] WAL recovery complete
+[2025-09-21 19:26:39.800] [info] [41294004] Storage engine initialized with 1 tables
+[2025-09-21 19:26:39.800] [info] [41294004] ✅ Storage Engine ready
+[2025-09-21 19:26:39.800] [info] [41294004] 📡 Initializing Changefeed Engine...
+[2025-09-21 19:26:39.800] [info] [41294004] Changefeed engine initializing
+[2025-09-21 19:26:39.800] [info] [41294004] Changefeed engine started
+[2025-09-21 19:26:39.800] [info] [41294004] ✅ Changefeed Engine ready
+[2025-09-21 19:26:39.800] [info] [41294004] 🔍 Initializing SQL Engine...
+[2025-09-21 19:26:39.800] [info] [41294004] SQL Engine initialized
+[2025-09-21 19:26:39.800] [info] [41294004] ✅ SQL Engine ready with changefeed support
+[2025-09-21 19:26:39.800] [info] [41294004] 🌐 Initializing WebSocket Server...
+[2025-09-21 19:26:39.800] [info] [41294004] WebSocket server created on port 9090
+[2025-09-21 19:26:39.800] [info] [41294004] WebSocket server connected to changefeed engine
+[2025-09-21 19:26:39.800] [info] [41294004] Created subscription sub-1 with filter table=*
+[2025-09-21 19:26:39.800] [info] [41294004] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 19:26:39.800] [error] [41294004] Failed to bind socket to port 9090
+[2025-09-21 19:26:39.800] [error] [41294004] ❌ Failed to start WebSocket server
+[2025-09-21 19:26:39.800] [error] [41294004] 💥 Failed to initialize server
+[2025-09-21 19:26:39.800] [info] [41294004] 🛑 Shutting down InstantDB Server...
+[2025-09-21 19:26:39.800] [info] [41294004] ✅ WebSocket server stopped
+[2025-09-21 19:26:39.800] [info] [41294004] Changefeed engine stopped
+[2025-09-21 19:26:39.800] [info] [41294004] ✅ Changefeed engine stopped
+[2025-09-21 19:26:39.800] [info] [41294004] ✅ Storage engine shutdown
+[2025-09-21 19:26:39.800] [info] [41294004] 🏁 Server shutdown complete
+[2025-09-21 19:27:05.286] [info] [41287432] 📈 Server Stats: 1 tables, 4 rows, 149 bytes, 0 WS connections, 1 subscriptions, 1 events
+[2025-09-21 19:27:32.886] [info] [41297045] 🚀 Starting InstantDB Server
+[2025-09-21 19:27:32.887] [info] [41297045] =====================================
+[2025-09-21 19:27:32.887] [info] [41297045] 📦 Initializing Storage Engine...
+[2025-09-21 19:27:32.888] [info] [41297045] Read 6 entries from WAL
+[2025-09-21 19:27:32.888] [info] [41297045] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 6
+[2025-09-21 19:27:32.888] [info] [41297045] Read 6 entries from WAL
+[2025-09-21 19:27:32.888] [info] [41297045] Recovering 6 WAL entries
+[2025-09-21 19:27:32.889] [info] [41297045] Recovered table 'USERS' from WAL
+[2025-09-21 19:27:32.889] [info] [41297045] WAL recovery complete
+[2025-09-21 19:27:32.889] [info] [41297045] Storage engine initialized with 1 tables
+[2025-09-21 19:27:32.889] [info] [41297045] ✅ Storage Engine ready
+[2025-09-21 19:27:32.889] [info] [41297045] 📡 Initializing Changefeed Engine...
+[2025-09-21 19:27:32.889] [info] [41297045] Changefeed engine initializing
+[2025-09-21 19:27:32.889] [info] [41297045] Changefeed engine started
+[2025-09-21 19:27:32.889] [info] [41297045] ✅ Changefeed Engine ready
+[2025-09-21 19:27:32.889] [info] [41297045] 🔍 Initializing SQL Engine...
+[2025-09-21 19:27:32.889] [info] [41297045] SQL Engine initialized
+[2025-09-21 19:27:32.889] [info] [41297045] ✅ SQL Engine ready with changefeed support
+[2025-09-21 19:27:32.889] [info] [41297045] 🌐 Initializing WebSocket Server...
+[2025-09-21 19:27:32.889] [info] [41297045] WebSocket server created on port 9090
+[2025-09-21 19:27:32.889] [info] [41297045] WebSocket server connected to changefeed engine
+[2025-09-21 19:27:32.889] [info] [41297045] Created subscription sub-1 with filter table=*
+[2025-09-21 19:27:32.889] [info] [41297045] WebSocket server subscribed to all changefeed events (subscription: sub-1)
+[2025-09-21 19:27:32.889] [info] [41297045] WebSocket server started on port 9090
+[2025-09-21 19:27:32.889] [info] [41297045] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-21 19:27:32.889] [info] [41297129] WebSocket server listening on port 9090
+[2025-09-21 19:27:32.889] [info] [41297045] 🔌 Initializing gRPC Server...
+[2025-09-21 19:27:32.892] [info] [41297045] gRPC server listening on 0.0.0.0:50051
+[2025-09-21 19:27:32.892] [info] [41297045] ✅ gRPC Server ready on 0.0.0.0:50051
+[2025-09-21 19:27:32.892] [info] [41297045] 
+[2025-09-21 19:27:32.892] [info] [41297045] 🎯 InstantDB Server fully initialized!
+[2025-09-21 19:27:32.892] [info] [41297045] =====================================
+[2025-09-21 19:27:32.892] [info] [41297045] 📊 Server Status:
+[2025-09-21 19:27:32.892] [info] [41297045]   Storage: 1 tables
+[2025-09-21 19:27:32.892] [info] [41297045]   WebSocket: 0 active connections
+[2025-09-21 19:27:32.892] [info] [41297045]   Changefeed: 1 active subscriptions
+[2025-09-21 19:27:32.892] [info] [41297045] 
+[2025-09-21 19:27:32.892] [info] [41297045] 🔗 Endpoints:
+[2025-09-21 19:27:32.892] [info] [41297045]   WebSocket: ws://localhost:9090
+[2025-09-21 19:27:32.892] [info] [41297045]   gRPC API: localhost:50051
+[2025-09-21 19:27:32.892] [info] [41297045] 
+[2025-09-21 19:27:32.892] [info] [41297045] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-21 19:27:37.653] [info] [41297442] WebSocket client connected. Total connections: 1
+[2025-09-21 19:27:47.810] [info] [41297045] Received signal 2, requesting graceful shutdown...
+[2025-09-21 19:27:47.947] [info] [41297045] Stopping gRPC server...
+[2025-09-21 19:27:47.948] [info] [41297045] gRPC server stopped
+[2025-09-21 19:27:47.948] [info] [41297045] WebSocket server stopped

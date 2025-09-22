@@ -64,11 +64,15 @@ CMAKE_BINARY_DIR = /Users/a12042/Development/instant_db/build
 
 # The main recursive "all" target.
 all: CMakeFiles/storage.dir/all
-all: CMakeFiles/sql_engine.dir/all
 all: CMakeFiles/changefeed_engine.dir/all
+all: CMakeFiles/sql_engine.dir/all
 all: CMakeFiles/websocket_server.dir/all
 all: CMakeFiles/common_lib.dir/all
+all: CMakeFiles/grpc_service.dir/all
 all: CMakeFiles/instantdb_demo.dir/all
+all: CMakeFiles/instantdb_sql.dir/all
+all: CMakeFiles/instantdb_server.dir/all
+all: CMakeFiles/instantdb_client.dir/all
 all: _deps/json-build/all
 all: _deps/spdlog-build/all
 all: _deps/fmt-build/all
@@ -82,11 +86,15 @@ preinstall: _deps/fmt-build/preinstall
 
 # The main recursive "clean" target.
 clean: CMakeFiles/storage.dir/clean
-clean: CMakeFiles/sql_engine.dir/clean
 clean: CMakeFiles/changefeed_engine.dir/clean
+clean: CMakeFiles/sql_engine.dir/clean
 clean: CMakeFiles/websocket_server.dir/clean
 clean: CMakeFiles/common_lib.dir/clean
+clean: CMakeFiles/grpc_service.dir/clean
 clean: CMakeFiles/instantdb_demo.dir/clean
+clean: CMakeFiles/instantdb_sql.dir/clean
+clean: CMakeFiles/instantdb_server.dir/clean
+clean: CMakeFiles/instantdb_client.dir/clean
 clean: _deps/json-build/clean
 clean: _deps/spdlog-build/clean
 clean: _deps/fmt-build/clean
@@ -141,11 +149,11 @@ _deps/spdlog-build/clean: _deps/spdlog-build/CMakeFiles/spdlog.dir/clean
 # Target rules for target CMakeFiles/storage.dir
 
 # All Build rule for target.
-CMakeFiles/storage.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
 CMakeFiles/storage.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
+CMakeFiles/storage.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/storage.dir/build.make CMakeFiles/storage.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/storage.dir/build.make CMakeFiles/storage.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=21,22,23,24,25 "Built target storage"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=35,36,37,38,39 "Built target storage"
 .PHONY : CMakeFiles/storage.dir/all
 
 # Build rule for subdir invocation for target.
@@ -165,40 +173,12 @@ CMakeFiles/storage.dir/clean:
 .PHONY : CMakeFiles/storage.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/sql_engine.dir
-
-# All Build rule for target.
-CMakeFiles/sql_engine.dir/all: CMakeFiles/storage.dir/all
-CMakeFiles/sql_engine.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
-CMakeFiles/sql_engine.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=19,20 "Built target sql_engine"
-.PHONY : CMakeFiles/sql_engine.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/sql_engine.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 18
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/sql_engine.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 0
-.PHONY : CMakeFiles/sql_engine.dir/rule
-
-# Convenience name for target.
-sql_engine: CMakeFiles/sql_engine.dir/rule
-.PHONY : sql_engine
-
-# clean rule for target.
-CMakeFiles/sql_engine.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/clean
-.PHONY : CMakeFiles/sql_engine.dir/clean
-
-#=============================================================================
 # Target rules for target CMakeFiles/changefeed_engine.dir
 
 # All Build rule for target.
+CMakeFiles/changefeed_engine.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
 CMakeFiles/changefeed_engine.dir/all: CMakeFiles/storage.dir/all
 CMakeFiles/changefeed_engine.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
-CMakeFiles/changefeed_engine.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=1,2 "Built target changefeed_engine"
@@ -221,16 +201,45 @@ CMakeFiles/changefeed_engine.dir/clean:
 .PHONY : CMakeFiles/changefeed_engine.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/sql_engine.dir
+
+# All Build rule for target.
+CMakeFiles/sql_engine.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
+CMakeFiles/sql_engine.dir/all: CMakeFiles/storage.dir/all
+CMakeFiles/sql_engine.dir/all: CMakeFiles/changefeed_engine.dir/all
+CMakeFiles/sql_engine.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=33,34 "Built target sql_engine"
+.PHONY : CMakeFiles/sql_engine.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/sql_engine.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 20
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/sql_engine.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 0
+.PHONY : CMakeFiles/sql_engine.dir/rule
+
+# Convenience name for target.
+sql_engine: CMakeFiles/sql_engine.dir/rule
+.PHONY : sql_engine
+
+# clean rule for target.
+CMakeFiles/sql_engine.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sql_engine.dir/build.make CMakeFiles/sql_engine.dir/clean
+.PHONY : CMakeFiles/sql_engine.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/websocket_server.dir
 
 # All Build rule for target.
+CMakeFiles/websocket_server.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
 CMakeFiles/websocket_server.dir/all: CMakeFiles/storage.dir/all
 CMakeFiles/websocket_server.dir/all: CMakeFiles/changefeed_engine.dir/all
 CMakeFiles/websocket_server.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
-CMakeFiles/websocket_server.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/websocket_server.dir/build.make CMakeFiles/websocket_server.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/websocket_server.dir/build.make CMakeFiles/websocket_server.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=26,27 "Built target websocket_server"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=40,41 "Built target websocket_server"
 .PHONY : CMakeFiles/websocket_server.dir/all
 
 # Build rule for subdir invocation for target.
@@ -253,8 +262,8 @@ CMakeFiles/websocket_server.dir/clean:
 # Target rules for target CMakeFiles/common_lib.dir
 
 # All Build rule for target.
-CMakeFiles/common_lib.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
 CMakeFiles/common_lib.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
+CMakeFiles/common_lib.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/common_lib.dir/build.make CMakeFiles/common_lib.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/common_lib.dir/build.make CMakeFiles/common_lib.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=3,4,5 "Built target common_lib"
@@ -277,19 +286,49 @@ CMakeFiles/common_lib.dir/clean:
 .PHONY : CMakeFiles/common_lib.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/grpc_service.dir
+
+# All Build rule for target.
+CMakeFiles/grpc_service.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
+CMakeFiles/grpc_service.dir/all: CMakeFiles/storage.dir/all
+CMakeFiles/grpc_service.dir/all: CMakeFiles/changefeed_engine.dir/all
+CMakeFiles/grpc_service.dir/all: CMakeFiles/sql_engine.dir/all
+CMakeFiles/grpc_service.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=9,10,11,12,13 "Built target grpc_service"
+.PHONY : CMakeFiles/grpc_service.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/grpc_service.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 25
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/grpc_service.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 0
+.PHONY : CMakeFiles/grpc_service.dir/rule
+
+# Convenience name for target.
+grpc_service: CMakeFiles/grpc_service.dir/rule
+.PHONY : grpc_service
+
+# clean rule for target.
+CMakeFiles/grpc_service.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/clean
+.PHONY : CMakeFiles/grpc_service.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/instantdb_demo.dir
 
 # All Build rule for target.
+CMakeFiles/instantdb_demo.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
 CMakeFiles/instantdb_demo.dir/all: CMakeFiles/storage.dir/all
-CMakeFiles/instantdb_demo.dir/all: CMakeFiles/sql_engine.dir/all
 CMakeFiles/instantdb_demo.dir/all: CMakeFiles/changefeed_engine.dir/all
+CMakeFiles/instantdb_demo.dir/all: CMakeFiles/sql_engine.dir/all
 CMakeFiles/instantdb_demo.dir/all: CMakeFiles/websocket_server.dir/all
 CMakeFiles/instantdb_demo.dir/all: CMakeFiles/common_lib.dir/all
 CMakeFiles/instantdb_demo.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
-CMakeFiles/instantdb_demo.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_demo.dir/build.make CMakeFiles/instantdb_demo.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_demo.dir/build.make CMakeFiles/instantdb_demo.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=9,10 "Built target instantdb_demo"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=19,20 "Built target instantdb_demo"
 .PHONY : CMakeFiles/instantdb_demo.dir/all
 
 # Build rule for subdir invocation for target.
@@ -309,13 +348,103 @@ CMakeFiles/instantdb_demo.dir/clean:
 .PHONY : CMakeFiles/instantdb_demo.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/instantdb_sql.dir
+
+# All Build rule for target.
+CMakeFiles/instantdb_sql.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
+CMakeFiles/instantdb_sql.dir/all: CMakeFiles/storage.dir/all
+CMakeFiles/instantdb_sql.dir/all: CMakeFiles/changefeed_engine.dir/all
+CMakeFiles/instantdb_sql.dir/all: CMakeFiles/sql_engine.dir/all
+CMakeFiles/instantdb_sql.dir/all: CMakeFiles/common_lib.dir/all
+CMakeFiles/instantdb_sql.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_sql.dir/build.make CMakeFiles/instantdb_sql.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_sql.dir/build.make CMakeFiles/instantdb_sql.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=23,24 "Built target instantdb_sql"
+.PHONY : CMakeFiles/instantdb_sql.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/instantdb_sql.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 25
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/instantdb_sql.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 0
+.PHONY : CMakeFiles/instantdb_sql.dir/rule
+
+# Convenience name for target.
+instantdb_sql: CMakeFiles/instantdb_sql.dir/rule
+.PHONY : instantdb_sql
+
+# clean rule for target.
+CMakeFiles/instantdb_sql.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_sql.dir/build.make CMakeFiles/instantdb_sql.dir/clean
+.PHONY : CMakeFiles/instantdb_sql.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/instantdb_server.dir
+
+# All Build rule for target.
+CMakeFiles/instantdb_server.dir/all: _deps/fmt-build/CMakeFiles/fmt.dir/all
+CMakeFiles/instantdb_server.dir/all: CMakeFiles/storage.dir/all
+CMakeFiles/instantdb_server.dir/all: CMakeFiles/changefeed_engine.dir/all
+CMakeFiles/instantdb_server.dir/all: CMakeFiles/sql_engine.dir/all
+CMakeFiles/instantdb_server.dir/all: CMakeFiles/websocket_server.dir/all
+CMakeFiles/instantdb_server.dir/all: CMakeFiles/common_lib.dir/all
+CMakeFiles/instantdb_server.dir/all: CMakeFiles/grpc_service.dir/all
+CMakeFiles/instantdb_server.dir/all: _deps/spdlog-build/CMakeFiles/spdlog.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_server.dir/build.make CMakeFiles/instantdb_server.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_server.dir/build.make CMakeFiles/instantdb_server.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=21,22 "Built target instantdb_server"
+.PHONY : CMakeFiles/instantdb_server.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/instantdb_server.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 32
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/instantdb_server.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 0
+.PHONY : CMakeFiles/instantdb_server.dir/rule
+
+# Convenience name for target.
+instantdb_server: CMakeFiles/instantdb_server.dir/rule
+.PHONY : instantdb_server
+
+# clean rule for target.
+CMakeFiles/instantdb_server.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_server.dir/build.make CMakeFiles/instantdb_server.dir/clean
+.PHONY : CMakeFiles/instantdb_server.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/instantdb_client.dir
+
+# All Build rule for target.
+CMakeFiles/instantdb_client.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=14,15,16,17,18 "Built target instantdb_client"
+.PHONY : CMakeFiles/instantdb_client.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/instantdb_client.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 5
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/instantdb_client.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/a12042/Development/instant_db/build/CMakeFiles 0
+.PHONY : CMakeFiles/instantdb_client.dir/rule
+
+# Convenience name for target.
+instantdb_client: CMakeFiles/instantdb_client.dir/rule
+.PHONY : instantdb_client
+
+# clean rule for target.
+CMakeFiles/instantdb_client.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/clean
+.PHONY : CMakeFiles/instantdb_client.dir/clean
+
+#=============================================================================
 # Target rules for target _deps/spdlog-build/CMakeFiles/spdlog.dir
 
 # All Build rule for target.
 _deps/spdlog-build/CMakeFiles/spdlog.dir/all:
 	$(MAKE) $(MAKESILENT) -f _deps/spdlog-build/CMakeFiles/spdlog.dir/build.make _deps/spdlog-build/CMakeFiles/spdlog.dir/depend
 	$(MAKE) $(MAKESILENT) -f _deps/spdlog-build/CMakeFiles/spdlog.dir/build.make _deps/spdlog-build/CMakeFiles/spdlog.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=11,12,13,14,15,16,17,18 "Built target spdlog"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=25,26,27,28,29,30,31,32 "Built target spdlog"
 .PHONY : _deps/spdlog-build/CMakeFiles/spdlog.dir/all
 
 # Build rule for subdir invocation for target.
