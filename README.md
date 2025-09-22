@@ -4,13 +4,14 @@ A high-performance, distributed database with **WebAssembly module support** - b
 
 ## ✨ Key Features
 
-- **🔥 Real-time Changefeeds**: Stream table changes to clients via WebSocket
+- **🔥 Real-time Changefeeds**: Stream table changes to clients via WebSocket with initial state
 - **⚡ WASM Modules**: Run custom application logic inside the database server
 - **🔔 WASM Subscriptions**: Programmable real-time data streams with filtering & transformation
 - **🗃️ In-Memory Storage**: High-performance MVCC with persistent WAL
 - **🔍 SQL Interface**: Standard SQL with programmable extensions
 - **🌐 Multi-Protocol API**: gRPC and WebSocket endpoints
 - **🛡️ Sandboxed Execution**: Safe WASM runtime with resource limits
+- **🛠️ CLI Tool**: Comprehensive command-line interface for project management
 - **📊 Production Ready**: Structured logging, metrics, and observability
 
 ## 🏗️ Architecture Overview
@@ -44,6 +45,7 @@ A high-performance, distributed database with **WebAssembly module support** - b
 - ✅ **Write-Ahead Log**: Durable transaction logging with crash recovery
 - ✅ **Changefeed Engine**: Real-time event streaming with subscriptions
 - ✅ **WebSocket Server**: Multi-client connection and broadcast management
+- ✅ **Initial State Broadcast**: Send current data on subscription, then incremental updates
 
 #### **WASM Module System** 🆕 
 - ✅ **WASM Runtime**: Full engine integration with instance pooling
@@ -71,7 +73,7 @@ A high-performance, distributed database with **WebAssembly module support** - b
 
 #### **API & Integration**
 - ✅ **gRPC Service**: Complete API with SQL and WASM module endpoints
-- ✅ **WebSocket Protocol**: WASM subscription requests and real-time events
+- ✅ **WebSocket Protocol**: SQL/WASM subscriptions with initial state + real-time events
 - ✅ **Protocol Buffers**: Type-safe API definitions for all services
 - ✅ **Multi-Client Support**: Concurrent WebSocket connections with client tracking
 - ✅ **Real-time Sync**: Database changes → WASM processing → WebSocket delivery
@@ -82,6 +84,16 @@ A high-performance, distributed database with **WebAssembly module support** - b
 - ✅ **Health Endpoints**: Server status and statistics
 - ✅ **Command Line Tools**: `instantdb_sql` client for testing
 - ✅ **Configuration**: Environment variable and CLI argument support
+
+#### **CLI Tool & Developer Experience** 🆕
+- ✅ **Comprehensive CLI**: Full-featured command-line interface for all operations
+- ✅ **Project Initialization**: Multi-language WASM project scaffolding
+- ✅ **Server Management**: Start/stop/status with daemon mode support
+- ✅ **Module Management**: Build, deploy, and manage WASM modules
+- ✅ **Database Operations**: Create, backup, restore database operations
+- ✅ **Log Viewing**: Real-time log tailing and monitoring
+- ✅ **Multi-Language Support**: Templates for Rust, C#, JavaScript, Go, C++
+- ✅ **Build System Integration**: CMake integration and parallel builds
 
 ### 🚧 **In Progress**
 - 🚧 **Full Wasmtime Integration**: Production-ready WASM runtime (placeholder implementation currently)
@@ -108,11 +120,41 @@ cd instant_db
 cmake -B build -S .
 make -C build -j4
 
-# Run the server
-./build/instantdb_server --port 8080
+# Build the CLI tool (recommended)
+cmake --build build --target instantdb
 ```
 
-### Basic Usage
+### CLI Tool (Recommended) 🆕
+
+InstantDB now includes a comprehensive CLI tool for project management:
+
+```bash
+# Initialize a new project with WASM modules
+./build/instantdb init --lang rust my_realtime_app
+cd my_realtime_app
+
+# Start the server as a daemon
+./build/instantdb server start --daemon
+
+# Create and build a WASM module
+./build/instantdb module init auth_service
+./build/instantdb module build auth_service
+
+# Monitor logs
+./build/instantdb logs --follow
+
+# Execute reducers and SQL
+./build/instantdb exec create_user --input '{"name":"Alice","email":"alice@example.com"}'
+./build/instantdb exec --sql "SELECT * FROM users"
+
+# Manage databases
+./build/instantdb database create myapp
+./build/instantdb database list
+```
+
+See [CLI_GUIDE.md](./CLI_GUIDE.md) for complete documentation.
+
+### Manual Usage (Alternative)
 
 ```bash
 # 1. Start server in one terminal
@@ -387,6 +429,21 @@ await client.createWasmSubscription({
 }
 ```
 
+#### SQL Subscription (with Initial State) 🆕
+```json
+{
+  "type": "sql_subscribe",
+  "sql": "SELECT * FROM users WHERE active = true"
+}
+```
+
+#### All Tables Subscription (with Initial State) 🆕
+```json
+{
+  "type": "subscribe_to_all_tables"
+}
+```
+
 #### WASM Subscription (Programmable Filtering/Transformation) 🆕
 ```json
 {
@@ -430,6 +487,73 @@ await client.createWasmSubscription({
     "server_version": "1.0.0",
     "user_reputation": 95
   }
+}
+```
+
+#### Receive Initial State (SQL Subscription) 🆕
+```json
+{
+  "type": "initial_state",
+  "subscription_id": "sql_sub_1",
+  "sql": "SELECT * FROM users WHERE active = true",
+  "columns": [
+    {"name": "id", "type": "INT64", "nullable": false},
+    {"name": "name", "type": "STRING", "nullable": false},
+    {"name": "active", "type": "BOOLEAN", "nullable": false}
+  ],
+  "rows": [
+    {
+      "key": "1",
+      "version": 1,
+      "timestamp": 1704067200000,
+      "data": {"id": 1, "name": "Alice", "active": true}
+    },
+    {
+      "key": "2",
+      "version": 1,
+      "timestamp": 1704067205000,
+      "data": {"id": 2, "name": "Bob", "active": true}
+    }
+  ],
+  "rows_count": 2,
+  "execution_time_ms": 15
+}
+```
+
+#### Receive Initial State (All Tables) 🆕
+```json
+{
+  "type": "initial_state_all_tables",
+  "subscription_id": "all_tables_sub_1",
+  "tables": {
+    "users": {
+      "columns": [
+        {"name": "id", "type": "INT64", "nullable": false},
+        {"name": "name", "type": "STRING", "nullable": false}
+      ],
+      "rows": [
+        {
+          "key": "1",
+          "data": {"id": 1, "name": "Alice"}
+        }
+      ],
+      "rows_count": 1
+    },
+    "orders": {
+      "columns": [
+        {"name": "id", "type": "INT64", "nullable": false},
+        {"name": "user_id", "type": "INT64", "nullable": false}
+      ],
+      "rows": [
+        {
+          "key": "101",
+          "data": {"id": 101, "user_id": 1}
+        }
+      ],
+      "rows_count": 1
+    }
+  },
+  "tables_count": 2
 }
 ```
 
@@ -645,10 +769,11 @@ We welcome contributions! Areas where help is especially needed:
 
 ### Getting Started
 
-1. Check out the [Project roadmap](PROJECT.md) for the full vision
-2. Look at the [prototype demo](PROTOTYPE_DEMO.md) to understand the flow
-3. Browse the source code in areas of interest
-4. Open an issue to discuss your contribution ideas
+1. Check out the [CLI Guide](CLI_GUIDE.md) for comprehensive command-line usage
+2. Review the [Project roadmap](PROJECT.md) for the full vision
+3. Look at the [prototype demo](PROTOTYPE_DEMO.md) to understand the flow
+4. Browse the source code in areas of interest
+5. Open an issue to discuss your contribution ideas
 
 ## 🎉 Demo & Examples
 

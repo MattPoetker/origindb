@@ -9,6 +9,7 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <regex>
+#include <fmt/format.h>
 
 namespace instantdb {
 
@@ -119,6 +120,16 @@ void WebSocketServer::SetWasmSubscriptionManager(std::shared_ptr<WasmSubscriptio
 void WebSocketServer::SetSqlSubscriptionManager(std::shared_ptr<SqlSubscriptionManager> sql_manager) {
     sql_manager_ = sql_manager;
     spdlog::info("WebSocket server connected to SQL subscription manager");
+}
+
+void WebSocketServer::SetSqlEngine(std::shared_ptr<SqlEngine> sql_engine) {
+    sql_engine_ = sql_engine;
+    spdlog::info("WebSocket server connected to SQL engine");
+}
+
+void WebSocketServer::SetStorageEngine(std::shared_ptr<StorageEngine> storage_engine) {
+    storage_engine_ = storage_engine;
+    spdlog::info("WebSocket server connected to storage engine");
 }
 
 size_t WebSocketServer::GetActiveConnections() const {
@@ -825,6 +836,9 @@ void WebSocketServer::HandleSqlSubscriptionRequest(int client_socket, const std:
         SendWebSocketFrame(client_socket, response.dump());
         spdlog::info("Created SQL subscription {} for client {}: {}", subscription_id, client_id, sql_query);
 
+        // Send initial state to the client
+        SendInitialState(client_socket, sql_query, subscription_id);
+
     } catch (const std::exception& e) {
         spdlog::error("Failed to handle SQL subscription request: {}", e.what());
 
@@ -876,12 +890,209 @@ void WebSocketServer::HandleSubscribeToAllTablesRequest(int client_socket, const
         SendWebSocketFrame(client_socket, response.dump());
         spdlog::info("Created ALL_TABLES subscription {} for client {}", subscription_id, client_id);
 
+        // Send initial state for all tables to the client
+        SendInitialStateAllTables(client_socket, subscription_id);
+
     } catch (const std::exception& e) {
         spdlog::error("Failed to handle subscribe to all tables request: {}", e.what());
 
         nlohmann::json error;
         error["type"] = "error";
         error["message"] = "Failed to create ALL_TABLES subscription: " + std::string(e.what());
+        SendWebSocketFrame(client_socket, error.dump());
+    }
+}
+
+void WebSocketServer::SendInitialState(int client_socket, const std::string& sql_query, const std::string& subscription_id) {
+    if (!sql_engine_) {
+        spdlog::error("SQL engine not available for initial state query");
+        return;
+    }
+
+    try {
+        // Execute the SQL query to get current state
+        auto result = sql_engine_->Execute(sql_query);
+
+        if (!result.success) {
+            spdlog::error("Failed to execute initial state query: {}", result.error);
+            nlohmann::json error;
+            error["type"] = "initial_state_error";
+            error["subscription_id"] = subscription_id;
+            error["message"] = "Failed to fetch initial state: " + result.error;
+            SendWebSocketFrame(client_socket, error.dump());
+            return;
+        }
+
+        // Convert SQL result to JSON format
+        nlohmann::json initial_state;
+        initial_state["type"] = "initial_state";
+        initial_state["subscription_id"] = subscription_id;
+        initial_state["sql"] = sql_query;
+
+        // Add column information
+        nlohmann::json columns = nlohmann::json::array();
+        for (const auto& col : result.columns) {
+            nlohmann::json column;
+            column["name"] = col.name;
+            column["type"] = col.type;
+            column["nullable"] = col.nullable;
+            columns.push_back(column);
+        }
+        initial_state["columns"] = columns;
+
+        // Add row data
+        nlohmann::json rows = nlohmann::json::array();
+        for (const auto& row : result.rows) {
+            nlohmann::json json_row;
+            json_row["key"] = row.key;
+            json_row["version"] = row.version;
+            json_row["timestamp"] = row.timestamp;
+
+            nlohmann::json row_data;
+            for (const auto& [col_name, value] : row.columns) {
+                // Convert Value variant to JSON
+                std::visit([&](const auto& v) {
+                    using T = std::decay_t<decltype(v)>;
+                    if constexpr (std::is_same_v<T, std::monostate>) {
+                        row_data[col_name] = nullptr;
+                    } else if constexpr (std::is_same_v<T, bool>) {
+                        row_data[col_name] = v;
+                    } else if constexpr (std::is_arithmetic_v<T>) {
+                        row_data[col_name] = v;
+                    } else if constexpr (std::is_same_v<T, std::string>) {
+                        row_data[col_name] = v;
+                    } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
+                        // Convert binary data to base64 or hex string
+                        std::string hex;
+                        for (uint8_t byte : v) {
+                            hex += fmt::format("{:02x}", byte);
+                        }
+                        row_data[col_name] = hex;
+                    } else if constexpr (std::is_same_v<T, std::chrono::system_clock::time_point>) {
+                        auto time_t = std::chrono::system_clock::to_time_t(v);
+                        row_data[col_name] = time_t;
+                    }
+                }, value);
+            }
+            json_row["data"] = row_data;
+            rows.push_back(json_row);
+        }
+        initial_state["rows"] = rows;
+        initial_state["rows_count"] = result.rows.size();
+        initial_state["execution_time_ms"] = result.execution_time_ms;
+
+        // Send the initial state to the client
+        SendWebSocketFrame(client_socket, initial_state.dump());
+        spdlog::info("Sent initial state for subscription {} ({} rows)", subscription_id, result.rows.size());
+
+    } catch (const std::exception& e) {
+        spdlog::error("Exception while sending initial state: {}", e.what());
+        nlohmann::json error;
+        error["type"] = "initial_state_error";
+        error["subscription_id"] = subscription_id;
+        error["message"] = "Exception while fetching initial state: " + std::string(e.what());
+        SendWebSocketFrame(client_socket, error.dump());
+    }
+}
+
+void WebSocketServer::SendInitialStateAllTables(int client_socket, const std::string& subscription_id) {
+    if (!storage_engine_ || !sql_engine_) {
+        spdlog::error("Storage engine or SQL engine not available for all tables initial state");
+        return;
+    }
+
+    try {
+        // Get list of all tables
+        auto tables = storage_engine_->ListTables();
+
+        nlohmann::json all_tables_state;
+        all_tables_state["type"] = "initial_state_all_tables";
+        all_tables_state["subscription_id"] = subscription_id;
+
+        nlohmann::json tables_data = nlohmann::json::object();
+
+        // Get current state for each table
+        for (const auto& table_name : tables) {
+            std::string sql_query = "SELECT * FROM " + table_name;
+            auto result = sql_engine_->Execute(sql_query);
+
+            if (result.success) {
+                nlohmann::json table_state;
+
+                // Add column information
+                nlohmann::json columns = nlohmann::json::array();
+                for (const auto& col : result.columns) {
+                    nlohmann::json column;
+                    column["name"] = col.name;
+                    column["type"] = col.type;
+                    column["nullable"] = col.nullable;
+                    columns.push_back(column);
+                }
+                table_state["columns"] = columns;
+
+                // Add row data
+                nlohmann::json rows = nlohmann::json::array();
+                for (const auto& row : result.rows) {
+                    nlohmann::json json_row;
+                    json_row["key"] = row.key;
+                    json_row["version"] = row.version;
+                    json_row["timestamp"] = row.timestamp;
+
+                    nlohmann::json row_data;
+                    for (const auto& [col_name, value] : row.columns) {
+                        // Convert Value variant to JSON
+                        std::visit([&](const auto& v) {
+                            using T = std::decay_t<decltype(v)>;
+                            if constexpr (std::is_same_v<T, std::monostate>) {
+                                row_data[col_name] = nullptr;
+                            } else if constexpr (std::is_same_v<T, bool>) {
+                                row_data[col_name] = v;
+                            } else if constexpr (std::is_arithmetic_v<T>) {
+                                row_data[col_name] = v;
+                            } else if constexpr (std::is_same_v<T, std::string>) {
+                                row_data[col_name] = v;
+                            } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
+                                // Convert binary data to hex string
+                                std::string hex;
+                                for (uint8_t byte : v) {
+                                    hex += fmt::format("{:02x}", byte);
+                                }
+                                row_data[col_name] = hex;
+                            } else if constexpr (std::is_same_v<T, std::chrono::system_clock::time_point>) {
+                                auto time_t = std::chrono::system_clock::to_time_t(v);
+                                row_data[col_name] = time_t;
+                            }
+                        }, value);
+                    }
+                    json_row["data"] = row_data;
+                    rows.push_back(json_row);
+                }
+                table_state["rows"] = rows;
+                table_state["rows_count"] = result.rows.size();
+
+                tables_data[table_name] = table_state;
+            } else {
+                spdlog::warn("Failed to get initial state for table '{}': {}", table_name, result.error);
+                nlohmann::json error_state;
+                error_state["error"] = result.error;
+                error_state["rows_count"] = 0;
+                tables_data[table_name] = error_state;
+            }
+        }
+
+        all_tables_state["tables"] = tables_data;
+        all_tables_state["tables_count"] = tables.size();
+
+        // Send the initial state to the client
+        SendWebSocketFrame(client_socket, all_tables_state.dump());
+        spdlog::info("Sent initial state for all tables subscription {} ({} tables)", subscription_id, tables.size());
+
+    } catch (const std::exception& e) {
+        spdlog::error("Exception while sending initial state for all tables: {}", e.what());
+        nlohmann::json error;
+        error["type"] = "initial_state_error";
+        error["subscription_id"] = subscription_id;
+        error["message"] = "Exception while fetching initial state for all tables: " + std::string(e.what());
         SendWebSocketFrame(client_socket, error.dump());
     }
 }

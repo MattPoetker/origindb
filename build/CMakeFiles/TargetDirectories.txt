@@ -8,6 +8,7 @@
 /Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_demo.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_sql.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_server.dir
+/Users/a12042/Development/instant_db/build/CMakeFiles/instantdb.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_client.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/edit_cache.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/rebuild_cache.dir

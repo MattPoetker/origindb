@@ -994,6 +994,11 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: \
   /Users/a12042/Development/instant_db/include/wasm/wasm_subscription.h \
   /Users/a12042/Development/instant_db/include/wasm/wasm_engine.h \
   /Users/a12042/Development/instant_db/include/storage/table.h \
+  /Users/a12042/Development/instant_db/include/sql/sql_engine.h \
+  /Users/a12042/Development/instant_db/include/storage/storage_engine.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/shared_mutex \
+  /Users/a12042/Development/instant_db/include/storage/wal.h \
+  /Users/a12042/Development/instant_db/include/storage/snapshot.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/spdlog.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/details/registry.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/details/periodic_worker.h \
@@ -1163,4 +1168,5 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: \
   /usr/local/Cellar/openssl@3/3.5.1/include/openssl/objectserr.h \
   /usr/local/Cellar/openssl@3/3.5.1/include/openssl/buffer.h \
   /usr/local/Cellar/openssl@3/3.5.1/include/openssl/buffererr.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/regex
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/regex \
+  /Users/a12042/Development/instant_db/_deps/fmt-src/include/fmt/format.h

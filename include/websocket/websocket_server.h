@@ -15,12 +15,16 @@
 #include "changefeed/changefeed_engine.h"
 #include "changefeed/sql_subscription.h"
 #include "wasm/wasm_subscription.h"
+#include "sql/sql_engine.h"
+#include "storage/storage_engine.h"
 
 namespace instantdb {
 
 class ChangefeedEngine;
 class WasmSubscriptionManager;
 class SqlSubscriptionManager;
+class SqlEngine;
+class StorageEngine;
 
 // Simple WebSocket server using raw sockets
 class WebSocketServer {
@@ -39,6 +43,12 @@ public:
 
     // Set SQL subscription manager for SQL-based subscriptions
     void SetSqlSubscriptionManager(std::shared_ptr<SqlSubscriptionManager> sql_manager);
+
+    // Set SQL engine for executing queries to get current state
+    void SetSqlEngine(std::shared_ptr<SqlEngine> sql_engine);
+
+    // Set storage engine for getting table list
+    void SetStorageEngine(std::shared_ptr<StorageEngine> storage_engine);
 
     // Get connection statistics
     size_t GetActiveConnections() const;
@@ -66,6 +76,12 @@ private:
     void HandleSqlSubscriptionRequest(int client_socket, const std::string& message);
     void HandleSubscribeToAllTablesRequest(int client_socket, const std::string& message);
 
+    // Helper method to execute SQL query and send initial state
+    void SendInitialState(int client_socket, const std::string& sql_query, const std::string& subscription_id);
+
+    // Helper method to send initial state for all tables
+    void SendInitialStateAllTables(int client_socket, const std::string& subscription_id);
+
 private:
     uint16_t port_;
     std::atomic<bool> running_;
@@ -74,6 +90,8 @@ private:
     std::shared_ptr<ChangefeedEngine> changefeed_;
     std::shared_ptr<WasmSubscriptionManager> wasm_manager_;
     std::shared_ptr<SqlSubscriptionManager> sql_manager_;
+    std::shared_ptr<SqlEngine> sql_engine_;
+    std::shared_ptr<StorageEngine> storage_engine_;
 
     mutable std::mutex clients_mutex_;
     std::vector<int> active_clients_;

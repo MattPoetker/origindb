@@ -104,6 +104,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/instantdb_demo.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_sql.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_server.dir/DependInfo.cmake"
+  "CMakeFiles/instantdb.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_client.dir/DependInfo.cmake"
   "_deps/spdlog-build/CMakeFiles/spdlog.dir/DependInfo.cmake"
   "_deps/fmt-build/CMakeFiles/fmt.dir/DependInfo.cmake"

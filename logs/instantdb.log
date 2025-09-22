@@ -2953,3 +2953,986 @@ WASM: 0 loaded modules
 [2025-09-22 11:50:43.508] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
 [2025-09-22 11:50:46.951] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
 [2025-09-22 11:50:47.985] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:10.397] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:11.074] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:13.591] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:17.057] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:51:18.102] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:40.491] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:41.174] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:43.682] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:51:47.160] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:51:48.201] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:10.588] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:11.285] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:13.787] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:17.256] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:52:18.313] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:40.697] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:41.438] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:43.883] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:52:47.365] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:52:48.458] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:10.828] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:11.535] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:14.013] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:17.515] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:53:18.556] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:40.925] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:41.607] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:44.121] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:53:47.618] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:53:48.630] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:11.036] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:11.758] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:14.267] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:17.717] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:54:18.781] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:41.150] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:41.856] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:44.371] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:54:47.825] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:54:48.876] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:11.246] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:11.955] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:14.468] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:17.927] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:55:18.983] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:41.351] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:42.069] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:44.586] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:55:48.036] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:55:49.094] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:11.446] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:12.176] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:14.685] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:18.183] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:56:19.199] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:41.545] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:42.307] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:44.791] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:56:48.329] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:56:49.339] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:11.638] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:12.407] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:14.897] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:18.427] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:57:19.442] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:41.739] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:42.517] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:45.006] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:57:48.535] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:57:49.554] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:11.846] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:12.614] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:15.119] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:18.638] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:58:19.655] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:41.947] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:42.717] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:45.223] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:58:48.736] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:58:49.752] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:12.053] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:12.819] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:15.329] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:18.843] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:59:19.857] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:42.220] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:42.929] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:45.424] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 11:59:48.952] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 11:59:49.957] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:12.341] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:13.048] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:15.516] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:19.069] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:00:20.074] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:42.449] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:43.265] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:45.609] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:00:49.283] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:00:50.286] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:12.551] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:13.370] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:15.710] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:19.390] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:01:20.394] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:42.664] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:43.480] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:45.814] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:01:49.501] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:01:50.506] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:12.767] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:13.571] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:15.916] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:19.593] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:02:20.596] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:42.865] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:43.675] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:46.025] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:02:49.698] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:02:50.702] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:12.969] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:13.783] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:16.135] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:19.802] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:03:20.804] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:43.119] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:43.877] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:46.296] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:03:49.902] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:03:50.906] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:13.241] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:13.989] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:16.451] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:20.010] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:04:21.019] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:43.349] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:44.104] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:46.614] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:04:50.130] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:04:51.130] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:13.449] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:14.196] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:16.706] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:20.216] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:05:21.220] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:43.545] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:44.298] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:46.801] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:05:50.322] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:05:51.339] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:13.671] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:14.404] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:16.933] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:20.428] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:06:21.455] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:43.795] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:44.515] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:47.195] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:06:50.527] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:06:51.541] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:13.934] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:14.601] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:17.301] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:20.625] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:07:21.656] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:44.038] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:44.701] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:47.488] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:07:50.716] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:07:51.766] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:14.149] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:14.802] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:17.593] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:20.819] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:08:21.868] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:44.259] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:44.924] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:47.701] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:08:50.946] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:08:51.974] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:14.359] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:15.037] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:17.802] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:21.057] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:09:22.079] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:44.476] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:45.145] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:47.915] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:09:51.161] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:09:52.188] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:14.667] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:15.237] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:18.010] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:21.255] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:10:22.281] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:44.779] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:45.339] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:48.121] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:10:51.356] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:10:52.389] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:14.889] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:15.431] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:18.291] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:21.455] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:11:22.503] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:44.999] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:45.546] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:48.395] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:11:51.566] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:11:52.592] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:15.108] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:15.637] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:18.503] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:21.655] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:12:22.706] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:45.211] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:45.745] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:48.602] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:12:51.770] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:12:52.813] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:15.357] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:15.836] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:18.761] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:21.878] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:13:22.987] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:45.464] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:45.939] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:48.872] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:13:51.973] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:13:53.093] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:15.613] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:16.050] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:18.980] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:22.078] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:14:23.205] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:45.711] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:46.156] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:49.085] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:14:52.173] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:14:53.309] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:15.842] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:16.263] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:19.306] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:22.321] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:15:23.417] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:45.963] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:46.409] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:49.416] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:15:52.428] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:15:53.521] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:16.083] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:16.503] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:19.512] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:22.525] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:16:23.634] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:46.202] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:46.604] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:49.617] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:16:52.641] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:16:53.734] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:16.297] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:16.700] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:19.712] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:22.761] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:17:23.836] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:46.402] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:46.810] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:49.822] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:17:52.867] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:17:53.968] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:16.497] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:16.912] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:19.922] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:22.978] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:18:24.086] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:46.610] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:47.023] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:50.032] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:18:53.094] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:18:54.196] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:16.720] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:17.124] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:20.132] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:23.201] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:19:24.308] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:46.840] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:47.233] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:50.241] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:19:53.300] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:19:54.469] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:16.940] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:17.343] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:20.356] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:23.418] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:20:24.553] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:47.054] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:47.454] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:50.467] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:20:53.489] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:20:54.668] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:17.161] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:17.532] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:20.544] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:23.595] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:21:24.782] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:47.273] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:47.653] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:50.666] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:21:53.701] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:21:54.894] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:17.764] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:17.377] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:20.775] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:23.806] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:22:25.008] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:47.479] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:47.876] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:50.886] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:22:53.914] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:22:55.107] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:17.582] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:17.986] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:20.998] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:24.027] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:23:25.212] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:47.688] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:48.096] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:51.105] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:23:54.121] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:23:55.315] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:17.784] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:18.199] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:21.208] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:24.215] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:24:25.409] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:47.889] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:48.289] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:51.295] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:24:54.308] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:24:55.502] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:17.987] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:18.391] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:21.400] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:24.407] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:25:25.596] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:48.090] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:48.473] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:51.483] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:25:54.521] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:25:55.693] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:18.198] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:18.578] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:21.587] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:24.636] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:26:25.796] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:48.301] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:48.672] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:51.685] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:26:54.752] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:26:55.900] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:18.399] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:18.775] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:21.788] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:24.855] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:27:26.030] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:48.499] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:48.891] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:51.903] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:27:54.969] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:27:56.133] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:18.681] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:19.022] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:22.035] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:25.090] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:28:26.239] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:48.784] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:49.129] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:52.142] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:28:55.415] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:28:56.561] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:19.114] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:19.455] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:22.467] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:25.525] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:29:26.672] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:49.226] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:49.559] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:52.569] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:29:55.629] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:29:56.784] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:19.342] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:19.668] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:22.675] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:25.731] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:30:26.894] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:49.474] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:49.769] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:52.778] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:30:55.845] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:30:57.047] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:19.578] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:19.863] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:22.873] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:25.950] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:31:27.166] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:49.697] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:49.959] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:52.968] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:31:56.133] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:31:57.258] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:19.800] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:20.073] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:23.085] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:26.261] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:32:27.484] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:49.916] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:50.187] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:53.200] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:32:56.360] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:32:57.591] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:20.024] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:20.303] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:23.313] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:26.461] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:33:27.683] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:50.133] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:50.396] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:53.408] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:33:56.566] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:33:57.769] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:20.244] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:20.507] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:23.517] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:26.664] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:34:27.859] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:50.604] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:50.343] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:53.624] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:34:56.768] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:34:57.963] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:20.767] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:20.458] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:23.780] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:26.869] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:35:28.065] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:50.572] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:50.882] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:53.894] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:35:56.992] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:35:58.184] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:20.694] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:20.986] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:24.000] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:27.104] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:36:28.293] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:50.821] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:51.086] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:54.096] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:36:57.210] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:36:58.406] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:20.926] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:21.205] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:24.218] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:27.317] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:37:28.513] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:51.038] [info] [42873465] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:51.317] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:54.330] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:37:57.433] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:37:58.623] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:38:14.411] [info] [42873465] Received signal 2, requesting graceful shutdown...
+[2025-09-22 12:38:15.121] [info] [42873465] Stopping gRPC server...
+[2025-09-22 12:38:15.122] [info] [42873465] gRPC server stopped
+[2025-09-22 12:38:15.122] [info] [42873465] WebSocket server stopped
+[2025-09-22 12:38:21.429] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:38:24.441] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:38:27.545] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:38:28.715] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:38:51.534] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:38:54.544] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:38:57.657] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:38:58.867] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:39:21.644] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:39:24.660] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:39:27.769] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:39:28.970] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:39:51.739] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:39:54.748] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:39:57.867] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:39:59.072] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:40:21.822] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:40:24.834] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:40:27.972] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:40:29.177] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:40:51.922] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:40:54.933] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:40:58.070] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:40:59.277] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:41:22.037] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:41:25.045] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:41:28.179] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:41:29.458] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:41:52.137] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:41:55.145] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:41:58.283] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:41:59.565] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:42:22.246] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:42:25.257] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:42:28.391] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:42:29.669] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:42:52.335] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:42:55.364] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:42:58.507] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:42:59.763] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:43:22.448] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:43:25.485] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:43:28.613] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:43:29.878] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:43:52.550] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:43:55.589] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:43:58.711] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:43:59.983] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:44:23.041] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:44:26.076] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:44:29.216] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:44:30.514] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:44:53.137] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:44:56.192] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:44:59.325] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:45:00.621] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:45:23.250] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:45:26.311] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:45:29.443] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:45:30.734] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:45:53.364] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:45:56.421] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:45:59.563] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:46:00.845] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:46:23.471] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:46:26.576] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:46:29.671] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:46:30.952] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:46:53.586] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:46:56.695] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:46:59.801] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:47:01.059] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:47:23.693] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:47:26.806] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:47:29.973] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:47:31.171] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:47:53.809] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:47:56.921] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:48:00.092] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:48:01.292] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:48:23.910] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:48:27.039] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:48:30.209] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:48:31.398] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:48:54.027] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:48:57.132] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:49:00.323] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:49:01.519] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:49:24.145] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:49:27.245] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:49:30.428] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:49:31.629] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:49:54.246] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:49:57.372] [info] [43094822] 🚀 Starting InstantDB Server
+[2025-09-22 12:49:57.373] [info] [43094822] =====================================
+[2025-09-22 12:49:57.373] [info] [43094822] 📦 Initializing Storage Engine...
+[2025-09-22 12:49:57.374] [info] [43094822] Read 9 entries from WAL
+[2025-09-22 12:49:57.374] [info] [43094822] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 9
+[2025-09-22 12:49:57.374] [info] [43094822] Read 9 entries from WAL
+[2025-09-22 12:49:57.374] [info] [43094822] Recovering 9 WAL entries
+[2025-09-22 12:49:57.374] [info] [43094822] Recovered table 'USERS' from WAL
+[2025-09-22 12:49:57.375] [info] [43094822] WAL recovery complete
+[2025-09-22 12:49:57.375] [info] [43094822] Storage engine initialized with 1 tables
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ Storage Engine ready
+[2025-09-22 12:49:57.375] [info] [43094822] 📡 Initializing Changefeed Engine...
+[2025-09-22 12:49:57.375] [info] [43094822] Changefeed engine initializing
+[2025-09-22 12:49:57.375] [info] [43094822] Changefeed engine started
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ Changefeed Engine ready
+[2025-09-22 12:49:57.375] [info] [43094822] 🔗 Storage Engine linked to Changefeed Engine for automatic event emission
+[2025-09-22 12:49:57.375] [info] [43094822] 🔍 Initializing SQL Engine...
+[2025-09-22 12:49:57.375] [info] [43094822] SQL Engine initialized
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ SQL Engine ready with changefeed support
+[2025-09-22 12:49:57.375] [info] [43094822] ⚡ Initializing WASM Engine...
+[2025-09-22 12:49:57.375] [info] [43094822] Initializing WASM Engine
+[2025-09-22 12:49:57.375] [info] [43094822] WASM Engine initialized successfully
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ WASM Engine ready
+[2025-09-22 12:49:57.375] [info] [43094822] 🔔 Initializing WASM Subscription Manager...
+[2025-09-22 12:49:57.375] [info] [43094822] Initializing WASM subscription manager
+[2025-09-22 12:49:57.375] [info] [43094822] Created subscription sub-1 with filter table=*
+[2025-09-22 12:49:57.375] [info] [43094822] Starting WASM subscription manager
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ WASM Subscription Manager ready
+[2025-09-22 12:49:57.375] [info] [43094822] 📋 Initializing SQL Subscription Manager...
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ SQL Subscription Manager ready
+[2025-09-22 12:49:57.375] [info] [43094822] 🌐 Initializing WebSocket Server...
+[2025-09-22 12:49:57.375] [info] [43094822] WebSocket server created on port 8080
+[2025-09-22 12:49:57.375] [info] [43094822] WebSocket server connected to changefeed engine
+[2025-09-22 12:49:57.375] [info] [43094822] Created subscription sub-2 with filter table=*
+[2025-09-22 12:49:57.375] [info] [43094822] WebSocket server subscribed to all changefeed events (subscription: sub-2)
+[2025-09-22 12:49:57.375] [info] [43094822] WebSocket server connected to WASM subscription manager
+[2025-09-22 12:49:57.375] [info] [43094822] WebSocket server connected to SQL subscription manager
+[2025-09-22 12:49:57.375] [error] [43094822] Failed to bind socket to port 8080
+[2025-09-22 12:49:57.375] [error] [43094822] ❌ Failed to start WebSocket server
+[2025-09-22 12:49:57.375] [error] [43094822] 💥 Failed to initialize server
+[2025-09-22 12:49:57.375] [info] [43094822] 🛑 Shutting down InstantDB Server...
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ WebSocket server stopped
+[2025-09-22 12:49:57.375] [info] [43094822] Shutting down WASM Engine
+[2025-09-22 12:49:57.375] [info] [43094822] WASM Engine shutdown complete
+[2025-09-22 12:49:57.375] [info] [43094822] ✅ WASM engine stopped
+[2025-09-22 12:49:57.376] [info] [43094822] Changefeed engine stopped
+[2025-09-22 12:49:57.376] [info] [43094822] ✅ Changefeed engine stopped
+[2025-09-22 12:49:57.376] [info] [43094822] ✅ Storage engine shutdown
+[2025-09-22 12:49:57.376] [info] [43094822] 🏁 Server shutdown complete
+[2025-09-22 12:49:57.344] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:50:00.525] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:50:01.744] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:50:19.190] [info] [43096380] 🚀 Starting InstantDB Server
+[2025-09-22 12:50:19.191] [info] [43096380] =====================================
+[2025-09-22 12:50:19.191] [info] [43096380] 📦 Initializing Storage Engine...
+[2025-09-22 12:50:19.191] [info] [43096380] Read 9 entries from WAL
+[2025-09-22 12:50:19.191] [info] [43096380] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 9
+[2025-09-22 12:50:19.192] [info] [43096380] Read 9 entries from WAL
+[2025-09-22 12:50:19.192] [info] [43096380] Recovering 9 WAL entries
+[2025-09-22 12:50:19.192] [info] [43096380] Recovered table 'USERS' from WAL
+[2025-09-22 12:50:19.192] [info] [43096380] WAL recovery complete
+[2025-09-22 12:50:19.192] [info] [43096380] Storage engine initialized with 1 tables
+[2025-09-22 12:50:19.192] [info] [43096380] ✅ Storage Engine ready
+[2025-09-22 12:50:19.192] [info] [43096380] 📡 Initializing Changefeed Engine...
+[2025-09-22 12:50:19.192] [info] [43096380] Changefeed engine initializing
+[2025-09-22 12:50:19.192] [info] [43096380] Changefeed engine started
+[2025-09-22 12:50:19.192] [info] [43096380] ✅ Changefeed Engine ready
+[2025-09-22 12:50:19.192] [info] [43096380] 🔗 Storage Engine linked to Changefeed Engine for automatic event emission
+[2025-09-22 12:50:19.192] [info] [43096380] 🔍 Initializing SQL Engine...
+[2025-09-22 12:50:19.192] [info] [43096380] SQL Engine initialized
+[2025-09-22 12:50:19.192] [info] [43096380] ✅ SQL Engine ready with changefeed support
+[2025-09-22 12:50:19.192] [info] [43096380] ⚡ Initializing WASM Engine...
+[2025-09-22 12:50:19.192] [info] [43096380] Initializing WASM Engine
+[2025-09-22 12:50:19.193] [info] [43096380] WASM Engine initialized successfully
+[2025-09-22 12:50:19.193] [info] [43096380] ✅ WASM Engine ready
+[2025-09-22 12:50:19.193] [info] [43096380] 🔔 Initializing WASM Subscription Manager...
+[2025-09-22 12:50:19.193] [info] [43096380] Initializing WASM subscription manager
+[2025-09-22 12:50:19.193] [info] [43096380] Created subscription sub-1 with filter table=*
+[2025-09-22 12:50:19.193] [info] [43096380] Starting WASM subscription manager
+[2025-09-22 12:50:19.193] [info] [43096380] ✅ WASM Subscription Manager ready
+[2025-09-22 12:50:19.193] [info] [43096380] 📋 Initializing SQL Subscription Manager...
+[2025-09-22 12:50:19.193] [info] [43096380] ✅ SQL Subscription Manager ready
+[2025-09-22 12:50:19.193] [info] [43096380] 🌐 Initializing WebSocket Server...
+[2025-09-22 12:50:19.193] [info] [43096380] WebSocket server created on port 9090
+[2025-09-22 12:50:19.193] [info] [43096380] WebSocket server connected to changefeed engine
+[2025-09-22 12:50:19.193] [info] [43096380] Created subscription sub-2 with filter table=*
+[2025-09-22 12:50:19.193] [info] [43096380] WebSocket server subscribed to all changefeed events (subscription: sub-2)
+[2025-09-22 12:50:19.193] [info] [43096380] WebSocket server connected to WASM subscription manager
+[2025-09-22 12:50:19.193] [info] [43096380] WebSocket server connected to SQL subscription manager
+[2025-09-22 12:50:19.193] [info] [43096380] WebSocket server started on port 9090
+[2025-09-22 12:50:19.193] [info] [43096380] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-22 12:50:19.193] [info] [43096387] WebSocket server listening on port 9090
+[2025-09-22 12:50:19.193] [info] [43096380] 🔌 Initializing gRPC Server...
+[2025-09-22 12:50:19.195] [info] [43096380] gRPC server listening on 0.0.0.0:50051
+[2025-09-22 12:50:19.195] [info] [43096380] ✅ gRPC Server ready on 0.0.0.0:50051
+[2025-09-22 12:50:19.195] [info] [43096380] 
+[2025-09-22 12:50:19.195] [info] [43096380] 🎯 InstantDB Server fully initialized!
+[2025-09-22 12:50:19.195] [info] [43096380] =====================================
+[2025-09-22 12:50:19.195] [info] [43096380] 📊 Server Status:
+[2025-09-22 12:50:19.195] [info] [43096380]   Storage: 1 tables
+[2025-09-22 12:50:19.195] [info] [43096380]   WebSocket: 0 active connections
+[2025-09-22 12:50:19.195] [info] [43096380]   Changefeed: 2 active subscriptions
+[2025-09-22 12:50:19.195] [info] [43096380]   WASM: 0 loaded modules
+[2025-09-22 12:50:19.195] [info] [43096380]   WASM Subscriptions: 0 active
+[2025-09-22 12:50:19.195] [info] [43096380] 
+[2025-09-22 12:50:19.195] [info] [43096380] 🔗 Endpoints:
+[2025-09-22 12:50:19.195] [info] [43096380]   WebSocket: ws://localhost:9090
+[2025-09-22 12:50:19.195] [info] [43096380]   gRPC API: localhost:50051
+[2025-09-22 12:50:19.195] [info] [43096380] 
+[2025-09-22 12:50:19.195] [info] [43096380] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-22 12:50:24.350] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:50:27.445] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:50:30.634] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:50:31.833] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:50:33.764] [info] [43097201] WASM subscription client connected: client_11_1758563433764506
+[2025-09-22 12:50:33.764] [info] [43097201] WebSocket client connected: client_11_1758563433764506 Total connections: 1
+[2025-09-22 12:50:50.305] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:50:54.449] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:50:57.553] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:00.751] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:51:01.933] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:20.404] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:24.561] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:27.660] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:30.865] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:51:32.032] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:50.504] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:54.670] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:51:57.767] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:00.965] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:52:02.144] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:20.620] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:24.770] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:27.871] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:31.083] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:52:32.255] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:50.723] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:54.867] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:52:57.974] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:01.179] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:53:02.356] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:20.820] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:24.977] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:28.070] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:31.280] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:53:32.463] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:33.101] [info] [43097201] Parsed SQL subscription: sql_sub_1 - SELECT * FROM users 
+[2025-09-22 12:53:33.101] [info] [43097201] Created SQL subscription sql_sub_1 for client client_11_1758563433764506: SELECT * FROM users
+[2025-09-22 12:53:33.101] [info] [43097201] Created SQL subscription sql_sub_1 for client client_11_1758563433764506: SELECT * FROM users
+[2025-09-22 12:53:50.924] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:55.090] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:53:58.169] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:01.397] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:54:02.564] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:21.035] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:25.202] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:28.287] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:31.507] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:54:32.672] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:51.132] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:55.305] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:54:58.388] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:01.615] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:55:02.829] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:21.242] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:25.422] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:28.494] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:31.721] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:55:32.936] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:51.354] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:55.538] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:55:58.599] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:01.822] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:56:03.051] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:21.457] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:25.643] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:28.733] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:31.935] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:56:33.151] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:51.564] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:55.836] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:56:58.845] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:02.049] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:57:03.253] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:21.686] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:25.949] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:28.959] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:32.166] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:57:33.354] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:51.804] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:56.062] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:57:59.068] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:02.283] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:58:03.459] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:21.939] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:26.167] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:29.177] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:32.421] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:58:33.635] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:52.051] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:56.280] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:58:59.289] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:02.529] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:59:03.739] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:22.141] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:26.393] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:29.406] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:32.641] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 12:59:33.838] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:52.251] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:56.501] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 12:59:59.506] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:02.747] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:00:03.945] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:22.360] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:26.613] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:29.624] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:32.849] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:00:34.050] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:52.469] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:56.727] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:00:59.734] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:02.946] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:01:04.149] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:22.586] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:26.847] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:29.842] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:33.059] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:01:34.259] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:52.692] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:56.964] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:01:59.952] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:02:03.152] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:02:04.370] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:02:22.808] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:02:27.070] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:02:30.071] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:02:33.270] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:02:34.485] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:02:52.931] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:02:57.159] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:00.170] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:03.379] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:03:04.595] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:23.043] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:27.264] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:30.279] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:33.486] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:03:34.688] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:53.170] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:03:57.380] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:04:00.391] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:04:03.603] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:04:04.799] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:04:23.284] [info] [43096380] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:04:27.492] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:04:30.504] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:04:33.730] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:04:34.911] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:04:50.370] [info] [43096380] Received signal 2, requesting graceful shutdown...
+[2025-09-22 13:04:50.377] [info] [43096380] Stopping gRPC server...
+[2025-09-22 13:04:50.377] [info] [43096380] gRPC server stopped
+[2025-09-22 13:04:50.378] [info] [43096380] WebSocket server stopped
+[2025-09-22 13:04:57.631] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:05:00.640] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:05:03.838] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:05:05.017] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:05:27.737] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:05:30.748] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:05:33.946] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:05:35.104] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:05:57.837] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:06:00.849] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:06:04.067] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:06:05.217] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:06:27.955] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:06:30.969] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:06:34.171] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:06:35.376] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:06:58.071] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:07:01.078] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:07:04.284] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:07:05.487] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:07:28.194] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:07:31.205] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:07:34.401] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:07:35.599] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:07:58.317] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:08:01.330] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:08:04.512] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:08:05.703] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:08:28.481] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:08:31.494] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:08:34.634] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:08:35.820] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:08:58.597] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:09:01.609] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:09:04.761] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:09:05.972] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:09:28.703] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:09:31.715] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:09:34.950] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:09:36.084] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:09:58.816] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:10:01.828] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:10:05.109] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:10:06.183] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:10:29.033] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:10:32.045] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:10:35.251] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:10:36.335] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:10:59.127] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:11:02.140] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:11:05.365] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:11:06.497] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:11:29.243] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:11:32.254] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:11:35.479] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:11:36.623] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:11:59.349] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:12:02.362] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:12:05.595] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:12:06.737] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:12:29.460] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:12:32.473] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:12:35.834] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:12:36.853] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:12:59.578] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:13:02.591] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:13:05.950] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:13:06.983] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:13:29.803] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:13:32.814] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:13:36.069] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:13:37.089] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:13:59.910] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:14:02.923] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:14:04.991] [info] [43184556] 🚀 Starting InstantDB Server
+[2025-09-22 13:14:04.992] [info] [43184556] =====================================
+[2025-09-22 13:14:04.992] [info] [43184556] 📦 Initializing Storage Engine...
+[2025-09-22 13:14:04.993] [info] [43184556] Read 9 entries from WAL
+[2025-09-22 13:14:04.993] [info] [43184556] WAL initialized at ./instantdb_data/wal/wal.log with next sequence 9
+[2025-09-22 13:14:04.993] [info] [43184556] Read 9 entries from WAL
+[2025-09-22 13:14:04.993] [info] [43184556] Recovering 9 WAL entries
+[2025-09-22 13:14:04.994] [info] [43184556] Recovered table 'USERS' from WAL
+[2025-09-22 13:14:04.994] [info] [43184556] WAL recovery complete
+[2025-09-22 13:14:04.994] [info] [43184556] Storage engine initialized with 1 tables
+[2025-09-22 13:14:04.994] [info] [43184556] ✅ Storage Engine ready
+[2025-09-22 13:14:04.994] [info] [43184556] 📡 Initializing Changefeed Engine...
+[2025-09-22 13:14:04.994] [info] [43184556] Changefeed engine initializing
+[2025-09-22 13:14:04.994] [info] [43184556] Changefeed engine started
+[2025-09-22 13:14:04.994] [info] [43184556] ✅ Changefeed Engine ready
+[2025-09-22 13:14:04.994] [info] [43184556] 🔗 Storage Engine linked to Changefeed Engine for automatic event emission
+[2025-09-22 13:14:04.994] [info] [43184556] 🔍 Initializing SQL Engine...
+[2025-09-22 13:14:04.994] [info] [43184556] SQL Engine initialized
+[2025-09-22 13:14:04.994] [info] [43184556] ✅ SQL Engine ready with changefeed support
+[2025-09-22 13:14:04.994] [info] [43184556] ⚡ Initializing WASM Engine...
+[2025-09-22 13:14:04.994] [info] [43184556] Initializing WASM Engine
+[2025-09-22 13:14:04.994] [info] [43184556] WASM Engine initialized successfully
+[2025-09-22 13:14:04.994] [info] [43184556] ✅ WASM Engine ready
+[2025-09-22 13:14:04.994] [info] [43184556] 🔔 Initializing WASM Subscription Manager...
+[2025-09-22 13:14:04.994] [info] [43184556] Initializing WASM subscription manager
+[2025-09-22 13:14:04.994] [info] [43184556] Created subscription sub-1 with filter table=*
+[2025-09-22 13:14:04.994] [info] [43184556] Starting WASM subscription manager
+[2025-09-22 13:14:04.994] [info] [43184556] ✅ WASM Subscription Manager ready
+[2025-09-22 13:14:04.994] [info] [43184556] 📋 Initializing SQL Subscription Manager...
+[2025-09-22 13:14:04.994] [info] [43184556] ✅ SQL Subscription Manager ready
+[2025-09-22 13:14:04.994] [info] [43184556] 🌐 Initializing WebSocket Server...
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server created on port 9090
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server connected to changefeed engine
+[2025-09-22 13:14:04.995] [info] [43184556] Created subscription sub-2 with filter table=*
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server subscribed to all changefeed events (subscription: sub-2)
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server connected to WASM subscription manager
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server connected to SQL subscription manager
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server connected to SQL engine
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server connected to storage engine
+[2025-09-22 13:14:04.995] [info] [43184556] WebSocket server started on port 9090
+[2025-09-22 13:14:04.995] [info] [43184556] ✅ WebSocket Server ready on 0.0.0.0:9090
+[2025-09-22 13:14:04.995] [info] [43184556] 🔌 Initializing gRPC Server...
+[2025-09-22 13:14:04.995] [info] [43184632] WebSocket server listening on port 9090
+[2025-09-22 13:14:04.997] [info] [43184556] gRPC server listening on 0.0.0.0:50051
+[2025-09-22 13:14:04.997] [info] [43184556] ✅ gRPC Server ready on 0.0.0.0:50051
+[2025-09-22 13:14:04.997] [info] [43184556] 
+[2025-09-22 13:14:04.997] [info] [43184556] 🎯 InstantDB Server fully initialized!
+[2025-09-22 13:14:04.997] [info] [43184556] =====================================
+[2025-09-22 13:14:04.997] [info] [43184556] 📊 Server Status:
+[2025-09-22 13:14:04.997] [info] [43184556]   Storage: 1 tables
+[2025-09-22 13:14:04.997] [info] [43184556]   WebSocket: 0 active connections
+[2025-09-22 13:14:04.997] [info] [43184556]   Changefeed: 2 active subscriptions
+[2025-09-22 13:14:04.997] [info] [43184556]   WASM: 0 loaded modules
+[2025-09-22 13:14:04.997] [info] [43184556]   WASM Subscriptions: 0 active
+[2025-09-22 13:14:04.997] [info] [43184556] 
+[2025-09-22 13:14:04.997] [info] [43184556] 🔗 Endpoints:
+[2025-09-22 13:14:04.997] [info] [43184556]   WebSocket: ws://localhost:9090
+[2025-09-22 13:14:04.997] [info] [43184556]   gRPC API: localhost:50051
+[2025-09-22 13:14:04.997] [info] [43184556] 
+[2025-09-22 13:14:04.997] [info] [43184556] 💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully
+[2025-09-22 13:14:06.173] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:14:07.177] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:14:09.820] [info] [43184953] WASM subscription client connected: client_11_1758564849820261
+[2025-09-22 13:14:09.820] [info] [43184953] WebSocket client connected: client_11_1758564849820261 Total connections: 1
+[2025-09-22 13:14:13.291] [info] [43184953] Parsed SQL subscription: sql_sub_1 - SELECT * FROM users 
+[2025-09-22 13:14:13.291] [info] [43184953] Created SQL subscription sql_sub_1 for client client_11_1758564849820261: SELECT * FROM users
+[2025-09-22 13:14:13.291] [info] [43184953] Created SQL subscription sql_sub_1 for client client_11_1758564849820261: SELECT * FROM users
+[2025-09-22 13:14:13.291] [info] [43184953] SQL Execute: Starting execution of: SELECT * FROM users
+[2025-09-22 13:14:13.291] [info] [43184953] SQL Execute: Parsed statement type: 0
+[2025-09-22 13:14:13.292] [info] [43184953] Sent initial state for subscription sql_sub_1 (8 rows)
+[2025-09-22 13:14:30.028] [info] [42639845] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:14:33.040] [info] [42663042] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:14:36.290] [info] [42552015] 📈 Server Stats: 1 tables, 7 rows, 280 bytes, 0 WS connections, 1 subscriptions, 2 events, 0 modules
+[2025-09-22 13:14:36.106] [info] [43184556] 📈 Server Stats: 1 tables, 8 rows, 317 bytes, 1 WS connections, 2 subscriptions, 0 events, 0 modules
+[2025-09-22 13:14:37.294] [info] [41571014] 📈 Server Stats: 1 tables, 5 rows, 189 bytes, 0 WS connections, 1 subscriptions, 0 events, 0 modules
+[2025-09-22 13:14:38.684] [info] [43184556] Received signal 2, requesting graceful shutdown...
+[2025-09-22 13:14:39.119] [info] [43184556] Stopping gRPC server...
+[2025-09-22 13:14:39.119] [info] [43184556] gRPC server stopped
+[2025-09-22 13:14:39.120] [info] [43184556] WebSocket server stopped

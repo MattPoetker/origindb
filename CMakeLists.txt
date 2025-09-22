@@ -123,6 +123,7 @@ set(CHANGEFEED_SRCS
 file(GLOB_RECURSE WEBSOCKET_SRCS "src/websocket/*.cpp")
 file(GLOB_RECURSE COMMON_SRCS "src/common/*.cpp")
 file(GLOB_RECURSE WASM_SRCS "src/wasm/*.cpp")
+file(GLOB_RECURSE CLI_SRCS "src/cli/*.cpp")
 
 # gRPC sources (only if available)
 if(GRPC_AVAILABLE)
@@ -261,6 +262,32 @@ if(GRPC_AVAILABLE)
     endif()
 endif()
 
+# CLI executable
+add_executable(instantdb ${CLI_SRCS})
+target_link_libraries(instantdb
+    storage
+    sql_engine
+    changefeed_engine
+    websocket_server
+    wasm_engine
+    common_lib
+    Threads::Threads
+    spdlog::spdlog
+    fmt::fmt
+    nlohmann_json::nlohmann_json
+)
+
+# Add gRPC support to CLI if available
+if(GRPC_AVAILABLE)
+    target_link_libraries(instantdb grpc_service)
+    target_compile_definitions(instantdb PRIVATE GRPC_AVAILABLE)
+
+    # Add protobuf/grpc library directories if using pkg-config
+    if(PROTOBUF_FOUND AND GRPC_FOUND)
+        target_link_directories(instantdb PRIVATE ${PROTOBUF_LIBRARY_DIRS} ${GRPC_LIBRARY_DIRS})
+    endif()
+endif()
+
 # gRPC client executable (only if gRPC is available)
 if(GRPC_AVAILABLE)
     add_executable(instantdb_client src/cmd/grpc_client.cpp ${PROTO_SRCS} ${GRPC_SRCS})
@@ -285,8 +312,8 @@ if(GRPC_AVAILABLE)
     endif()
 
     # Installation with gRPC client
-    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb_client DESTINATION bin)
+    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb_client instantdb DESTINATION bin)
 else()
     # Installation without gRPC client
-    install(TARGETS instantdb_demo instantdb_server instantdb_sql DESTINATION bin)
+    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb DESTINATION bin)
 endif()
