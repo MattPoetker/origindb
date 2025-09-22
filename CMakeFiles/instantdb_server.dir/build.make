@@ -96,14 +96,15 @@ instantdb_server: libstorage.a
 instantdb_server: libsql_engine.a
 instantdb_server: libchangefeed_engine.a
 instantdb_server: libwebsocket_server.a
+instantdb_server: libwasm_engine.a
 instantdb_server: libcommon_lib.a
 instantdb_server: _deps/spdlog-build/libspdlogd.a
 instantdb_server: _deps/fmt-build/libfmtd.a
 instantdb_server: libgrpc_service.a
-instantdb_server: libchangefeed_engine.a
 instantdb_server: /usr/local/Cellar/openssl@3/3.5.1/lib/libssl.dylib
 instantdb_server: /usr/local/Cellar/openssl@3/3.5.1/lib/libcrypto.dylib
 instantdb_server: libsql_engine.a
+instantdb_server: libchangefeed_engine.a
 instantdb_server: libstorage.a
 instantdb_server: _deps/fmt-build/libfmtd.a
 instantdb_server: _deps/spdlog-build/libspdlogd.a

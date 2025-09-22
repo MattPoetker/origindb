@@ -116,9 +116,13 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # Source files (minimal set)
 file(GLOB_RECURSE STORAGE_SRCS "src/storage/*.cpp")
 file(GLOB_RECURSE SQL_SRCS "src/sql/*.cpp")
-file(GLOB_RECURSE CHANGEFEED_SRCS "src/changefeed/*.cpp")
+set(CHANGEFEED_SRCS
+    "src/changefeed/changefeed_engine.cpp"
+    "src/changefeed/sql_subscription.cpp"
+)
 file(GLOB_RECURSE WEBSOCKET_SRCS "src/websocket/*.cpp")
 file(GLOB_RECURSE COMMON_SRCS "src/common/*.cpp")
+file(GLOB_RECURSE WASM_SRCS "src/wasm/*.cpp")
 
 # gRPC sources (only if available)
 if(GRPC_AVAILABLE)
@@ -152,6 +156,7 @@ target_link_libraries(sql_engine
 add_library(websocket_server STATIC ${WEBSOCKET_SRCS})
 target_link_libraries(websocket_server
     changefeed_engine
+    wasm_engine
     spdlog::spdlog
     nlohmann_json::nlohmann_json
     OpenSSL::SSL
@@ -163,6 +168,14 @@ add_library(common_lib STATIC ${COMMON_SRCS})
 target_link_libraries(common_lib
     spdlog::spdlog
     fmt::fmt
+)
+
+add_library(wasm_engine STATIC ${WASM_SRCS})
+target_link_libraries(wasm_engine
+    storage
+    changefeed_engine
+    spdlog::spdlog
+    nlohmann_json::nlohmann_json
 )
 
 # gRPC service library (only if available)
@@ -229,6 +242,7 @@ target_link_libraries(instantdb_server
     sql_engine
     changefeed_engine
     websocket_server
+    wasm_engine
     common_lib
     Threads::Threads
     spdlog::spdlog

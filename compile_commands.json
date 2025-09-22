@@ -25,15 +25,33 @@
 },
 {
   "directory": "/Users/a12042/Development/instant_db",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DSPDLOG_COMPILED_LIB -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include -g -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -Wpedantic -g -O0 -o CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o -c /Users/a12042/Development/instant_db/src/changefeed/changefeed_engine.cpp",
+  "file": "/Users/a12042/Development/instant_db/src/changefeed/changefeed_engine.cpp",
+  "output": "CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o"
+},
+{
+  "directory": "/Users/a12042/Development/instant_db",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DSPDLOG_COMPILED_LIB -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include -g -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -Wpedantic -g -O0 -o CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o -c /Users/a12042/Development/instant_db/src/changefeed/sql_subscription.cpp",
+  "file": "/Users/a12042/Development/instant_db/src/changefeed/sql_subscription.cpp",
+  "output": "CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o"
+},
+{
+  "directory": "/Users/a12042/Development/instant_db",
   "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DSPDLOG_COMPILED_LIB -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include -g -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -Wpedantic -g -O0 -o CMakeFiles/sql_engine.dir/src/sql/sql_engine.cpp.o -c /Users/a12042/Development/instant_db/src/sql/sql_engine.cpp",
   "file": "/Users/a12042/Development/instant_db/src/sql/sql_engine.cpp",
   "output": "CMakeFiles/sql_engine.dir/src/sql/sql_engine.cpp.o"
 },
 {
   "directory": "/Users/a12042/Development/instant_db",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DSPDLOG_COMPILED_LIB -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include -g -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -Wpedantic -g -O0 -o CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o -c /Users/a12042/Development/instant_db/src/changefeed/changefeed_engine.cpp",
-  "file": "/Users/a12042/Development/instant_db/src/changefeed/changefeed_engine.cpp",
-  "output": "CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o"
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DSPDLOG_COMPILED_LIB -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include -g -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -Wpedantic -g -O0 -o CMakeFiles/wasm_engine.dir/src/wasm/wasm_engine.cpp.o -c /Users/a12042/Development/instant_db/src/wasm/wasm_engine.cpp",
+  "file": "/Users/a12042/Development/instant_db/src/wasm/wasm_engine.cpp",
+  "output": "CMakeFiles/wasm_engine.dir/src/wasm/wasm_engine.cpp.o"
+},
+{
+  "directory": "/Users/a12042/Development/instant_db",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DSPDLOG_COMPILED_LIB -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include -g -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -Wpedantic -g -O0 -o CMakeFiles/wasm_engine.dir/src/wasm/wasm_subscription.cpp.o -c /Users/a12042/Development/instant_db/src/wasm/wasm_subscription.cpp",
+  "file": "/Users/a12042/Development/instant_db/src/wasm/wasm_subscription.cpp",
+  "output": "CMakeFiles/wasm_engine.dir/src/wasm/wasm_subscription.cpp.o"
 },
 {
   "directory": "/Users/a12042/Development/instant_db",

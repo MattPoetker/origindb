@@ -2,6 +2,7 @@
 #include "storage/mem_table.h"
 #include "storage/transaction_impl.h"
 #include "storage/wal_impl.h"
+#include "changefeed/changefeed_engine.h"
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
@@ -17,6 +18,10 @@ public:
           next_txn_id_(1),
           next_timestamp_(1),
           stats_{} {
+    }
+
+    void SetChangefeedEngine(std::shared_ptr<ChangefeedEngine> changefeed) {
+        changefeed_engine_ = changefeed;
     }
 
     bool Initialize() {
@@ -223,6 +228,44 @@ public:
                 entry.timestamp = txn->GetTimestamp();
                 wal_->Append(entry);
                 spdlog::info("StorageEngine::Commit: WAL append completed");
+
+                // Emit changefeed event if changefeed engine is available
+                if (changefeed_engine_) {
+                    ChangefeedEvent cf_event;
+                    cf_event.offset = 0; // Will be assigned by changefeed engine
+                    cf_event.transaction_id = std::to_string(txn->GetTimestamp());
+                    cf_event.table = write.table_name;
+
+                    // Map WriteOp to operation string
+                    switch (write.op) {
+                        case WriteOp::INSERT:
+                            cf_event.operation = "INSERT";
+                            break;
+                        case WriteOp::UPDATE:
+                            cf_event.operation = "UPDATE";
+                            break;
+                        case WriteOp::DELETE:
+                            cf_event.operation = "DELETE";
+                            break;
+                    }
+
+                    // Convert key to bytes
+                    cf_event.key = std::vector<uint8_t>(write.row.key.begin(), write.row.key.end());
+
+                    // For INSERT/UPDATE operations, set new_value
+                    if (write.op == WriteOp::INSERT || write.op == WriteOp::UPDATE) {
+                        cf_event.new_value = SerializeRow(write.row);
+                    }
+
+                    // TODO: For UPDATE/DELETE operations, we should also set old_value
+                    // This would require reading the existing value before the operation
+
+                    cf_event.timestamp = std::chrono::system_clock::now();
+
+                    changefeed_engine_->PublishEvent(cf_event);
+                    spdlog::info("StorageEngine::Commit: Changefeed event emitted for table {}, operation {}",
+                                write.table_name, cf_event.operation);
+                }
             }
         }
 
@@ -372,6 +415,9 @@ private:
     std::atomic<uint64_t> next_timestamp_;
 
     mutable StorageEngine::Stats stats_;
+
+    // Changefeed integration
+    std::shared_ptr<ChangefeedEngine> changefeed_engine_;
 
     // Helper function implementations
     std::vector<uint8_t> SerializeSchema(const TableSchema& schema) {
@@ -549,6 +595,10 @@ bool StorageEngine::Initialize() {
 
 void StorageEngine::Shutdown() {
     impl_->Shutdown();
+}
+
+void StorageEngine::SetChangefeedEngine(std::shared_ptr<ChangefeedEngine> changefeed) {
+    impl_->SetChangefeedEngine(changefeed);
 }
 
 bool StorageEngine::CreateTable(const TableSchema& schema) {

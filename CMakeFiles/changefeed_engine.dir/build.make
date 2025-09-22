@@ -83,17 +83,33 @@ CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.s: cmake_f
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/changefeed/changefeed_engine.cpp -o CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.s
 
+CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o: CMakeFiles/changefeed_engine.dir/flags.make
+CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o: src/changefeed/sql_subscription.cpp
+CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o: CMakeFiles/changefeed_engine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o -MF CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o.d -o CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o -c /Users/a12042/Development/instant_db/src/changefeed/sql_subscription.cpp
+
+CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/changefeed/sql_subscription.cpp > CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.i
+
+CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/changefeed/sql_subscription.cpp -o CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.s
+
 # Object files for target changefeed_engine
 changefeed_engine_OBJECTS = \
-"CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o"
+"CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o" \
+"CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o"
 
 # External object files for target changefeed_engine
 changefeed_engine_EXTERNAL_OBJECTS =
 
 libchangefeed_engine.a: CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o
+libchangefeed_engine.a: CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o
 libchangefeed_engine.a: CMakeFiles/changefeed_engine.dir/build.make
 libchangefeed_engine.a: CMakeFiles/changefeed_engine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library libchangefeed_engine.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libchangefeed_engine.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/changefeed_engine.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/changefeed_engine.dir/link.txt --verbose=$(VERBOSE)
 

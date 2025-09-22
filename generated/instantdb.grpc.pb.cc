@@ -168,6 +168,235 @@ SQLService::Service::~Service() {
 }
 
 
+static const char* WasmService_method_names[] = {
+  "/instantdb.grpc.WasmService/DeployModule",
+  "/instantdb.grpc.WasmService/UndeployModule",
+  "/instantdb.grpc.WasmService/ListModules",
+  "/instantdb.grpc.WasmService/GetModule",
+  "/instantdb.grpc.WasmService/ExecuteReducer",
+};
+
+std::unique_ptr< WasmService::Stub> WasmService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
+  (void)options;
+  std::unique_ptr< WasmService::Stub> stub(new WasmService::Stub(channel, options));
+  return stub;
+}
+
+WasmService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
+  : channel_(channel), rpcmethod_DeployModule_(WasmService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UndeployModule_(WasmService_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ListModules_(WasmService_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetModule_(WasmService_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ExecuteReducer_(WasmService_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  {}
+
+::grpc::Status WasmService::Stub::DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::instantdb::grpc::DeployModuleResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_DeployModule_, context, request, response);
+}
+
+void WasmService::Stub::async::DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeployModule_, context, request, response, std::move(f));
+}
+
+void WasmService::Stub::async::DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeployModule_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>* WasmService::Stub::PrepareAsyncDeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::instantdb::grpc::DeployModuleResponse, ::instantdb::grpc::DeployModuleRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_DeployModule_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>* WasmService::Stub::AsyncDeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncDeployModuleRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status WasmService::Stub::UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::instantdb::grpc::UndeployModuleResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_UndeployModule_, context, request, response);
+}
+
+void WasmService::Stub::async::UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UndeployModule_, context, request, response, std::move(f));
+}
+
+void WasmService::Stub::async::UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UndeployModule_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>* WasmService::Stub::PrepareAsyncUndeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::instantdb::grpc::UndeployModuleResponse, ::instantdb::grpc::UndeployModuleRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_UndeployModule_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>* WasmService::Stub::AsyncUndeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncUndeployModuleRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status WasmService::Stub::ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::instantdb::grpc::ListModulesResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ListModules_, context, request, response);
+}
+
+void WasmService::Stub::async::ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ListModules_, context, request, response, std::move(f));
+}
+
+void WasmService::Stub::async::ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ListModules_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>* WasmService::Stub::PrepareAsyncListModulesRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::instantdb::grpc::ListModulesResponse, ::instantdb::grpc::ListModulesRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ListModules_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>* WasmService::Stub::AsyncListModulesRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncListModulesRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status WasmService::Stub::GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::instantdb::grpc::GetModuleResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetModule_, context, request, response);
+}
+
+void WasmService::Stub::async::GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetModule_, context, request, response, std::move(f));
+}
+
+void WasmService::Stub::async::GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetModule_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>* WasmService::Stub::PrepareAsyncGetModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::instantdb::grpc::GetModuleResponse, ::instantdb::grpc::GetModuleRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetModule_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>* WasmService::Stub::AsyncGetModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetModuleRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status WasmService::Stub::ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::instantdb::grpc::ExecuteReducerResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ExecuteReducer_, context, request, response);
+}
+
+void WasmService::Stub::async::ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ExecuteReducer_, context, request, response, std::move(f));
+}
+
+void WasmService::Stub::async::ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ExecuteReducer_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>* WasmService::Stub::PrepareAsyncExecuteReducerRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::instantdb::grpc::ExecuteReducerResponse, ::instantdb::grpc::ExecuteReducerRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ExecuteReducer_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>* WasmService::Stub::AsyncExecuteReducerRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncExecuteReducerRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+WasmService::Service::Service() {
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      WasmService_method_names[0],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< WasmService::Service, ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](WasmService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::instantdb::grpc::DeployModuleRequest* req,
+             ::instantdb::grpc::DeployModuleResponse* resp) {
+               return service->DeployModule(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      WasmService_method_names[1],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< WasmService::Service, ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](WasmService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::instantdb::grpc::UndeployModuleRequest* req,
+             ::instantdb::grpc::UndeployModuleResponse* resp) {
+               return service->UndeployModule(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      WasmService_method_names[2],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< WasmService::Service, ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](WasmService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::instantdb::grpc::ListModulesRequest* req,
+             ::instantdb::grpc::ListModulesResponse* resp) {
+               return service->ListModules(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      WasmService_method_names[3],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< WasmService::Service, ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](WasmService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::instantdb::grpc::GetModuleRequest* req,
+             ::instantdb::grpc::GetModuleResponse* resp) {
+               return service->GetModule(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      WasmService_method_names[4],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< WasmService::Service, ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](WasmService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::instantdb::grpc::ExecuteReducerRequest* req,
+             ::instantdb::grpc::ExecuteReducerResponse* resp) {
+               return service->ExecuteReducer(ctx, req, resp);
+             }, this)));
+}
+
+WasmService::Service::~Service() {
+}
+
+::grpc::Status WasmService::Service::DeployModule(::grpc::ServerContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status WasmService::Service::UndeployModule(::grpc::ServerContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status WasmService::Service::ListModules(::grpc::ServerContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status WasmService::Service::GetModule(::grpc::ServerContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status WasmService::Service::ExecuteReducer(::grpc::ServerContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+
 }  // namespace instantdb
 }  // namespace grpc
 #include <grpcpp/ports_undef.inc>

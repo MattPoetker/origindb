@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o"
   "CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o.d"
+  "CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o"
+  "CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o.d"
   "libchangefeed_engine.a"
   "libchangefeed_engine.pdb"
 )

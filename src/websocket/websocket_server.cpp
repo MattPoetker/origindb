@@ -102,6 +102,25 @@ void WebSocketServer::SetChangefeedEngine(std::shared_ptr<ChangefeedEngine> chan
     }
 }
 
+void WebSocketServer::SetWasmSubscriptionManager(std::shared_ptr<WasmSubscriptionManager> wasm_manager) {
+    wasm_manager_ = wasm_manager;
+    spdlog::info("WebSocket server connected to WASM subscription manager");
+
+    // Set callback for WASM subscription events
+    if (wasm_manager_) {
+        wasm_manager_->SetSubscriptionCallback(
+            [this](const std::string& subscription_id, const std::string& client_id, const WasmValue& data) {
+                OnWasmSubscriptionEvent(subscription_id, client_id, data);
+            }
+        );
+    }
+}
+
+void WebSocketServer::SetSqlSubscriptionManager(std::shared_ptr<SqlSubscriptionManager> sql_manager) {
+    sql_manager_ = sql_manager;
+    spdlog::info("WebSocket server connected to SQL subscription manager");
+}
+
 size_t WebSocketServer::GetActiveConnections() const {
     std::lock_guard<std::mutex> lock(clients_mutex_);
     return active_clients_.size();
@@ -145,19 +164,31 @@ void WebSocketServer::HandleClient(int client_socket) {
     // Check if it's a WebSocket upgrade request
     if (request.find("Upgrade: websocket") != std::string::npos) {
         if (HandleWebSocketHandshake(client_socket, request)) {
+            // Generate client ID
+            std::string client_id = "client_" + std::to_string(client_socket) + "_" +
+                                   std::to_string(std::chrono::system_clock::now().time_since_epoch().count());
+
             // Add to active clients
             {
                 std::lock_guard<std::mutex> lock(clients_mutex_);
                 active_clients_.push_back(client_socket);
+                client_ids_[client_socket] = client_id;
             }
 
-            spdlog::info("WebSocket client connected. Total connections: {}", GetActiveConnections());
+            // Notify WASM subscription manager
+            if (wasm_manager_) {
+                wasm_manager_->OnClientConnected(client_id);
+            }
+
+            spdlog::info("WebSocket client connected: {} Total connections: {}", client_id, GetActiveConnections());
 
             // Send welcome message
             nlohmann::json welcome;
             welcome["type"] = "welcome";
             welcome["message"] = "Connected to InstantDB changefeed";
             welcome["server_version"] = "0.1.0";
+            welcome["client_id"] = client_id;
+            welcome["features"] = nlohmann::json::array({"changefeed", "wasm_subscriptions"});
             SendWebSocketFrame(client_socket, welcome.dump());
 
             // Handle WebSocket messages
@@ -183,18 +214,35 @@ void WebSocketServer::HandleClient(int client_socket) {
                 std::string message = ParseWebSocketFrame(frame_data);
 
                 if (!message.empty()) {
-                    spdlog::debug("Received WebSocket message: {}", message);
                     HandleWebSocketMessage(client_socket, message);
                 }
             }
 
-            // Remove from active clients
+            // Get client ID before removing
+            std::string disconnected_client_id;
             {
                 std::lock_guard<std::mutex> lock(clients_mutex_);
+                auto it = client_ids_.find(client_socket);
+                if (it != client_ids_.end()) {
+                    disconnected_client_id = it->second;
+                    client_ids_.erase(it);
+                }
+
+                // Remove from active clients
                 active_clients_.erase(
                     std::remove(active_clients_.begin(), active_clients_.end(), client_socket),
                     active_clients_.end()
                 );
+            }
+
+            // Notify WASM subscription manager
+            if (wasm_manager_ && !disconnected_client_id.empty()) {
+                wasm_manager_->OnClientDisconnected(disconnected_client_id);
+            }
+
+            // Notify SQL subscription manager
+            if (sql_manager_ && !disconnected_client_id.empty()) {
+                sql_manager_->UnsubscribeAll(disconnected_client_id);
             }
 
             spdlog::info("WebSocket client disconnected. Total connections: {}", GetActiveConnections());
@@ -382,6 +430,15 @@ void WebSocketServer::HandleWebSocketMessage(int client_socket, const std::strin
             SendWebSocketFrame(client_socket, response.dump());
             spdlog::info("WebSocket client subscribed to all table changes");
 
+        } else if (type == "sql_subscribe") {
+            HandleSqlSubscriptionRequest(client_socket, message);
+
+        } else if (type == "subscribe_to_all_tables") {
+            HandleSubscribeToAllTablesRequest(client_socket, message);
+
+        } else if (type == "wasm_subscribe") {
+            HandleSubscriptionRequest(client_socket, message);
+
         } else if (type == "ping") {
             nlohmann::json response;
             response["type"] = "pong";
@@ -441,38 +498,392 @@ void WebSocketServer::BroadcastToAllClients(const std::string& message) {
 }
 
 void WebSocketServer::OnChangefeedEvent(const std::string& subscription_id, const ChangefeedEvent& event) {
-    // Convert changefeed event to JSON for WebSocket clients
+    // If SQL subscription manager is available, use it for selective filtering
+    if (sql_manager_) {
+        // Process event through SQL subscription manager to get filtered results per client
+        auto filtered_results = sql_manager_->ProcessEvent(event);
+
+        for (const auto& [client_id, filtered_event] : filtered_results) {
+            // Find the client socket for this client ID
+            int target_socket = -1;
+            {
+                std::lock_guard<std::mutex> lock(clients_mutex_);
+                for (const auto& [socket, id] : client_ids_) {
+                    if (id == client_id) {
+                        target_socket = socket;
+                        break;
+                    }
+                }
+            }
+
+            if (target_socket == -1) {
+                spdlog::warn("SQL subscription event for unknown client: {}", client_id);
+                continue;
+            }
+
+            // Convert filtered changefeed event to JSON for this specific client
+            nlohmann::json message;
+            message["type"] = "sql_changefeed_event";
+            message["subscription_id"] = subscription_id;
+            message["offset"] = filtered_event.offset;
+            message["table"] = filtered_event.table;
+            message["operation"] = filtered_event.operation;
+            message["transaction_id"] = filtered_event.transaction_id;
+
+            // Convert timestamp to milliseconds since epoch
+            auto duration = filtered_event.timestamp.time_since_epoch();
+            auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+            message["timestamp"] = millis;
+
+            // Convert binary data to strings for JSON transport
+            if (!filtered_event.key.empty()) {
+                message["key"] = std::string(filtered_event.key.begin(), filtered_event.key.end());
+            }
+
+            if (!filtered_event.new_value.empty()) {
+                message["new_value"] = std::string(filtered_event.new_value.begin(), filtered_event.new_value.end());
+            }
+
+            if (!filtered_event.old_value.empty()) {
+                message["old_value"] = std::string(filtered_event.old_value.begin(), filtered_event.old_value.end());
+            }
+
+            // Send to the specific client only
+            try {
+                SendWebSocketFrame(target_socket, message.dump());
+                spdlog::debug("Sent filtered changefeed event to client {}: {} {} key={}",
+                            client_id, filtered_event.table, filtered_event.operation,
+                            std::string(filtered_event.key.begin(), filtered_event.key.end()));
+            } catch (const std::exception& e) {
+                spdlog::warn("Failed to send filtered changefeed event to client {}: {}", client_id, e.what());
+            }
+        }
+
+        spdlog::info("Processed changefeed event: {} {} key={} - sent to {} subscribers",
+                    event.table, event.operation, std::string(event.key.begin(), event.key.end()),
+                    filtered_results.size());
+    } else {
+        // Fallback: broadcast to all clients (legacy behavior)
+        nlohmann::json message;
+        message["type"] = "changefeed_event";
+        message["subscription_id"] = subscription_id;
+        message["offset"] = event.offset;
+        message["table"] = event.table;
+        message["operation"] = event.operation;
+        message["transaction_id"] = event.transaction_id;
+
+        // Convert timestamp to milliseconds since epoch
+        auto duration = event.timestamp.time_since_epoch();
+        auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        message["timestamp"] = millis;
+
+        // Convert binary data to strings for JSON transport
+        if (!event.key.empty()) {
+            message["key"] = std::string(event.key.begin(), event.key.end());
+        }
+
+        if (!event.new_value.empty()) {
+            message["new_value"] = std::string(event.new_value.begin(), event.new_value.end());
+        }
+
+        if (!event.old_value.empty()) {
+            message["old_value"] = std::string(event.old_value.begin(), event.old_value.end());
+        }
+
+        // Broadcast to all connected WebSocket clients
+        BroadcastToAllClients(message.dump());
+
+        spdlog::info("Broadcast changefeed event: {} {} key={} to {} clients",
+                    event.table, event.operation, std::string(event.key.begin(), event.key.end()),
+                    GetActiveConnections());
+    }
+}
+
+void WebSocketServer::OnWasmSubscriptionEvent(const std::string& subscription_id,
+                                             const std::string& client_id,
+                                             const WasmValue& data) {
+    // Find the client socket for this client ID
+    int target_socket = -1;
+    {
+        std::lock_guard<std::mutex> lock(clients_mutex_);
+        for (const auto& [socket, id] : client_ids_) {
+            if (id == client_id) {
+                target_socket = socket;
+                break;
+            }
+        }
+    }
+
+    if (target_socket == -1) {
+        spdlog::warn("WASM subscription event for unknown client: {}", client_id);
+        return;
+    }
+
+    // Convert WasmValue to JSON
     nlohmann::json message;
-    message["type"] = "changefeed_event";
+    message["type"] = "wasm_subscription_event";
     message["subscription_id"] = subscription_id;
-    message["offset"] = event.offset;
-    message["table"] = event.table;
-    message["operation"] = event.operation;
-    message["transaction_id"] = event.transaction_id;
-    // Convert timestamp to milliseconds since epoch
-    auto duration = event.timestamp.time_since_epoch();
-    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    message["timestamp"] = millis;
+    message["client_id"] = client_id;
 
-    // Convert binary data to strings for JSON transport
-    if (!event.key.empty()) {
-        message["key"] = std::string(event.key.begin(), event.key.end());
+    // Convert WasmValue to JSON value
+    std::visit([&message](const auto& value) {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<T, std::monostate>) {
+            message["data"] = nullptr;
+        } else if constexpr (std::is_same_v<T, bool>) {
+            message["data"] = value;
+        } else if constexpr (std::is_arithmetic_v<T>) {
+            message["data"] = value;
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            message["data"] = value;
+        } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
+            // Convert binary data to base64 string
+            message["data"] = std::string(value.begin(), value.end()); // Simplified
+            message["data_type"] = "binary";
+        }
+    }, data);
+
+    try {
+        SendWebSocketFrame(target_socket, message.dump());
+        spdlog::debug("Sent WASM subscription event to client: {}", client_id);
+    } catch (const std::exception& e) {
+        spdlog::warn("Failed to send WASM subscription event to client {}: {}", client_id, e.what());
+    }
+}
+
+void WebSocketServer::HandleSubscriptionRequest(int client_socket, const std::string& message) {
+    if (!wasm_manager_) {
+        nlohmann::json error;
+        error["type"] = "error";
+        error["message"] = "WASM subscription manager not available";
+        SendWebSocketFrame(client_socket, error.dump());
+        return;
     }
 
-    if (!event.new_value.empty()) {
-        message["new_value"] = std::string(event.new_value.begin(), event.new_value.end());
+    try {
+        nlohmann::json request = nlohmann::json::parse(message);
+
+        // Get client ID for this socket
+        std::string client_id;
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex_);
+            auto it = client_ids_.find(client_socket);
+            if (it != client_ids_.end()) {
+                client_id = it->second;
+            }
+        }
+
+        if (client_id.empty()) {
+            nlohmann::json error;
+            error["type"] = "error";
+            error["message"] = "Client ID not found";
+            SendWebSocketFrame(client_socket, error.dump());
+            return;
+        }
+
+        // Build WASM subscription query using the builder
+        SubscriptionQueryBuilder builder;
+        builder.ForClient(client_id);
+
+        // Required fields
+        if (request.contains("module_name")) {
+            builder.WithModule(request["module_name"]);
+        } else {
+            nlohmann::json error;
+            error["type"] = "error";
+            error["message"] = "module_name is required";
+            SendWebSocketFrame(client_socket, error.dump());
+            return;
+        }
+
+        // Optional fields
+        if (request.contains("filter_function")) {
+            builder.WithFilter(request["filter_function"]);
+        }
+
+        if (request.contains("transform_function")) {
+            builder.WithTransform(request["transform_function"]);
+        }
+
+        if (request.contains("tables")) {
+            std::vector<std::string> tables = request["tables"];
+            builder.FromTables(tables);
+        }
+
+        if (request.contains("where_clause")) {
+            builder.Where(request["where_clause"]);
+        }
+
+        if (request.contains("columns")) {
+            std::vector<std::string> columns = request["columns"];
+            builder.Select(columns);
+        }
+
+        if (request.contains("parameters")) {
+            nlohmann::json params = request["parameters"];
+            for (const auto& [key, value] : params.items()) {
+                // Convert JSON values to WasmValue
+                WasmValue wasm_val;
+                if (value.is_null()) {
+                    wasm_val = std::monostate{};
+                } else if (value.is_boolean()) {
+                    wasm_val = value.get<bool>();
+                } else if (value.is_number_integer()) {
+                    wasm_val = value.get<int64_t>();
+                } else if (value.is_number_float()) {
+                    wasm_val = value.get<double>();
+                } else if (value.is_string()) {
+                    wasm_val = value.get<std::string>();
+                }
+                builder.WithParameter(key, wasm_val);
+            }
+        }
+
+        if (request.contains("include_initial_data")) {
+            builder.IncludeInitialData(request["include_initial_data"]);
+        }
+
+        if (request.contains("start_offset")) {
+            builder.StartingAt(request["start_offset"]);
+        }
+
+        // Create the subscription
+        auto query = builder.Build();
+        std::string subscription_id = wasm_manager_->CreateSubscription(query);
+
+        // Send response
+        nlohmann::json response;
+        response["type"] = "wasm_subscription_created";
+        response["subscription_id"] = subscription_id;
+        response["client_id"] = client_id;
+        response["module_name"] = query.module_name;
+
+        SendWebSocketFrame(client_socket, response.dump());
+        spdlog::info("Created WASM subscription {} for client {}", subscription_id, client_id);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to handle WASM subscription request: {}", e.what());
+
+        nlohmann::json error;
+        error["type"] = "error";
+        error["message"] = "Failed to create WASM subscription: " + std::string(e.what());
+        SendWebSocketFrame(client_socket, error.dump());
+    }
+}
+
+void WebSocketServer::HandleSqlSubscriptionRequest(int client_socket, const std::string& message) {
+    if (!sql_manager_) {
+        nlohmann::json error;
+        error["type"] = "error";
+        error["message"] = "SQL subscription manager not available";
+        SendWebSocketFrame(client_socket, error.dump());
+        return;
     }
 
-    if (!event.old_value.empty()) {
-        message["old_value"] = std::string(event.old_value.begin(), event.old_value.end());
+    try {
+        nlohmann::json request = nlohmann::json::parse(message);
+
+        // Get client ID for this socket
+        std::string client_id;
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex_);
+            auto it = client_ids_.find(client_socket);
+            if (it != client_ids_.end()) {
+                client_id = it->second;
+            }
+        }
+
+        if (client_id.empty()) {
+            nlohmann::json error;
+            error["type"] = "error";
+            error["message"] = "Client ID not found";
+            SendWebSocketFrame(client_socket, error.dump());
+            return;
+        }
+
+        // Extract SQL query
+        if (!request.contains("sql")) {
+            nlohmann::json error;
+            error["type"] = "error";
+            error["message"] = "sql field is required";
+            SendWebSocketFrame(client_socket, error.dump());
+            return;
+        }
+
+        std::string sql_query = request["sql"];
+
+        // Create the SQL subscription
+        std::string subscription_id = sql_manager_->Subscribe(client_id, sql_query);
+
+        // Send response
+        nlohmann::json response;
+        response["type"] = "sql_subscription_created";
+        response["subscription_id"] = subscription_id;
+        response["client_id"] = client_id;
+        response["sql"] = sql_query;
+
+        SendWebSocketFrame(client_socket, response.dump());
+        spdlog::info("Created SQL subscription {} for client {}: {}", subscription_id, client_id, sql_query);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to handle SQL subscription request: {}", e.what());
+
+        nlohmann::json error;
+        error["type"] = "error";
+        error["message"] = "Failed to create SQL subscription: " + std::string(e.what());
+        SendWebSocketFrame(client_socket, error.dump());
+    }
+}
+
+void WebSocketServer::HandleSubscribeToAllTablesRequest(int client_socket, const std::string& message) {
+    if (!sql_manager_) {
+        nlohmann::json error;
+        error["type"] = "error";
+        error["message"] = "SQL subscription manager not available";
+        SendWebSocketFrame(client_socket, error.dump());
+        return;
     }
 
-    // Broadcast to all connected WebSocket clients
-    BroadcastToAllClients(message.dump());
+    try {
+        // Get client ID for this socket
+        std::string client_id;
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex_);
+            auto it = client_ids_.find(client_socket);
+            if (it != client_ids_.end()) {
+                client_id = it->second;
+            }
+        }
 
-    spdlog::info("Broadcast changefeed event: {} {} key={} to {} clients",
-                event.table, event.operation, std::string(event.key.begin(), event.key.end()),
-                GetActiveConnections());
+        if (client_id.empty()) {
+            nlohmann::json error;
+            error["type"] = "error";
+            error["message"] = "Client ID not found";
+            SendWebSocketFrame(client_socket, error.dump());
+            return;
+        }
+
+        // Create the ALL_TABLES subscription using the cleaner API
+        std::string subscription_id = sql_manager_->SubscribeToAllTables(client_id);
+
+        // Send response
+        nlohmann::json response;
+        response["type"] = "all_tables_subscription_created";
+        response["subscription_id"] = subscription_id;
+        response["client_id"] = client_id;
+        response["scope"] = "all_tables";
+
+        SendWebSocketFrame(client_socket, response.dump());
+        spdlog::info("Created ALL_TABLES subscription {} for client {}", subscription_id, client_id);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to handle subscribe to all tables request: {}", e.what());
+
+        nlohmann::json error;
+        error["type"] = "error";
+        error["message"] = "Failed to create ALL_TABLES subscription: " + std::string(e.what());
+        SendWebSocketFrame(client_socket, error.dump());
+    }
 }
 
 } // namespace instantdb

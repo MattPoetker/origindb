@@ -989,6 +989,11 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/fmt/fmt.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/fmt/bundled/core.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/fmt/bundled/format.h \
+  /Users/a12042/Development/instant_db/include/changefeed/sql_subscription.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/unordered_set \
+  /Users/a12042/Development/instant_db/include/wasm/wasm_subscription.h \
+  /Users/a12042/Development/instant_db/include/wasm/wasm_engine.h \
+  /Users/a12042/Development/instant_db/include/storage/table.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/spdlog.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/details/registry.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/details/periodic_worker.h \

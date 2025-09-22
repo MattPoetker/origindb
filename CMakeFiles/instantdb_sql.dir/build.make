@@ -97,6 +97,7 @@ instantdb_sql: libsql_engine.a
 instantdb_sql: libcommon_lib.a
 instantdb_sql: _deps/spdlog-build/libspdlogd.a
 instantdb_sql: _deps/fmt-build/libfmtd.a
+instantdb_sql: libchangefeed_engine.a
 instantdb_sql: libstorage.a
 instantdb_sql: _deps/spdlog-build/libspdlogd.a
 instantdb_sql: _deps/fmt-build/libfmtd.a

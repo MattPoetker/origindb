@@ -972,6 +972,7 @@ CMakeFiles/sql_engine.dir/src/sql/sql_engine.cpp.o: \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/fmt/bundled/format.h \
   /Users/a12042/Development/instant_db/include/storage/wal.h \
   /Users/a12042/Development/instant_db/include/storage/snapshot.h \
+  /Users/a12042/Development/instant_db/include/changefeed/changefeed_engine.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/spdlog.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/details/registry.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/details/periodic_worker.h \
@@ -999,4 +1000,120 @@ CMakeFiles/sql_engine.dir/src/sql/sql_engine.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/_static_assert.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/version.h \
   /Users/a12042/Development/instant_db/_deps/spdlog-src/include/spdlog/details/synchronous_factory.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/regex
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/regex \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/json.hpp \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/numeric \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/accumulate.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/adjacent_difference.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/inner_product.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/iota.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/partial_sum.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/exclusive_scan.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/gcd_lcm.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/inclusive_scan.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/pstl.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/reduce.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/transform_exclusive_scan.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/transform_inclusive_scan.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/transform_reduce.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/midpoint.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__numeric/saturation_arithmetic.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/execution \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__type_traits/is_execution_policy.h \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/adl_serializer.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/abi_macros.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/conversions/from_json.hpp \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/map \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__tree \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/valarray \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/exceptions.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/value_t.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/macro_scope.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/detected.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/void_t.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/thirdparty/hedley/hedley.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/string_escape.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/input/position_t.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/cpp_future.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/type_traits.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/iterators/iterator_traits.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/call_std/begin.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/call_std/end.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/json_fwd.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/string_concat.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/identity_tag.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/std_fs.hpp \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/filesystem \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/copy_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/directory_entry.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/file_status.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/file_type.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/perms.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/file_time_type.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/filesystem_error.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/path.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/iomanip \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/operations.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/perm_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/space_info.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/directory_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/directory_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/path_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/recursive_directory_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__filesystem/u8path.h \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/conversions/to_json.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/iterators/iteration_proxy.hpp \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/ranges \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/all.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__functional/compose.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/owning_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/range_adaptor.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/common_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/counted.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/span \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__fwd/span.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/drop_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/empty_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/iota_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/non_propagating_cache.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/repeat_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/drop_while_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/elements_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__tuple/tuple_like.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/filter_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/join_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__iterator/iterator_with_data.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__utility/as_lvalue.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/lazy_split_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/single_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/rbegin.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/rend.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/reverse_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/split_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/take_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/take_while_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/transform_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/views.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__ranges/istream_view.h \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/byte_container_with_subtype.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/hash.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/input/binary_reader.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/input/input_adapters.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/input/json_sax.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/input/lexer.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/meta/is_sax.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/input/parser.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/iterators/internal_iterator.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/iterators/primitive_iterator.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/iterators/iter_impl.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/iterators/json_reverse_iterator.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/json_pointer.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/json_ref.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/output/binary_writer.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/output/output_adapters.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/output/serializer.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/conversions/to_chars.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/ordered_map.hpp \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/any \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/detail/macro_unscope.hpp \
+  /Users/a12042/Development/instant_db/_deps/json-src/include/nlohmann/thirdparty/hedley/hedley_undef.hpp

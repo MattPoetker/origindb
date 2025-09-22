@@ -227,6 +227,19 @@ common_lib/fast:
 .PHONY : common_lib/fast
 
 #=============================================================================
+# Target rules for targets named wasm_engine
+
+# Build rule for target.
+wasm_engine: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 wasm_engine
+.PHONY : wasm_engine
+
+# fast build rule for target.
+wasm_engine/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/wasm_engine.dir/build.make CMakeFiles/wasm_engine.dir/build
+.PHONY : wasm_engine/fast
+
+#=============================================================================
 # Target rules for targets named grpc_service
 
 # Build rule for target.
@@ -394,6 +407,30 @@ src/changefeed/changefeed_engine.s: src/changefeed/changefeed_engine.cpp.s
 src/changefeed/changefeed_engine.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.s
 .PHONY : src/changefeed/changefeed_engine.cpp.s
+
+src/changefeed/sql_subscription.o: src/changefeed/sql_subscription.cpp.o
+.PHONY : src/changefeed/sql_subscription.o
+
+# target to build an object file
+src/changefeed/sql_subscription.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o
+.PHONY : src/changefeed/sql_subscription.cpp.o
+
+src/changefeed/sql_subscription.i: src/changefeed/sql_subscription.cpp.i
+.PHONY : src/changefeed/sql_subscription.i
+
+# target to preprocess a source file
+src/changefeed/sql_subscription.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.i
+.PHONY : src/changefeed/sql_subscription.cpp.i
+
+src/changefeed/sql_subscription.s: src/changefeed/sql_subscription.cpp.s
+.PHONY : src/changefeed/sql_subscription.s
+
+# target to generate assembly for a file
+src/changefeed/sql_subscription.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.s
+.PHONY : src/changefeed/sql_subscription.cpp.s
 
 src/cmd/grpc_client.o: src/cmd/grpc_client.cpp.o
 .PHONY : src/cmd/grpc_client.o
@@ -683,6 +720,54 @@ src/storage/wal_impl.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/storage.dir/build.make CMakeFiles/storage.dir/src/storage/wal_impl.cpp.s
 .PHONY : src/storage/wal_impl.cpp.s
 
+src/wasm/wasm_engine.o: src/wasm/wasm_engine.cpp.o
+.PHONY : src/wasm/wasm_engine.o
+
+# target to build an object file
+src/wasm/wasm_engine.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/wasm_engine.dir/build.make CMakeFiles/wasm_engine.dir/src/wasm/wasm_engine.cpp.o
+.PHONY : src/wasm/wasm_engine.cpp.o
+
+src/wasm/wasm_engine.i: src/wasm/wasm_engine.cpp.i
+.PHONY : src/wasm/wasm_engine.i
+
+# target to preprocess a source file
+src/wasm/wasm_engine.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/wasm_engine.dir/build.make CMakeFiles/wasm_engine.dir/src/wasm/wasm_engine.cpp.i
+.PHONY : src/wasm/wasm_engine.cpp.i
+
+src/wasm/wasm_engine.s: src/wasm/wasm_engine.cpp.s
+.PHONY : src/wasm/wasm_engine.s
+
+# target to generate assembly for a file
+src/wasm/wasm_engine.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/wasm_engine.dir/build.make CMakeFiles/wasm_engine.dir/src/wasm/wasm_engine.cpp.s
+.PHONY : src/wasm/wasm_engine.cpp.s
+
+src/wasm/wasm_subscription.o: src/wasm/wasm_subscription.cpp.o
+.PHONY : src/wasm/wasm_subscription.o
+
+# target to build an object file
+src/wasm/wasm_subscription.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/wasm_engine.dir/build.make CMakeFiles/wasm_engine.dir/src/wasm/wasm_subscription.cpp.o
+.PHONY : src/wasm/wasm_subscription.cpp.o
+
+src/wasm/wasm_subscription.i: src/wasm/wasm_subscription.cpp.i
+.PHONY : src/wasm/wasm_subscription.i
+
+# target to preprocess a source file
+src/wasm/wasm_subscription.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/wasm_engine.dir/build.make CMakeFiles/wasm_engine.dir/src/wasm/wasm_subscription.cpp.i
+.PHONY : src/wasm/wasm_subscription.cpp.i
+
+src/wasm/wasm_subscription.s: src/wasm/wasm_subscription.cpp.s
+.PHONY : src/wasm/wasm_subscription.s
+
+# target to generate assembly for a file
+src/wasm/wasm_subscription.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/wasm_engine.dir/build.make CMakeFiles/wasm_engine.dir/src/wasm/wasm_subscription.cpp.s
+.PHONY : src/wasm/wasm_subscription.cpp.s
+
 src/websocket/websocket_server.o: src/websocket/websocket_server.cpp.o
 .PHONY : src/websocket/websocket_server.o
 
@@ -730,6 +815,7 @@ help:
 	@echo "... spdlog"
 	@echo "... sql_engine"
 	@echo "... storage"
+	@echo "... wasm_engine"
 	@echo "... websocket_server"
 	@echo "... generated/instantdb.grpc.pb.o"
 	@echo "... generated/instantdb.grpc.pb.i"
@@ -740,6 +826,9 @@ help:
 	@echo "... src/changefeed/changefeed_engine.o"
 	@echo "... src/changefeed/changefeed_engine.i"
 	@echo "... src/changefeed/changefeed_engine.s"
+	@echo "... src/changefeed/sql_subscription.o"
+	@echo "... src/changefeed/sql_subscription.i"
+	@echo "... src/changefeed/sql_subscription.s"
 	@echo "... src/cmd/grpc_client.o"
 	@echo "... src/cmd/grpc_client.i"
 	@echo "... src/cmd/grpc_client.s"
@@ -776,6 +865,12 @@ help:
 	@echo "... src/storage/wal_impl.o"
 	@echo "... src/storage/wal_impl.i"
 	@echo "... src/storage/wal_impl.s"
+	@echo "... src/wasm/wasm_engine.o"
+	@echo "... src/wasm/wasm_engine.i"
+	@echo "... src/wasm/wasm_engine.s"
+	@echo "... src/wasm/wasm_subscription.o"
+	@echo "... src/wasm/wasm_subscription.i"
+	@echo "... src/wasm/wasm_subscription.s"
 	@echo "... src/websocket/websocket_server.o"
 	@echo "... src/websocket/websocket_server.i"
 	@echo "... src/websocket/websocket_server.s"

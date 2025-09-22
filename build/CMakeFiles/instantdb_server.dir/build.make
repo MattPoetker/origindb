@@ -96,6 +96,7 @@ instantdb_server: libstorage.a
 instantdb_server: libsql_engine.a
 instantdb_server: libchangefeed_engine.a
 instantdb_server: libwebsocket_server.a
+instantdb_server: libwasm_engine.a
 instantdb_server: libcommon_lib.a
 instantdb_server: _deps/spdlog-build/libspdlogd.a
 instantdb_server: _deps/fmt-build/libfmtd.a

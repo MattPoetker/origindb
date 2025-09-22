@@ -17,6 +17,7 @@ namespace instantdb {
 
 class Transaction;
 class Index;
+class ChangefeedEngine;
 
 // Transaction isolation levels
 enum class IsolationLevel {
@@ -34,6 +35,9 @@ public:
 
     bool Initialize();
     void Shutdown();
+
+    // Changefeed integration
+    void SetChangefeedEngine(std::shared_ptr<ChangefeedEngine> changefeed);
 
     // Table operations
     bool CreateTable(const TableSchema& schema);

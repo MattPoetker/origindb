@@ -11,7 +11,10 @@
 #include "storage/storage_engine.h"
 #include "sql/sql_engine.h"
 #include "changefeed/changefeed_engine.h"
+#include "changefeed/sql_subscription.h"
 #include "websocket/websocket_server.h"
+#include "wasm/wasm_engine.h"
+#include "wasm/wasm_subscription.h"
 
 #ifdef GRPC_AVAILABLE
 #include "grpc/grpc_server.h"
@@ -52,6 +55,10 @@ public:
         }
         spdlog::info("✅ Changefeed Engine ready");
 
+        // Wire storage engine to automatically emit changefeed events
+        storage_engine_->SetChangefeedEngine(changefeed_engine_);
+        spdlog::info("🔗 Storage Engine linked to Changefeed Engine for automatic event emission");
+
         // Initialize SQL engine with changefeed support
         spdlog::info("🔍 Initializing SQL Engine...");
         sql_engine_ = std::make_shared<SqlEngine>(storage_engine_, changefeed_engine_);
@@ -60,6 +67,30 @@ public:
             return false;
         }
         spdlog::info("✅ SQL Engine ready with changefeed support");
+
+        // Initialize WASM engine
+        spdlog::info("⚡ Initializing WASM Engine...");
+        wasm_engine_ = std::make_shared<WasmEngine>(storage_engine_, changefeed_engine_);
+        if (!wasm_engine_->Initialize()) {
+            spdlog::error("❌ Failed to initialize WASM engine");
+            return false;
+        }
+        spdlog::info("✅ WASM Engine ready");
+
+        // Initialize WASM subscription manager
+        spdlog::info("🔔 Initializing WASM Subscription Manager...");
+        wasm_subscription_manager_ = std::make_shared<WasmSubscriptionManager>(
+            wasm_engine_, changefeed_engine_, storage_engine_);
+        if (!wasm_subscription_manager_->Initialize() || !wasm_subscription_manager_->Start()) {
+            spdlog::error("❌ Failed to initialize WASM subscription manager");
+            return false;
+        }
+        spdlog::info("✅ WASM Subscription Manager ready");
+
+        // Initialize SQL subscription manager
+        spdlog::info("📋 Initializing SQL Subscription Manager...");
+        sql_subscription_manager_ = std::make_shared<SqlSubscriptionManager>();
+        spdlog::info("✅ SQL Subscription Manager ready");
 
         // Initialize WebSocket server
         spdlog::info("🌐 Initializing WebSocket Server...");
@@ -73,6 +104,8 @@ public:
 
         websocket_server_ = std::make_shared<WebSocketServer>(ws_port);
         websocket_server_->SetChangefeedEngine(changefeed_engine_);
+        websocket_server_->SetWasmSubscriptionManager(wasm_subscription_manager_);
+        websocket_server_->SetSqlSubscriptionManager(sql_subscription_manager_);
         if (!websocket_server_->Start()) {
             spdlog::error("❌ Failed to start WebSocket server");
             return false;
@@ -104,6 +137,8 @@ public:
         spdlog::info("  Storage: {} tables", storage_engine_->ListTables().size());
         spdlog::info("  WebSocket: {} active connections", websocket_server_->GetActiveConnections());
         spdlog::info("  Changefeed: {} active subscriptions", changefeed_engine_->GetMetrics().active_subscriptions);
+        spdlog::info("  WASM: {} loaded modules", wasm_engine_->ListModules().size());
+        spdlog::info("  WASM Subscriptions: {} active", wasm_subscription_manager_->GetMetrics().active_subscriptions);
         spdlog::info("");
         spdlog::info("🔗 Endpoints:");
         // Extract port for display
@@ -157,6 +192,11 @@ public:
             spdlog::info("✅ WebSocket server stopped");
         }
 
+        if (wasm_engine_) {
+            wasm_engine_->Shutdown();
+            spdlog::info("✅ WASM engine stopped");
+        }
+
         if (changefeed_engine_) {
             changefeed_engine_->Stop();
             spdlog::info("✅ Changefeed engine stopped");
@@ -188,6 +228,7 @@ public:
         size_t active_connections;
         size_t active_subscriptions;
         size_t events_published;
+        size_t loaded_modules;
     };
 
     ServerStats GetStats() const {
@@ -200,7 +241,8 @@ public:
             .storage_bytes = storage_stats.total_bytes,
             .active_connections = websocket_server_->GetActiveConnections(),
             .active_subscriptions = cf_metrics.active_subscriptions,
-            .events_published = cf_metrics.total_events_published
+            .events_published = cf_metrics.total_events_published,
+            .loaded_modules = wasm_engine_->ListModules().size()
         };
     }
 
@@ -240,9 +282,9 @@ private:
         // Log stats every 30 seconds
         if (std::chrono::duration_cast<std::chrono::seconds>(now - last_log).count() >= 30) {
             auto stats = GetStats();
-            spdlog::info("📈 Server Stats: {} tables, {} rows, {} bytes, {} WS connections, {} subscriptions, {} events",
+            spdlog::info("📈 Server Stats: {} tables, {} rows, {} bytes, {} WS connections, {} subscriptions, {} events, {} modules",
                         stats.total_tables, stats.total_rows, stats.storage_bytes,
-                        stats.active_connections, stats.active_subscriptions, stats.events_published);
+                        stats.active_connections, stats.active_subscriptions, stats.events_published, stats.loaded_modules);
             last_log = now;
         }
     }
@@ -254,7 +296,10 @@ private:
     std::shared_ptr<StorageEngine> storage_engine_;
     std::shared_ptr<SqlEngine> sql_engine_;
     std::shared_ptr<ChangefeedEngine> changefeed_engine_;
+    std::shared_ptr<SqlSubscriptionManager> sql_subscription_manager_;
     std::shared_ptr<WebSocketServer> websocket_server_;
+    std::shared_ptr<WasmEngine> wasm_engine_;
+    std::shared_ptr<WasmSubscriptionManager> wasm_subscription_manager_;
 #ifdef GRPC_AVAILABLE
     std::shared_ptr<GrpcServer> grpc_server_;
 #endif

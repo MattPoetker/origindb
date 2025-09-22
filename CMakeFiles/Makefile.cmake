@@ -95,10 +95,11 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/storage.dir/DependInfo.cmake"
-  "CMakeFiles/sql_engine.dir/DependInfo.cmake"
   "CMakeFiles/changefeed_engine.dir/DependInfo.cmake"
+  "CMakeFiles/sql_engine.dir/DependInfo.cmake"
   "CMakeFiles/websocket_server.dir/DependInfo.cmake"
   "CMakeFiles/common_lib.dir/DependInfo.cmake"
+  "CMakeFiles/wasm_engine.dir/DependInfo.cmake"
   "CMakeFiles/grpc_service.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_demo.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_sql.dir/DependInfo.cmake"

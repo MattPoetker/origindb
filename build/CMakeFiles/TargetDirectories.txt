@@ -3,6 +3,7 @@
 /Users/a12042/Development/instant_db/build/CMakeFiles/sql_engine.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/websocket_server.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/common_lib.dir
+/Users/a12042/Development/instant_db/build/CMakeFiles/wasm_engine.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/grpc_service.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_demo.dir
 /Users/a12042/Development/instant_db/build/CMakeFiles/instantdb_sql.dir

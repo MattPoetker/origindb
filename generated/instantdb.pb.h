@@ -33,6 +33,7 @@
 #include "google/protobuf/map_type_handler.h"  // IWYU pragma: export
 #include "google/protobuf/map_entry.h"
 #include "google/protobuf/map_field.h"
+#include "google/protobuf/generated_enum_reflection.h"
 #include "google/protobuf/unknown_field_set.h"
 // @@protoc_insertion_point(includes)
 
@@ -59,10 +60,56 @@ extern const ::google::protobuf::internal::DescriptorTable descriptor_table_inst
 }  // extern "C"
 namespace instantdb {
 namespace grpc {
+enum ColumnType : int;
+extern const uint32_t ColumnType_internal_data_[];
+class ColumnDefinition;
+struct ColumnDefinitionDefaultTypeInternal;
+extern ColumnDefinitionDefaultTypeInternal _ColumnDefinition_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ColumnDefinition_class_data_;
 class ColumnValue;
 struct ColumnValueDefaultTypeInternal;
 extern ColumnValueDefaultTypeInternal _ColumnValue_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull ColumnValue_class_data_;
+class DeployModuleRequest;
+struct DeployModuleRequestDefaultTypeInternal;
+extern DeployModuleRequestDefaultTypeInternal _DeployModuleRequest_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull DeployModuleRequest_class_data_;
+class DeployModuleResponse;
+struct DeployModuleResponseDefaultTypeInternal;
+extern DeployModuleResponseDefaultTypeInternal _DeployModuleResponse_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull DeployModuleResponse_class_data_;
+class ExecuteReducerRequest;
+struct ExecuteReducerRequestDefaultTypeInternal;
+extern ExecuteReducerRequestDefaultTypeInternal _ExecuteReducerRequest_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ExecuteReducerRequest_class_data_;
+class ExecuteReducerResponse;
+struct ExecuteReducerResponseDefaultTypeInternal;
+extern ExecuteReducerResponseDefaultTypeInternal _ExecuteReducerResponse_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ExecuteReducerResponse_class_data_;
+class GetModuleRequest;
+struct GetModuleRequestDefaultTypeInternal;
+extern GetModuleRequestDefaultTypeInternal _GetModuleRequest_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull GetModuleRequest_class_data_;
+class GetModuleResponse;
+struct GetModuleResponseDefaultTypeInternal;
+extern GetModuleResponseDefaultTypeInternal _GetModuleResponse_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull GetModuleResponse_class_data_;
+class ListModulesRequest;
+struct ListModulesRequestDefaultTypeInternal;
+extern ListModulesRequestDefaultTypeInternal _ListModulesRequest_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ListModulesRequest_class_data_;
+class ListModulesResponse;
+struct ListModulesResponseDefaultTypeInternal;
+extern ListModulesResponseDefaultTypeInternal _ListModulesResponse_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ListModulesResponse_class_data_;
+class ModuleInfo;
+struct ModuleInfoDefaultTypeInternal;
+extern ModuleInfoDefaultTypeInternal _ModuleInfo_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ModuleInfo_class_data_;
+class ReducerDefinition;
+struct ReducerDefinitionDefaultTypeInternal;
+extern ReducerDefinitionDefaultTypeInternal _ReducerDefinition_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ReducerDefinition_class_data_;
 class Row;
 struct RowDefaultTypeInternal;
 extern RowDefaultTypeInternal _Row_default_instance_;
@@ -99,19 +146,756 @@ class StatusResponse;
 struct StatusResponseDefaultTypeInternal;
 extern StatusResponseDefaultTypeInternal _StatusResponse_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull StatusResponse_class_data_;
+class TableSchema;
+struct TableSchemaDefaultTypeInternal;
+extern TableSchemaDefaultTypeInternal _TableSchema_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull TableSchema_class_data_;
+class UndeployModuleRequest;
+struct UndeployModuleRequestDefaultTypeInternal;
+extern UndeployModuleRequestDefaultTypeInternal _UndeployModuleRequest_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull UndeployModuleRequest_class_data_;
+class UndeployModuleResponse;
+struct UndeployModuleResponseDefaultTypeInternal;
+extern UndeployModuleResponseDefaultTypeInternal _UndeployModuleResponse_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull UndeployModuleResponse_class_data_;
+class WasmValue;
+struct WasmValueDefaultTypeInternal;
+extern WasmValueDefaultTypeInternal _WasmValue_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull WasmValue_class_data_;
 }  // namespace grpc
 }  // namespace instantdb
 namespace google {
 namespace protobuf {
+template <>
+internal::EnumTraitsT<::instantdb::grpc::ColumnType_internal_data_>
+    internal::EnumTraitsImpl::value<::instantdb::grpc::ColumnType>;
 }  // namespace protobuf
 }  // namespace google
 
 namespace instantdb {
 namespace grpc {
+enum ColumnType : int {
+  INT64 = 0,
+  STRING = 1,
+  DOUBLE = 2,
+  BOOL = 3,
+  BYTES = 4,
+  ColumnType_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::min(),
+  ColumnType_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::max(),
+};
+
+extern const uint32_t ColumnType_internal_data_[];
+inline constexpr ColumnType ColumnType_MIN =
+    static_cast<ColumnType>(0);
+inline constexpr ColumnType ColumnType_MAX =
+    static_cast<ColumnType>(4);
+inline bool ColumnType_IsValid(int value) {
+  return 0 <= value && value <= 4;
+}
+inline constexpr int ColumnType_ARRAYSIZE = 4 + 1;
+const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL ColumnType_descriptor();
+template <typename T>
+const ::std::string& ColumnType_Name(T value) {
+  static_assert(::std::is_same<T, ColumnType>::value ||
+                    ::std::is_integral<T>::value,
+                "Incorrect type passed to ColumnType_Name().");
+  return ColumnType_Name(static_cast<ColumnType>(value));
+}
+template <>
+inline const ::std::string& ColumnType_Name(ColumnType value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<ColumnType_descriptor, 0, 4>(
+      static_cast<int>(value));
+}
+inline bool ColumnType_Parse(
+    ::absl::string_view name, ColumnType* PROTOBUF_NONNULL value) {
+  return ::google::protobuf::internal::ParseNamedEnum<ColumnType>(ColumnType_descriptor(), name,
+                                           value);
+}
 
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class WasmValue final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.WasmValue) */ {
+ public:
+  inline WasmValue() : WasmValue(nullptr) {}
+  ~WasmValue() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(WasmValue* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(WasmValue));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR WasmValue(::google::protobuf::internal::ConstantInitialized);
+
+  inline WasmValue(const WasmValue& from) : WasmValue(nullptr, from) {}
+  inline WasmValue(WasmValue&& from) noexcept
+      : WasmValue(nullptr, ::std::move(from)) {}
+  inline WasmValue& operator=(const WasmValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WasmValue& operator=(WasmValue&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const WasmValue& default_instance() {
+    return *reinterpret_cast<const WasmValue*>(
+        &_WasmValue_default_instance_);
+  }
+  enum ValueCase {
+    kInt64Value = 1,
+    kStringValue = 2,
+    kDoubleValue = 3,
+    kBoolValue = 4,
+    kBytesValue = 5,
+    VALUE_NOT_SET = 0,
+  };
+  static constexpr int kIndexInFileMessages = 24;
+  friend void swap(WasmValue& a, WasmValue& b) { a.Swap(&b); }
+  inline void Swap(WasmValue* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WasmValue* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  WasmValue* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<WasmValue>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const WasmValue& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const WasmValue& from) { WasmValue::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(WasmValue* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.WasmValue"; }
+
+ protected:
+  explicit WasmValue(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  WasmValue(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const WasmValue& from);
+  WasmValue(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, WasmValue&& from) noexcept
+      : WasmValue(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kInt64ValueFieldNumber = 1,
+    kStringValueFieldNumber = 2,
+    kDoubleValueFieldNumber = 3,
+    kBoolValueFieldNumber = 4,
+    kBytesValueFieldNumber = 5,
+  };
+  // int64 int64_value = 1;
+  bool has_int64_value() const;
+  void clear_int64_value() ;
+  ::int64_t int64_value() const;
+  void set_int64_value(::int64_t value);
+
+  private:
+  ::int64_t _internal_int64_value() const;
+  void _internal_set_int64_value(::int64_t value);
+
+  public:
+  // string string_value = 2;
+  bool has_string_value() const;
+  void clear_string_value() ;
+  const ::std::string& string_value() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_string_value(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_string_value();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_string_value();
+  void set_allocated_string_value(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_string_value() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_string_value(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_string_value();
+
+  public:
+  // double double_value = 3;
+  bool has_double_value() const;
+  void clear_double_value() ;
+  double double_value() const;
+  void set_double_value(double value);
+
+  private:
+  double _internal_double_value() const;
+  void _internal_set_double_value(double value);
+
+  public:
+  // bool bool_value = 4;
+  bool has_bool_value() const;
+  void clear_bool_value() ;
+  bool bool_value() const;
+  void set_bool_value(bool value);
+
+  private:
+  bool _internal_bool_value() const;
+  void _internal_set_bool_value(bool value);
+
+  public:
+  // bytes bytes_value = 5;
+  bool has_bytes_value() const;
+  void clear_bytes_value() ;
+  const ::std::string& bytes_value() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_bytes_value(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_bytes_value();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_bytes_value();
+  void set_allocated_bytes_value(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_bytes_value() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_bytes_value(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_bytes_value();
+
+  public:
+  void clear_value();
+  ValueCase value_case() const;
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.WasmValue)
+ private:
+  class _Internal;
+  void set_has_int64_value();
+  void set_has_string_value();
+  void set_has_double_value();
+  void set_has_bool_value();
+  void set_has_bytes_value();
+  inline bool has_value() const;
+  inline void clear_has_value();
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 5,
+                                   0, 45,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const WasmValue& from_msg);
+    union ValueUnion {
+      constexpr ValueUnion() : _constinit_{} {}
+      ::google::protobuf::internal::ConstantInitialized _constinit_;
+      ::int64_t int64_value_;
+      ::google::protobuf::internal::ArenaStringPtr string_value_;
+      double double_value_;
+      bool bool_value_;
+      ::google::protobuf::internal::ArenaStringPtr bytes_value_;
+    } value_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::uint32_t _oneof_case_[1];
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull WasmValue_class_data_;
+// -------------------------------------------------------------------
+
+class UndeployModuleResponse final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.UndeployModuleResponse) */ {
+ public:
+  inline UndeployModuleResponse() : UndeployModuleResponse(nullptr) {}
+  ~UndeployModuleResponse() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(UndeployModuleResponse* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(UndeployModuleResponse));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR UndeployModuleResponse(::google::protobuf::internal::ConstantInitialized);
+
+  inline UndeployModuleResponse(const UndeployModuleResponse& from) : UndeployModuleResponse(nullptr, from) {}
+  inline UndeployModuleResponse(UndeployModuleResponse&& from) noexcept
+      : UndeployModuleResponse(nullptr, ::std::move(from)) {}
+  inline UndeployModuleResponse& operator=(const UndeployModuleResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UndeployModuleResponse& operator=(UndeployModuleResponse&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const UndeployModuleResponse& default_instance() {
+    return *reinterpret_cast<const UndeployModuleResponse*>(
+        &_UndeployModuleResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 13;
+  friend void swap(UndeployModuleResponse& a, UndeployModuleResponse& b) { a.Swap(&b); }
+  inline void Swap(UndeployModuleResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UndeployModuleResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  UndeployModuleResponse* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<UndeployModuleResponse>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const UndeployModuleResponse& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const UndeployModuleResponse& from) { UndeployModuleResponse::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(UndeployModuleResponse* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.UndeployModuleResponse"; }
+
+ protected:
+  explicit UndeployModuleResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  UndeployModuleResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const UndeployModuleResponse& from);
+  UndeployModuleResponse(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, UndeployModuleResponse&& from) noexcept
+      : UndeployModuleResponse(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kErrorFieldNumber = 2,
+    kSuccessFieldNumber = 1,
+  };
+  // string error = 2;
+  void clear_error() ;
+  const ::std::string& error() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_error(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_error();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_error();
+  void set_allocated_error(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_error() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_error(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_error();
+
+  public:
+  // bool success = 1;
+  void clear_success() ;
+  bool success() const;
+  void set_success(bool value);
+
+  private:
+  bool _internal_success() const;
+  void _internal_set_success(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.UndeployModuleResponse)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<1, 2,
+                                   0, 51,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const UndeployModuleResponse& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr error_;
+    bool success_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull UndeployModuleResponse_class_data_;
+// -------------------------------------------------------------------
+
+class UndeployModuleRequest final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.UndeployModuleRequest) */ {
+ public:
+  inline UndeployModuleRequest() : UndeployModuleRequest(nullptr) {}
+  ~UndeployModuleRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(UndeployModuleRequest* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(UndeployModuleRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR UndeployModuleRequest(::google::protobuf::internal::ConstantInitialized);
+
+  inline UndeployModuleRequest(const UndeployModuleRequest& from) : UndeployModuleRequest(nullptr, from) {}
+  inline UndeployModuleRequest(UndeployModuleRequest&& from) noexcept
+      : UndeployModuleRequest(nullptr, ::std::move(from)) {}
+  inline UndeployModuleRequest& operator=(const UndeployModuleRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UndeployModuleRequest& operator=(UndeployModuleRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const UndeployModuleRequest& default_instance() {
+    return *reinterpret_cast<const UndeployModuleRequest*>(
+        &_UndeployModuleRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 12;
+  friend void swap(UndeployModuleRequest& a, UndeployModuleRequest& b) { a.Swap(&b); }
+  inline void Swap(UndeployModuleRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UndeployModuleRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  UndeployModuleRequest* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<UndeployModuleRequest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const UndeployModuleRequest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const UndeployModuleRequest& from) { UndeployModuleRequest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(UndeployModuleRequest* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.UndeployModuleRequest"; }
+
+ protected:
+  explicit UndeployModuleRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  UndeployModuleRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const UndeployModuleRequest& from);
+  UndeployModuleRequest(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, UndeployModuleRequest&& from) noexcept
+      : UndeployModuleRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const ::std::string& name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_name();
+  void set_allocated_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.UndeployModuleRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   0, 49,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const UndeployModuleRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull UndeployModuleRequest_class_data_;
 // -------------------------------------------------------------------
 
 class StatusRequest final : public ::google::protobuf::internal::ZeroFieldsBase
@@ -401,6 +1185,7 @@ class ServerStats final : public ::google::protobuf::Message
     kTotalQueriesFieldNumber = 7,
     kSuccessfulQueriesFieldNumber = 8,
     kFailedQueriesFieldNumber = 9,
+    kLoadedModulesFieldNumber = 10,
   };
   // int64 total_tables = 1;
   void clear_total_tables() ;
@@ -492,11 +1277,21 @@ class ServerStats final : public ::google::protobuf::Message
   void _internal_set_failed_queries(::int64_t value);
 
   public:
+  // int64 loaded_modules = 10;
+  void clear_loaded_modules() ;
+  ::int64_t loaded_modules() const;
+  void set_loaded_modules(::int64_t value);
+
+  private:
+  ::int64_t _internal_loaded_modules() const;
+  void _internal_set_loaded_modules(::int64_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:instantdb.grpc.ServerStats)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 9,
+  static const ::google::protobuf::internal::TcParseTable<4, 10,
                                    0, 0,
                                    2>
       _table_;
@@ -527,6 +1322,7 @@ class ServerStats final : public ::google::protobuf::Message
     ::int64_t total_queries_;
     ::int64_t successful_queries_;
     ::int64_t failed_queries_;
+    ::int64_t loaded_modules_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -934,6 +1730,835 @@ class SQLRequest final : public ::google::protobuf::Message
 extern const ::google::protobuf::internal::ClassDataFull SQLRequest_class_data_;
 // -------------------------------------------------------------------
 
+class ReducerDefinition final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.ReducerDefinition) */ {
+ public:
+  inline ReducerDefinition() : ReducerDefinition(nullptr) {}
+  ~ReducerDefinition() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ReducerDefinition* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ReducerDefinition));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ReducerDefinition(::google::protobuf::internal::ConstantInitialized);
+
+  inline ReducerDefinition(const ReducerDefinition& from) : ReducerDefinition(nullptr, from) {}
+  inline ReducerDefinition(ReducerDefinition&& from) noexcept
+      : ReducerDefinition(nullptr, ::std::move(from)) {}
+  inline ReducerDefinition& operator=(const ReducerDefinition& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ReducerDefinition& operator=(ReducerDefinition&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ReducerDefinition& default_instance() {
+    return *reinterpret_cast<const ReducerDefinition*>(
+        &_ReducerDefinition_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 23;
+  friend void swap(ReducerDefinition& a, ReducerDefinition& b) { a.Swap(&b); }
+  inline void Swap(ReducerDefinition* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ReducerDefinition* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ReducerDefinition* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ReducerDefinition>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ReducerDefinition& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ReducerDefinition& from) { ReducerDefinition::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ReducerDefinition* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.ReducerDefinition"; }
+
+ protected:
+  explicit ReducerDefinition(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ReducerDefinition(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ReducerDefinition& from);
+  ReducerDefinition(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ReducerDefinition&& from) noexcept
+      : ReducerDefinition(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kParamTypesFieldNumber = 2,
+    kNameFieldNumber = 1,
+    kReturnTypeFieldNumber = 3,
+    kIsInitFieldNumber = 4,
+    kIsClientConnectedFieldNumber = 5,
+    kIsClientDisconnectedFieldNumber = 6,
+  };
+  // repeated string param_types = 2;
+  int param_types_size() const;
+  private:
+  int _internal_param_types_size() const;
+
+  public:
+  void clear_param_types() ;
+  const ::std::string& param_types(int index) const;
+  ::std::string* PROTOBUF_NONNULL mutable_param_types(int index);
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_param_types(int index, Arg_&& value, Args_... args);
+  ::std::string* PROTOBUF_NONNULL add_param_types();
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void add_param_types(Arg_&& value, Args_... args);
+  const ::google::protobuf::RepeatedPtrField<::std::string>& param_types() const;
+  ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL mutable_param_types();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::std::string>& _internal_param_types() const;
+  ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL _internal_mutable_param_types();
+
+  public:
+  // string name = 1;
+  void clear_name() ;
+  const ::std::string& name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_name();
+  void set_allocated_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
+
+  public:
+  // string return_type = 3;
+  void clear_return_type() ;
+  const ::std::string& return_type() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_return_type(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_return_type();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_return_type();
+  void set_allocated_return_type(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_return_type() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_return_type(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_return_type();
+
+  public:
+  // bool is_init = 4;
+  void clear_is_init() ;
+  bool is_init() const;
+  void set_is_init(bool value);
+
+  private:
+  bool _internal_is_init() const;
+  void _internal_set_is_init(bool value);
+
+  public:
+  // bool is_client_connected = 5;
+  void clear_is_client_connected() ;
+  bool is_client_connected() const;
+  void set_is_client_connected(bool value);
+
+  private:
+  bool _internal_is_client_connected() const;
+  void _internal_set_is_client_connected(bool value);
+
+  public:
+  // bool is_client_disconnected = 6;
+  void clear_is_client_disconnected() ;
+  bool is_client_disconnected() const;
+  void set_is_client_disconnected(bool value);
+
+  private:
+  bool _internal_is_client_disconnected() const;
+  void _internal_set_is_client_disconnected(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.ReducerDefinition)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 6,
+                                   0, 67,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ReducerDefinition& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField<::std::string> param_types_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr return_type_;
+    bool is_init_;
+    bool is_client_connected_;
+    bool is_client_disconnected_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ReducerDefinition_class_data_;
+// -------------------------------------------------------------------
+
+class ListModulesRequest final : public ::google::protobuf::internal::ZeroFieldsBase
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.ListModulesRequest) */ {
+ public:
+  inline ListModulesRequest() : ListModulesRequest(nullptr) {}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ListModulesRequest* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ListModulesRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ListModulesRequest(::google::protobuf::internal::ConstantInitialized);
+
+  inline ListModulesRequest(const ListModulesRequest& from) : ListModulesRequest(nullptr, from) {}
+  inline ListModulesRequest(ListModulesRequest&& from) noexcept
+      : ListModulesRequest(nullptr, ::std::move(from)) {}
+  inline ListModulesRequest& operator=(const ListModulesRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListModulesRequest& operator=(ListModulesRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ListModulesRequest& default_instance() {
+    return *reinterpret_cast<const ListModulesRequest*>(
+        &_ListModulesRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 14;
+  friend void swap(ListModulesRequest& a, ListModulesRequest& b) { a.Swap(&b); }
+  inline void Swap(ListModulesRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListModulesRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ListModulesRequest* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::internal::ZeroFieldsBase::DefaultConstruct<ListModulesRequest>(arena);
+  }
+  using ::google::protobuf::internal::ZeroFieldsBase::CopyFrom;
+  inline void CopyFrom(const ListModulesRequest& from) {
+    ::google::protobuf::internal::ZeroFieldsBase::CopyImpl(*this, from);
+  }
+  using ::google::protobuf::internal::ZeroFieldsBase::MergeFrom;
+  void MergeFrom(const ListModulesRequest& from) {
+    ::google::protobuf::internal::ZeroFieldsBase::MergeImpl(*this, from);
+  }
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.ListModulesRequest"; }
+
+ protected:
+  explicit ListModulesRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ListModulesRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ListModulesRequest& from);
+  ListModulesRequest(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ListModulesRequest&& from) noexcept
+      : ListModulesRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.ListModulesRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 0,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ListModulesRequest_class_data_;
+// -------------------------------------------------------------------
+
+class GetModuleRequest final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.GetModuleRequest) */ {
+ public:
+  inline GetModuleRequest() : GetModuleRequest(nullptr) {}
+  ~GetModuleRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(GetModuleRequest* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(GetModuleRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR GetModuleRequest(::google::protobuf::internal::ConstantInitialized);
+
+  inline GetModuleRequest(const GetModuleRequest& from) : GetModuleRequest(nullptr, from) {}
+  inline GetModuleRequest(GetModuleRequest&& from) noexcept
+      : GetModuleRequest(nullptr, ::std::move(from)) {}
+  inline GetModuleRequest& operator=(const GetModuleRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GetModuleRequest& operator=(GetModuleRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GetModuleRequest& default_instance() {
+    return *reinterpret_cast<const GetModuleRequest*>(
+        &_GetModuleRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 16;
+  friend void swap(GetModuleRequest& a, GetModuleRequest& b) { a.Swap(&b); }
+  inline void Swap(GetModuleRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GetModuleRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GetModuleRequest* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<GetModuleRequest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const GetModuleRequest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const GetModuleRequest& from) { GetModuleRequest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(GetModuleRequest* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.GetModuleRequest"; }
+
+ protected:
+  explicit GetModuleRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  GetModuleRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const GetModuleRequest& from);
+  GetModuleRequest(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, GetModuleRequest&& from) noexcept
+      : GetModuleRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const ::std::string& name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_name();
+  void set_allocated_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.GetModuleRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   0, 44,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const GetModuleRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull GetModuleRequest_class_data_;
+// -------------------------------------------------------------------
+
+class DeployModuleResponse final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.DeployModuleResponse) */ {
+ public:
+  inline DeployModuleResponse() : DeployModuleResponse(nullptr) {}
+  ~DeployModuleResponse() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(DeployModuleResponse* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(DeployModuleResponse));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR DeployModuleResponse(::google::protobuf::internal::ConstantInitialized);
+
+  inline DeployModuleResponse(const DeployModuleResponse& from) : DeployModuleResponse(nullptr, from) {}
+  inline DeployModuleResponse(DeployModuleResponse&& from) noexcept
+      : DeployModuleResponse(nullptr, ::std::move(from)) {}
+  inline DeployModuleResponse& operator=(const DeployModuleResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeployModuleResponse& operator=(DeployModuleResponse&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const DeployModuleResponse& default_instance() {
+    return *reinterpret_cast<const DeployModuleResponse*>(
+        &_DeployModuleResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 11;
+  friend void swap(DeployModuleResponse& a, DeployModuleResponse& b) { a.Swap(&b); }
+  inline void Swap(DeployModuleResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeployModuleResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  DeployModuleResponse* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<DeployModuleResponse>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const DeployModuleResponse& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const DeployModuleResponse& from) { DeployModuleResponse::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(DeployModuleResponse* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.DeployModuleResponse"; }
+
+ protected:
+  explicit DeployModuleResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  DeployModuleResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const DeployModuleResponse& from);
+  DeployModuleResponse(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, DeployModuleResponse&& from) noexcept
+      : DeployModuleResponse(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kErrorFieldNumber = 2,
+    kModuleIdFieldNumber = 3,
+    kSuccessFieldNumber = 1,
+  };
+  // string error = 2;
+  void clear_error() ;
+  const ::std::string& error() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_error(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_error();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_error();
+  void set_allocated_error(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_error() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_error(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_error();
+
+  public:
+  // string module_id = 3;
+  void clear_module_id() ;
+  const ::std::string& module_id() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_module_id(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_module_id();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_module_id();
+  void set_allocated_module_id(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_module_id() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_module_id(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_module_id();
+
+  public:
+  // bool success = 1;
+  void clear_success() ;
+  bool success() const;
+  void set_success(bool value);
+
+  private:
+  bool _internal_success() const;
+  void _internal_set_success(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.DeployModuleResponse)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
+                                   0, 58,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const DeployModuleResponse& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr error_;
+    ::google::protobuf::internal::ArenaStringPtr module_id_;
+    bool success_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull DeployModuleResponse_class_data_;
+// -------------------------------------------------------------------
+
 class ColumnValue final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:instantdb.grpc.ColumnValue) */ {
  public:
@@ -1209,6 +2834,501 @@ class ColumnValue final : public ::google::protobuf::Message
 extern const ::google::protobuf::internal::ClassDataFull ColumnValue_class_data_;
 // -------------------------------------------------------------------
 
+class ColumnDefinition final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.ColumnDefinition) */ {
+ public:
+  inline ColumnDefinition() : ColumnDefinition(nullptr) {}
+  ~ColumnDefinition() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ColumnDefinition* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ColumnDefinition));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ColumnDefinition(::google::protobuf::internal::ConstantInitialized);
+
+  inline ColumnDefinition(const ColumnDefinition& from) : ColumnDefinition(nullptr, from) {}
+  inline ColumnDefinition(ColumnDefinition&& from) noexcept
+      : ColumnDefinition(nullptr, ::std::move(from)) {}
+  inline ColumnDefinition& operator=(const ColumnDefinition& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ColumnDefinition& operator=(ColumnDefinition&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ColumnDefinition& default_instance() {
+    return *reinterpret_cast<const ColumnDefinition*>(
+        &_ColumnDefinition_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 22;
+  friend void swap(ColumnDefinition& a, ColumnDefinition& b) { a.Swap(&b); }
+  inline void Swap(ColumnDefinition* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ColumnDefinition* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ColumnDefinition* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ColumnDefinition>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ColumnDefinition& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ColumnDefinition& from) { ColumnDefinition::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ColumnDefinition* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.ColumnDefinition"; }
+
+ protected:
+  explicit ColumnDefinition(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ColumnDefinition(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ColumnDefinition& from);
+  ColumnDefinition(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ColumnDefinition&& from) noexcept
+      : ColumnDefinition(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+    kTypeFieldNumber = 2,
+    kNullableFieldNumber = 3,
+    kIsPrimaryKeyFieldNumber = 4,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const ::std::string& name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_name();
+  void set_allocated_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
+
+  public:
+  // .instantdb.grpc.ColumnType type = 2;
+  void clear_type() ;
+  ::instantdb::grpc::ColumnType type() const;
+  void set_type(::instantdb::grpc::ColumnType value);
+
+  private:
+  ::instantdb::grpc::ColumnType _internal_type() const;
+  void _internal_set_type(::instantdb::grpc::ColumnType value);
+
+  public:
+  // bool nullable = 3;
+  void clear_nullable() ;
+  bool nullable() const;
+  void set_nullable(bool value);
+
+  private:
+  bool _internal_nullable() const;
+  void _internal_set_nullable(bool value);
+
+  public:
+  // bool is_primary_key = 4;
+  void clear_is_primary_key() ;
+  bool is_primary_key() const;
+  void set_is_primary_key(bool value);
+
+  private:
+  bool _internal_is_primary_key() const;
+  void _internal_set_is_primary_key(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.ColumnDefinition)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   0, 44,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ColumnDefinition& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    int type_;
+    bool nullable_;
+    bool is_primary_key_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ColumnDefinition_class_data_;
+// -------------------------------------------------------------------
+
+class TableSchema final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.TableSchema) */ {
+ public:
+  inline TableSchema() : TableSchema(nullptr) {}
+  ~TableSchema() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(TableSchema* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(TableSchema));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR TableSchema(::google::protobuf::internal::ConstantInitialized);
+
+  inline TableSchema(const TableSchema& from) : TableSchema(nullptr, from) {}
+  inline TableSchema(TableSchema&& from) noexcept
+      : TableSchema(nullptr, ::std::move(from)) {}
+  inline TableSchema& operator=(const TableSchema& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TableSchema& operator=(TableSchema&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const TableSchema& default_instance() {
+    return *reinterpret_cast<const TableSchema*>(
+        &_TableSchema_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 21;
+  friend void swap(TableSchema& a, TableSchema& b) { a.Swap(&b); }
+  inline void Swap(TableSchema* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TableSchema* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  TableSchema* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<TableSchema>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const TableSchema& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const TableSchema& from) { TableSchema::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(TableSchema* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.TableSchema"; }
+
+ protected:
+  explicit TableSchema(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  TableSchema(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const TableSchema& from);
+  TableSchema(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, TableSchema&& from) noexcept
+      : TableSchema(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kColumnsFieldNumber = 2,
+    kPrimaryKeyFieldNumber = 3,
+    kIndicesFieldNumber = 4,
+    kNameFieldNumber = 1,
+  };
+  // repeated .instantdb.grpc.ColumnDefinition columns = 2;
+  int columns_size() const;
+  private:
+  int _internal_columns_size() const;
+
+  public:
+  void clear_columns() ;
+  ::instantdb::grpc::ColumnDefinition* PROTOBUF_NONNULL mutable_columns(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>* PROTOBUF_NONNULL mutable_columns();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>& _internal_columns() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>* PROTOBUF_NONNULL _internal_mutable_columns();
+  public:
+  const ::instantdb::grpc::ColumnDefinition& columns(int index) const;
+  ::instantdb::grpc::ColumnDefinition* PROTOBUF_NONNULL add_columns();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>& columns() const;
+  // repeated string primary_key = 3;
+  int primary_key_size() const;
+  private:
+  int _internal_primary_key_size() const;
+
+  public:
+  void clear_primary_key() ;
+  const ::std::string& primary_key(int index) const;
+  ::std::string* PROTOBUF_NONNULL mutable_primary_key(int index);
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_primary_key(int index, Arg_&& value, Args_... args);
+  ::std::string* PROTOBUF_NONNULL add_primary_key();
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void add_primary_key(Arg_&& value, Args_... args);
+  const ::google::protobuf::RepeatedPtrField<::std::string>& primary_key() const;
+  ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL mutable_primary_key();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::std::string>& _internal_primary_key() const;
+  ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL _internal_mutable_primary_key();
+
+  public:
+  // repeated string indices = 4;
+  int indices_size() const;
+  private:
+  int _internal_indices_size() const;
+
+  public:
+  void clear_indices() ;
+  const ::std::string& indices(int index) const;
+  ::std::string* PROTOBUF_NONNULL mutable_indices(int index);
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_indices(int index, Arg_&& value, Args_... args);
+  ::std::string* PROTOBUF_NONNULL add_indices();
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void add_indices(Arg_&& value, Args_... args);
+  const ::google::protobuf::RepeatedPtrField<::std::string>& indices() const;
+  ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL mutable_indices();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::std::string>& _internal_indices() const;
+  ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL _internal_mutable_indices();
+
+  public:
+  // string name = 1;
+  void clear_name() ;
+  const ::std::string& name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_name();
+  void set_allocated_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.TableSchema)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   1, 57,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const TableSchema& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::ColumnDefinition > columns_;
+    ::google::protobuf::RepeatedPtrField<::std::string> primary_key_;
+    ::google::protobuf::RepeatedPtrField<::std::string> indices_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull TableSchema_class_data_;
+// -------------------------------------------------------------------
+
 class StatusResponse final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:instantdb.grpc.StatusResponse) */ {
  public:
@@ -1473,6 +3593,511 @@ class Row_ColumnsEntry_DoNotUse final
 extern const ::google::protobuf::internal::ClassDataFull Row_ColumnsEntry_DoNotUse_class_data_;
 // -------------------------------------------------------------------
 
+class ExecuteReducerResponse final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.ExecuteReducerResponse) */ {
+ public:
+  inline ExecuteReducerResponse() : ExecuteReducerResponse(nullptr) {}
+  ~ExecuteReducerResponse() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ExecuteReducerResponse* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ExecuteReducerResponse));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ExecuteReducerResponse(::google::protobuf::internal::ConstantInitialized);
+
+  inline ExecuteReducerResponse(const ExecuteReducerResponse& from) : ExecuteReducerResponse(nullptr, from) {}
+  inline ExecuteReducerResponse(ExecuteReducerResponse&& from) noexcept
+      : ExecuteReducerResponse(nullptr, ::std::move(from)) {}
+  inline ExecuteReducerResponse& operator=(const ExecuteReducerResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ExecuteReducerResponse& operator=(ExecuteReducerResponse&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ExecuteReducerResponse& default_instance() {
+    return *reinterpret_cast<const ExecuteReducerResponse*>(
+        &_ExecuteReducerResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 19;
+  friend void swap(ExecuteReducerResponse& a, ExecuteReducerResponse& b) { a.Swap(&b); }
+  inline void Swap(ExecuteReducerResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ExecuteReducerResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ExecuteReducerResponse* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ExecuteReducerResponse>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ExecuteReducerResponse& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ExecuteReducerResponse& from) { ExecuteReducerResponse::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ExecuteReducerResponse* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.ExecuteReducerResponse"; }
+
+ protected:
+  explicit ExecuteReducerResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ExecuteReducerResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ExecuteReducerResponse& from);
+  ExecuteReducerResponse(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ExecuteReducerResponse&& from) noexcept
+      : ExecuteReducerResponse(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kResultsFieldNumber = 3,
+    kErrorFieldNumber = 2,
+    kExecutionTimeMicrosFieldNumber = 4,
+    kSuccessFieldNumber = 1,
+  };
+  // repeated .instantdb.grpc.WasmValue results = 3;
+  int results_size() const;
+  private:
+  int _internal_results_size() const;
+
+  public:
+  void clear_results() ;
+  ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL mutable_results(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL mutable_results();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>& _internal_results() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL _internal_mutable_results();
+  public:
+  const ::instantdb::grpc::WasmValue& results(int index) const;
+  ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL add_results();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>& results() const;
+  // string error = 2;
+  void clear_error() ;
+  const ::std::string& error() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_error(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_error();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_error();
+  void set_allocated_error(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_error() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_error(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_error();
+
+  public:
+  // int64 execution_time_micros = 4;
+  void clear_execution_time_micros() ;
+  ::int64_t execution_time_micros() const;
+  void set_execution_time_micros(::int64_t value);
+
+  private:
+  ::int64_t _internal_execution_time_micros() const;
+  void _internal_set_execution_time_micros(::int64_t value);
+
+  public:
+  // bool success = 1;
+  void clear_success() ;
+  bool success() const;
+  void set_success(bool value);
+
+  private:
+  bool _internal_success() const;
+  void _internal_set_success(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.ExecuteReducerResponse)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   1, 51,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ExecuteReducerResponse& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::WasmValue > results_;
+    ::google::protobuf::internal::ArenaStringPtr error_;
+    ::int64_t execution_time_micros_;
+    bool success_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ExecuteReducerResponse_class_data_;
+// -------------------------------------------------------------------
+
+class ExecuteReducerRequest final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.ExecuteReducerRequest) */ {
+ public:
+  inline ExecuteReducerRequest() : ExecuteReducerRequest(nullptr) {}
+  ~ExecuteReducerRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ExecuteReducerRequest* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ExecuteReducerRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ExecuteReducerRequest(::google::protobuf::internal::ConstantInitialized);
+
+  inline ExecuteReducerRequest(const ExecuteReducerRequest& from) : ExecuteReducerRequest(nullptr, from) {}
+  inline ExecuteReducerRequest(ExecuteReducerRequest&& from) noexcept
+      : ExecuteReducerRequest(nullptr, ::std::move(from)) {}
+  inline ExecuteReducerRequest& operator=(const ExecuteReducerRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ExecuteReducerRequest& operator=(ExecuteReducerRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ExecuteReducerRequest& default_instance() {
+    return *reinterpret_cast<const ExecuteReducerRequest*>(
+        &_ExecuteReducerRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 18;
+  friend void swap(ExecuteReducerRequest& a, ExecuteReducerRequest& b) { a.Swap(&b); }
+  inline void Swap(ExecuteReducerRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ExecuteReducerRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ExecuteReducerRequest* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ExecuteReducerRequest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ExecuteReducerRequest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ExecuteReducerRequest& from) { ExecuteReducerRequest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ExecuteReducerRequest* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.ExecuteReducerRequest"; }
+
+ protected:
+  explicit ExecuteReducerRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ExecuteReducerRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ExecuteReducerRequest& from);
+  ExecuteReducerRequest(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ExecuteReducerRequest&& from) noexcept
+      : ExecuteReducerRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kArgsFieldNumber = 5,
+    kModuleNameFieldNumber = 1,
+    kReducerNameFieldNumber = 2,
+    kSenderIdentityFieldNumber = 3,
+    kConnectionIdFieldNumber = 4,
+  };
+  // repeated .instantdb.grpc.WasmValue args = 5;
+  int args_size() const;
+  private:
+  int _internal_args_size() const;
+
+  public:
+  void clear_args() ;
+  ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL mutable_args(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL mutable_args();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>& _internal_args() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL _internal_mutable_args();
+  public:
+  const ::instantdb::grpc::WasmValue& args(int index) const;
+  ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL add_args();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>& args() const;
+  // string module_name = 1;
+  void clear_module_name() ;
+  const ::std::string& module_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_module_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_module_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_module_name();
+  void set_allocated_module_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_module_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_module_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_module_name();
+
+  public:
+  // string reducer_name = 2;
+  void clear_reducer_name() ;
+  const ::std::string& reducer_name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_reducer_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_reducer_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_reducer_name();
+  void set_allocated_reducer_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_reducer_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_reducer_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_reducer_name();
+
+  public:
+  // string sender_identity = 3;
+  void clear_sender_identity() ;
+  const ::std::string& sender_identity() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_sender_identity(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_sender_identity();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_sender_identity();
+  void set_allocated_sender_identity(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_sender_identity() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_sender_identity(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_sender_identity();
+
+  public:
+  // string connection_id = 4;
+  void clear_connection_id() ;
+  const ::std::string& connection_id() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_connection_id(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_connection_id();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_connection_id();
+  void set_allocated_connection_id(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_connection_id() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_connection_id(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_connection_id();
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.ExecuteReducerRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 5,
+                                   1, 96,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ExecuteReducerRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::WasmValue > args_;
+    ::google::protobuf::internal::ArenaStringPtr module_name_;
+    ::google::protobuf::internal::ArenaStringPtr reducer_name_;
+    ::google::protobuf::internal::ArenaStringPtr sender_identity_;
+    ::google::protobuf::internal::ArenaStringPtr connection_id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ExecuteReducerRequest_class_data_;
+// -------------------------------------------------------------------
+
 class Row final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:instantdb.grpc.Row) */ {
  public:
@@ -1687,6 +4312,549 @@ class Row final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull Row_class_data_;
+// -------------------------------------------------------------------
+
+class ModuleInfo final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.ModuleInfo) */ {
+ public:
+  inline ModuleInfo() : ModuleInfo(nullptr) {}
+  ~ModuleInfo() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ModuleInfo* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ModuleInfo));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ModuleInfo(::google::protobuf::internal::ConstantInitialized);
+
+  inline ModuleInfo(const ModuleInfo& from) : ModuleInfo(nullptr, from) {}
+  inline ModuleInfo(ModuleInfo&& from) noexcept
+      : ModuleInfo(nullptr, ::std::move(from)) {}
+  inline ModuleInfo& operator=(const ModuleInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ModuleInfo& operator=(ModuleInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ModuleInfo& default_instance() {
+    return *reinterpret_cast<const ModuleInfo*>(
+        &_ModuleInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 20;
+  friend void swap(ModuleInfo& a, ModuleInfo& b) { a.Swap(&b); }
+  inline void Swap(ModuleInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ModuleInfo* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ModuleInfo* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ModuleInfo>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ModuleInfo& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ModuleInfo& from) { ModuleInfo::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ModuleInfo* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.ModuleInfo"; }
+
+ protected:
+  explicit ModuleInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ModuleInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ModuleInfo& from);
+  ModuleInfo(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ModuleInfo&& from) noexcept
+      : ModuleInfo(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kTablesFieldNumber = 3,
+    kReducersFieldNumber = 4,
+    kNameFieldNumber = 1,
+    kVersionFieldNumber = 2,
+    kLoadedFieldNumber = 5,
+    kValidatedFieldNumber = 6,
+  };
+  // repeated .instantdb.grpc.TableSchema tables = 3;
+  int tables_size() const;
+  private:
+  int _internal_tables_size() const;
+
+  public:
+  void clear_tables() ;
+  ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL mutable_tables(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL mutable_tables();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>& _internal_tables() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL _internal_mutable_tables();
+  public:
+  const ::instantdb::grpc::TableSchema& tables(int index) const;
+  ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL add_tables();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>& tables() const;
+  // repeated .instantdb.grpc.ReducerDefinition reducers = 4;
+  int reducers_size() const;
+  private:
+  int _internal_reducers_size() const;
+
+  public:
+  void clear_reducers() ;
+  ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL mutable_reducers(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL mutable_reducers();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>& _internal_reducers() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL _internal_mutable_reducers();
+  public:
+  const ::instantdb::grpc::ReducerDefinition& reducers(int index) const;
+  ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL add_reducers();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>& reducers() const;
+  // string name = 1;
+  void clear_name() ;
+  const ::std::string& name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_name();
+  void set_allocated_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
+
+  public:
+  // string version = 2;
+  void clear_version() ;
+  const ::std::string& version() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_version(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_version();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_version();
+  void set_allocated_version(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_version() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_version(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_version();
+
+  public:
+  // bool loaded = 5;
+  void clear_loaded() ;
+  bool loaded() const;
+  void set_loaded(bool value);
+
+  private:
+  bool _internal_loaded() const;
+  void _internal_set_loaded(bool value);
+
+  public:
+  // bool validated = 6;
+  void clear_validated() ;
+  bool validated() const;
+  void set_validated(bool value);
+
+  private:
+  bool _internal_validated() const;
+  void _internal_set_validated(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.ModuleInfo)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 6,
+                                   2, 45,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ModuleInfo& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::TableSchema > tables_;
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::ReducerDefinition > reducers_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr version_;
+    bool loaded_;
+    bool validated_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ModuleInfo_class_data_;
+// -------------------------------------------------------------------
+
+class DeployModuleRequest final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.DeployModuleRequest) */ {
+ public:
+  inline DeployModuleRequest() : DeployModuleRequest(nullptr) {}
+  ~DeployModuleRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(DeployModuleRequest* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(DeployModuleRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR DeployModuleRequest(::google::protobuf::internal::ConstantInitialized);
+
+  inline DeployModuleRequest(const DeployModuleRequest& from) : DeployModuleRequest(nullptr, from) {}
+  inline DeployModuleRequest(DeployModuleRequest&& from) noexcept
+      : DeployModuleRequest(nullptr, ::std::move(from)) {}
+  inline DeployModuleRequest& operator=(const DeployModuleRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeployModuleRequest& operator=(DeployModuleRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const DeployModuleRequest& default_instance() {
+    return *reinterpret_cast<const DeployModuleRequest*>(
+        &_DeployModuleRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 10;
+  friend void swap(DeployModuleRequest& a, DeployModuleRequest& b) { a.Swap(&b); }
+  inline void Swap(DeployModuleRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeployModuleRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  DeployModuleRequest* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<DeployModuleRequest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const DeployModuleRequest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const DeployModuleRequest& from) { DeployModuleRequest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(DeployModuleRequest* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.DeployModuleRequest"; }
+
+ protected:
+  explicit DeployModuleRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  DeployModuleRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const DeployModuleRequest& from);
+  DeployModuleRequest(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, DeployModuleRequest&& from) noexcept
+      : DeployModuleRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kTablesFieldNumber = 4,
+    kReducersFieldNumber = 5,
+    kNameFieldNumber = 1,
+    kBytecodeFieldNumber = 2,
+    kVersionFieldNumber = 3,
+  };
+  // repeated .instantdb.grpc.TableSchema tables = 4;
+  int tables_size() const;
+  private:
+  int _internal_tables_size() const;
+
+  public:
+  void clear_tables() ;
+  ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL mutable_tables(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL mutable_tables();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>& _internal_tables() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL _internal_mutable_tables();
+  public:
+  const ::instantdb::grpc::TableSchema& tables(int index) const;
+  ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL add_tables();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>& tables() const;
+  // repeated .instantdb.grpc.ReducerDefinition reducers = 5;
+  int reducers_size() const;
+  private:
+  int _internal_reducers_size() const;
+
+  public:
+  void clear_reducers() ;
+  ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL mutable_reducers(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL mutable_reducers();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>& _internal_reducers() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL _internal_mutable_reducers();
+  public:
+  const ::instantdb::grpc::ReducerDefinition& reducers(int index) const;
+  ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL add_reducers();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>& reducers() const;
+  // string name = 1;
+  void clear_name() ;
+  const ::std::string& name() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_name();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_name();
+  void set_allocated_name(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_name();
+
+  public:
+  // bytes bytecode = 2;
+  void clear_bytecode() ;
+  const ::std::string& bytecode() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_bytecode(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_bytecode();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_bytecode();
+  void set_allocated_bytecode(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_bytecode() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_bytecode(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_bytecode();
+
+  public:
+  // string version = 3;
+  void clear_version() ;
+  const ::std::string& version() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_version(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_version();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_version();
+  void set_allocated_version(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_version() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_version(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_version();
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.DeployModuleRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<3, 5,
+                                   2, 54,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const DeployModuleRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::TableSchema > tables_;
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::ReducerDefinition > reducers_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr bytecode_;
+    ::google::protobuf::internal::ArenaStringPtr version_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull DeployModuleRequest_class_data_;
 // -------------------------------------------------------------------
 
 class SQLResponse final : public ::google::protobuf::Message
@@ -1938,6 +5106,428 @@ class SQLResponse final : public ::google::protobuf::Message
 };
 
 extern const ::google::protobuf::internal::ClassDataFull SQLResponse_class_data_;
+// -------------------------------------------------------------------
+
+class ListModulesResponse final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.ListModulesResponse) */ {
+ public:
+  inline ListModulesResponse() : ListModulesResponse(nullptr) {}
+  ~ListModulesResponse() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ListModulesResponse* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ListModulesResponse));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ListModulesResponse(::google::protobuf::internal::ConstantInitialized);
+
+  inline ListModulesResponse(const ListModulesResponse& from) : ListModulesResponse(nullptr, from) {}
+  inline ListModulesResponse(ListModulesResponse&& from) noexcept
+      : ListModulesResponse(nullptr, ::std::move(from)) {}
+  inline ListModulesResponse& operator=(const ListModulesResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListModulesResponse& operator=(ListModulesResponse&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ListModulesResponse& default_instance() {
+    return *reinterpret_cast<const ListModulesResponse*>(
+        &_ListModulesResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 15;
+  friend void swap(ListModulesResponse& a, ListModulesResponse& b) { a.Swap(&b); }
+  inline void Swap(ListModulesResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListModulesResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ListModulesResponse* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ListModulesResponse>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ListModulesResponse& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ListModulesResponse& from) { ListModulesResponse::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ListModulesResponse* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.ListModulesResponse"; }
+
+ protected:
+  explicit ListModulesResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ListModulesResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ListModulesResponse& from);
+  ListModulesResponse(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ListModulesResponse&& from) noexcept
+      : ListModulesResponse(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kModulesFieldNumber = 1,
+  };
+  // repeated .instantdb.grpc.ModuleInfo modules = 1;
+  int modules_size() const;
+  private:
+  int _internal_modules_size() const;
+
+  public:
+  void clear_modules() ;
+  ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL mutable_modules(int index);
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>* PROTOBUF_NONNULL mutable_modules();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>& _internal_modules() const;
+  ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>* PROTOBUF_NONNULL _internal_mutable_modules();
+  public:
+  const ::instantdb::grpc::ModuleInfo& modules(int index) const;
+  ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL add_modules();
+  const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>& modules() const;
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.ListModulesResponse)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   1, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ListModulesResponse& from_msg);
+    ::google::protobuf::RepeatedPtrField< ::instantdb::grpc::ModuleInfo > modules_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ListModulesResponse_class_data_;
+// -------------------------------------------------------------------
+
+class GetModuleResponse final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:instantdb.grpc.GetModuleResponse) */ {
+ public:
+  inline GetModuleResponse() : GetModuleResponse(nullptr) {}
+  ~GetModuleResponse() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(GetModuleResponse* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(GetModuleResponse));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR GetModuleResponse(::google::protobuf::internal::ConstantInitialized);
+
+  inline GetModuleResponse(const GetModuleResponse& from) : GetModuleResponse(nullptr, from) {}
+  inline GetModuleResponse(GetModuleResponse&& from) noexcept
+      : GetModuleResponse(nullptr, ::std::move(from)) {}
+  inline GetModuleResponse& operator=(const GetModuleResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GetModuleResponse& operator=(GetModuleResponse&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GetModuleResponse& default_instance() {
+    return *reinterpret_cast<const GetModuleResponse*>(
+        &_GetModuleResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 17;
+  friend void swap(GetModuleResponse& a, GetModuleResponse& b) { a.Swap(&b); }
+  inline void Swap(GetModuleResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GetModuleResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GetModuleResponse* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<GetModuleResponse>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const GetModuleResponse& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const GetModuleResponse& from) { GetModuleResponse::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(::google::protobuf::MessageLite& to_msg,
+                        const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      const ::google::protobuf::MessageLite& msg, ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* PROTOBUF_NONNULL _InternalSerialize(
+      ::uint8_t* PROTOBUF_NONNULL target,
+      ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(GetModuleResponse* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "instantdb.grpc.GetModuleResponse"; }
+
+ protected:
+  explicit GetModuleResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  GetModuleResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const GetModuleResponse& from);
+  GetModuleResponse(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, GetModuleResponse&& from) noexcept
+      : GetModuleResponse(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kErrorFieldNumber = 2,
+    kModuleFieldNumber = 3,
+    kSuccessFieldNumber = 1,
+  };
+  // string error = 2;
+  void clear_error() ;
+  const ::std::string& error() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_error(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_error();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_error();
+  void set_allocated_error(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_error() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_error(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_error();
+
+  public:
+  // .instantdb.grpc.ModuleInfo module = 3;
+  bool has_module() const;
+  void clear_module() ;
+  const ::instantdb::grpc::ModuleInfo& module() const;
+  [[nodiscard]] ::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE release_module();
+  ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL mutable_module();
+  void set_allocated_module(::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE value);
+  void unsafe_arena_set_allocated_module(::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE value);
+  ::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE unsafe_arena_release_module();
+
+  private:
+  const ::instantdb::grpc::ModuleInfo& _internal_module() const;
+  ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL _internal_mutable_module();
+
+  public:
+  // bool success = 1;
+  void clear_success() ;
+  bool success() const;
+  void set_success(bool value);
+
+  private:
+  bool _internal_success() const;
+  void _internal_set_success(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:instantdb.grpc.GetModuleResponse)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<2, 3,
+                                   1, 46,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const GetModuleResponse& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr error_;
+    ::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE module_;
+    bool success_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_instantdb_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull GetModuleResponse_class_data_;
 // -------------------------------------------------------------------
 
 class SQLTransactionResponse final : public ::google::protobuf::Message
@@ -3482,6 +7072,2670 @@ inline void ServerStats::_internal_set_failed_queries(::int64_t value) {
   _impl_.failed_queries_ = value;
 }
 
+// int64 loaded_modules = 10;
+inline void ServerStats::clear_loaded_modules() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.loaded_modules_ = ::int64_t{0};
+  _impl_._has_bits_[0] &= ~0x00000200U;
+}
+inline ::int64_t ServerStats::loaded_modules() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ServerStats.loaded_modules)
+  return _internal_loaded_modules();
+}
+inline void ServerStats::set_loaded_modules(::int64_t value) {
+  _internal_set_loaded_modules(value);
+  _impl_._has_bits_[0] |= 0x00000200U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ServerStats.loaded_modules)
+}
+inline ::int64_t ServerStats::_internal_loaded_modules() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.loaded_modules_;
+}
+inline void ServerStats::_internal_set_loaded_modules(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.loaded_modules_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// DeployModuleRequest
+
+// string name = 1;
+inline void DeployModuleRequest::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& DeployModuleRequest::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleRequest.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void DeployModuleRequest::set_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.DeployModuleRequest.name)
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleRequest::mutable_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.DeployModuleRequest.name)
+  return _s;
+}
+inline const ::std::string& DeployModuleRequest::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void DeployModuleRequest::_internal_set_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleRequest::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE DeployModuleRequest::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.DeployModuleRequest.name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void DeployModuleRequest::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.DeployModuleRequest.name)
+}
+
+// bytes bytecode = 2;
+inline void DeployModuleRequest::clear_bytecode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.bytecode_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline const ::std::string& DeployModuleRequest::bytecode() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleRequest.bytecode)
+  return _internal_bytecode();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void DeployModuleRequest::set_bytecode(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.bytecode_.SetBytes(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.DeployModuleRequest.bytecode)
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleRequest::mutable_bytecode()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_bytecode();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.DeployModuleRequest.bytecode)
+  return _s;
+}
+inline const ::std::string& DeployModuleRequest::_internal_bytecode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.bytecode_.Get();
+}
+inline void DeployModuleRequest::_internal_set_bytecode(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.bytecode_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleRequest::_internal_mutable_bytecode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  return _impl_.bytecode_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE DeployModuleRequest::release_bytecode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.DeployModuleRequest.bytecode)
+  if ((_impl_._has_bits_[0] & 0x00000002U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002U;
+  auto* released = _impl_.bytecode_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.bytecode_.Set("", GetArena());
+  }
+  return released;
+}
+inline void DeployModuleRequest::set_allocated_bytecode(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002U;
+  }
+  _impl_.bytecode_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.bytecode_.IsDefault()) {
+    _impl_.bytecode_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.DeployModuleRequest.bytecode)
+}
+
+// string version = 3;
+inline void DeployModuleRequest::clear_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.version_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline const ::std::string& DeployModuleRequest::version() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleRequest.version)
+  return _internal_version();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void DeployModuleRequest::set_version(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  _impl_.version_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.DeployModuleRequest.version)
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleRequest::mutable_version()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_version();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.DeployModuleRequest.version)
+  return _s;
+}
+inline const ::std::string& DeployModuleRequest::_internal_version() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.version_.Get();
+}
+inline void DeployModuleRequest::_internal_set_version(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  _impl_.version_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleRequest::_internal_mutable_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  return _impl_.version_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE DeployModuleRequest::release_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.DeployModuleRequest.version)
+  if ((_impl_._has_bits_[0] & 0x00000004U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000004U;
+  auto* released = _impl_.version_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.version_.Set("", GetArena());
+  }
+  return released;
+}
+inline void DeployModuleRequest::set_allocated_version(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000004U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004U;
+  }
+  _impl_.version_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.version_.IsDefault()) {
+    _impl_.version_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.DeployModuleRequest.version)
+}
+
+// repeated .instantdb.grpc.TableSchema tables = 4;
+inline int DeployModuleRequest::_internal_tables_size() const {
+  return _internal_tables().size();
+}
+inline int DeployModuleRequest::tables_size() const {
+  return _internal_tables_size();
+}
+inline void DeployModuleRequest::clear_tables() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tables_.Clear();
+}
+inline ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL DeployModuleRequest::mutable_tables(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.DeployModuleRequest.tables)
+  return _internal_mutable_tables()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL DeployModuleRequest::mutable_tables()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.DeployModuleRequest.tables)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_tables();
+}
+inline const ::instantdb::grpc::TableSchema& DeployModuleRequest::tables(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleRequest.tables)
+  return _internal_tables().Get(index);
+}
+inline ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL DeployModuleRequest::add_tables()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::TableSchema* _add = _internal_mutable_tables()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.DeployModuleRequest.tables)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>& DeployModuleRequest::tables() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.DeployModuleRequest.tables)
+  return _internal_tables();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>&
+DeployModuleRequest::_internal_tables() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.tables_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL
+DeployModuleRequest::_internal_mutable_tables() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.tables_;
+}
+
+// repeated .instantdb.grpc.ReducerDefinition reducers = 5;
+inline int DeployModuleRequest::_internal_reducers_size() const {
+  return _internal_reducers().size();
+}
+inline int DeployModuleRequest::reducers_size() const {
+  return _internal_reducers_size();
+}
+inline void DeployModuleRequest::clear_reducers() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.reducers_.Clear();
+}
+inline ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL DeployModuleRequest::mutable_reducers(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.DeployModuleRequest.reducers)
+  return _internal_mutable_reducers()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL DeployModuleRequest::mutable_reducers()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.DeployModuleRequest.reducers)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_reducers();
+}
+inline const ::instantdb::grpc::ReducerDefinition& DeployModuleRequest::reducers(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleRequest.reducers)
+  return _internal_reducers().Get(index);
+}
+inline ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL DeployModuleRequest::add_reducers()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::ReducerDefinition* _add = _internal_mutable_reducers()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.DeployModuleRequest.reducers)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>& DeployModuleRequest::reducers() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.DeployModuleRequest.reducers)
+  return _internal_reducers();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>&
+DeployModuleRequest::_internal_reducers() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.reducers_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL
+DeployModuleRequest::_internal_mutable_reducers() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.reducers_;
+}
+
+// -------------------------------------------------------------------
+
+// DeployModuleResponse
+
+// bool success = 1;
+inline void DeployModuleResponse::clear_success() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = false;
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline bool DeployModuleResponse::success() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleResponse.success)
+  return _internal_success();
+}
+inline void DeployModuleResponse::set_success(bool value) {
+  _internal_set_success(value);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.DeployModuleResponse.success)
+}
+inline bool DeployModuleResponse::_internal_success() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.success_;
+}
+inline void DeployModuleResponse::_internal_set_success(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = value;
+}
+
+// string error = 2;
+inline void DeployModuleResponse::clear_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& DeployModuleResponse::error() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleResponse.error)
+  return _internal_error();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void DeployModuleResponse::set_error(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.DeployModuleResponse.error)
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleResponse::mutable_error()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_error();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.DeployModuleResponse.error)
+  return _s;
+}
+inline const ::std::string& DeployModuleResponse::_internal_error() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.error_.Get();
+}
+inline void DeployModuleResponse::_internal_set_error(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleResponse::_internal_mutable_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.error_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE DeployModuleResponse::release_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.DeployModuleResponse.error)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.error_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  return released;
+}
+inline void DeployModuleResponse::set_allocated_error(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.error_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.error_.IsDefault()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.DeployModuleResponse.error)
+}
+
+// string module_id = 3;
+inline void DeployModuleResponse::clear_module_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.module_id_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline const ::std::string& DeployModuleResponse::module_id() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.DeployModuleResponse.module_id)
+  return _internal_module_id();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void DeployModuleResponse::set_module_id(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.module_id_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.DeployModuleResponse.module_id)
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleResponse::mutable_module_id()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_module_id();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.DeployModuleResponse.module_id)
+  return _s;
+}
+inline const ::std::string& DeployModuleResponse::_internal_module_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.module_id_.Get();
+}
+inline void DeployModuleResponse::_internal_set_module_id(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.module_id_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL DeployModuleResponse::_internal_mutable_module_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  return _impl_.module_id_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE DeployModuleResponse::release_module_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.DeployModuleResponse.module_id)
+  if ((_impl_._has_bits_[0] & 0x00000002U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002U;
+  auto* released = _impl_.module_id_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.module_id_.Set("", GetArena());
+  }
+  return released;
+}
+inline void DeployModuleResponse::set_allocated_module_id(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002U;
+  }
+  _impl_.module_id_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.module_id_.IsDefault()) {
+    _impl_.module_id_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.DeployModuleResponse.module_id)
+}
+
+// -------------------------------------------------------------------
+
+// UndeployModuleRequest
+
+// string name = 1;
+inline void UndeployModuleRequest::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& UndeployModuleRequest::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.UndeployModuleRequest.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void UndeployModuleRequest::set_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.UndeployModuleRequest.name)
+}
+inline ::std::string* PROTOBUF_NONNULL UndeployModuleRequest::mutable_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.UndeployModuleRequest.name)
+  return _s;
+}
+inline const ::std::string& UndeployModuleRequest::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void UndeployModuleRequest::_internal_set_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL UndeployModuleRequest::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE UndeployModuleRequest::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.UndeployModuleRequest.name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void UndeployModuleRequest::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.UndeployModuleRequest.name)
+}
+
+// -------------------------------------------------------------------
+
+// UndeployModuleResponse
+
+// bool success = 1;
+inline void UndeployModuleResponse::clear_success() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = false;
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline bool UndeployModuleResponse::success() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.UndeployModuleResponse.success)
+  return _internal_success();
+}
+inline void UndeployModuleResponse::set_success(bool value) {
+  _internal_set_success(value);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.UndeployModuleResponse.success)
+}
+inline bool UndeployModuleResponse::_internal_success() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.success_;
+}
+inline void UndeployModuleResponse::_internal_set_success(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = value;
+}
+
+// string error = 2;
+inline void UndeployModuleResponse::clear_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& UndeployModuleResponse::error() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.UndeployModuleResponse.error)
+  return _internal_error();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void UndeployModuleResponse::set_error(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.UndeployModuleResponse.error)
+}
+inline ::std::string* PROTOBUF_NONNULL UndeployModuleResponse::mutable_error()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_error();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.UndeployModuleResponse.error)
+  return _s;
+}
+inline const ::std::string& UndeployModuleResponse::_internal_error() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.error_.Get();
+}
+inline void UndeployModuleResponse::_internal_set_error(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL UndeployModuleResponse::_internal_mutable_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.error_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE UndeployModuleResponse::release_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.UndeployModuleResponse.error)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.error_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  return released;
+}
+inline void UndeployModuleResponse::set_allocated_error(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.error_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.error_.IsDefault()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.UndeployModuleResponse.error)
+}
+
+// -------------------------------------------------------------------
+
+// ListModulesRequest
+
+// -------------------------------------------------------------------
+
+// ListModulesResponse
+
+// repeated .instantdb.grpc.ModuleInfo modules = 1;
+inline int ListModulesResponse::_internal_modules_size() const {
+  return _internal_modules().size();
+}
+inline int ListModulesResponse::modules_size() const {
+  return _internal_modules_size();
+}
+inline void ListModulesResponse::clear_modules() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.modules_.Clear();
+}
+inline ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL ListModulesResponse::mutable_modules(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ListModulesResponse.modules)
+  return _internal_mutable_modules()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>* PROTOBUF_NONNULL ListModulesResponse::mutable_modules()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.ListModulesResponse.modules)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_modules();
+}
+inline const ::instantdb::grpc::ModuleInfo& ListModulesResponse::modules(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ListModulesResponse.modules)
+  return _internal_modules().Get(index);
+}
+inline ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL ListModulesResponse::add_modules()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::ModuleInfo* _add = _internal_mutable_modules()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.ListModulesResponse.modules)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>& ListModulesResponse::modules() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.ListModulesResponse.modules)
+  return _internal_modules();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>&
+ListModulesResponse::_internal_modules() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.modules_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ModuleInfo>* PROTOBUF_NONNULL
+ListModulesResponse::_internal_mutable_modules() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.modules_;
+}
+
+// -------------------------------------------------------------------
+
+// GetModuleRequest
+
+// string name = 1;
+inline void GetModuleRequest::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& GetModuleRequest::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.GetModuleRequest.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void GetModuleRequest::set_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.GetModuleRequest.name)
+}
+inline ::std::string* PROTOBUF_NONNULL GetModuleRequest::mutable_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.GetModuleRequest.name)
+  return _s;
+}
+inline const ::std::string& GetModuleRequest::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void GetModuleRequest::_internal_set_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL GetModuleRequest::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE GetModuleRequest::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.GetModuleRequest.name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void GetModuleRequest::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.GetModuleRequest.name)
+}
+
+// -------------------------------------------------------------------
+
+// GetModuleResponse
+
+// bool success = 1;
+inline void GetModuleResponse::clear_success() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = false;
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline bool GetModuleResponse::success() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.GetModuleResponse.success)
+  return _internal_success();
+}
+inline void GetModuleResponse::set_success(bool value) {
+  _internal_set_success(value);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.GetModuleResponse.success)
+}
+inline bool GetModuleResponse::_internal_success() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.success_;
+}
+inline void GetModuleResponse::_internal_set_success(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = value;
+}
+
+// string error = 2;
+inline void GetModuleResponse::clear_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& GetModuleResponse::error() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.GetModuleResponse.error)
+  return _internal_error();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void GetModuleResponse::set_error(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.GetModuleResponse.error)
+}
+inline ::std::string* PROTOBUF_NONNULL GetModuleResponse::mutable_error()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_error();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.GetModuleResponse.error)
+  return _s;
+}
+inline const ::std::string& GetModuleResponse::_internal_error() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.error_.Get();
+}
+inline void GetModuleResponse::_internal_set_error(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL GetModuleResponse::_internal_mutable_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.error_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE GetModuleResponse::release_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.GetModuleResponse.error)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.error_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  return released;
+}
+inline void GetModuleResponse::set_allocated_error(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.error_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.error_.IsDefault()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.GetModuleResponse.error)
+}
+
+// .instantdb.grpc.ModuleInfo module = 3;
+inline bool GetModuleResponse::has_module() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002U) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.module_ != nullptr);
+  return value;
+}
+inline void GetModuleResponse::clear_module() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.module_ != nullptr) _impl_.module_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline const ::instantdb::grpc::ModuleInfo& GetModuleResponse::_internal_module() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::instantdb::grpc::ModuleInfo* p = _impl_.module_;
+  return p != nullptr ? *p : reinterpret_cast<const ::instantdb::grpc::ModuleInfo&>(::instantdb::grpc::_ModuleInfo_default_instance_);
+}
+inline const ::instantdb::grpc::ModuleInfo& GetModuleResponse::module() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.GetModuleResponse.module)
+  return _internal_module();
+}
+inline void GetModuleResponse::unsafe_arena_set_allocated_module(
+    ::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.module_);
+  }
+  _impl_.module_ = reinterpret_cast<::instantdb::grpc::ModuleInfo*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002U;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:instantdb.grpc.GetModuleResponse.module)
+}
+inline ::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE GetModuleResponse::release_module() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000002U;
+  ::instantdb::grpc::ModuleInfo* released = _impl_.module_;
+  _impl_.module_ = nullptr;
+  if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
+    auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    if (GetArena() == nullptr) {
+      delete old;
+    }
+  } else {
+    if (GetArena() != nullptr) {
+      released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    }
+  }
+  return released;
+}
+inline ::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE GetModuleResponse::unsafe_arena_release_module() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.GetModuleResponse.module)
+
+  _impl_._has_bits_[0] &= ~0x00000002U;
+  ::instantdb::grpc::ModuleInfo* temp = _impl_.module_;
+  _impl_.module_ = nullptr;
+  return temp;
+}
+inline ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL GetModuleResponse::_internal_mutable_module() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.module_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::instantdb::grpc::ModuleInfo>(GetArena());
+    _impl_.module_ = reinterpret_cast<::instantdb::grpc::ModuleInfo*>(p);
+  }
+  return _impl_.module_;
+}
+inline ::instantdb::grpc::ModuleInfo* PROTOBUF_NONNULL GetModuleResponse::mutable_module()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000002U;
+  ::instantdb::grpc::ModuleInfo* _msg = _internal_mutable_module();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.GetModuleResponse.module)
+  return _msg;
+}
+inline void GetModuleResponse::set_allocated_module(::instantdb::grpc::ModuleInfo* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.module_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = value->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000002U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002U;
+  }
+
+  _impl_.module_ = reinterpret_cast<::instantdb::grpc::ModuleInfo*>(value);
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.GetModuleResponse.module)
+}
+
+// -------------------------------------------------------------------
+
+// ExecuteReducerRequest
+
+// string module_name = 1;
+inline void ExecuteReducerRequest::clear_module_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.module_name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& ExecuteReducerRequest::module_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerRequest.module_name)
+  return _internal_module_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ExecuteReducerRequest::set_module_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.module_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ExecuteReducerRequest.module_name)
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::mutable_module_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_module_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ExecuteReducerRequest.module_name)
+  return _s;
+}
+inline const ::std::string& ExecuteReducerRequest::_internal_module_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.module_name_.Get();
+}
+inline void ExecuteReducerRequest::_internal_set_module_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.module_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::_internal_mutable_module_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.module_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ExecuteReducerRequest::release_module_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ExecuteReducerRequest.module_name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.module_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.module_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ExecuteReducerRequest::set_allocated_module_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.module_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.module_name_.IsDefault()) {
+    _impl_.module_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ExecuteReducerRequest.module_name)
+}
+
+// string reducer_name = 2;
+inline void ExecuteReducerRequest::clear_reducer_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.reducer_name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline const ::std::string& ExecuteReducerRequest::reducer_name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerRequest.reducer_name)
+  return _internal_reducer_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ExecuteReducerRequest::set_reducer_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.reducer_name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ExecuteReducerRequest.reducer_name)
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::mutable_reducer_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_reducer_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ExecuteReducerRequest.reducer_name)
+  return _s;
+}
+inline const ::std::string& ExecuteReducerRequest::_internal_reducer_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.reducer_name_.Get();
+}
+inline void ExecuteReducerRequest::_internal_set_reducer_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.reducer_name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::_internal_mutable_reducer_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  return _impl_.reducer_name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ExecuteReducerRequest::release_reducer_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ExecuteReducerRequest.reducer_name)
+  if ((_impl_._has_bits_[0] & 0x00000002U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002U;
+  auto* released = _impl_.reducer_name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.reducer_name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ExecuteReducerRequest::set_allocated_reducer_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002U;
+  }
+  _impl_.reducer_name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.reducer_name_.IsDefault()) {
+    _impl_.reducer_name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ExecuteReducerRequest.reducer_name)
+}
+
+// string sender_identity = 3;
+inline void ExecuteReducerRequest::clear_sender_identity() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sender_identity_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline const ::std::string& ExecuteReducerRequest::sender_identity() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerRequest.sender_identity)
+  return _internal_sender_identity();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ExecuteReducerRequest::set_sender_identity(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  _impl_.sender_identity_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ExecuteReducerRequest.sender_identity)
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::mutable_sender_identity()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_sender_identity();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ExecuteReducerRequest.sender_identity)
+  return _s;
+}
+inline const ::std::string& ExecuteReducerRequest::_internal_sender_identity() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sender_identity_.Get();
+}
+inline void ExecuteReducerRequest::_internal_set_sender_identity(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  _impl_.sender_identity_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::_internal_mutable_sender_identity() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  return _impl_.sender_identity_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ExecuteReducerRequest::release_sender_identity() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ExecuteReducerRequest.sender_identity)
+  if ((_impl_._has_bits_[0] & 0x00000004U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000004U;
+  auto* released = _impl_.sender_identity_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.sender_identity_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ExecuteReducerRequest::set_allocated_sender_identity(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000004U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004U;
+  }
+  _impl_.sender_identity_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.sender_identity_.IsDefault()) {
+    _impl_.sender_identity_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ExecuteReducerRequest.sender_identity)
+}
+
+// string connection_id = 4;
+inline void ExecuteReducerRequest::clear_connection_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.connection_id_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000008U;
+}
+inline const ::std::string& ExecuteReducerRequest::connection_id() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerRequest.connection_id)
+  return _internal_connection_id();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ExecuteReducerRequest::set_connection_id(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000008U;
+  _impl_.connection_id_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ExecuteReducerRequest.connection_id)
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::mutable_connection_id()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_connection_id();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ExecuteReducerRequest.connection_id)
+  return _s;
+}
+inline const ::std::string& ExecuteReducerRequest::_internal_connection_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.connection_id_.Get();
+}
+inline void ExecuteReducerRequest::_internal_set_connection_id(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000008U;
+  _impl_.connection_id_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerRequest::_internal_mutable_connection_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000008U;
+  return _impl_.connection_id_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ExecuteReducerRequest::release_connection_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ExecuteReducerRequest.connection_id)
+  if ((_impl_._has_bits_[0] & 0x00000008U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000008U;
+  auto* released = _impl_.connection_id_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.connection_id_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ExecuteReducerRequest::set_allocated_connection_id(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000008U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000008U;
+  }
+  _impl_.connection_id_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.connection_id_.IsDefault()) {
+    _impl_.connection_id_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ExecuteReducerRequest.connection_id)
+}
+
+// repeated .instantdb.grpc.WasmValue args = 5;
+inline int ExecuteReducerRequest::_internal_args_size() const {
+  return _internal_args().size();
+}
+inline int ExecuteReducerRequest::args_size() const {
+  return _internal_args_size();
+}
+inline void ExecuteReducerRequest::clear_args() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.args_.Clear();
+}
+inline ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL ExecuteReducerRequest::mutable_args(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ExecuteReducerRequest.args)
+  return _internal_mutable_args()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL ExecuteReducerRequest::mutable_args()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.ExecuteReducerRequest.args)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_args();
+}
+inline const ::instantdb::grpc::WasmValue& ExecuteReducerRequest::args(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerRequest.args)
+  return _internal_args().Get(index);
+}
+inline ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL ExecuteReducerRequest::add_args()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::WasmValue* _add = _internal_mutable_args()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.ExecuteReducerRequest.args)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>& ExecuteReducerRequest::args() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.ExecuteReducerRequest.args)
+  return _internal_args();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>&
+ExecuteReducerRequest::_internal_args() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.args_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL
+ExecuteReducerRequest::_internal_mutable_args() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.args_;
+}
+
+// -------------------------------------------------------------------
+
+// ExecuteReducerResponse
+
+// bool success = 1;
+inline void ExecuteReducerResponse::clear_success() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = false;
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline bool ExecuteReducerResponse::success() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerResponse.success)
+  return _internal_success();
+}
+inline void ExecuteReducerResponse::set_success(bool value) {
+  _internal_set_success(value);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ExecuteReducerResponse.success)
+}
+inline bool ExecuteReducerResponse::_internal_success() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.success_;
+}
+inline void ExecuteReducerResponse::_internal_set_success(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.success_ = value;
+}
+
+// string error = 2;
+inline void ExecuteReducerResponse::clear_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& ExecuteReducerResponse::error() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerResponse.error)
+  return _internal_error();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ExecuteReducerResponse::set_error(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ExecuteReducerResponse.error)
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerResponse::mutable_error()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_error();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ExecuteReducerResponse.error)
+  return _s;
+}
+inline const ::std::string& ExecuteReducerResponse::_internal_error() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.error_.Get();
+}
+inline void ExecuteReducerResponse::_internal_set_error(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.error_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ExecuteReducerResponse::_internal_mutable_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.error_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ExecuteReducerResponse::release_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ExecuteReducerResponse.error)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.error_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ExecuteReducerResponse::set_allocated_error(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.error_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.error_.IsDefault()) {
+    _impl_.error_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ExecuteReducerResponse.error)
+}
+
+// repeated .instantdb.grpc.WasmValue results = 3;
+inline int ExecuteReducerResponse::_internal_results_size() const {
+  return _internal_results().size();
+}
+inline int ExecuteReducerResponse::results_size() const {
+  return _internal_results_size();
+}
+inline void ExecuteReducerResponse::clear_results() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.results_.Clear();
+}
+inline ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL ExecuteReducerResponse::mutable_results(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ExecuteReducerResponse.results)
+  return _internal_mutable_results()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL ExecuteReducerResponse::mutable_results()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.ExecuteReducerResponse.results)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_results();
+}
+inline const ::instantdb::grpc::WasmValue& ExecuteReducerResponse::results(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerResponse.results)
+  return _internal_results().Get(index);
+}
+inline ::instantdb::grpc::WasmValue* PROTOBUF_NONNULL ExecuteReducerResponse::add_results()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::WasmValue* _add = _internal_mutable_results()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.ExecuteReducerResponse.results)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>& ExecuteReducerResponse::results() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.ExecuteReducerResponse.results)
+  return _internal_results();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>&
+ExecuteReducerResponse::_internal_results() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.results_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::WasmValue>* PROTOBUF_NONNULL
+ExecuteReducerResponse::_internal_mutable_results() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.results_;
+}
+
+// int64 execution_time_micros = 4;
+inline void ExecuteReducerResponse::clear_execution_time_micros() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.execution_time_micros_ = ::int64_t{0};
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline ::int64_t ExecuteReducerResponse::execution_time_micros() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ExecuteReducerResponse.execution_time_micros)
+  return _internal_execution_time_micros();
+}
+inline void ExecuteReducerResponse::set_execution_time_micros(::int64_t value) {
+  _internal_set_execution_time_micros(value);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ExecuteReducerResponse.execution_time_micros)
+}
+inline ::int64_t ExecuteReducerResponse::_internal_execution_time_micros() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.execution_time_micros_;
+}
+inline void ExecuteReducerResponse::_internal_set_execution_time_micros(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.execution_time_micros_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ModuleInfo
+
+// string name = 1;
+inline void ModuleInfo::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& ModuleInfo::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ModuleInfo.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ModuleInfo::set_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ModuleInfo.name)
+}
+inline ::std::string* PROTOBUF_NONNULL ModuleInfo::mutable_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ModuleInfo.name)
+  return _s;
+}
+inline const ::std::string& ModuleInfo::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void ModuleInfo::_internal_set_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ModuleInfo::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ModuleInfo::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ModuleInfo.name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ModuleInfo::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ModuleInfo.name)
+}
+
+// string version = 2;
+inline void ModuleInfo::clear_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.version_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline const ::std::string& ModuleInfo::version() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ModuleInfo.version)
+  return _internal_version();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ModuleInfo::set_version(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.version_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ModuleInfo.version)
+}
+inline ::std::string* PROTOBUF_NONNULL ModuleInfo::mutable_version()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_version();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ModuleInfo.version)
+  return _s;
+}
+inline const ::std::string& ModuleInfo::_internal_version() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.version_.Get();
+}
+inline void ModuleInfo::_internal_set_version(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.version_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ModuleInfo::_internal_mutable_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  return _impl_.version_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ModuleInfo::release_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ModuleInfo.version)
+  if ((_impl_._has_bits_[0] & 0x00000002U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002U;
+  auto* released = _impl_.version_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.version_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ModuleInfo::set_allocated_version(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002U;
+  }
+  _impl_.version_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.version_.IsDefault()) {
+    _impl_.version_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ModuleInfo.version)
+}
+
+// repeated .instantdb.grpc.TableSchema tables = 3;
+inline int ModuleInfo::_internal_tables_size() const {
+  return _internal_tables().size();
+}
+inline int ModuleInfo::tables_size() const {
+  return _internal_tables_size();
+}
+inline void ModuleInfo::clear_tables() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tables_.Clear();
+}
+inline ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL ModuleInfo::mutable_tables(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ModuleInfo.tables)
+  return _internal_mutable_tables()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL ModuleInfo::mutable_tables()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.ModuleInfo.tables)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_tables();
+}
+inline const ::instantdb::grpc::TableSchema& ModuleInfo::tables(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ModuleInfo.tables)
+  return _internal_tables().Get(index);
+}
+inline ::instantdb::grpc::TableSchema* PROTOBUF_NONNULL ModuleInfo::add_tables()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::TableSchema* _add = _internal_mutable_tables()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.ModuleInfo.tables)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>& ModuleInfo::tables() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.ModuleInfo.tables)
+  return _internal_tables();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>&
+ModuleInfo::_internal_tables() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.tables_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::TableSchema>* PROTOBUF_NONNULL
+ModuleInfo::_internal_mutable_tables() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.tables_;
+}
+
+// repeated .instantdb.grpc.ReducerDefinition reducers = 4;
+inline int ModuleInfo::_internal_reducers_size() const {
+  return _internal_reducers().size();
+}
+inline int ModuleInfo::reducers_size() const {
+  return _internal_reducers_size();
+}
+inline void ModuleInfo::clear_reducers() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.reducers_.Clear();
+}
+inline ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL ModuleInfo::mutable_reducers(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ModuleInfo.reducers)
+  return _internal_mutable_reducers()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL ModuleInfo::mutable_reducers()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.ModuleInfo.reducers)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_reducers();
+}
+inline const ::instantdb::grpc::ReducerDefinition& ModuleInfo::reducers(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ModuleInfo.reducers)
+  return _internal_reducers().Get(index);
+}
+inline ::instantdb::grpc::ReducerDefinition* PROTOBUF_NONNULL ModuleInfo::add_reducers()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::ReducerDefinition* _add = _internal_mutable_reducers()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.ModuleInfo.reducers)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>& ModuleInfo::reducers() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.ModuleInfo.reducers)
+  return _internal_reducers();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>&
+ModuleInfo::_internal_reducers() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.reducers_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ReducerDefinition>* PROTOBUF_NONNULL
+ModuleInfo::_internal_mutable_reducers() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.reducers_;
+}
+
+// bool loaded = 5;
+inline void ModuleInfo::clear_loaded() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.loaded_ = false;
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline bool ModuleInfo::loaded() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ModuleInfo.loaded)
+  return _internal_loaded();
+}
+inline void ModuleInfo::set_loaded(bool value) {
+  _internal_set_loaded(value);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ModuleInfo.loaded)
+}
+inline bool ModuleInfo::_internal_loaded() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.loaded_;
+}
+inline void ModuleInfo::_internal_set_loaded(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.loaded_ = value;
+}
+
+// bool validated = 6;
+inline void ModuleInfo::clear_validated() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.validated_ = false;
+  _impl_._has_bits_[0] &= ~0x00000008U;
+}
+inline bool ModuleInfo::validated() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ModuleInfo.validated)
+  return _internal_validated();
+}
+inline void ModuleInfo::set_validated(bool value) {
+  _internal_set_validated(value);
+  _impl_._has_bits_[0] |= 0x00000008U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ModuleInfo.validated)
+}
+inline bool ModuleInfo::_internal_validated() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.validated_;
+}
+inline void ModuleInfo::_internal_set_validated(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.validated_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// TableSchema
+
+// string name = 1;
+inline void TableSchema::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& TableSchema::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.TableSchema.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void TableSchema::set_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.TableSchema.name)
+}
+inline ::std::string* PROTOBUF_NONNULL TableSchema::mutable_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.TableSchema.name)
+  return _s;
+}
+inline const ::std::string& TableSchema::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void TableSchema::_internal_set_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL TableSchema::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE TableSchema::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.TableSchema.name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void TableSchema::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.TableSchema.name)
+}
+
+// repeated .instantdb.grpc.ColumnDefinition columns = 2;
+inline int TableSchema::_internal_columns_size() const {
+  return _internal_columns().size();
+}
+inline int TableSchema::columns_size() const {
+  return _internal_columns_size();
+}
+inline void TableSchema::clear_columns() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.columns_.Clear();
+}
+inline ::instantdb::grpc::ColumnDefinition* PROTOBUF_NONNULL TableSchema::mutable_columns(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.TableSchema.columns)
+  return _internal_mutable_columns()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>* PROTOBUF_NONNULL TableSchema::mutable_columns()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.TableSchema.columns)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_columns();
+}
+inline const ::instantdb::grpc::ColumnDefinition& TableSchema::columns(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.TableSchema.columns)
+  return _internal_columns().Get(index);
+}
+inline ::instantdb::grpc::ColumnDefinition* PROTOBUF_NONNULL TableSchema::add_columns()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::instantdb::grpc::ColumnDefinition* _add = _internal_mutable_columns()->Add();
+  // @@protoc_insertion_point(field_add:instantdb.grpc.TableSchema.columns)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>& TableSchema::columns() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.TableSchema.columns)
+  return _internal_columns();
+}
+inline const ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>&
+TableSchema::_internal_columns() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.columns_;
+}
+inline ::google::protobuf::RepeatedPtrField<::instantdb::grpc::ColumnDefinition>* PROTOBUF_NONNULL
+TableSchema::_internal_mutable_columns() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.columns_;
+}
+
+// repeated string primary_key = 3;
+inline int TableSchema::_internal_primary_key_size() const {
+  return _internal_primary_key().size();
+}
+inline int TableSchema::primary_key_size() const {
+  return _internal_primary_key_size();
+}
+inline void TableSchema::clear_primary_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.primary_key_.Clear();
+}
+inline ::std::string* PROTOBUF_NONNULL TableSchema::add_primary_key()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::std::string* _s = _internal_mutable_primary_key()->Add();
+  // @@protoc_insertion_point(field_add_mutable:instantdb.grpc.TableSchema.primary_key)
+  return _s;
+}
+inline const ::std::string& TableSchema::primary_key(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.TableSchema.primary_key)
+  return _internal_primary_key().Get(index);
+}
+inline ::std::string* PROTOBUF_NONNULL TableSchema::mutable_primary_key(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.TableSchema.primary_key)
+  return _internal_mutable_primary_key()->Mutable(index);
+}
+template <typename Arg_, typename... Args_>
+inline void TableSchema::set_primary_key(int index, Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::AssignToString(*_internal_mutable_primary_key()->Mutable(index), ::std::forward<Arg_>(value),
+                        args... );
+  // @@protoc_insertion_point(field_set:instantdb.grpc.TableSchema.primary_key)
+}
+template <typename Arg_, typename... Args_>
+inline void TableSchema::add_primary_key(Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_primary_key(),
+                               ::std::forward<Arg_>(value),
+                               args... );
+  // @@protoc_insertion_point(field_add:instantdb.grpc.TableSchema.primary_key)
+}
+inline const ::google::protobuf::RepeatedPtrField<::std::string>& TableSchema::primary_key()
+    const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.TableSchema.primary_key)
+  return _internal_primary_key();
+}
+inline ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL
+TableSchema::mutable_primary_key() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.TableSchema.primary_key)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_primary_key();
+}
+inline const ::google::protobuf::RepeatedPtrField<::std::string>&
+TableSchema::_internal_primary_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.primary_key_;
+}
+inline ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL
+TableSchema::_internal_mutable_primary_key() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.primary_key_;
+}
+
+// repeated string indices = 4;
+inline int TableSchema::_internal_indices_size() const {
+  return _internal_indices().size();
+}
+inline int TableSchema::indices_size() const {
+  return _internal_indices_size();
+}
+inline void TableSchema::clear_indices() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.indices_.Clear();
+}
+inline ::std::string* PROTOBUF_NONNULL TableSchema::add_indices()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::std::string* _s = _internal_mutable_indices()->Add();
+  // @@protoc_insertion_point(field_add_mutable:instantdb.grpc.TableSchema.indices)
+  return _s;
+}
+inline const ::std::string& TableSchema::indices(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.TableSchema.indices)
+  return _internal_indices().Get(index);
+}
+inline ::std::string* PROTOBUF_NONNULL TableSchema::mutable_indices(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.TableSchema.indices)
+  return _internal_mutable_indices()->Mutable(index);
+}
+template <typename Arg_, typename... Args_>
+inline void TableSchema::set_indices(int index, Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::AssignToString(*_internal_mutable_indices()->Mutable(index), ::std::forward<Arg_>(value),
+                        args... );
+  // @@protoc_insertion_point(field_set:instantdb.grpc.TableSchema.indices)
+}
+template <typename Arg_, typename... Args_>
+inline void TableSchema::add_indices(Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_indices(),
+                               ::std::forward<Arg_>(value),
+                               args... );
+  // @@protoc_insertion_point(field_add:instantdb.grpc.TableSchema.indices)
+}
+inline const ::google::protobuf::RepeatedPtrField<::std::string>& TableSchema::indices()
+    const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.TableSchema.indices)
+  return _internal_indices();
+}
+inline ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL
+TableSchema::mutable_indices() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.TableSchema.indices)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_indices();
+}
+inline const ::google::protobuf::RepeatedPtrField<::std::string>&
+TableSchema::_internal_indices() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.indices_;
+}
+inline ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL
+TableSchema::_internal_mutable_indices() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.indices_;
+}
+
+// -------------------------------------------------------------------
+
+// ColumnDefinition
+
+// string name = 1;
+inline void ColumnDefinition::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& ColumnDefinition::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ColumnDefinition.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ColumnDefinition::set_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ColumnDefinition.name)
+}
+inline ::std::string* PROTOBUF_NONNULL ColumnDefinition::mutable_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ColumnDefinition.name)
+  return _s;
+}
+inline const ::std::string& ColumnDefinition::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void ColumnDefinition::_internal_set_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ColumnDefinition::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ColumnDefinition::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ColumnDefinition.name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ColumnDefinition::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ColumnDefinition.name)
+}
+
+// .instantdb.grpc.ColumnType type = 2;
+inline void ColumnDefinition::clear_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.type_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline ::instantdb::grpc::ColumnType ColumnDefinition::type() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ColumnDefinition.type)
+  return _internal_type();
+}
+inline void ColumnDefinition::set_type(::instantdb::grpc::ColumnType value) {
+  _internal_set_type(value);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ColumnDefinition.type)
+}
+inline ::instantdb::grpc::ColumnType ColumnDefinition::_internal_type() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::instantdb::grpc::ColumnType>(_impl_.type_);
+}
+inline void ColumnDefinition::_internal_set_type(::instantdb::grpc::ColumnType value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.type_ = value;
+}
+
+// bool nullable = 3;
+inline void ColumnDefinition::clear_nullable() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.nullable_ = false;
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline bool ColumnDefinition::nullable() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ColumnDefinition.nullable)
+  return _internal_nullable();
+}
+inline void ColumnDefinition::set_nullable(bool value) {
+  _internal_set_nullable(value);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ColumnDefinition.nullable)
+}
+inline bool ColumnDefinition::_internal_nullable() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.nullable_;
+}
+inline void ColumnDefinition::_internal_set_nullable(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.nullable_ = value;
+}
+
+// bool is_primary_key = 4;
+inline void ColumnDefinition::clear_is_primary_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_primary_key_ = false;
+  _impl_._has_bits_[0] &= ~0x00000008U;
+}
+inline bool ColumnDefinition::is_primary_key() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ColumnDefinition.is_primary_key)
+  return _internal_is_primary_key();
+}
+inline void ColumnDefinition::set_is_primary_key(bool value) {
+  _internal_set_is_primary_key(value);
+  _impl_._has_bits_[0] |= 0x00000008U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ColumnDefinition.is_primary_key)
+}
+inline bool ColumnDefinition::_internal_is_primary_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_primary_key_;
+}
+inline void ColumnDefinition::_internal_set_is_primary_key(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_primary_key_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ReducerDefinition
+
+// string name = 1;
+inline void ReducerDefinition::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001U;
+}
+inline const ::std::string& ReducerDefinition::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ReducerDefinition.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ReducerDefinition::set_name(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ReducerDefinition.name)
+}
+inline ::std::string* PROTOBUF_NONNULL ReducerDefinition::mutable_name()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ReducerDefinition.name)
+  return _s;
+}
+inline const ::std::string& ReducerDefinition::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void ReducerDefinition::_internal_set_name(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  _impl_.name_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ReducerDefinition::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001U;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ReducerDefinition::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ReducerDefinition.name)
+  if ((_impl_._has_bits_[0] & 0x00000001U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001U;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ReducerDefinition::set_allocated_name(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001U;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ReducerDefinition.name)
+}
+
+// repeated string param_types = 2;
+inline int ReducerDefinition::_internal_param_types_size() const {
+  return _internal_param_types().size();
+}
+inline int ReducerDefinition::param_types_size() const {
+  return _internal_param_types_size();
+}
+inline void ReducerDefinition::clear_param_types() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.param_types_.Clear();
+}
+inline ::std::string* PROTOBUF_NONNULL ReducerDefinition::add_param_types()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::std::string* _s = _internal_mutable_param_types()->Add();
+  // @@protoc_insertion_point(field_add_mutable:instantdb.grpc.ReducerDefinition.param_types)
+  return _s;
+}
+inline const ::std::string& ReducerDefinition::param_types(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ReducerDefinition.param_types)
+  return _internal_param_types().Get(index);
+}
+inline ::std::string* PROTOBUF_NONNULL ReducerDefinition::mutable_param_types(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ReducerDefinition.param_types)
+  return _internal_mutable_param_types()->Mutable(index);
+}
+template <typename Arg_, typename... Args_>
+inline void ReducerDefinition::set_param_types(int index, Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::AssignToString(*_internal_mutable_param_types()->Mutable(index), ::std::forward<Arg_>(value),
+                        args... );
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ReducerDefinition.param_types)
+}
+template <typename Arg_, typename... Args_>
+inline void ReducerDefinition::add_param_types(Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_param_types(),
+                               ::std::forward<Arg_>(value),
+                               args... );
+  // @@protoc_insertion_point(field_add:instantdb.grpc.ReducerDefinition.param_types)
+}
+inline const ::google::protobuf::RepeatedPtrField<::std::string>& ReducerDefinition::param_types()
+    const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:instantdb.grpc.ReducerDefinition.param_types)
+  return _internal_param_types();
+}
+inline ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL
+ReducerDefinition::mutable_param_types() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:instantdb.grpc.ReducerDefinition.param_types)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_param_types();
+}
+inline const ::google::protobuf::RepeatedPtrField<::std::string>&
+ReducerDefinition::_internal_param_types() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.param_types_;
+}
+inline ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL
+ReducerDefinition::_internal_mutable_param_types() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.param_types_;
+}
+
+// string return_type = 3;
+inline void ReducerDefinition::clear_return_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.return_type_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002U;
+}
+inline const ::std::string& ReducerDefinition::return_type() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ReducerDefinition.return_type)
+  return _internal_return_type();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ReducerDefinition::set_return_type(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.return_type_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ReducerDefinition.return_type)
+}
+inline ::std::string* PROTOBUF_NONNULL ReducerDefinition::mutable_return_type()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_return_type();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.ReducerDefinition.return_type)
+  return _s;
+}
+inline const ::std::string& ReducerDefinition::_internal_return_type() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.return_type_.Get();
+}
+inline void ReducerDefinition::_internal_set_return_type(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  _impl_.return_type_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ReducerDefinition::_internal_mutable_return_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000002U;
+  return _impl_.return_type_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ReducerDefinition::release_return_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.ReducerDefinition.return_type)
+  if ((_impl_._has_bits_[0] & 0x00000002U) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002U;
+  auto* released = _impl_.return_type_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.return_type_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ReducerDefinition::set_allocated_return_type(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002U;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002U;
+  }
+  _impl_.return_type_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.return_type_.IsDefault()) {
+    _impl_.return_type_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.ReducerDefinition.return_type)
+}
+
+// bool is_init = 4;
+inline void ReducerDefinition::clear_is_init() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_init_ = false;
+  _impl_._has_bits_[0] &= ~0x00000004U;
+}
+inline bool ReducerDefinition::is_init() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ReducerDefinition.is_init)
+  return _internal_is_init();
+}
+inline void ReducerDefinition::set_is_init(bool value) {
+  _internal_set_is_init(value);
+  _impl_._has_bits_[0] |= 0x00000004U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ReducerDefinition.is_init)
+}
+inline bool ReducerDefinition::_internal_is_init() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_init_;
+}
+inline void ReducerDefinition::_internal_set_is_init(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_init_ = value;
+}
+
+// bool is_client_connected = 5;
+inline void ReducerDefinition::clear_is_client_connected() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_client_connected_ = false;
+  _impl_._has_bits_[0] &= ~0x00000008U;
+}
+inline bool ReducerDefinition::is_client_connected() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ReducerDefinition.is_client_connected)
+  return _internal_is_client_connected();
+}
+inline void ReducerDefinition::set_is_client_connected(bool value) {
+  _internal_set_is_client_connected(value);
+  _impl_._has_bits_[0] |= 0x00000008U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ReducerDefinition.is_client_connected)
+}
+inline bool ReducerDefinition::_internal_is_client_connected() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_client_connected_;
+}
+inline void ReducerDefinition::_internal_set_is_client_connected(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_client_connected_ = value;
+}
+
+// bool is_client_disconnected = 6;
+inline void ReducerDefinition::clear_is_client_disconnected() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_client_disconnected_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010U;
+}
+inline bool ReducerDefinition::is_client_disconnected() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.ReducerDefinition.is_client_disconnected)
+  return _internal_is_client_disconnected();
+}
+inline void ReducerDefinition::set_is_client_disconnected(bool value) {
+  _internal_set_is_client_disconnected(value);
+  _impl_._has_bits_[0] |= 0x00000010U;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.ReducerDefinition.is_client_disconnected)
+}
+inline bool ReducerDefinition::_internal_is_client_disconnected() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_client_disconnected_;
+}
+inline void ReducerDefinition::_internal_set_is_client_disconnected(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_client_disconnected_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// WasmValue
+
+// int64 int64_value = 1;
+inline bool WasmValue::has_int64_value() const {
+  return value_case() == kInt64Value;
+}
+inline void WasmValue::set_has_int64_value() {
+  _impl_._oneof_case_[0] = kInt64Value;
+}
+inline void WasmValue::clear_int64_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() == kInt64Value) {
+    _impl_.value_.int64_value_ = ::int64_t{0};
+    clear_has_value();
+  }
+}
+inline ::int64_t WasmValue::int64_value() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.WasmValue.int64_value)
+  return _internal_int64_value();
+}
+inline void WasmValue::set_int64_value(::int64_t value) {
+  if (value_case() != kInt64Value) {
+    clear_value();
+    set_has_int64_value();
+  }
+  _impl_.value_.int64_value_ = value;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.WasmValue.int64_value)
+}
+inline ::int64_t WasmValue::_internal_int64_value() const {
+  if (value_case() == kInt64Value) {
+    return _impl_.value_.int64_value_;
+  }
+  return ::int64_t{0};
+}
+
+// string string_value = 2;
+inline bool WasmValue::has_string_value() const {
+  return value_case() == kStringValue;
+}
+inline void WasmValue::set_has_string_value() {
+  _impl_._oneof_case_[0] = kStringValue;
+}
+inline void WasmValue::clear_string_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() == kStringValue) {
+    _impl_.value_.string_value_.Destroy();
+    clear_has_value();
+  }
+}
+inline const ::std::string& WasmValue::string_value() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.WasmValue.string_value)
+  return _internal_string_value();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WasmValue::set_string_value(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() != kStringValue) {
+    clear_value();
+
+    set_has_string_value();
+    _impl_.value_.string_value_.InitDefault();
+  }
+  _impl_.value_.string_value_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.WasmValue.string_value)
+}
+inline ::std::string* PROTOBUF_NONNULL WasmValue::mutable_string_value()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_string_value();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.WasmValue.string_value)
+  return _s;
+}
+inline const ::std::string& WasmValue::_internal_string_value() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  if (value_case() != kStringValue) {
+    return ::google::protobuf::internal::GetEmptyStringAlreadyInited();
+  }
+  return _impl_.value_.string_value_.Get();
+}
+inline void WasmValue::_internal_set_string_value(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() != kStringValue) {
+    clear_value();
+
+    set_has_string_value();
+    _impl_.value_.string_value_.InitDefault();
+  }
+  _impl_.value_.string_value_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WasmValue::_internal_mutable_string_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() != kStringValue) {
+    clear_value();
+
+    set_has_string_value();
+    _impl_.value_.string_value_.InitDefault();
+  }
+  return _impl_.value_.string_value_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WasmValue::release_string_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.WasmValue.string_value)
+  if (value_case() != kStringValue) {
+    return nullptr;
+  }
+  clear_has_value();
+  return _impl_.value_.string_value_.Release();
+}
+inline void WasmValue::set_allocated_string_value(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (has_value()) {
+    clear_value();
+  }
+  if (value != nullptr) {
+    set_has_string_value();
+    _impl_.value_.string_value_.InitAllocated(value, GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.WasmValue.string_value)
+}
+
+// double double_value = 3;
+inline bool WasmValue::has_double_value() const {
+  return value_case() == kDoubleValue;
+}
+inline void WasmValue::set_has_double_value() {
+  _impl_._oneof_case_[0] = kDoubleValue;
+}
+inline void WasmValue::clear_double_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() == kDoubleValue) {
+    _impl_.value_.double_value_ = 0;
+    clear_has_value();
+  }
+}
+inline double WasmValue::double_value() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.WasmValue.double_value)
+  return _internal_double_value();
+}
+inline void WasmValue::set_double_value(double value) {
+  if (value_case() != kDoubleValue) {
+    clear_value();
+    set_has_double_value();
+  }
+  _impl_.value_.double_value_ = value;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.WasmValue.double_value)
+}
+inline double WasmValue::_internal_double_value() const {
+  if (value_case() == kDoubleValue) {
+    return _impl_.value_.double_value_;
+  }
+  return 0;
+}
+
+// bool bool_value = 4;
+inline bool WasmValue::has_bool_value() const {
+  return value_case() == kBoolValue;
+}
+inline void WasmValue::set_has_bool_value() {
+  _impl_._oneof_case_[0] = kBoolValue;
+}
+inline void WasmValue::clear_bool_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() == kBoolValue) {
+    _impl_.value_.bool_value_ = false;
+    clear_has_value();
+  }
+}
+inline bool WasmValue::bool_value() const {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.WasmValue.bool_value)
+  return _internal_bool_value();
+}
+inline void WasmValue::set_bool_value(bool value) {
+  if (value_case() != kBoolValue) {
+    clear_value();
+    set_has_bool_value();
+  }
+  _impl_.value_.bool_value_ = value;
+  // @@protoc_insertion_point(field_set:instantdb.grpc.WasmValue.bool_value)
+}
+inline bool WasmValue::_internal_bool_value() const {
+  if (value_case() == kBoolValue) {
+    return _impl_.value_.bool_value_;
+  }
+  return false;
+}
+
+// bytes bytes_value = 5;
+inline bool WasmValue::has_bytes_value() const {
+  return value_case() == kBytesValue;
+}
+inline void WasmValue::set_has_bytes_value() {
+  _impl_._oneof_case_[0] = kBytesValue;
+}
+inline void WasmValue::clear_bytes_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() == kBytesValue) {
+    _impl_.value_.bytes_value_.Destroy();
+    clear_has_value();
+  }
+}
+inline const ::std::string& WasmValue::bytes_value() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:instantdb.grpc.WasmValue.bytes_value)
+  return _internal_bytes_value();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void WasmValue::set_bytes_value(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() != kBytesValue) {
+    clear_value();
+
+    set_has_bytes_value();
+    _impl_.value_.bytes_value_.InitDefault();
+  }
+  _impl_.value_.bytes_value_.SetBytes(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:instantdb.grpc.WasmValue.bytes_value)
+}
+inline ::std::string* PROTOBUF_NONNULL WasmValue::mutable_bytes_value()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::std::string* _s = _internal_mutable_bytes_value();
+  // @@protoc_insertion_point(field_mutable:instantdb.grpc.WasmValue.bytes_value)
+  return _s;
+}
+inline const ::std::string& WasmValue::_internal_bytes_value() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  if (value_case() != kBytesValue) {
+    return ::google::protobuf::internal::GetEmptyStringAlreadyInited();
+  }
+  return _impl_.value_.bytes_value_.Get();
+}
+inline void WasmValue::_internal_set_bytes_value(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() != kBytesValue) {
+    clear_value();
+
+    set_has_bytes_value();
+    _impl_.value_.bytes_value_.InitDefault();
+  }
+  _impl_.value_.bytes_value_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL WasmValue::_internal_mutable_bytes_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value_case() != kBytesValue) {
+    clear_value();
+
+    set_has_bytes_value();
+    _impl_.value_.bytes_value_.InitDefault();
+  }
+  return _impl_.value_.bytes_value_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE WasmValue::release_bytes_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:instantdb.grpc.WasmValue.bytes_value)
+  if (value_case() != kBytesValue) {
+    return nullptr;
+  }
+  clear_has_value();
+  return _impl_.value_.bytes_value_.Release();
+}
+inline void WasmValue::set_allocated_bytes_value(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (has_value()) {
+    clear_value();
+  }
+  if (value != nullptr) {
+    set_has_bytes_value();
+    _impl_.value_.bytes_value_.InitAllocated(value, GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:instantdb.grpc.WasmValue.bytes_value)
+}
+
+inline bool WasmValue::has_value() const {
+  return value_case() != VALUE_NOT_SET;
+}
+inline void WasmValue::clear_has_value() {
+  _impl_._oneof_case_[0] = VALUE_NOT_SET;
+}
+inline WasmValue::ValueCase WasmValue::value_case() const {
+  return WasmValue::ValueCase(_impl_._oneof_case_[0]);
+}
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif  // __GNUC__
@@ -3490,6 +9744,19 @@ inline void ServerStats::_internal_set_failed_queries(::int64_t value) {
 }  // namespace grpc
 }  // namespace instantdb
 
+
+namespace google {
+namespace protobuf {
+
+template <>
+struct is_proto_enum<::instantdb::grpc::ColumnType> : std::true_type {};
+template <>
+inline const EnumDescriptor* PROTOBUF_NONNULL GetEnumDescriptor<::instantdb::grpc::ColumnType>() {
+  return ::instantdb::grpc::ColumnType_descriptor();
+}
+
+}  // namespace protobuf
+}  // namespace google
 
 // @@protoc_insertion_point(global_scope)
 

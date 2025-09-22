@@ -560,6 +560,857 @@ class SQLService final {
   typedef WithStreamedUnaryMethod_Execute<WithStreamedUnaryMethod_ExecuteTransaction<WithStreamedUnaryMethod_GetStatus<Service > > > StreamedService;
 };
 
+// WASM module management service
+class WasmService final {
+ public:
+  static constexpr char const* service_full_name() {
+    return "instantdb.grpc.WasmService";
+  }
+  class StubInterface {
+   public:
+    virtual ~StubInterface() {}
+    // Deploy a new WASM module
+    virtual ::grpc::Status DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::instantdb::grpc::DeployModuleResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::DeployModuleResponse>> AsyncDeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::DeployModuleResponse>>(AsyncDeployModuleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::DeployModuleResponse>> PrepareAsyncDeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::DeployModuleResponse>>(PrepareAsyncDeployModuleRaw(context, request, cq));
+    }
+    // Remove a WASM module
+    virtual ::grpc::Status UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::instantdb::grpc::UndeployModuleResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::UndeployModuleResponse>> AsyncUndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::UndeployModuleResponse>>(AsyncUndeployModuleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::UndeployModuleResponse>> PrepareAsyncUndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::UndeployModuleResponse>>(PrepareAsyncUndeployModuleRaw(context, request, cq));
+    }
+    // List all deployed modules
+    virtual ::grpc::Status ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::instantdb::grpc::ListModulesResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ListModulesResponse>> AsyncListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ListModulesResponse>>(AsyncListModulesRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ListModulesResponse>> PrepareAsyncListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ListModulesResponse>>(PrepareAsyncListModulesRaw(context, request, cq));
+    }
+    // Get module information
+    virtual ::grpc::Status GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::instantdb::grpc::GetModuleResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::GetModuleResponse>> AsyncGetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::GetModuleResponse>>(AsyncGetModuleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::GetModuleResponse>> PrepareAsyncGetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::GetModuleResponse>>(PrepareAsyncGetModuleRaw(context, request, cq));
+    }
+    // Execute a reducer function
+    virtual ::grpc::Status ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::instantdb::grpc::ExecuteReducerResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ExecuteReducerResponse>> AsyncExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ExecuteReducerResponse>>(AsyncExecuteReducerRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ExecuteReducerResponse>> PrepareAsyncExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ExecuteReducerResponse>>(PrepareAsyncExecuteReducerRaw(context, request, cq));
+    }
+    class async_interface {
+     public:
+      virtual ~async_interface() {}
+      // Deploy a new WASM module
+      virtual void DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      // Remove a WASM module
+      virtual void UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      // List all deployed modules
+      virtual void ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      // Get module information
+      virtual void GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      // Execute a reducer function
+      virtual void ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+    };
+    typedef class async_interface experimental_async_interface;
+    virtual class async_interface* async() { return nullptr; }
+    class async_interface* experimental_async() { return async(); }
+   private:
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::DeployModuleResponse>* AsyncDeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::DeployModuleResponse>* PrepareAsyncDeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::UndeployModuleResponse>* AsyncUndeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::UndeployModuleResponse>* PrepareAsyncUndeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ListModulesResponse>* AsyncListModulesRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ListModulesResponse>* PrepareAsyncListModulesRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::GetModuleResponse>* AsyncGetModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::GetModuleResponse>* PrepareAsyncGetModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ExecuteReducerResponse>* AsyncExecuteReducerRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::instantdb::grpc::ExecuteReducerResponse>* PrepareAsyncExecuteReducerRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) = 0;
+  };
+  class Stub final : public StubInterface {
+   public:
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
+    ::grpc::Status DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::instantdb::grpc::DeployModuleResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>> AsyncDeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>>(AsyncDeployModuleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>> PrepareAsyncDeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>>(PrepareAsyncDeployModuleRaw(context, request, cq));
+    }
+    ::grpc::Status UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::instantdb::grpc::UndeployModuleResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>> AsyncUndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>>(AsyncUndeployModuleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>> PrepareAsyncUndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>>(PrepareAsyncUndeployModuleRaw(context, request, cq));
+    }
+    ::grpc::Status ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::instantdb::grpc::ListModulesResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>> AsyncListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>>(AsyncListModulesRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>> PrepareAsyncListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>>(PrepareAsyncListModulesRaw(context, request, cq));
+    }
+    ::grpc::Status GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::instantdb::grpc::GetModuleResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>> AsyncGetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>>(AsyncGetModuleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>> PrepareAsyncGetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>>(PrepareAsyncGetModuleRaw(context, request, cq));
+    }
+    ::grpc::Status ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::instantdb::grpc::ExecuteReducerResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>> AsyncExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>>(AsyncExecuteReducerRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>> PrepareAsyncExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>>(PrepareAsyncExecuteReducerRaw(context, request, cq));
+    }
+    class async final :
+      public StubInterface::async_interface {
+     public:
+      void DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response, std::function<void(::grpc::Status)>) override;
+      void DeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response, std::function<void(::grpc::Status)>) override;
+      void UndeployModule(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response, std::function<void(::grpc::Status)>) override;
+      void ListModules(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response, std::function<void(::grpc::Status)>) override;
+      void GetModule(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response, std::function<void(::grpc::Status)>) override;
+      void ExecuteReducer(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+     private:
+      friend class Stub;
+      explicit async(Stub* stub): stub_(stub) { }
+      Stub* stub() { return stub_; }
+      Stub* stub_;
+    };
+    class async* async() override { return &async_stub_; }
+
+   private:
+    std::shared_ptr< ::grpc::ChannelInterface> channel_;
+    class async async_stub_{this};
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>* AsyncDeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::DeployModuleResponse>* PrepareAsyncDeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::DeployModuleRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>* AsyncUndeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::UndeployModuleResponse>* PrepareAsyncUndeployModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::UndeployModuleRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>* AsyncListModulesRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ListModulesResponse>* PrepareAsyncListModulesRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ListModulesRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>* AsyncGetModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::GetModuleResponse>* PrepareAsyncGetModuleRaw(::grpc::ClientContext* context, const ::instantdb::grpc::GetModuleRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>* AsyncExecuteReducerRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::instantdb::grpc::ExecuteReducerResponse>* PrepareAsyncExecuteReducerRaw(::grpc::ClientContext* context, const ::instantdb::grpc::ExecuteReducerRequest& request, ::grpc::CompletionQueue* cq) override;
+    const ::grpc::internal::RpcMethod rpcmethod_DeployModule_;
+    const ::grpc::internal::RpcMethod rpcmethod_UndeployModule_;
+    const ::grpc::internal::RpcMethod rpcmethod_ListModules_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetModule_;
+    const ::grpc::internal::RpcMethod rpcmethod_ExecuteReducer_;
+  };
+  static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
+
+  class Service : public ::grpc::Service {
+   public:
+    Service();
+    virtual ~Service();
+    // Deploy a new WASM module
+    virtual ::grpc::Status DeployModule(::grpc::ServerContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response);
+    // Remove a WASM module
+    virtual ::grpc::Status UndeployModule(::grpc::ServerContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response);
+    // List all deployed modules
+    virtual ::grpc::Status ListModules(::grpc::ServerContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response);
+    // Get module information
+    virtual ::grpc::Status GetModule(::grpc::ServerContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response);
+    // Execute a reducer function
+    virtual ::grpc::Status ExecuteReducer(::grpc::ServerContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response);
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_DeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_DeployModule() {
+      ::grpc::Service::MarkMethodAsync(0);
+    }
+    ~WithAsyncMethod_DeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status DeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::DeployModuleRequest* /*request*/, ::instantdb::grpc::DeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestDeployModule(::grpc::ServerContext* context, ::instantdb::grpc::DeployModuleRequest* request, ::grpc::ServerAsyncResponseWriter< ::instantdb::grpc::DeployModuleResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_UndeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_UndeployModule() {
+      ::grpc::Service::MarkMethodAsync(1);
+    }
+    ~WithAsyncMethod_UndeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UndeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::UndeployModuleRequest* /*request*/, ::instantdb::grpc::UndeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUndeployModule(::grpc::ServerContext* context, ::instantdb::grpc::UndeployModuleRequest* request, ::grpc::ServerAsyncResponseWriter< ::instantdb::grpc::UndeployModuleResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_ListModules : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ListModules() {
+      ::grpc::Service::MarkMethodAsync(2);
+    }
+    ~WithAsyncMethod_ListModules() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ListModules(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ListModulesRequest* /*request*/, ::instantdb::grpc::ListModulesResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestListModules(::grpc::ServerContext* context, ::instantdb::grpc::ListModulesRequest* request, ::grpc::ServerAsyncResponseWriter< ::instantdb::grpc::ListModulesResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_GetModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetModule() {
+      ::grpc::Service::MarkMethodAsync(3);
+    }
+    ~WithAsyncMethod_GetModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::GetModuleRequest* /*request*/, ::instantdb::grpc::GetModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetModule(::grpc::ServerContext* context, ::instantdb::grpc::GetModuleRequest* request, ::grpc::ServerAsyncResponseWriter< ::instantdb::grpc::GetModuleResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_ExecuteReducer : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ExecuteReducer() {
+      ::grpc::Service::MarkMethodAsync(4);
+    }
+    ~WithAsyncMethod_ExecuteReducer() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ExecuteReducer(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ExecuteReducerRequest* /*request*/, ::instantdb::grpc::ExecuteReducerResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestExecuteReducer(::grpc::ServerContext* context, ::instantdb::grpc::ExecuteReducerRequest* request, ::grpc::ServerAsyncResponseWriter< ::instantdb::grpc::ExecuteReducerResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_DeployModule<WithAsyncMethod_UndeployModule<WithAsyncMethod_ListModules<WithAsyncMethod_GetModule<WithAsyncMethod_ExecuteReducer<Service > > > > > AsyncService;
+  template <class BaseClass>
+  class WithCallbackMethod_DeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_DeployModule() {
+      ::grpc::Service::MarkMethodCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::instantdb::grpc::DeployModuleRequest* request, ::instantdb::grpc::DeployModuleResponse* response) { return this->DeployModule(context, request, response); }));}
+    void SetMessageAllocatorFor_DeployModule(
+        ::grpc::MessageAllocator< ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_DeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status DeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::DeployModuleRequest* /*request*/, ::instantdb::grpc::DeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* DeployModule(
+      ::grpc::CallbackServerContext* /*context*/, const ::instantdb::grpc::DeployModuleRequest* /*request*/, ::instantdb::grpc::DeployModuleResponse* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_UndeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_UndeployModule() {
+      ::grpc::Service::MarkMethodCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::instantdb::grpc::UndeployModuleRequest* request, ::instantdb::grpc::UndeployModuleResponse* response) { return this->UndeployModule(context, request, response); }));}
+    void SetMessageAllocatorFor_UndeployModule(
+        ::grpc::MessageAllocator< ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_UndeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UndeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::UndeployModuleRequest* /*request*/, ::instantdb::grpc::UndeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* UndeployModule(
+      ::grpc::CallbackServerContext* /*context*/, const ::instantdb::grpc::UndeployModuleRequest* /*request*/, ::instantdb::grpc::UndeployModuleResponse* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_ListModules : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_ListModules() {
+      ::grpc::Service::MarkMethodCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::instantdb::grpc::ListModulesRequest* request, ::instantdb::grpc::ListModulesResponse* response) { return this->ListModules(context, request, response); }));}
+    void SetMessageAllocatorFor_ListModules(
+        ::grpc::MessageAllocator< ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_ListModules() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ListModules(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ListModulesRequest* /*request*/, ::instantdb::grpc::ListModulesResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* ListModules(
+      ::grpc::CallbackServerContext* /*context*/, const ::instantdb::grpc::ListModulesRequest* /*request*/, ::instantdb::grpc::ListModulesResponse* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_GetModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_GetModule() {
+      ::grpc::Service::MarkMethodCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::instantdb::grpc::GetModuleRequest* request, ::instantdb::grpc::GetModuleResponse* response) { return this->GetModule(context, request, response); }));}
+    void SetMessageAllocatorFor_GetModule(
+        ::grpc::MessageAllocator< ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_GetModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::GetModuleRequest* /*request*/, ::instantdb::grpc::GetModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetModule(
+      ::grpc::CallbackServerContext* /*context*/, const ::instantdb::grpc::GetModuleRequest* /*request*/, ::instantdb::grpc::GetModuleResponse* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_ExecuteReducer : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_ExecuteReducer() {
+      ::grpc::Service::MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::instantdb::grpc::ExecuteReducerRequest* request, ::instantdb::grpc::ExecuteReducerResponse* response) { return this->ExecuteReducer(context, request, response); }));}
+    void SetMessageAllocatorFor_ExecuteReducer(
+        ::grpc::MessageAllocator< ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_ExecuteReducer() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ExecuteReducer(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ExecuteReducerRequest* /*request*/, ::instantdb::grpc::ExecuteReducerResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* ExecuteReducer(
+      ::grpc::CallbackServerContext* /*context*/, const ::instantdb::grpc::ExecuteReducerRequest* /*request*/, ::instantdb::grpc::ExecuteReducerResponse* /*response*/)  { return nullptr; }
+  };
+  typedef WithCallbackMethod_DeployModule<WithCallbackMethod_UndeployModule<WithCallbackMethod_ListModules<WithCallbackMethod_GetModule<WithCallbackMethod_ExecuteReducer<Service > > > > > CallbackService;
+  typedef CallbackService ExperimentalCallbackService;
+  template <class BaseClass>
+  class WithGenericMethod_DeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_DeployModule() {
+      ::grpc::Service::MarkMethodGeneric(0);
+    }
+    ~WithGenericMethod_DeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status DeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::DeployModuleRequest* /*request*/, ::instantdb::grpc::DeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_UndeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_UndeployModule() {
+      ::grpc::Service::MarkMethodGeneric(1);
+    }
+    ~WithGenericMethod_UndeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UndeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::UndeployModuleRequest* /*request*/, ::instantdb::grpc::UndeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ListModules : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ListModules() {
+      ::grpc::Service::MarkMethodGeneric(2);
+    }
+    ~WithGenericMethod_ListModules() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ListModules(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ListModulesRequest* /*request*/, ::instantdb::grpc::ListModulesResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetModule() {
+      ::grpc::Service::MarkMethodGeneric(3);
+    }
+    ~WithGenericMethod_GetModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::GetModuleRequest* /*request*/, ::instantdb::grpc::GetModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ExecuteReducer : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ExecuteReducer() {
+      ::grpc::Service::MarkMethodGeneric(4);
+    }
+    ~WithGenericMethod_ExecuteReducer() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ExecuteReducer(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ExecuteReducerRequest* /*request*/, ::instantdb::grpc::ExecuteReducerResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_DeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_DeployModule() {
+      ::grpc::Service::MarkMethodRaw(0);
+    }
+    ~WithRawMethod_DeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status DeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::DeployModuleRequest* /*request*/, ::instantdb::grpc::DeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestDeployModule(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_UndeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_UndeployModule() {
+      ::grpc::Service::MarkMethodRaw(1);
+    }
+    ~WithRawMethod_UndeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UndeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::UndeployModuleRequest* /*request*/, ::instantdb::grpc::UndeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUndeployModule(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ListModules : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ListModules() {
+      ::grpc::Service::MarkMethodRaw(2);
+    }
+    ~WithRawMethod_ListModules() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ListModules(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ListModulesRequest* /*request*/, ::instantdb::grpc::ListModulesResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestListModules(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetModule() {
+      ::grpc::Service::MarkMethodRaw(3);
+    }
+    ~WithRawMethod_GetModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::GetModuleRequest* /*request*/, ::instantdb::grpc::GetModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetModule(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ExecuteReducer : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ExecuteReducer() {
+      ::grpc::Service::MarkMethodRaw(4);
+    }
+    ~WithRawMethod_ExecuteReducer() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ExecuteReducer(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ExecuteReducerRequest* /*request*/, ::instantdb::grpc::ExecuteReducerResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestExecuteReducer(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_DeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_DeployModule() {
+      ::grpc::Service::MarkMethodRawCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->DeployModule(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_DeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status DeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::DeployModuleRequest* /*request*/, ::instantdb::grpc::DeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* DeployModule(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_UndeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_UndeployModule() {
+      ::grpc::Service::MarkMethodRawCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UndeployModule(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_UndeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UndeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::UndeployModuleRequest* /*request*/, ::instantdb::grpc::UndeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* UndeployModule(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_ListModules : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_ListModules() {
+      ::grpc::Service::MarkMethodRawCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ListModules(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_ListModules() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ListModules(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ListModulesRequest* /*request*/, ::instantdb::grpc::ListModulesResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* ListModules(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_GetModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_GetModule() {
+      ::grpc::Service::MarkMethodRawCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetModule(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_GetModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::GetModuleRequest* /*request*/, ::instantdb::grpc::GetModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetModule(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_ExecuteReducer : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_ExecuteReducer() {
+      ::grpc::Service::MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ExecuteReducer(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_ExecuteReducer() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ExecuteReducer(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ExecuteReducerRequest* /*request*/, ::instantdb::grpc::ExecuteReducerResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* ExecuteReducer(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_DeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_DeployModule() {
+      ::grpc::Service::MarkMethodStreamed(0,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::instantdb::grpc::DeployModuleRequest, ::instantdb::grpc::DeployModuleResponse>* streamer) {
+                       return this->StreamedDeployModule(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_DeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status DeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::DeployModuleRequest* /*request*/, ::instantdb::grpc::DeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedDeployModule(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::instantdb::grpc::DeployModuleRequest,::instantdb::grpc::DeployModuleResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_UndeployModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_UndeployModule() {
+      ::grpc::Service::MarkMethodStreamed(1,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::instantdb::grpc::UndeployModuleRequest, ::instantdb::grpc::UndeployModuleResponse>* streamer) {
+                       return this->StreamedUndeployModule(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_UndeployModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status UndeployModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::UndeployModuleRequest* /*request*/, ::instantdb::grpc::UndeployModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedUndeployModule(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::instantdb::grpc::UndeployModuleRequest,::instantdb::grpc::UndeployModuleResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ListModules : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ListModules() {
+      ::grpc::Service::MarkMethodStreamed(2,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::instantdb::grpc::ListModulesRequest, ::instantdb::grpc::ListModulesResponse>* streamer) {
+                       return this->StreamedListModules(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ListModules() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ListModules(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ListModulesRequest* /*request*/, ::instantdb::grpc::ListModulesResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedListModules(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::instantdb::grpc::ListModulesRequest,::instantdb::grpc::ListModulesResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetModule : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetModule() {
+      ::grpc::Service::MarkMethodStreamed(3,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::instantdb::grpc::GetModuleRequest, ::instantdb::grpc::GetModuleResponse>* streamer) {
+                       return this->StreamedGetModule(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetModule() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetModule(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::GetModuleRequest* /*request*/, ::instantdb::grpc::GetModuleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetModule(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::instantdb::grpc::GetModuleRequest,::instantdb::grpc::GetModuleResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ExecuteReducer : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ExecuteReducer() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::instantdb::grpc::ExecuteReducerRequest, ::instantdb::grpc::ExecuteReducerResponse>* streamer) {
+                       return this->StreamedExecuteReducer(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ExecuteReducer() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ExecuteReducer(::grpc::ServerContext* /*context*/, const ::instantdb::grpc::ExecuteReducerRequest* /*request*/, ::instantdb::grpc::ExecuteReducerResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedExecuteReducer(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::instantdb::grpc::ExecuteReducerRequest,::instantdb::grpc::ExecuteReducerResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_DeployModule<WithStreamedUnaryMethod_UndeployModule<WithStreamedUnaryMethod_ListModules<WithStreamedUnaryMethod_GetModule<WithStreamedUnaryMethod_ExecuteReducer<Service > > > > > StreamedUnaryService;
+  typedef Service SplitStreamedService;
+  typedef WithStreamedUnaryMethod_DeployModule<WithStreamedUnaryMethod_UndeployModule<WithStreamedUnaryMethod_ListModules<WithStreamedUnaryMethod_GetModule<WithStreamedUnaryMethod_ExecuteReducer<Service > > > > > StreamedService;
+};
+
 }  // namespace grpc
 }  // namespace instantdb
 
