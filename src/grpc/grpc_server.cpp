@@ -54,7 +54,13 @@ public:
     ::grpc::Status DeployModule(::grpc::ServerContext* context,
                                const instantdb::grpc::DeployModuleRequest* request,
                                instantdb::grpc::DeployModuleResponse* response) override {
+        spdlog::info("DEBUG: WasmGrpcServiceImpl::DeployModule ENTRY - request received");
+        spdlog::info("DEBUG: About to call wrapper_->DeployModule");
         auto result = wrapper_->DeployModule(context, request, response);
+        spdlog::info("DEBUG: wrapper_->DeployModule returned");
+        spdlog::info("DEBUG: Final response - success: {}, module_id: '{}'",
+                     response->success(), response->module_id());
+        spdlog::info("DEBUG: About to return gRPC Status");
         return *static_cast<::grpc::Status*>(result);
     }
 
@@ -130,7 +136,9 @@ public:
             builder.SetMaxSendMessageSize(config_.max_message_size);
 
             // Register services
+            spdlog::info("DEBUG: Registering SQL service");
             builder.RegisterService(&grpc_service_);
+            spdlog::info("DEBUG: Registering WASM service");
             builder.RegisterService(&wasm_grpc_service_);
 
             // Build and start server

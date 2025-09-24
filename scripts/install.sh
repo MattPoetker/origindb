@@ -18,8 +18,8 @@ BINARIES="instantdb instantdb_server instantdb_sql instantdb_client instantdb_de
 INSTALL_DIR="/usr/local/bin"
 SHARE_DIR="/usr/local/share/instantdb"  # Directory for proto files and other resources
 TMP_DIR="/tmp/instantdb-install"
-LOCAL_BUILD_DIR="$(dirname "$0")/../build"  # Path to local build directory
-LOCAL_PROTO_FILE="$(dirname "$0")/../proto/instantdb.proto"  # Path to proto file in repo
+LOCAL_BUILD_DIR="$(dirname "$0")/.."  # Path to root directory (where current binaries are)
+LOCAL_PROTO_FILE="$(dirname "$0")/../instantdb.proto"  # Path to proto file in repo root
 
 # Logging functions
 log() {
@@ -234,7 +234,7 @@ install_local() {
     # Check if main binary exists
     if [ ! -f "$LOCAL_BUILD_DIR/$MAIN_BINARY" ]; then
         error "Local build not found at $LOCAL_BUILD_DIR/$MAIN_BINARY"
-        error "Please build the project first with: cd build && make"
+        error "Please build the project first with: make"
         exit 1
     fi
 

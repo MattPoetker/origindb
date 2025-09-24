@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <thread>
 #include <fstream>
+#include <atomic>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -21,6 +22,13 @@
 #endif
 
 using namespace instantdb;
+
+// Global shutdown flag accessible from WASM engine
+std::atomic<bool> g_shutdown_requested = false;
+
+// Signal handling with timeout enforcement
+std::atomic<bool> g_signal_received = false;
+std::atomic<int> g_signal_count = 0;
 
 class InstantDBServer {
 public:
@@ -167,12 +175,16 @@ public:
     void Run() {
         spdlog::info("💡 Server running - send SIGINT (Ctrl+C) to shutdown gracefully");
 
-        // Wait for shutdown signal
-        while (!shutdown_requested_) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+        // Wait for shutdown signal with immediate response
+        while (!shutdown_requested_ && !g_signal_received.load()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Faster polling for responsiveness
 
             // Log periodic stats
             LogPeriodicStats();
+        }
+
+        if (g_signal_received.load()) {
+            spdlog::info("🔔 Signal received, initiating shutdown...");
         }
     }
 
@@ -195,6 +207,7 @@ public:
         }
 
         if (wasm_engine_) {
+            wasm_engine_->RequestShutdown();
             wasm_engine_->Shutdown();
             spdlog::info("✅ WASM engine stopped");
         }
@@ -310,9 +323,39 @@ private:
 // Global server instance for signal handling
 static InstantDBServer* g_server = nullptr;
 
-// Signal handler
+// Timeout mechanism for forced shutdown
+void forced_shutdown_thread() {
+    std::this_thread::sleep_for(std::chrono::seconds(10)); // 10-second timeout
+
+    if (!g_shutdown_requested.load()) {
+        spdlog::error("⏰ FORCED SHUTDOWN: Server did not respond to signals within timeout");
+        std::exit(1);
+    }
+}
+
+// Enhanced signal handler with immediate response and forced termination
 void signal_handler(int signal) {
-    spdlog::info("Received signal {}, requesting graceful shutdown...", signal);
+    int signal_count = g_signal_count.fetch_add(1) + 1;
+
+    spdlog::info("🔔 Signal {} received (count: {}), requesting immediate shutdown...", signal, signal_count);
+
+    // Set signal received flag immediately
+    g_signal_received.store(true);
+    g_shutdown_requested.store(true);
+
+    // Start forced shutdown timer on first signal
+    if (signal_count == 1) {
+        spdlog::info("⏱️  Starting 10-second shutdown timeout...");
+        std::thread timeout_thread(forced_shutdown_thread);
+        timeout_thread.detach();
+    }
+
+    // Force immediate exit on second signal
+    if (signal_count >= 2) {
+        spdlog::error("⚡ IMMEDIATE EXIT: Second signal received - forcing termination");
+        std::exit(1);
+    }
+
     if (g_server) {
         g_server->RequestShutdown();
     }
@@ -472,9 +515,17 @@ int main(int argc, char* argv[]) {
         InstantDBServer server(config);
         g_server = &server;
 
-        // Setup signal handlers
-        signal(SIGINT, signal_handler);
-        signal(SIGTERM, signal_handler);
+        // Setup signal handlers with verification
+        spdlog::info("🛡️  Registering signal handlers...");
+        if (signal(SIGINT, signal_handler) == SIG_ERR) {
+            spdlog::error("❌ Failed to register SIGINT handler");
+            return 1;
+        }
+        if (signal(SIGTERM, signal_handler) == SIG_ERR) {
+            spdlog::error("❌ Failed to register SIGTERM handler");
+            return 1;
+        }
+        spdlog::info("✅ Signal handlers registered successfully");
 
         // Initialize and run
         if (!server.Initialize()) {

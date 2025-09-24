@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <functional>
 #include <variant>
+#include <atomic>
 #include "storage/table.h"
 
 namespace instantdb {
@@ -146,6 +147,7 @@ public:
 
     bool Initialize();
     void Shutdown();
+    void RequestShutdown();
 
     // Module management
     bool LoadModule(const std::string& name, const std::vector<uint8_t>& bytecode);
@@ -190,6 +192,7 @@ private:
     uint32_t memory_limit_mb_;
 
     bool initialized_;
+    std::atomic<bool> shutdown_requested_;
     mutable std::mutex modules_mutex_;
 
     // Instance management

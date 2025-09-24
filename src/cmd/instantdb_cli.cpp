@@ -271,6 +271,7 @@ int handleStopCommand(const std::vector<std::string>& args) {
 }
 
 int handlePublishCommand(const std::vector<std::string>& args) {
+    std::cout << "PUBLISH_DEBUG: Starting handlePublishCommand" << std::endl;
     std::string server_url = "http://localhost:9090";
     std::string project_path = ".";
 
@@ -415,8 +416,14 @@ int handlePublishCommand(const std::vector<std::string>& args) {
     }
 
     // Create JSON with base64-encoded WASM file
+    std::cout << YELLOW << "Debug: Starting base64 encoding..." << RESET << "\n";
+    std::cout.flush();
+
     // First, base64 encode the file content
     std::string base64_cmd = "base64 < " + wasm_file;
+    std::cout << YELLOW << "Debug: About to run: " << base64_cmd << RESET << "\n";
+    std::cout.flush();
+
     FILE* pipe = popen(base64_cmd.c_str(), "r");
     if (!pipe) {
         std::cerr << RED << "Error: Failed to encode WASM file" << RESET << "\n";
@@ -424,12 +431,18 @@ int handlePublishCommand(const std::vector<std::string>& args) {
         return 1;
     }
 
+    std::cout << YELLOW << "Debug: popen() succeeded, reading base64 data..." << RESET << "\n";
+    std::cout.flush();
+
     std::string base64_content;
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
         base64_content += buffer;
     }
     pclose(pipe);
+
+    std::cout << YELLOW << "Debug: Base64 encoding completed, length: " << base64_content.length() << RESET << "\n";
+    std::cout.flush();
 
     // Remove newlines from base64 content
     base64_content.erase(std::remove(base64_content.begin(), base64_content.end(), '\n'), base64_content.end());
@@ -459,8 +472,12 @@ int handlePublishCommand(const std::vector<std::string>& args) {
 
     // Debug: Print the command we're about to run
     std::cout << YELLOW << "Debug: NEW Running command: " << grpc_cmd << RESET << "\n";
+    std::cout << YELLOW << "Debug: About to call system()..." << RESET << "\n";
+    std::cout.flush(); // Ensure output is visible immediately
 
     int deploy_result = system(grpc_cmd.c_str());
+
+    std::cout << YELLOW << "Debug: system() returned: " << deploy_result << RESET << "\n";
 
     // Clean up temporary JSON file
     std::remove(temp_json.c_str());

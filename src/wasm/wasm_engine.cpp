@@ -6,6 +6,7 @@
 #include <chrono>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 namespace instantdb {
 
@@ -104,24 +105,36 @@ void WasmInstance::Shutdown() {
 WasmResult WasmInstance::CallReducer(const std::string& reducer_name,
                                     const ReducerContext& ctx,
                                     const std::vector<WasmValue>& args) {
+    spdlog::info("DEBUG: CallReducer ENTRY for reducer: {}", reducer_name);
+
     if (!initialized_) {
+        spdlog::error("DEBUG: CallReducer - instance not initialized for reducer: {}", reducer_name);
         return {false, "Instance not initialized", {}};
     }
 
+    spdlog::info("DEBUG: CallReducer - setting thread-local context for reducer: {}", reducer_name);
     // Set thread-local context for host function access
     current_instance = this;
     current_context = const_cast<ReducerContext*>(&ctx);
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
+    spdlog::info("DEBUG: CallReducer - about to execute reducer logic for: {}", reducer_name);
     spdlog::debug("Calling WASM reducer: {} with {} args", reducer_name, args.size());
 
     // Simulate basic reducer execution with actual database operations
     WasmResult result;
     result.success = true;
 
+    spdlog::info("DEBUG: CallReducer - entering reducer dispatch for: {}", reducer_name);
+
     // Provide different stub behaviors for common reducers
-    if (reducer_name == "CreateUser" || reducer_name == "create_user") {
+    if (reducer_name == "init") {
+        // Handle module initialization - this should be fast and simple
+        spdlog::info("DEBUG: CallReducer - handling 'init' reducer");
+        result.values.push_back(std::string("init_success"));
+        spdlog::info("WASM reducer {} initialized successfully", reducer_name);
+    } else if (reducer_name == "CreateUser" || reducer_name == "create_user") {
         // Simulate creating a user by inserting into the database
         if (ctx.storage && args.size() >= 1) {
             try {
@@ -187,18 +200,22 @@ WasmResult WasmInstance::CallReducer(const std::string& reducer_name,
         spdlog::info("WASM reducer {} executed successfully (default behavior)", reducer_name);
     }
 
+    spdlog::info("DEBUG: CallReducer - about to simulate execution time for: {}", reducer_name);
     // Simulate some execution time
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
 
+    spdlog::info("DEBUG: CallReducer - execution completed for: {}, duration: {} μs", reducer_name, duration.count());
     spdlog::debug("WASM reducer {} completed in {} μs", reducer_name, duration.count());
 
+    spdlog::info("DEBUG: CallReducer - clearing thread-local context for: {}", reducer_name);
     // Clear thread-local context
     current_instance = nullptr;
     current_context = nullptr;
 
+    spdlog::info("DEBUG: CallReducer EXIT for reducer: {}, success: {}", reducer_name, result.success);
     return result;
 }
 
@@ -266,7 +283,7 @@ WasmEngine::WasmEngine(std::shared_ptr<StorageEngine> storage,
                        std::shared_ptr<ChangefeedEngine> changefeed)
     : storage_(storage), changefeed_(changefeed),
       max_instances_(10), timeout_ms_(5000), memory_limit_mb_(64),
-      initialized_(false) {
+      initialized_(false), shutdown_requested_(false) {
 }
 
 WasmEngine::~WasmEngine() {
@@ -298,30 +315,67 @@ void WasmEngine::Shutdown() {
     spdlog::info("WASM Engine shutdown complete");
 }
 
+void WasmEngine::RequestShutdown() {
+    shutdown_requested_.store(true);
+    spdlog::info("WASM Engine shutdown requested");
+}
+
 bool WasmEngine::LoadModule(const std::string& name, const std::vector<uint8_t>& bytecode) {
-    if (!initialized_) return false;
+    spdlog::info("DEBUG: LoadModule called with name: {}, bytecode size: {}", name, bytecode.size());
 
-    std::lock_guard<std::mutex> lock(modules_mutex_);
-
-    // Check if module already exists
-    if (modules_.find(name) != modules_.end()) {
-        spdlog::warn("Module {} already loaded, replacing", name);
-    }
-
-    auto module = std::make_shared<WasmModule>(name, bytecode);
-    if (!module->Load() || !module->Validate()) {
-        spdlog::error("Failed to load and validate module: {}", name);
+    if (!initialized_) {
+        spdlog::error("DEBUG: WasmEngine not initialized");
         return false;
     }
 
-    modules_[name] = module;
-    instance_pools_[name] = std::vector<std::unique_ptr<WasmInstance>>();
+    // Scope the mutex lock to only cover the module loading/registration part
+    {
+        spdlog::info("DEBUG: Acquiring mutex lock");
+        std::lock_guard<std::mutex> lock(modules_mutex_);
+        spdlog::info("DEBUG: Mutex acquired");
 
-    spdlog::info("Successfully loaded WASM module: {}", name);
+        // Check if module already exists
+        if (modules_.find(name) != modules_.end()) {
+            spdlog::warn("Module {} already loaded, replacing", name);
+        }
 
-    // Call module initialization
+        spdlog::info("DEBUG: Creating WasmModule instance");
+        auto module = std::make_shared<WasmModule>(name, bytecode);
+
+        spdlog::info("DEBUG: About to call module->Load()");
+        if (!module->Load()) {
+            spdlog::error("DEBUG: module->Load() failed for {}", name);
+            return false;
+        }
+
+        spdlog::info("DEBUG: About to call module->Validate()");
+        if (!module->Validate()) {
+            spdlog::error("DEBUG: module->Validate() failed for {}", name);
+            return false;
+        }
+
+        spdlog::info("DEBUG: Module {} loaded and validated successfully", name);
+
+        modules_[name] = module;
+        instance_pools_[name] = std::vector<std::unique_ptr<WasmInstance>>();
+
+        spdlog::info("Successfully loaded WASM module: {}", name);
+        spdlog::info("DEBUG: Releasing mutex before OnModuleInit");
+    } // Mutex is released here
+
+    // Check for shutdown before calling init
+    if (shutdown_requested_.load()) {
+        spdlog::info("Module loading interrupted by shutdown for {}", name);
+        UnloadModule(name);
+        return false;
+    }
+
+    // Call module initialization WITHOUT holding the mutex
+    spdlog::info("DEBUG: About to call OnModuleInit (mutex released)");
     ReducerContext ctx = CreateReducerContext("system", "");
     auto result = OnModuleInit(name, ctx);
+    spdlog::info("DEBUG: OnModuleInit returned success: {}", result.success);
+
     if (!result.success) {
         spdlog::error("Module initialization failed for {}: {}", name, result.error);
         UnloadModule(name);
@@ -377,21 +431,81 @@ WasmResult WasmEngine::ExecuteReducer(const std::string& module_name,
                                      const std::string& reducer_name,
                                      const ReducerContext& ctx,
                                      const std::vector<WasmValue>& args) {
+    spdlog::info("DEBUG: ExecuteReducer ENTRY for {}.{}", module_name, reducer_name);
+
     auto instance = GetOrCreateInstance(module_name);
     if (!instance) {
+        spdlog::error("DEBUG: ExecuteReducer - failed to get instance for {}.{}", module_name, reducer_name);
         return {false, "Failed to get module instance", {}};
     }
 
-    auto result = instance->CallReducer(reducer_name, ctx, args);
+    spdlog::info("DEBUG: ExecuteReducer - got instance, starting background thread for {}.{}", module_name, reducer_name);
+
+    // Execute with timeout to prevent hanging
+    std::atomic<bool> completed{false};
+    WasmResult result;
+    std::thread execution_thread([&]() {
+        spdlog::info("DEBUG: ExecuteReducer - background thread started for {}.{}", module_name, reducer_name);
+        result = instance->CallReducer(reducer_name, ctx, args);
+        spdlog::info("DEBUG: ExecuteReducer - background thread completed for {}.{}", module_name, reducer_name);
+        completed.store(true);
+    });
+
+    // Wait with timeout
+    auto start = std::chrono::steady_clock::now();
+    constexpr std::chrono::seconds timeout{10}; // 10 second timeout
+
+    spdlog::info("DEBUG: ExecuteReducer - starting timeout loop for {}.{}", module_name, reducer_name);
+
+    while (!completed.load() && (std::chrono::steady_clock::now() - start) < timeout) {
+        // Check for shutdown signal
+        if (shutdown_requested_.load()) {
+            spdlog::info("WASM ExecuteReducer interrupted by shutdown signal for {}.{}", module_name, reducer_name);
+            execution_thread.detach(); // Let it finish in background
+            ReturnInstance(module_name, std::move(instance));
+            return {false, "Interrupted by shutdown", {}};
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    if (!completed.load()) {
+        // Timeout occurred
+        spdlog::error("DEBUG: ExecuteReducer - TIMEOUT occurred for {}.{} after 10 seconds", module_name, reducer_name);
+        spdlog::error("WASM ExecuteReducer timeout for {}.{}", module_name, reducer_name);
+        execution_thread.detach(); // Let it finish in background
+        ReturnInstance(module_name, std::move(instance));
+        return {false, "Execution timeout", {}};
+    }
+
+    spdlog::info("DEBUG: ExecuteReducer - execution completed successfully for {}.{}", module_name, reducer_name);
+    execution_thread.join();
 
     // Return instance to pool
+    spdlog::info("DEBUG: ExecuteReducer - returning instance to pool for {}.{}", module_name, reducer_name);
     ReturnInstance(module_name, std::move(instance));
 
+    spdlog::info("DEBUG: ExecuteReducer EXIT for {}.{}, success: {}", module_name, reducer_name, result.success);
     return result;
 }
 
 WasmResult WasmEngine::OnModuleInit(const std::string& module_name, const ReducerContext& ctx) {
-    return ExecuteReducer(module_name, "init", ctx, {});
+    spdlog::info("DEBUG: OnModuleInit starting for module: {}", module_name);
+
+    // Add timeout to prevent hanging - init should be fast
+    auto start_time = std::chrono::steady_clock::now();
+    constexpr std::chrono::seconds timeout{5}; // 5 second timeout for init
+
+    auto result = ExecuteReducer(module_name, "init", ctx, {});
+
+    auto elapsed = std::chrono::steady_clock::now() - start_time;
+    if (elapsed > timeout) {
+        spdlog::warn("OnModuleInit took {}ms for module {}",
+                    std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count(),
+                    module_name);
+    }
+
+    spdlog::info("DEBUG: OnModuleInit completed for module: {}", module_name);
+    return result;
 }
 
 WasmResult WasmEngine::OnClientConnected(const std::string& module_name, const ReducerContext& ctx) {
@@ -403,10 +517,13 @@ WasmResult WasmEngine::OnClientDisconnected(const std::string& module_name, cons
 }
 
 std::unique_ptr<WasmInstance> WasmEngine::GetOrCreateInstance(const std::string& module_name) {
+    spdlog::info("DEBUG: GetOrCreateInstance - attempting to acquire mutex for module: {}", module_name);
     std::lock_guard<std::mutex> lock(modules_mutex_);
+    spdlog::info("DEBUG: GetOrCreateInstance - mutex acquired for module: {}", module_name);
 
     auto module_it = modules_.find(module_name);
     if (module_it == modules_.end()) {
+        spdlog::error("DEBUG: GetOrCreateInstance - module not found: {}", module_name);
         return nullptr;
     }
 
@@ -414,13 +531,17 @@ std::unique_ptr<WasmInstance> WasmEngine::GetOrCreateInstance(const std::string&
 
     // Try to reuse an existing instance
     if (!instances.empty()) {
+        spdlog::info("DEBUG: GetOrCreateInstance - reusing existing instance for module: {}", module_name);
         auto instance = std::move(instances.back());
         instances.pop_back();
         return instance;
     }
 
     // Create new instance
-    return module_it->second->CreateInstance();
+    spdlog::info("DEBUG: GetOrCreateInstance - creating new instance for module: {}", module_name);
+    auto new_instance = module_it->second->CreateInstance();
+    spdlog::info("DEBUG: GetOrCreateInstance - instance created for module: {}", module_name);
+    return new_instance;
 }
 
 void WasmEngine::ReturnInstance(const std::string& module_name, std::unique_ptr<WasmInstance> instance) {

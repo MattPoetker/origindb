@@ -25,31 +25,44 @@ void* WasmServiceImpl::DeployModule(void* context,
 
     try {
         // Convert bytecode to vector
+        spdlog::info("DEBUG: Converting bytecode to vector, size: {}", deploy_request->bytecode().size());
         std::vector<uint8_t> bytecode(deploy_request->bytecode().begin(),
                                      deploy_request->bytecode().end());
+        spdlog::info("DEBUG: Bytecode converted, vector size: {}", bytecode.size());
 
         // Load the module into the WASM engine
+        spdlog::info("DEBUG: About to call LoadModule");
         bool success = wasm_engine_->LoadModule(deploy_request->name(), bytecode);
+        spdlog::info("DEBUG: LoadModule returned: {}", success);
 
         if (success) {
             deploy_response->set_success(true);
             deploy_response->set_module_id(deploy_request->name());
             spdlog::info("Successfully deployed module: {}", deploy_request->name());
+            spdlog::info("DEBUG: Response fields set - success: {}, module_id: '{}'",
+                         deploy_response->success(), deploy_response->module_id());
         } else {
             deploy_response->set_success(false);
             deploy_response->set_error("Failed to load WASM module");
             spdlog::error("Failed to deploy module: {}", deploy_request->name());
+            spdlog::info("DEBUG: Response fields set - success: {}, error: '{}'",
+                         deploy_response->success(), deploy_response->error());
         }
 
+        spdlog::info("DEBUG: About to return from WasmServiceImpl::DeployModule");
         status = ::grpc::Status::OK;
 
     } catch (const std::exception& e) {
         deploy_response->set_success(false);
         deploy_response->set_error("Exception during module deployment: " + std::string(e.what()));
         spdlog::error("Exception in DeployModule: {}", e.what());
+        spdlog::info("DEBUG: Response fields set after exception - success: {}, error: '{}'",
+                     deploy_response->success(), deploy_response->error());
+        spdlog::info("DEBUG: About to return from WasmServiceImpl::DeployModule (exception path)");
         status = ::grpc::Status::OK;
     }
 
+    spdlog::info("DEBUG: Returning from WasmServiceImpl::DeployModule with status OK");
     return &status;
 }
 
