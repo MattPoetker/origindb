@@ -65,6 +65,26 @@ CMAKE_BINARY_DIR = /Users/a12042/Development/instant_db/build
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	/usr/local/Cellar/cmake/3.29.0/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	/usr/local/Cellar/cmake/3.29.0/bin/cpack --config ./CPackSourceConfig.cmake /Users/a12042/Development/instant_db/build/CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake cache editor..."
@@ -87,7 +107,7 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target list_install_components
 list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Runtime\" \"Unspecified\""
 .PHONY : list_install_components
 
 # Special rule for the target list_install_components
@@ -279,6 +299,19 @@ instantdb_sql/fast:
 .PHONY : instantdb_sql/fast
 
 #=============================================================================
+# Target rules for targets named instantdb_init
+
+# Build rule for target.
+instantdb_init: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 instantdb_init
+.PHONY : instantdb_init
+
+# fast build rule for target.
+instantdb_init/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_init.dir/build.make CMakeFiles/instantdb_init.dir/build
+.PHONY : instantdb_init/fast
+
+#=============================================================================
 # Target rules for targets named instantdb_server
 
 # Build rule for target.
@@ -445,198 +478,6 @@ src/changefeed/sql_subscription.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/changefeed_engine.dir/build.make CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.s
 .PHONY : src/changefeed/sql_subscription.cpp.s
 
-src/cli/cli_main.o: src/cli/cli_main.cpp.o
-.PHONY : src/cli/cli_main.o
-
-# target to build an object file
-src/cli/cli_main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o
-.PHONY : src/cli/cli_main.cpp.o
-
-src/cli/cli_main.i: src/cli/cli_main.cpp.i
-.PHONY : src/cli/cli_main.i
-
-# target to preprocess a source file
-src/cli/cli_main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.i
-.PHONY : src/cli/cli_main.cpp.i
-
-src/cli/cli_main.s: src/cli/cli_main.cpp.s
-.PHONY : src/cli/cli_main.s
-
-# target to generate assembly for a file
-src/cli/cli_main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.s
-.PHONY : src/cli/cli_main.cpp.s
-
-src/cli/commands/build_command.o: src/cli/commands/build_command.cpp.o
-.PHONY : src/cli/commands/build_command.o
-
-# target to build an object file
-src/cli/commands/build_command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o
-.PHONY : src/cli/commands/build_command.cpp.o
-
-src/cli/commands/build_command.i: src/cli/commands/build_command.cpp.i
-.PHONY : src/cli/commands/build_command.i
-
-# target to preprocess a source file
-src/cli/commands/build_command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.i
-.PHONY : src/cli/commands/build_command.cpp.i
-
-src/cli/commands/build_command.s: src/cli/commands/build_command.cpp.s
-.PHONY : src/cli/commands/build_command.s
-
-# target to generate assembly for a file
-src/cli/commands/build_command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.s
-.PHONY : src/cli/commands/build_command.cpp.s
-
-src/cli/commands/database_command.o: src/cli/commands/database_command.cpp.o
-.PHONY : src/cli/commands/database_command.o
-
-# target to build an object file
-src/cli/commands/database_command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o
-.PHONY : src/cli/commands/database_command.cpp.o
-
-src/cli/commands/database_command.i: src/cli/commands/database_command.cpp.i
-.PHONY : src/cli/commands/database_command.i
-
-# target to preprocess a source file
-src/cli/commands/database_command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.i
-.PHONY : src/cli/commands/database_command.cpp.i
-
-src/cli/commands/database_command.s: src/cli/commands/database_command.cpp.s
-.PHONY : src/cli/commands/database_command.s
-
-# target to generate assembly for a file
-src/cli/commands/database_command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.s
-.PHONY : src/cli/commands/database_command.cpp.s
-
-src/cli/commands/exec_command.o: src/cli/commands/exec_command.cpp.o
-.PHONY : src/cli/commands/exec_command.o
-
-# target to build an object file
-src/cli/commands/exec_command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o
-.PHONY : src/cli/commands/exec_command.cpp.o
-
-src/cli/commands/exec_command.i: src/cli/commands/exec_command.cpp.i
-.PHONY : src/cli/commands/exec_command.i
-
-# target to preprocess a source file
-src/cli/commands/exec_command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.i
-.PHONY : src/cli/commands/exec_command.cpp.i
-
-src/cli/commands/exec_command.s: src/cli/commands/exec_command.cpp.s
-.PHONY : src/cli/commands/exec_command.s
-
-# target to generate assembly for a file
-src/cli/commands/exec_command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.s
-.PHONY : src/cli/commands/exec_command.cpp.s
-
-src/cli/commands/init_command.o: src/cli/commands/init_command.cpp.o
-.PHONY : src/cli/commands/init_command.o
-
-# target to build an object file
-src/cli/commands/init_command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o
-.PHONY : src/cli/commands/init_command.cpp.o
-
-src/cli/commands/init_command.i: src/cli/commands/init_command.cpp.i
-.PHONY : src/cli/commands/init_command.i
-
-# target to preprocess a source file
-src/cli/commands/init_command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.i
-.PHONY : src/cli/commands/init_command.cpp.i
-
-src/cli/commands/init_command.s: src/cli/commands/init_command.cpp.s
-.PHONY : src/cli/commands/init_command.s
-
-# target to generate assembly for a file
-src/cli/commands/init_command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.s
-.PHONY : src/cli/commands/init_command.cpp.s
-
-src/cli/commands/logs_command.o: src/cli/commands/logs_command.cpp.o
-.PHONY : src/cli/commands/logs_command.o
-
-# target to build an object file
-src/cli/commands/logs_command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o
-.PHONY : src/cli/commands/logs_command.cpp.o
-
-src/cli/commands/logs_command.i: src/cli/commands/logs_command.cpp.i
-.PHONY : src/cli/commands/logs_command.i
-
-# target to preprocess a source file
-src/cli/commands/logs_command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.i
-.PHONY : src/cli/commands/logs_command.cpp.i
-
-src/cli/commands/logs_command.s: src/cli/commands/logs_command.cpp.s
-.PHONY : src/cli/commands/logs_command.s
-
-# target to generate assembly for a file
-src/cli/commands/logs_command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.s
-.PHONY : src/cli/commands/logs_command.cpp.s
-
-src/cli/commands/module_command.o: src/cli/commands/module_command.cpp.o
-.PHONY : src/cli/commands/module_command.o
-
-# target to build an object file
-src/cli/commands/module_command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o
-.PHONY : src/cli/commands/module_command.cpp.o
-
-src/cli/commands/module_command.i: src/cli/commands/module_command.cpp.i
-.PHONY : src/cli/commands/module_command.i
-
-# target to preprocess a source file
-src/cli/commands/module_command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.i
-.PHONY : src/cli/commands/module_command.cpp.i
-
-src/cli/commands/module_command.s: src/cli/commands/module_command.cpp.s
-.PHONY : src/cli/commands/module_command.s
-
-# target to generate assembly for a file
-src/cli/commands/module_command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.s
-.PHONY : src/cli/commands/module_command.cpp.s
-
-src/cli/commands/server_command.o: src/cli/commands/server_command.cpp.o
-.PHONY : src/cli/commands/server_command.o
-
-# target to build an object file
-src/cli/commands/server_command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o
-.PHONY : src/cli/commands/server_command.cpp.o
-
-src/cli/commands/server_command.i: src/cli/commands/server_command.cpp.i
-.PHONY : src/cli/commands/server_command.i
-
-# target to preprocess a source file
-src/cli/commands/server_command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.i
-.PHONY : src/cli/commands/server_command.cpp.i
-
-src/cli/commands/server_command.s: src/cli/commands/server_command.cpp.s
-.PHONY : src/cli/commands/server_command.s
-
-# target to generate assembly for a file
-src/cli/commands/server_command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.s
-.PHONY : src/cli/commands/server_command.cpp.s
-
 src/cmd/grpc_client.o: src/cmd/grpc_client.cpp.o
 .PHONY : src/cmd/grpc_client.o
 
@@ -660,6 +501,54 @@ src/cmd/grpc_client.s: src/cmd/grpc_client.cpp.s
 src/cmd/grpc_client.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_client.dir/build.make CMakeFiles/instantdb_client.dir/src/cmd/grpc_client.cpp.s
 .PHONY : src/cmd/grpc_client.cpp.s
+
+src/cmd/instantdb_cli.o: src/cmd/instantdb_cli.cpp.o
+.PHONY : src/cmd/instantdb_cli.o
+
+# target to build an object file
+src/cmd/instantdb_cli.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o
+.PHONY : src/cmd/instantdb_cli.cpp.o
+
+src/cmd/instantdb_cli.i: src/cmd/instantdb_cli.cpp.i
+.PHONY : src/cmd/instantdb_cli.i
+
+# target to preprocess a source file
+src/cmd/instantdb_cli.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.i
+.PHONY : src/cmd/instantdb_cli.cpp.i
+
+src/cmd/instantdb_cli.s: src/cmd/instantdb_cli.cpp.s
+.PHONY : src/cmd/instantdb_cli.s
+
+# target to generate assembly for a file
+src/cmd/instantdb_cli.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb.dir/build.make CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.s
+.PHONY : src/cmd/instantdb_cli.cpp.s
+
+src/cmd/instantdb_init.o: src/cmd/instantdb_init.cpp.o
+.PHONY : src/cmd/instantdb_init.o
+
+# target to build an object file
+src/cmd/instantdb_init.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_init.dir/build.make CMakeFiles/instantdb_init.dir/src/cmd/instantdb_init.cpp.o
+.PHONY : src/cmd/instantdb_init.cpp.o
+
+src/cmd/instantdb_init.i: src/cmd/instantdb_init.cpp.i
+.PHONY : src/cmd/instantdb_init.i
+
+# target to preprocess a source file
+src/cmd/instantdb_init.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_init.dir/build.make CMakeFiles/instantdb_init.dir/src/cmd/instantdb_init.cpp.i
+.PHONY : src/cmd/instantdb_init.cpp.i
+
+src/cmd/instantdb_init.s: src/cmd/instantdb_init.cpp.s
+.PHONY : src/cmd/instantdb_init.s
+
+# target to generate assembly for a file
+src/cmd/instantdb_init.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/instantdb_init.dir/build.make CMakeFiles/instantdb_init.dir/src/cmd/instantdb_init.cpp.s
+.PHONY : src/cmd/instantdb_init.cpp.s
 
 src/cmd/instantdb_server.o: src/cmd/instantdb_server.cpp.o
 .PHONY : src/cmd/instantdb_server.o
@@ -804,6 +693,30 @@ src/grpc/grpc_server.s: src/grpc/grpc_server.cpp.s
 src/grpc/grpc_server.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.s
 .PHONY : src/grpc/grpc_server.cpp.s
+
+src/grpc/wasm_service_impl.o: src/grpc/wasm_service_impl.cpp.o
+.PHONY : src/grpc/wasm_service_impl.o
+
+# target to build an object file
+src/grpc/wasm_service_impl.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o
+.PHONY : src/grpc/wasm_service_impl.cpp.o
+
+src/grpc/wasm_service_impl.i: src/grpc/wasm_service_impl.cpp.i
+.PHONY : src/grpc/wasm_service_impl.i
+
+# target to preprocess a source file
+src/grpc/wasm_service_impl.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.i
+.PHONY : src/grpc/wasm_service_impl.cpp.i
+
+src/grpc/wasm_service_impl.s: src/grpc/wasm_service_impl.cpp.s
+.PHONY : src/grpc/wasm_service_impl.s
+
+# target to generate assembly for a file
+src/grpc/wasm_service_impl.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/grpc_service.dir/build.make CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.s
+.PHONY : src/grpc/wasm_service_impl.cpp.s
 
 src/sql/sql_engine.o: src/sql/sql_engine.cpp.o
 .PHONY : src/sql/sql_engine.o
@@ -1008,6 +921,8 @@ help:
 	@echo "... install/local"
 	@echo "... install/strip"
 	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
 	@echo "... changefeed_engine"
 	@echo "... common_lib"
@@ -1016,6 +931,7 @@ help:
 	@echo "... instantdb"
 	@echo "... instantdb_client"
 	@echo "... instantdb_demo"
+	@echo "... instantdb_init"
 	@echo "... instantdb_server"
 	@echo "... instantdb_sql"
 	@echo "... spdlog"
@@ -1035,33 +951,15 @@ help:
 	@echo "... src/changefeed/sql_subscription.o"
 	@echo "... src/changefeed/sql_subscription.i"
 	@echo "... src/changefeed/sql_subscription.s"
-	@echo "... src/cli/cli_main.o"
-	@echo "... src/cli/cli_main.i"
-	@echo "... src/cli/cli_main.s"
-	@echo "... src/cli/commands/build_command.o"
-	@echo "... src/cli/commands/build_command.i"
-	@echo "... src/cli/commands/build_command.s"
-	@echo "... src/cli/commands/database_command.o"
-	@echo "... src/cli/commands/database_command.i"
-	@echo "... src/cli/commands/database_command.s"
-	@echo "... src/cli/commands/exec_command.o"
-	@echo "... src/cli/commands/exec_command.i"
-	@echo "... src/cli/commands/exec_command.s"
-	@echo "... src/cli/commands/init_command.o"
-	@echo "... src/cli/commands/init_command.i"
-	@echo "... src/cli/commands/init_command.s"
-	@echo "... src/cli/commands/logs_command.o"
-	@echo "... src/cli/commands/logs_command.i"
-	@echo "... src/cli/commands/logs_command.s"
-	@echo "... src/cli/commands/module_command.o"
-	@echo "... src/cli/commands/module_command.i"
-	@echo "... src/cli/commands/module_command.s"
-	@echo "... src/cli/commands/server_command.o"
-	@echo "... src/cli/commands/server_command.i"
-	@echo "... src/cli/commands/server_command.s"
 	@echo "... src/cmd/grpc_client.o"
 	@echo "... src/cmd/grpc_client.i"
 	@echo "... src/cmd/grpc_client.s"
+	@echo "... src/cmd/instantdb_cli.o"
+	@echo "... src/cmd/instantdb_cli.i"
+	@echo "... src/cmd/instantdb_cli.s"
+	@echo "... src/cmd/instantdb_init.o"
+	@echo "... src/cmd/instantdb_init.i"
+	@echo "... src/cmd/instantdb_init.s"
 	@echo "... src/cmd/instantdb_server.o"
 	@echo "... src/cmd/instantdb_server.i"
 	@echo "... src/cmd/instantdb_server.s"
@@ -1080,6 +978,9 @@ help:
 	@echo "... src/grpc/grpc_server.o"
 	@echo "... src/grpc/grpc_server.i"
 	@echo "... src/grpc/grpc_server.s"
+	@echo "... src/grpc/wasm_service_impl.o"
+	@echo "... src/grpc/wasm_service_impl.i"
+	@echo "... src/grpc/wasm_service_impl.s"
 	@echo "... src/sql/sql_engine.o"
 	@echo "... src/sql/sql_engine.i"
 	@echo "... src/sql/sql_engine.s"

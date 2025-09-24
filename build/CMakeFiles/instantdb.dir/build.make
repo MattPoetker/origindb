@@ -69,159 +69,34 @@ include CMakeFiles/instantdb.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/instantdb.dir/flags.make
 
-CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o: /Users/a12042/Development/instant_db/src/cli/cli_main.cpp
-CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o -c /Users/a12042/Development/instant_db/src/cli/cli_main.cpp
+CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o: CMakeFiles/instantdb.dir/flags.make
+CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o: /Users/a12042/Development/instant_db/src/cmd/instantdb_cli.cpp
+CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o -MF CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o.d -o CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o -c /Users/a12042/Development/instant_db/src/cmd/instantdb_cli.cpp
 
-CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/cli_main.cpp > CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.i
+CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cmd/instantdb_cli.cpp > CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.i
 
-CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/cli_main.cpp -o CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.s
-
-CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o: /Users/a12042/Development/instant_db/src/cli/commands/build_command.cpp
-CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o -c /Users/a12042/Development/instant_db/src/cli/commands/build_command.cpp
-
-CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/commands/build_command.cpp > CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.i
-
-CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/commands/build_command.cpp -o CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.s
-
-CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o: /Users/a12042/Development/instant_db/src/cli/commands/database_command.cpp
-CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o -c /Users/a12042/Development/instant_db/src/cli/commands/database_command.cpp
-
-CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/commands/database_command.cpp > CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.i
-
-CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/commands/database_command.cpp -o CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.s
-
-CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o: /Users/a12042/Development/instant_db/src/cli/commands/exec_command.cpp
-CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o -c /Users/a12042/Development/instant_db/src/cli/commands/exec_command.cpp
-
-CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/commands/exec_command.cpp > CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.i
-
-CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/commands/exec_command.cpp -o CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.s
-
-CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o: /Users/a12042/Development/instant_db/src/cli/commands/init_command.cpp
-CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o -c /Users/a12042/Development/instant_db/src/cli/commands/init_command.cpp
-
-CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/commands/init_command.cpp > CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.i
-
-CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/commands/init_command.cpp -o CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.s
-
-CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o: /Users/a12042/Development/instant_db/src/cli/commands/logs_command.cpp
-CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o -c /Users/a12042/Development/instant_db/src/cli/commands/logs_command.cpp
-
-CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/commands/logs_command.cpp > CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.i
-
-CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/commands/logs_command.cpp -o CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.s
-
-CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o: /Users/a12042/Development/instant_db/src/cli/commands/module_command.cpp
-CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o -c /Users/a12042/Development/instant_db/src/cli/commands/module_command.cpp
-
-CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/commands/module_command.cpp > CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.i
-
-CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/commands/module_command.cpp -o CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.s
-
-CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o: CMakeFiles/instantdb.dir/flags.make
-CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o: /Users/a12042/Development/instant_db/src/cli/commands/server_command.cpp
-CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o: CMakeFiles/instantdb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o -MF CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o.d -o CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o -c /Users/a12042/Development/instant_db/src/cli/commands/server_command.cpp
-
-CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/cli/commands/server_command.cpp > CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.i
-
-CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cli/commands/server_command.cpp -o CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.s
+CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/cmd/instantdb_cli.cpp -o CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.s
 
 # Object files for target instantdb
 instantdb_OBJECTS = \
-"CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o" \
-"CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o" \
-"CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o" \
-"CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o" \
-"CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o" \
-"CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o" \
-"CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o" \
-"CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o"
+"CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o"
 
 # External object files for target instantdb
 instantdb_EXTERNAL_OBJECTS =
 
-instantdb: CMakeFiles/instantdb.dir/src/cli/cli_main.cpp.o
-instantdb: CMakeFiles/instantdb.dir/src/cli/commands/build_command.cpp.o
-instantdb: CMakeFiles/instantdb.dir/src/cli/commands/database_command.cpp.o
-instantdb: CMakeFiles/instantdb.dir/src/cli/commands/exec_command.cpp.o
-instantdb: CMakeFiles/instantdb.dir/src/cli/commands/init_command.cpp.o
-instantdb: CMakeFiles/instantdb.dir/src/cli/commands/logs_command.cpp.o
-instantdb: CMakeFiles/instantdb.dir/src/cli/commands/module_command.cpp.o
-instantdb: CMakeFiles/instantdb.dir/src/cli/commands/server_command.cpp.o
+instantdb: CMakeFiles/instantdb.dir/src/cmd/instantdb_cli.cpp.o
 instantdb: CMakeFiles/instantdb.dir/build.make
-instantdb: libstorage.a
-instantdb: libsql_engine.a
-instantdb: libchangefeed_engine.a
-instantdb: libwebsocket_server.a
-instantdb: libwasm_engine.a
 instantdb: libcommon_lib.a
 instantdb: _deps/spdlog-build/libspdlogd.a
 instantdb: _deps/fmt-build/libfmtd.a
-instantdb: libgrpc_service.a
-instantdb: /usr/local/Cellar/openssl@3/3.5.2/lib/libssl.dylib
-instantdb: /usr/local/Cellar/openssl@3/3.5.2/lib/libcrypto.dylib
-instantdb: libsql_engine.a
-instantdb: libchangefeed_engine.a
-instantdb: libstorage.a
-instantdb: _deps/fmt-build/libfmtd.a
-instantdb: _deps/spdlog-build/libspdlogd.a
 instantdb: CMakeFiles/instantdb.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable instantdb"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/a12042/Development/instant_db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable instantdb"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/instantdb.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

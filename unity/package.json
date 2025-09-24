@@ -1,0 +1,50 @@
+{
+  "name": "com.instantdb.unity",
+  "version": "1.0.0",
+  "displayName": "InstantDB for Unity",
+  "description": "Real-time database integration for Unity with WebAssembly module support. Build multiplayer games with real-time data synchronization.",
+  "keywords": [
+    "database",
+    "realtime",
+    "multiplayer",
+    "webassembly",
+    "networking",
+    "websocket"
+  ],
+  "author": {
+    "name": "InstantDB Team",
+    "email": "support@instantdb.com",
+    "url": "https://instantdb.com"
+  },
+  "license": "MIT",
+  "unity": "2021.3",
+  "unityRelease": "0f1",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.0.2"
+  },
+  "samples": [
+    {
+      "displayName": "Basic Connection Example",
+      "description": "Shows how to connect to InstantDB and handle basic events",
+      "path": "Samples~/BasicConnection"
+    },
+    {
+      "displayName": "Multiplayer Game Example",
+      "description": "Complete multiplayer game example with real-time player synchronization",
+      "path": "Samples~/MultiplayerGame"
+    },
+    {
+      "displayName": "Chat System Example",
+      "description": "Real-time chat system using InstantDB",
+      "path": "Samples~/ChatSystem"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/instantdb-unity.git"
+  },
+  "documentationUrl": "https://docs.instantdb.com/unity",
+  "changelogUrl": "https://github.com/your-org/instantdb-unity/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/your-org/instantdb-unity/blob/main/LICENSE",
+  "type": "library"
+}

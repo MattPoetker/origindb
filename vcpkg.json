@@ -1,0 +1,35 @@
+{
+  "name": "instantdb",
+  "version": "0.1.0",
+  "description": "Real-time database with WebAssembly module support",
+  "homepage": "https://instantdb.com",
+  "documentation": "https://docs.instantdb.com",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "grpc",
+      "version>=": "1.40.0"
+    },
+    {
+      "name": "protobuf",
+      "version>=": "3.0.0"
+    },
+    {
+      "name": "openssl",
+      "version>=": "1.1.0"
+    },
+    {
+      "name": "fmt",
+      "version>=": "8.0.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.10.0"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.9.0"
+    }
+  ],
+  "builtin-baseline": "3426db05b996481ca31e95fff3734cf23e0f51bc"
+}

@@ -34,6 +34,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CMakeParseArguments.cmake"
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CMakeSystemSpecificInformation.cmake"
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake"
+  "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CPack.cmake"
+  "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CPackComponent.cmake"
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CheckCSourceCompiles.cmake"
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CheckCXXCompilerFlag.cmake"
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
@@ -67,6 +69,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/Platform/Darwin.cmake"
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/Platform/UnixPaths.cmake"
   "/usr/local/Cellar/cmake/3.29.0/share/cmake/Modules/WriteBasicConfigVersionFile.cmake"
+  "/usr/local/Cellar/cmake/3.29.0/share/cmake/Templates/CPackConfig.cmake.in"
   )
 
 # The corresponding makefile is:
@@ -80,6 +83,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "_deps/json-subbuild/CMakeLists.txt"
   "_deps/spdlog-subbuild/CMakeLists.txt"
   "_deps/fmt-subbuild/CMakeLists.txt"
+  "CPackConfig.cmake"
+  "CPackSourceConfig.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "_deps/json-build/nlohmann_json.pc"
   "_deps/json-build/nlohmann_jsonConfigVersion.cmake"
@@ -103,6 +108,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/grpc_service.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_demo.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_sql.dir/DependInfo.cmake"
+  "CMakeFiles/instantdb_init.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_server.dir/DependInfo.cmake"
   "CMakeFiles/instantdb.dir/DependInfo.cmake"
   "CMakeFiles/instantdb_client.dir/DependInfo.cmake"

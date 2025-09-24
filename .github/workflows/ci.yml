@@ -1,0 +1,349 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-13, macos-14, windows-2022]
+        build_type: [Debug, Release]
+        exclude:
+          # Only test Release builds on Windows to save CI time
+          - os: windows-2022
+            build_type: Debug
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache CMake dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          build/_deps
+          ~/.cache/vcpkg
+        key: ${{ runner.os }}-cmake-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-
+
+    # Linux setup
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          libprotobuf-dev \
+          protobuf-compiler \
+          libgrpc++-dev \
+          libssl-dev \
+          pkg-config \
+          ninja-build
+
+    # macOS setup
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install cmake protobuf grpc openssl ninja
+
+    # Windows setup
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+        choco install ninja
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: '**/vcpkg.json'
+
+    # Configure build
+    - name: Configure CMake (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -GNinja \
+          -DBUILD_TESTING=ON
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cmake -B build -S . `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+          -DVCPKG_TARGET_TRIPLET=x64-windows `
+          -DBUILD_TESTING=ON
+
+    # Build
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+    # Test
+    - name: Run tests
+      working-directory: build
+      run: ctest --build-config ${{ matrix.build_type }} --output-on-failure --parallel
+
+    # Upload build artifacts for release builds
+    - name: Upload build artifacts
+      if: matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: instantdb-${{ runner.os }}-${{ runner.arch }}
+        path: |
+          build/instantdb*
+          build/*.exe
+        retention-days: 7
+
+  build-packages:
+    name: Build Packages
+    needs: test
+    runs-on: ${{ matrix.os }}
+    if: startsWith(github.ref, 'refs/tags/v')
+    strategy:
+      matrix:
+        include:
+          # Linux packages
+          - os: ubuntu-22.04
+            package_type: deb
+            arch: x64
+          - os: ubuntu-22.04
+            package_type: rpm
+            arch: x64
+
+          # macOS packages
+          - os: macos-13
+            package_type: dmg
+            arch: x64
+          - os: macos-14
+            package_type: dmg
+            arch: arm64
+
+          # Windows packages
+          - os: windows-2022
+            package_type: msi
+            arch: x64
+          - os: windows-2022
+            package_type: zip
+            arch: x64
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential cmake \
+          libprotobuf-dev protobuf-compiler \
+          libgrpc++-dev libssl-dev \
+          ninja-build rpm
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install cmake protobuf grpc openssl ninja create-dmg
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        choco install cmake ninja wix311
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: '**/vcpkg.json'
+
+    - name: Configure and build
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET=x64-windows
+        else
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -GNinja
+        fi
+        cmake --build build --config Release --parallel
+      shell: bash
+
+    - name: Create packages
+      working-directory: build
+      run: |
+        case "${{ matrix.package_type }}" in
+          deb)
+            cpack -G DEB
+            ;;
+          rpm)
+            cpack -G RPM
+            ;;
+          dmg)
+            cpack -G DragNDrop
+            ;;
+          msi)
+            cpack -G WIX
+            ;;
+          zip)
+            cpack -G ZIP
+            ;;
+        esac
+      shell: bash
+
+    - name: Upload packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: instantdb-${{ matrix.package_type }}-${{ matrix.arch }}
+        path: build/*.{deb,rpm,dmg,msi,zip}
+        retention-days: 30
+
+  docker:
+    name: Build Docker Images
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: instantdb/instantdb
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  release:
+    name: Create Release
+    needs: [test, build-packages]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Prepare release assets
+      run: |
+        mkdir -p release
+        find artifacts -name "*.deb" -o -name "*.rpm" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zip" | \
+          xargs -I {} cp {} release/
+
+        # Create platform-specific archives for binary distributions
+        for os in Linux macOS Windows; do
+          if [ -d "artifacts/instantdb-$os-X64" ]; then
+            cd "artifacts/instantdb-$os-X64"
+            case "$os" in
+              Linux)
+                tar czf "../../release/instantdb-linux-x64.tar.gz" instantdb*
+                ;;
+              macOS)
+                tar czf "../../release/instantdb-macos-x64.tar.gz" instantdb*
+                ;;
+              Windows)
+                zip -r "../../release/instantdb-windows-x64.zip" *.exe
+                ;;
+            esac
+            cd ../..
+          fi
+        done
+
+    - name: Generate checksums
+      working-directory: release
+      run: |
+        sha256sum * > checksums.txt
+        cat checksums.txt
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/*
+        generate_release_notes: true
+        body: |
+          ## Installation
+
+          ### One-Liner Install (Recommended)
+          ```bash
+          # macOS & Linux
+          curl -sSf https://install.instantdb.com | sh
+
+          # Windows (PowerShell)
+          iwr -useb https://install.instantdb.com/windows | iex
+
+          # Windows (Command Prompt)
+          curl -sSf https://install.instantdb.com/windows.bat | cmd
+          ```
+
+          ### Manual Installation
+          ```bash
+          # macOS
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/instantdb-macos-x64.tar.gz | tar xz
+          sudo mv instantdb /usr/local/bin/
+
+          # Linux
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/instantdb-linux-x64.tar.gz | tar xz
+          sudo mv instantdb /usr/local/bin/
+
+          # Windows (PowerShell)
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/instantdb-windows-x64.zip" -OutFile "instantdb.zip"
+          Expand-Archive -Path "instantdb.zip" -DestinationPath "C:\tools\instantdb"
+          ```
+
+          ### Package Managers
+          - **Debian/Ubuntu**: Download the `.deb` file and run `sudo dpkg -i instantdb_*.deb`
+          - **CentOS/RHEL/Fedora**: Download the `.rpm` file and run `sudo rpm -i instantdb-*.rpm`
+          - **macOS**: Download the `.dmg` file and drag InstantDB to Applications
+          - **Windows**: Download the `.msi` file and run the installer
+
+          ### Docker
+          ```bash
+          docker run -p 8080:8080 -p 50051:50051 instantdb/instantdb:${{ github.ref_name }}
+          ```
+
+          See [INSTALL.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/INSTALL.md) for complete installation instructions.
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

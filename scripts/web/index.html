@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstantDB Installation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 20px;
+        }
+        .tagline {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .install-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .install-section h2 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        .command {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .copy-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background: #0052a3;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .next-steps {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        .next-steps h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="logo">⚡ InstantDB</div>
+        <div class="tagline">Real-time database for modern applications</div>
+    </div>
+
+    <div class="install-section">
+        <h2>🍎 macOS & Linux</h2>
+        <p>Install InstantDB with a single command:</p>
+        <div class="command">
+            curl -sSf https://install.instantdb.com | sh
+            <button class="copy-btn" onclick="copyToClipboard('curl -sSf https://install.instantdb.com | sh')">Copy</button>
+        </div>
+    </div>
+
+    <div class="install-section">
+        <h2>🪟 Windows (PowerShell)</h2>
+        <p>Install using PowerShell (recommended):</p>
+        <div class="command">
+            iwr -useb https://install.instantdb.com/windows | iex
+            <button class="copy-btn" onclick="copyToClipboard('iwr -useb https://install.instantdb.com/windows | iex')">Copy</button>
+        </div>
+    </div>
+
+    <div class="install-section">
+        <h2>🪟 Windows (Command Prompt)</h2>
+        <p>Alternative installation for Command Prompt:</p>
+        <div class="command">
+            curl -sSf https://install.instantdb.com/windows.bat | cmd
+            <button class="copy-btn" onclick="copyToClipboard('curl -sSf https://install.instantdb.com/windows.bat | cmd')">Copy</button>
+        </div>
+    </div>
+
+    <div class="features">
+        <div class="feature">
+            <div class="feature-icon">🚀</div>
+            <h4>Fast Installation</h4>
+            <p>Get up and running in seconds with our one-liner install</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">🔍</div>
+            <h4>Auto-Detection</h4>
+            <p>Automatically detects your OS and architecture</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">🛡️</div>
+            <h4>Secure</h4>
+            <p>Downloads from GitHub releases with HTTPS</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">🔄</div>
+            <h4>Always Latest</h4>
+            <p>Installs the latest stable release automatically</p>
+        </div>
+    </div>
+
+    <div class="next-steps">
+        <h3>✅ Next Steps</h3>
+        <ol>
+            <li>Restart your terminal or open a new one</li>
+            <li>Start the InstantDB server: <code>instantdb server</code></li>
+            <li>Check out the <a href="https://docs.instantdb.com">documentation</a></li>
+            <li>Try the <a href="https://docs.instantdb.com/csharp">C# quickstart</a></li>
+            <li>Explore <a href="https://docs.instantdb.com/unity">Unity integration</a></li>
+        </ol>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#28a745';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#0066cc';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o.d"
   "CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o"
   "CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o.d"
+  "CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o"
+  "CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o.d"
   "generated/instantdb.grpc.pb.cc"
   "generated/instantdb.grpc.pb.h"
   "generated/instantdb.pb.cc"

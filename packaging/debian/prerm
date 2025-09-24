@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+# Stop and disable systemd service
+if command -v systemctl >/dev/null 2>&1; then
+    if systemctl is-active --quiet instantdb.service; then
+        echo "Stopping InstantDB service..."
+        systemctl stop instantdb.service
+    fi
+
+    if systemctl is-enabled --quiet instantdb.service; then
+        echo "Disabling InstantDB service..."
+        systemctl disable instantdb.service
+    fi
+fi
+
+echo "InstantDB service stopped and disabled."
+echo "Data in /var/lib/instantdb has been preserved."
+echo "To completely remove all data, run: sudo rm -rf /var/lib/instantdb"

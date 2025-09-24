@@ -192,6 +192,9 @@ if(GRPC_AVAILABLE)
         target_link_libraries(grpc_service
             storage
             sql_engine
+            wasm_engine
+            changefeed_engine
+            websocket_server
             spdlog::spdlog
             ${PROTOBUF_LIBRARIES}
             ${GRPC_LIBRARIES}
@@ -203,6 +206,9 @@ if(GRPC_AVAILABLE)
         target_link_libraries(grpc_service
             storage
             sql_engine
+            wasm_engine
+            changefeed_engine
+            websocket_server
             spdlog::spdlog
             protobuf::libprotobuf
             gRPC::grpc++
@@ -236,6 +242,15 @@ target_link_libraries(instantdb_sql
     fmt::fmt
 )
 
+# Init command for project scaffolding
+add_executable(instantdb_init src/cmd/instantdb_init.cpp)
+target_link_libraries(instantdb_init
+    common_lib
+    Threads::Threads
+    spdlog::spdlog
+    fmt::fmt
+)
+
 # Production server executable
 add_executable(instantdb_server src/cmd/instantdb_server.cpp)
 target_link_libraries(instantdb_server
@@ -262,31 +277,16 @@ if(GRPC_AVAILABLE)
     endif()
 endif()
 
-# CLI executable
-add_executable(instantdb ${CLI_SRCS})
+# CLI executable (main wrapper for all commands)
+add_executable(instantdb src/cmd/instantdb_cli.cpp)
 target_link_libraries(instantdb
-    storage
-    sql_engine
-    changefeed_engine
-    websocket_server
-    wasm_engine
     common_lib
     Threads::Threads
     spdlog::spdlog
     fmt::fmt
-    nlohmann_json::nlohmann_json
 )
 
-# Add gRPC support to CLI if available
-if(GRPC_AVAILABLE)
-    target_link_libraries(instantdb grpc_service)
-    target_compile_definitions(instantdb PRIVATE GRPC_AVAILABLE)
-
-    # Add protobuf/grpc library directories if using pkg-config
-    if(PROTOBUF_FOUND AND GRPC_FOUND)
-        target_link_directories(instantdb PRIVATE ${PROTOBUF_LIBRARY_DIRS} ${GRPC_LIBRARY_DIRS})
-    endif()
-endif()
+# CLI is just a wrapper, doesn't need gRPC directly
 
 # gRPC client executable (only if gRPC is available)
 if(GRPC_AVAILABLE)
@@ -312,8 +312,131 @@ if(GRPC_AVAILABLE)
     endif()
 
     # Installation with gRPC client
-    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb_client instantdb DESTINATION bin)
+    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb_client instantdb instantdb_init DESTINATION bin)
 else()
     # Installation without gRPC client
-    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb DESTINATION bin)
+    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb instantdb_init DESTINATION bin)
 endif()
+
+# Package configuration with CPack
+set(CPACK_PACKAGE_NAME "InstantDB")
+set(CPACK_PACKAGE_VENDOR "InstantDB Project")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Real-time database with WebAssembly module support")
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "InstantDB")
+
+# Package description
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+# Contact information
+set(CPACK_PACKAGE_CONTACT "support@instantdb.com")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://instantdb.com")
+
+# Platform-specific package configuration
+if(WIN32)
+    # Windows MSI installer
+    set(CPACK_GENERATOR "WIX;ZIP")
+    set(CPACK_WIX_UPGRADE_GUID "12345678-1234-1234-1234-123456789012")
+    set(CPACK_WIX_PRODUCT_GUID "87654321-4321-4321-4321-210987654321")
+    set(CPACK_WIX_PROGRAM_MENU_FOLDER "InstantDB")
+    set(CPACK_WIX_UI_BANNER "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/banner.bmp")
+    set(CPACK_WIX_UI_DIALOG "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/dialog.bmp")
+
+    # Add to PATH
+    set(CPACK_WIX_PATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/path.xml")
+
+elseif(APPLE)
+    # macOS DMG
+    set(CPACK_GENERATOR "DragNDrop;TGZ")
+    set(CPACK_DMG_VOLUME_NAME "InstantDB")
+    set(CPACK_DMG_FORMAT "UDBZ")
+    set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/background.png")
+    set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/setup.scpt")
+
+elseif(UNIX)
+    # Linux packages
+    set(CPACK_GENERATOR "DEB;RPM;TGZ")
+
+    # Debian/Ubuntu package
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "InstantDB Team <support@instantdb.com>")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "database")
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://instantdb.com")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libprotobuf32, libgrpc++1.45, libssl3")
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "InstantDB is a high-performance, distributed database with WebAssembly module support, bringing programmable capabilities to a production SQL engine.")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/postinst"
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/prerm"
+    )
+
+    # RPM package
+    set(CPACK_RPM_PACKAGE_SUMMARY "Real-time database with WebAssembly module support")
+    set(CPACK_RPM_PACKAGE_DESCRIPTION "InstantDB is a high-performance, distributed database with WebAssembly module support, bringing programmable capabilities to a production SQL engine.")
+    set(CPACK_RPM_PACKAGE_GROUP "Applications/Databases")
+    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+    set(CPACK_RPM_PACKAGE_URL "https://instantdb.com")
+    set(CPACK_RPM_PACKAGE_REQUIRES "protobuf >= 3.0, grpc >= 1.40, openssl >= 1.1")
+    set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/rpm/postinstall.sh")
+    set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/rpm/preuninstall.sh")
+endif()
+
+# Source package
+set(CPACK_SOURCE_GENERATOR "TGZ;ZIP")
+set(CPACK_SOURCE_IGNORE_FILES
+    "/build/"
+    "/\\.git/"
+    "/\\.github/"
+    "\\.gitignore"
+    "\\.DS_Store"
+    "/\\.vscode/"
+    "/\\.idea/"
+    "CMakeCache\\.txt"
+    "CMakeFiles"
+    "Makefile"
+    "cmake_install\\.cmake"
+    "CPackConfig\\.cmake"
+    "CPackSourceConfig\\.cmake"
+    "_CPack_Packages"
+    "\\.tar\\.gz$"
+    "\\.zip$"
+)
+
+# Component-based installation
+set(CPACK_COMPONENTS_ALL Runtime Development)
+set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "InstantDB Runtime")
+set(CPACK_COMPONENT_RUNTIME_DESCRIPTION "InstantDB server and client tools")
+set(CPACK_COMPONENT_DEVELOPMENT_DISPLAY_NAME "Development Files")
+set(CPACK_COMPONENT_DEVELOPMENT_DESCRIPTION "Headers and development libraries")
+
+# Install documentation
+install(FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+    "${CMAKE_CURRENT_SOURCE_DIR}/INSTALL.md"
+    "${CMAKE_CURRENT_SOURCE_DIR}/CLI_GUIDE.md"
+    DESTINATION share/doc/instantdb
+    COMPONENT Runtime
+)
+
+# Install systemd service file (Linux only)
+if(UNIX AND NOT APPLE)
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/instantdb.service"
+        DESTINATION lib/systemd/system
+        COMPONENT Runtime
+    )
+endif()
+
+# Install shell completion scripts
+install(FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/packaging/shell/instantdb.bash"
+    DESTINATION share/bash-completion/completions
+    RENAME instantdb
+    COMPONENT Runtime
+)
+
+include(CPack)

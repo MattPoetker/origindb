@@ -122,7 +122,7 @@ public:
         grpc_config.max_message_size = static_cast<int>(config_.grpc.max_message_size);
 
         grpc_server_ = std::make_shared<GrpcServer>(grpc_config, sql_engine_, storage_engine_,
-                                                   changefeed_engine_, websocket_server_);
+                                                   changefeed_engine_, websocket_server_, wasm_engine_);
         if (!grpc_server_->Start()) {
             spdlog::error("❌ Failed to start gRPC server");
             return false;

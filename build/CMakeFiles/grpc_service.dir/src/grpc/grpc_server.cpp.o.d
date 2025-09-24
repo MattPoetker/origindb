@@ -973,6 +973,7 @@ CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o: \
   /Users/a12042/Development/instant_db/build/_deps/spdlog-src/include/spdlog/fmt/bundled/format.h \
   /Users/a12042/Development/instant_db/include/storage/wal.h \
   /Users/a12042/Development/instant_db/include/storage/snapshot.h \
+  /Users/a12042/Development/instant_db/include/grpc/wasm_service_impl.h \
   /Users/a12042/Development/instant_db/include/changefeed/changefeed_engine.h \
   /Users/a12042/Development/instant_db/include/websocket/websocket_server.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/thread \
@@ -1306,6 +1307,7 @@ CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o: \
   /usr/local/Cellar/grpc/1.75.0/include/grpcpp/support/global_callback_hook.h \
   /usr/local/Cellar/grpc/1.75.0/include/grpcpp/support/message_allocator.h \
   /usr/local/Cellar/grpc/1.75.0/include/grpcpp/support/server_callback.h \
+  /usr/local/Cellar/grpc/1.75.0/include/grpcpp/ext/proto_server_reflection_plugin.h \
   /Users/a12042/Development/instant_db/build/generated/instantdb.grpc.pb.h \
   /Users/a12042/Development/instant_db/build/generated/instantdb.pb.h \
   /usr/local/Cellar/protobuf/32.1/include/google/protobuf/runtime_version.h \

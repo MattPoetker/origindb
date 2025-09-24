@@ -152,6 +152,7 @@ public:
     bool UnloadModule(const std::string& name);
     std::shared_ptr<WasmModule> GetModule(const std::string& name);
     std::vector<std::string> ListModules() const;
+    std::vector<std::string> GetLoadedModules() const;
 
     // Reducer execution
     WasmResult ExecuteReducer(const std::string& module_name,
@@ -168,6 +169,10 @@ public:
     void SetMaxInstances(size_t max_instances) { max_instances_ = max_instances; }
     void SetTimeoutMs(uint32_t timeout_ms) { timeout_ms_ = timeout_ms; }
     void SetMemoryLimitMB(uint32_t memory_limit_mb) { memory_limit_mb_ = memory_limit_mb; }
+
+    // Accessor methods
+    std::shared_ptr<StorageEngine> GetStorageEngine() const { return storage_; }
+    std::shared_ptr<ChangefeedEngine> GetChangefeedEngine() const { return changefeed_; }
 
 private:
     std::shared_ptr<StorageEngine> storage_;

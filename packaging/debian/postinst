@@ -1,0 +1,71 @@
+#!/bin/bash
+set -e
+
+# Create instantdb user and group if they don't exist
+if ! id "instantdb" &>/dev/null; then
+    useradd --system --shell /bin/false --home-dir /var/lib/instantdb --create-home instantdb
+fi
+
+# Create directories
+mkdir -p /var/lib/instantdb
+mkdir -p /var/log/instantdb
+mkdir -p /etc/instantdb
+
+# Set ownership
+chown -R instantdb:instantdb /var/lib/instantdb
+chown -R instantdb:instantdb /var/log/instantdb
+chown -R instantdb:instantdb /etc/instantdb
+
+# Set permissions
+chmod 750 /var/lib/instantdb
+chmod 750 /var/log/instantdb
+chmod 755 /etc/instantdb
+
+# Create default configuration if it doesn't exist
+if [ ! -f /etc/instantdb/instantdb.conf ]; then
+    cat > /etc/instantdb/instantdb.conf << EOF
+# InstantDB Configuration
+# See https://instantdb.com/docs/configuration for details
+
+# Data directory
+data_dir = /var/lib/instantdb
+
+# Network ports
+websocket_port = 8080
+grpc_port = 50051
+
+# Logging
+log_level = info
+log_file = /var/log/instantdb/instantdb.log
+
+# Security
+enable_auth = false
+EOF
+    chown instantdb:instantdb /etc/instantdb/instantdb.conf
+    chmod 640 /etc/instantdb/instantdb.conf
+fi
+
+# Enable and start systemd service
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl enable instantdb.service
+
+    # Only start if this is a fresh install (not an upgrade)
+    if [ "$1" = "configure" ] && [ -z "$2" ]; then
+        echo "Starting InstantDB service..."
+        systemctl start instantdb.service
+    fi
+fi
+
+echo "InstantDB has been installed successfully!"
+echo "Configuration file: /etc/instantdb/instantdb.conf"
+echo "Data directory: /var/lib/instantdb"
+echo "Log directory: /var/log/instantdb"
+echo ""
+echo "To start InstantDB:"
+echo "  sudo systemctl start instantdb"
+echo ""
+echo "To enable auto-start on boot:"
+echo "  sudo systemctl enable instantdb"
+echo ""
+echo "For more information, visit: https://instantdb.com/docs"

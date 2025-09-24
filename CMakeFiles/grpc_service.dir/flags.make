@@ -4,7 +4,7 @@
 # compile CXX with /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++
 CXX_DEFINES = -DSPDLOG_COMPILED_LIB
 
-CXX_INCLUDES = -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/usr/local/Cellar/protobuf/32.1/include -I/usr/local/Cellar/abseil/20250814.0_1/include -I/usr/local/Cellar/grpc/1.75.0/include -I/usr/local/Cellar/c-ares/1.34.5/include -I/usr/local/Cellar/openssl@3/3.5.2/include -I/usr/local/Cellar/re2/20250812_1/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include
+CXX_INCLUDES = -I/Users/a12042/Development/instant_db/generated -I/Users/a12042/Development/instant_db/include -I/usr/local/Cellar/protobuf/32.1/include -I/usr/local/Cellar/abseil/20250814.0_1/include -I/usr/local/Cellar/grpc/1.75.0/include -I/usr/local/Cellar/c-ares/1.34.5/include -I/usr/local/Cellar/openssl@3/3.5.2/include -I/usr/local/Cellar/re2/20250812_1/include -I/Users/a12042/Development/instant_db/_deps/spdlog-src/include -I/Users/a12042/Development/instant_db/_deps/fmt-src/include -I/Users/a12042/Development/instant_db/_deps/json-src/include -isystem /usr/local/Cellar/openssl@3/3.5.1/include
 
 CXX_FLAGS = -g -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -Wpedantic -g -O0 -DPROTOBUF_USE_DLLS -Wno-float-conversion -Wno-implicit-float-conversion -Wno-implicit-int-float-conversion -Wno-unknown-warning-option -Wno-unused-command-line-argument -DNOMINMAX -pthread
 

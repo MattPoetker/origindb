@@ -870,6 +870,7 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: /Users/a12
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/ranges \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/ratio \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/regex \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/shared_mutex \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/span \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/sstream \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/stack \
@@ -1069,6 +1070,7 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: /Users/a12
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdarg.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stddef.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdint.h \
+  _deps/fmt-src/include/fmt/format.h \
   _deps/json-src/include/nlohmann/adl_serializer.hpp \
   _deps/json-src/include/nlohmann/byte_container_with_subtype.hpp \
   _deps/json-src/include/nlohmann/detail/abi_macros.hpp \
@@ -1132,7 +1134,11 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: /Users/a12
   /Users/a12042/Development/instant_db/include/changefeed/changefeed_engine.h \
   /Users/a12042/Development/instant_db/include/changefeed/sql_subscription.h \
   /Users/a12042/Development/instant_db/include/common/config.h \
+  /Users/a12042/Development/instant_db/include/sql/sql_engine.h \
+  /Users/a12042/Development/instant_db/include/storage/snapshot.h \
+  /Users/a12042/Development/instant_db/include/storage/storage_engine.h \
   /Users/a12042/Development/instant_db/include/storage/table.h \
+  /Users/a12042/Development/instant_db/include/storage/wal.h \
   /Users/a12042/Development/instant_db/include/wasm/wasm_engine.h \
   /Users/a12042/Development/instant_db/include/wasm/wasm_subscription.h \
   /Users/a12042/Development/instant_db/include/websocket/websocket_server.h \
@@ -1172,8 +1178,6 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: /Users/a12
 
 /usr/local/Cellar/openssl@3/3.5.2/include/openssl/params.h:
 
-/usr/local/Cellar/openssl@3/3.5.2/include/openssl/opensslv.h:
-
 /usr/local/Cellar/openssl@3/3.5.2/include/openssl/objects.h:
 
 /usr/local/Cellar/openssl@3/3.5.2/include/openssl/obj_mac.h:
@@ -1202,7 +1206,15 @@ CMakeFiles/websocket_server.dir/src/websocket/websocket_server.cpp.o: /Users/a12
 
 /Users/a12042/Development/instant_db/include/wasm/wasm_subscription.h:
 
+/Users/a12042/Development/instant_db/include/storage/wal.h:
+
 /Users/a12042/Development/instant_db/include/storage/table.h:
+
+/usr/local/Cellar/openssl@3/3.5.2/include/openssl/opensslv.h:
+
+/Users/a12042/Development/instant_db/include/storage/storage_engine.h:
+
+/Users/a12042/Development/instant_db/include/sql/sql_engine.h:
 
 /Users/a12042/Development/instant_db/include/common/config.h:
 
@@ -1514,9 +1526,13 @@ _deps/json-src/include/nlohmann/detail/input/json_sax.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/span:
 
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/shared_mutex:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/regex:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/queue:
+
+_deps/fmt-src/include/fmt/format.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/optional:
 
@@ -3279,6 +3295,8 @@ _deps/json-src/include/nlohmann/detail/meta/call_std/begin.hpp:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/ranges_fill_n.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/simd_utils.h:
+
+/Users/a12042/Development/instant_db/include/storage/snapshot.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1/__algorithm/find.h:
 

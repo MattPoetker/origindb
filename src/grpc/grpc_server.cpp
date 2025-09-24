@@ -1,11 +1,14 @@
 #include "grpc/grpc_server.h"
+#include "grpc/wasm_service_impl.h"
 #include "sql/sql_engine.h"
 #include "storage/storage_engine.h"
 #include "changefeed/changefeed_engine.h"
 #include "websocket/websocket_server.h"
+#include "wasm/wasm_engine.h"
 #include <spdlog/spdlog.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server_builder.h>
+#include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <thread>
 
 // Include protobuf headers AFTER our headers to avoid conflicts
@@ -43,16 +46,73 @@ private:
     SQLServiceImpl* wrapper_;
 };
 
+// Internal WASM gRPC service implementation
+class WasmGrpcServiceImpl : public instantdb::grpc::WasmService::Service {
+public:
+    WasmGrpcServiceImpl(WasmServiceImpl* wrapper) : wrapper_(wrapper) {}
+
+    ::grpc::Status DeployModule(::grpc::ServerContext* context,
+                               const instantdb::grpc::DeployModuleRequest* request,
+                               instantdb::grpc::DeployModuleResponse* response) override {
+        auto result = wrapper_->DeployModule(context, request, response);
+        return *static_cast<::grpc::Status*>(result);
+    }
+
+    ::grpc::Status UndeployModule(::grpc::ServerContext* context,
+                                 const instantdb::grpc::UndeployModuleRequest* request,
+                                 instantdb::grpc::UndeployModuleResponse* response) override {
+        auto result = wrapper_->UndeployModule(context, request, response);
+        return *static_cast<::grpc::Status*>(result);
+    }
+
+    ::grpc::Status ListModules(::grpc::ServerContext* context,
+                              const instantdb::grpc::ListModulesRequest* request,
+                              instantdb::grpc::ListModulesResponse* response) override {
+        spdlog::error("WasmGrpcServiceImpl::ListModules ENTRY - this should always print");
+        try {
+            auto result = wrapper_->ListModules(context, request, response);
+            spdlog::error("WasmGrpcServiceImpl::ListModules wrapper returned normally");
+            return *static_cast<::grpc::Status*>(result);
+        } catch (const std::exception& e) {
+            spdlog::error("WasmGrpcServiceImpl::ListModules caught exception: {}", e.what());
+            return ::grpc::Status(::grpc::StatusCode::INTERNAL, "Exception in ListModules");
+        } catch (...) {
+            spdlog::error("WasmGrpcServiceImpl::ListModules caught unknown exception");
+            return ::grpc::Status(::grpc::StatusCode::INTERNAL, "Unknown exception in ListModules");
+        }
+    }
+
+    ::grpc::Status GetModule(::grpc::ServerContext* context,
+                            const instantdb::grpc::GetModuleRequest* request,
+                            instantdb::grpc::GetModuleResponse* response) override {
+        auto result = wrapper_->GetModule(context, request, response);
+        return *static_cast<::grpc::Status*>(result);
+    }
+
+    ::grpc::Status ExecuteReducer(::grpc::ServerContext* context,
+                                 const instantdb::grpc::ExecuteReducerRequest* request,
+                                 instantdb::grpc::ExecuteReducerResponse* response) override {
+        auto result = wrapper_->ExecuteReducer(context, request, response);
+        return *static_cast<::grpc::Status*>(result);
+    }
+
+private:
+    WasmServiceImpl* wrapper_;
+};
+
 class GrpcServer::Impl {
 public:
     Impl(const Config& config,
          std::shared_ptr<SqlEngine> sql_engine,
          std::shared_ptr<StorageEngine> storage_engine,
          std::shared_ptr<ChangefeedEngine> changefeed_engine,
-         std::shared_ptr<WebSocketServer> websocket_server)
+         std::shared_ptr<WebSocketServer> websocket_server,
+         std::shared_ptr<WasmEngine> wasm_engine)
         : config_(config)
         , sql_service_(sql_engine, storage_engine, changefeed_engine, websocket_server)
+        , wasm_service_(wasm_engine)
         , grpc_service_(&sql_service_)
+        , wasm_grpc_service_(&wasm_service_)
         , running_(false) {}
 
     bool Start() {
@@ -69,8 +129,9 @@ public:
             builder.SetMaxReceiveMessageSize(config_.max_message_size);
             builder.SetMaxSendMessageSize(config_.max_message_size);
 
-            // Register service
+            // Register services
             builder.RegisterService(&grpc_service_);
+            builder.RegisterService(&wasm_grpc_service_);
 
             // Build and start server
             server_ = builder.BuildAndStart();
@@ -125,7 +186,9 @@ public:
 private:
     Config config_;
     SQLServiceImpl sql_service_;
+    WasmServiceImpl wasm_service_;
     GrpcServiceImpl grpc_service_;
+    WasmGrpcServiceImpl wasm_grpc_service_;
     std::unique_ptr<::grpc::Server> server_;
     std::thread server_thread_;
     std::atomic<bool> running_;
@@ -135,8 +198,9 @@ GrpcServer::GrpcServer(const Config& config,
                        std::shared_ptr<SqlEngine> sql_engine,
                        std::shared_ptr<StorageEngine> storage_engine,
                        std::shared_ptr<ChangefeedEngine> changefeed_engine,
-                       std::shared_ptr<WebSocketServer> websocket_server)
-    : impl_(std::make_unique<Impl>(config, sql_engine, storage_engine, changefeed_engine, websocket_server)) {}
+                       std::shared_ptr<WebSocketServer> websocket_server,
+                       std::shared_ptr<WasmEngine> wasm_engine)
+    : impl_(std::make_unique<Impl>(config, sql_engine, storage_engine, changefeed_engine, websocket_server, wasm_engine)) {}
 
 GrpcServer::~GrpcServer() {
     if (impl_) {

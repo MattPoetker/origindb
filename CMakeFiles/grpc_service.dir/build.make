@@ -96,10 +96,24 @@ CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/grpc/grpc_server.cpp -o CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.s
 
+CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o: CMakeFiles/grpc_service.dir/flags.make
+CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o: src/grpc/wasm_service_impl.cpp
+CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o: CMakeFiles/grpc_service.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o -MF CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o.d -o CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o -c /Users/a12042/Development/instant_db/src/grpc/wasm_service_impl.cpp
+
+CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a12042/Development/instant_db/src/grpc/wasm_service_impl.cpp > CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.i
+
+CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a12042/Development/instant_db/src/grpc/wasm_service_impl.cpp -o CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.s
+
 CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o: CMakeFiles/grpc_service.dir/flags.make
 CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o: generated/instantdb.pb.cc
 CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o: CMakeFiles/grpc_service.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o -MF CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o.d -o CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o -c /Users/a12042/Development/instant_db/generated/instantdb.pb.cc
 
 CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.i: cmake_force
@@ -113,7 +127,7 @@ CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.s: cmake_force
 CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o: CMakeFiles/grpc_service.dir/flags.make
 CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o: generated/instantdb.grpc.pb.cc
 CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o: CMakeFiles/grpc_service.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o -MF CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o.d -o CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o -c /Users/a12042/Development/instant_db/generated/instantdb.grpc.pb.cc
 
 CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.i: cmake_force
@@ -127,6 +141,7 @@ CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.s: cmake_force
 # Object files for target grpc_service
 grpc_service_OBJECTS = \
 "CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o" \
+"CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o" \
 "CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o" \
 "CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o"
 
@@ -134,11 +149,12 @@ grpc_service_OBJECTS = \
 grpc_service_EXTERNAL_OBJECTS =
 
 libgrpc_service.a: CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o
+libgrpc_service.a: CMakeFiles/grpc_service.dir/src/grpc/wasm_service_impl.cpp.o
 libgrpc_service.a: CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o
 libgrpc_service.a: CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o
 libgrpc_service.a: CMakeFiles/grpc_service.dir/build.make
 libgrpc_service.a: CMakeFiles/grpc_service.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library libgrpc_service.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/a12042/Development/instant_db/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library libgrpc_service.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/grpc_service.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/grpc_service.dir/link.txt --verbose=$(VERBOSE)
 
