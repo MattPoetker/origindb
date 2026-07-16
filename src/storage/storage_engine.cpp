@@ -6,8 +6,9 @@
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
-#include <filesystem>
 #include <atomic>
+#include <filesystem>
+#include <fstream>
 
 namespace instantdb {
 
@@ -37,9 +38,13 @@ public:
             return false;
         }
 
-        // TODO: Initialize snapshot manager
-        // snapshot_manager_ = std::make_unique<SnapshotManager>(
-        //     config_.data_dir + "/snapshots", config_);
+        // Restore the last snapshot (if any), then replay the WAL tail on top.
+        // The WAL is truncated whenever a snapshot is written, so recovery
+        // only replays entries newer than the snapshot.
+        if (!LoadSnapshotIfPresent()) {
+            spdlog::error("Failed to load snapshot");
+            return false;
+        }
 
         // Recover from WAL if exists
         if (!RecoverFromWAL()) {
@@ -53,6 +58,14 @@ public:
     }
 
     void Shutdown() {
+        if (shutdown_done_) return;
+        shutdown_done_ = true;
+
+        // Persist a snapshot on clean shutdown and truncate the WAL, so the
+        // next boot loads the snapshot instead of replaying every entry.
+        // A crash before this point falls back to full WAL replay.
+        WriteSnapshot();
+
         // Flush WAL
         if (wal_) {
             wal_->Flush();
@@ -61,6 +74,85 @@ public:
         // Clear tables
         std::unique_lock lock(tables_mutex_);
         tables_.clear();
+    }
+
+    bool WriteSnapshot() {
+        std::shared_lock lock(tables_mutex_);
+        if (!wal_) return false;
+        if (tables_.empty()) return true;  // nothing to snapshot
+
+        nlohmann::json doc;
+        doc["last_sequence"] = wal_->GetLastSequence();
+        auto tables_json = nlohmann::json::array();
+        for (const auto& [name, table] : tables_) {
+            nlohmann::json t;
+            auto schema_bytes = SerializeSchema(table->GetSchema());
+            t["schema"] = std::string(schema_bytes.begin(), schema_bytes.end());
+            auto rows = nlohmann::json::array();
+            table->Scan("", "", [&](const std::string& key, const Row& row) {
+                auto bytes = SerializeRow(row);
+                rows.push_back(std::string(bytes.begin(), bytes.end()));
+                return true;
+            });
+            t["rows"] = std::move(rows);
+            tables_json.push_back(std::move(t));
+        }
+        doc["tables"] = std::move(tables_json);
+
+        auto snap_path = config_.data_dir + "/snapshots/snapshot.json";
+        auto tmp_path = snap_path + ".tmp";
+        {
+            std::ofstream out(tmp_path, std::ios::trunc);
+            if (!out || !(out << doc.dump())) {
+                spdlog::error("Failed to write snapshot to {}", tmp_path);
+                return false;
+            }
+        }
+        std::error_code ec;
+        std::filesystem::rename(tmp_path, snap_path, ec);
+        if (ec) {
+            spdlog::error("Failed to move snapshot into place: {}", ec.message());
+            return false;
+        }
+
+        // The snapshot now covers everything in the WAL; drop it.
+        wal_->Truncate(wal_->GetLastSequence());
+        spdlog::info("Snapshot written ({} tables) and WAL truncated", tables_.size());
+        return true;
+    }
+
+    bool LoadSnapshotIfPresent() {
+        auto snap_path = config_.data_dir + "/snapshots/snapshot.json";
+        std::ifstream in(snap_path);
+        if (!in) return true;  // no snapshot yet
+
+        auto doc = nlohmann::json::parse(in, nullptr, false);
+        if (doc.is_discarded() || !doc.contains("tables")) {
+            spdlog::warn("Ignoring corrupt snapshot at {}", snap_path);
+            return true;  // fall back to full WAL replay
+        }
+
+        std::unique_lock lock(tables_mutex_);
+        uint64_t restored_rows = 0;
+        for (const auto& t : doc["tables"]) {
+            std::string schema_str = t.value("schema", "");
+            std::vector<uint8_t> schema_bytes(schema_str.begin(), schema_str.end());
+            TableSchema schema = DeserializeSchema(schema_bytes);
+            auto table = std::make_shared<MemTable>(schema);
+            for (const auto& row_json : t["rows"]) {
+                std::string row_str = row_json.get<std::string>();
+                std::vector<uint8_t> row_bytes(row_str.begin(), row_str.end());
+                Row row = DeserializeRow(row_bytes);
+                table->Insert(row);
+                restored_rows++;
+            }
+            tables_[schema.name] = table;
+            stats_.total_tables++;
+        }
+        stats_.total_rows += restored_rows;
+        spdlog::info("Loaded snapshot: {} tables, {} rows",
+                    doc["tables"].size(), restored_rows);
+        return true;
     }
 
     bool CreateTable(const TableSchema& schema) {
@@ -427,6 +519,7 @@ private:
     std::unordered_map<uint64_t, std::shared_ptr<TransactionImpl>> active_transactions_;
 
     std::unique_ptr<WALImpl> wal_;
+    bool shutdown_done_ = false;
     // std::unique_ptr<SnapshotManager> snapshot_manager_;
 
     std::atomic<uint64_t> next_txn_id_;

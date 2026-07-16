@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <memory>
 #include <optional>
+#include <nlohmann/json_fwd.hpp>
 #include "changefeed/changefeed_engine.h"
 
 namespace instantdb {
@@ -31,6 +32,12 @@ struct SqlSubscription {
 
     // Check if this subscription matches an event
     bool MatchesEvent(const ChangefeedEvent& event) const;
+
+    // Fast path: caller supplies pre-parsed row column objects (nullptr when
+    // absent/unparseable) so one event parse is shared across subscriptions.
+    bool MatchesEvent(const ChangefeedEvent& event,
+                      const nlohmann::json* new_columns,
+                      const nlohmann::json* old_columns) const;
 
     // Filter event data based on column selection
     ChangefeedEvent FilterEvent(const ChangefeedEvent& event) const;
@@ -97,9 +104,15 @@ private:
     mutable std::mutex subscriptions_mutex_;
     std::unordered_map<std::string, std::unique_ptr<SqlSubscription>> subscriptions_;
     std::unordered_map<std::string, std::vector<std::string>> client_subscriptions_;  // client_id -> subscription_ids
+    // Routing index: table -> subscription_ids, plus catch-all subscriptions.
+    // ProcessEvent only evaluates candidates for the event's table.
+    std::unordered_map<std::string, std::unordered_set<std::string>> table_index_;
+    std::unordered_set<std::string> all_tables_index_;
     std::atomic<uint64_t> next_subscription_id_;
 
     std::string GenerateSubscriptionId();
+    void IndexSubscription(const SqlSubscription& subscription);
+    void UnindexSubscription(const SqlSubscription& subscription);
 };
 
 } // namespace instantdb

@@ -5,146 +5,155 @@
       "name": "storage_insert_50k",
       "notes": "txn + WAL per op",
       "ops": 50000,
-      "ops_per_sec": 8653.921630355026,
-      "p50_us": 109.29299999999999,
-      "p99_us": 172.493,
-      "seconds": 5.777727386
+      "ops_per_sec": 9888.475590888247,
+      "p50_us": 97.675,
+      "p99_us": 131.223,
+      "seconds": 5.056391103
     },
     {
       "name": "storage_get_50k",
       "notes": "",
       "ops": 50000,
-      "ops_per_sec": 147404.06552794666,
-      "p50_us": 4.638,
-      "p99_us": 11.793999999999999,
-      "seconds": 0.33920367
+      "ops_per_sec": 162004.27227298566,
+      "p50_us": 4.5680000000000005,
+      "p99_us": 6.508,
+      "seconds": 0.308633836
     },
     {
       "name": "storage_scan_full_50k_rows",
-      "notes": "rows/s = 4499783",
+      "notes": "rows/s = 4413936",
       "ops": 200,
-      "ops_per_sec": 89.99568056731549,
-      "p50_us": 11038.209,
-      "p99_us": 13070.798,
-      "seconds": 2.22232888
+      "ops_per_sec": 88.27874383784408,
+      "p50_us": 11426.056,
+      "p99_us": 12693.774,
+      "seconds": 2.265551041
     },
     {
-      "name": "wal_recovery_10k",
-      "notes": "WAL 2MB, replay 1.169s",
+      "name": "wal_replay_crash_10k",
+      "notes": "disk 2MB, boot 1.014s",
       "ops": 10000,
-      "ops_per_sec": 8548.670496231685,
+      "ops_per_sec": 9861.82852407196,
       "p50_us": 0.0,
       "p99_us": 0.0,
-      "seconds": 1.16977254
+      "seconds": 1.014010736
     },
     {
-      "name": "wal_recovery_100k",
-      "notes": "WAL 30MB, replay 12.09s",
+      "name": "wal_replay_crash_100k",
+      "notes": "disk 30MB, boot 10.54s",
       "ops": 100000,
-      "ops_per_sec": 8271.201924805362,
+      "ops_per_sec": 9480.612965421062,
       "p50_us": 0.0,
       "p99_us": 0.0,
-      "seconds": 12.090141301
+      "seconds": 10.547841196
+    },
+    {
+      "name": "snapshot_recovery_100k",
+      "notes": "disk 10MB, boot 5.754s",
+      "ops": 100000,
+      "ops_per_sec": 17376.246129193998,
+      "p50_us": 0.0,
+      "p99_us": 0.0,
+      "seconds": 5.754982938
     },
     {
       "name": "wasm_invoke_nowrite_5k",
       "notes": "sandbox + dispatch only",
       "ops": 5000,
-      "ops_per_sec": 139745.42743179263,
-      "p50_us": 6.356,
-      "p99_us": 7.381,
-      "seconds": 0.035779346
+      "ops_per_sec": 134751.97699341766,
+      "p50_us": 6.514,
+      "p99_us": 10.589,
+      "seconds": 0.037105207
     },
     {
       "name": "wasm_invoke_write_commit_5k",
       "notes": "full write pipeline",
       "ops": 5000,
-      "ops_per_sec": 8989.196043485186,
-      "p50_us": 108.24,
-      "p99_us": 145.731,
-      "seconds": 0.556223268
+      "ops_per_sec": 6655.184211139819,
+      "p50_us": 101.76299999999999,
+      "p99_us": 167.03,
+      "seconds": 0.751294005
     },
     {
       "name": "wasm_write_scaling_x1",
       "notes": "1 modules, 1 thread each",
       "ops": 2000,
-      "ops_per_sec": 9111.584933775634,
+      "ops_per_sec": 6594.101850868446,
       "p50_us": 0.0,
       "p99_us": 0.0,
-      "seconds": 0.21950078
+      "seconds": 0.303301351
     },
     {
       "name": "wasm_write_scaling_x2",
       "notes": "2 modules, 1 thread each",
       "ops": 4000,
-      "ops_per_sec": 11072.613847286864,
+      "ops_per_sec": 8691.731919391357,
       "p50_us": 0.0,
       "p99_us": 0.0,
-      "seconds": 0.361251648
+      "seconds": 0.460207475
     },
     {
       "name": "wasm_write_scaling_x4",
       "notes": "4 modules, 1 thread each",
       "ops": 8000,
-      "ops_per_sec": 13135.42354865371,
+      "ops_per_sec": 10483.012478765775,
       "p50_us": 0.0,
       "p99_us": 0.0,
-      "seconds": 0.609040125
+      "seconds": 0.763139414
     },
     {
       "name": "wasm_write_scaling_x8",
       "notes": "8 modules, 1 thread each",
       "ops": 16000,
-      "ops_per_sec": 12260.32747497135,
+      "ops_per_sec": 10772.257353014611,
       "p50_us": 0.0,
       "p99_us": 0.0,
-      "seconds": 1.305022238
+      "seconds": 1.485296858
     },
     {
       "name": "changefeed_publish_deliver_10k",
       "notes": "single subscriber, incl. queue wait",
       "ops": 10000,
-      "ops_per_sec": 52011.96127395331,
-      "p50_us": 9292.19,
-      "p99_us": 24363.815,
-      "seconds": 0.192263467
+      "ops_per_sec": 54514.64088807403,
+      "p50_us": 22677.478,
+      "p99_us": 35606.74,
+      "seconds": 0.18343696
     },
     {
       "name": "subs_match_1",
-      "notes": "1 subs, 0 matches/event",
+      "notes": "1 subs, 0.99 matches/event",
       "ops": 5000,
-      "ops_per_sec": 26635.245883911623,
-      "p50_us": 33.145,
-      "p99_us": 38.510999999999996,
-      "seconds": 0.187721188
+      "ops_per_sec": 26346.187288585348,
+      "p50_us": 33.46,
+      "p99_us": 38.231,
+      "seconds": 0.189780781
     },
     {
       "name": "subs_match_10",
-      "notes": "10 subs, 4 matches/event",
+      "notes": "10 subs, 4.75 matches/event",
       "ops": 5000,
-      "ops_per_sec": 5938.660962935965,
-      "p50_us": 164.596,
-      "p99_us": 181.23999999999998,
-      "seconds": 0.841940638
+      "ops_per_sec": 18281.513122961893,
+      "p50_us": 50.015,
+      "p99_us": 69.574,
+      "seconds": 0.273500337
     },
     {
       "name": "subs_match_100",
-      "notes": "100 subs, 25 matches/event",
+      "notes": "100 subs, 25.0 matches/event",
       "ops": 5000,
-      "ops_per_sec": 662.2177007893026,
-      "p50_us": 1497.942,
-      "p99_us": 1796.146,
-      "seconds": 7.550387122
+      "ops_per_sec": 6413.343176994202,
+      "p50_us": 150.51600000000002,
+      "p99_us": 204.589,
+      "seconds": 0.779624583
     },
     {
       "name": "subs_match_1000",
-      "notes": "1000 subs, 250 matches/event",
+      "notes": "1000 subs, 250. matches/event",
       "ops": 5000,
-      "ops_per_sec": 65.6748495028249,
-      "p50_us": 15122.325,
-      "p99_us": 18399.297,
-      "seconds": 76.13264496
+      "ops_per_sec": 798.0664276761726,
+      "p50_us": 1230.884,
+      "p99_us": 2169.3179999999998,
+      "seconds": 6.265142633
     }
   ],
-  "timestamp": 1784239047
+  "timestamp": 1784240217
 }

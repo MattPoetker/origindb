@@ -33,6 +33,22 @@ bool ExtractRowColumns(const std::vector<uint8_t>& value, nlohmann::json& out) {
 // ==================== SqlSubscription Methods ====================
 
 bool SqlSubscription::MatchesEvent(const ChangefeedEvent& event) const {
+    // Standalone entry point: parse the row payloads for this one call.
+    // ProcessEvent uses the pre-parsed overload to share the parse across
+    // every candidate subscription.
+    nlohmann::json new_columns, old_columns;
+    const nlohmann::json* new_ptr = nullptr;
+    const nlohmann::json* old_ptr = nullptr;
+    if (!event.new_value.empty() && ExtractRowColumns(event.new_value, new_columns))
+        new_ptr = &new_columns;
+    if (!event.old_value.empty() && ExtractRowColumns(event.old_value, old_columns))
+        old_ptr = &old_columns;
+    return MatchesEvent(event, new_ptr, old_ptr);
+}
+
+bool SqlSubscription::MatchesEvent(const ChangefeedEvent& event,
+                                   const nlohmann::json* new_columns,
+                                   const nlohmann::json* old_columns) const {
     // If subscription is not active, don't match
     if (!is_active) {
         return false;
@@ -52,53 +68,29 @@ bool SqlSubscription::MatchesEvent(const ChangefeedEvent& event) const {
     if (predicate) {
         if (event.operation == "DELETE") {
             // DELETE events carry only the old row
-            if (event.old_value.empty()) {
-                spdlog::debug("Subscription {}: DELETE event on table {} has no old_value, "
-                              "cannot evaluate WHERE clause",
+            if (!old_columns) {
+                spdlog::debug("Subscription {}: DELETE event on table {} has no usable "
+                              "old_value, cannot evaluate WHERE clause",
                               id, event.table);
                 return false;
             }
-            nlohmann::json old_columns;
-            if (!ExtractRowColumns(event.old_value, old_columns)) {
-                spdlog::warn("Subscription {}: failed to parse old_value JSON for {} event on table {}",
-                             id, event.operation, event.table);
-                return false;
-            }
-            return predicate->Evaluate(old_columns);
+            return predicate->Evaluate(*old_columns);
         }
 
         if (event.operation == "UPDATE") {
             // Match if either the new or the old row satisfies the predicate
-            bool matched = false;
-            if (!event.new_value.empty()) {
-                nlohmann::json new_columns;
-                if (ExtractRowColumns(event.new_value, new_columns)) {
-                    matched = predicate->Evaluate(new_columns);
-                } else {
-                    spdlog::warn("Subscription {}: failed to parse new_value JSON for UPDATE event on table {}",
-                                 id, event.table);
-                }
-            }
-            if (!matched && !event.old_value.empty()) {
-                nlohmann::json old_columns;
-                if (ExtractRowColumns(event.old_value, old_columns)) {
-                    matched = predicate->Evaluate(old_columns);
-                } else {
-                    spdlog::warn("Subscription {}: failed to parse old_value JSON for UPDATE event on table {}",
-                                 id, event.table);
-                }
-            }
-            return matched;
+            if (new_columns && predicate->Evaluate(*new_columns)) return true;
+            if (old_columns && predicate->Evaluate(*old_columns)) return true;
+            return false;
         }
 
         // INSERT: evaluate the new row
-        nlohmann::json new_columns;
-        if (!ExtractRowColumns(event.new_value, new_columns)) {
-            spdlog::warn("Subscription {}: failed to parse new_value JSON for {} event on table {}",
+        if (!new_columns) {
+            spdlog::warn("Subscription {}: unparseable new_value for {} event on table {}",
                          id, event.operation, event.table);
             return false;
         }
-        return predicate->Evaluate(new_columns);
+        return predicate->Evaluate(*new_columns);
     }
 
     return true;
@@ -292,6 +284,8 @@ std::string SqlSubscriptionManager::Subscribe(const std::string& client_id, cons
 
     std::lock_guard<std::mutex> lock(subscriptions_mutex_);
 
+    IndexSubscription(*subscription);
+
     // Store subscription
     subscriptions_[subscription_id] = std::move(subscription);
 
@@ -317,6 +311,8 @@ std::string SqlSubscriptionManager::SubscribeToAllTables(const std::string& clie
 
     std::lock_guard<std::mutex> lock(subscriptions_mutex_);
 
+    IndexSubscription(*subscription);
+
     // Store subscription
     subscriptions_[subscription_id] = std::move(subscription);
 
@@ -334,6 +330,7 @@ void SqlSubscriptionManager::Unsubscribe(const std::string& subscription_id) {
     auto it = subscriptions_.find(subscription_id);
     if (it != subscriptions_.end()) {
         std::string client_id = it->second->client_id;
+        UnindexSubscription(*it->second);
         subscriptions_.erase(it);
 
         // Remove from client subscriptions
@@ -357,7 +354,11 @@ void SqlSubscriptionManager::UnsubscribeAll(const std::string& client_id) {
     auto it = client_subscriptions_.find(client_id);
     if (it != client_subscriptions_.end()) {
         for (const auto& sub_id : it->second) {
-            subscriptions_.erase(sub_id);
+            auto sub_it = subscriptions_.find(sub_id);
+            if (sub_it != subscriptions_.end()) {
+                UnindexSubscription(*sub_it->second);
+                subscriptions_.erase(sub_it);
+            }
         }
         client_subscriptions_.erase(it);
 
@@ -371,20 +372,54 @@ SqlSubscriptionManager::ProcessEvent(const ChangefeedEvent& event) {
 
     std::lock_guard<std::mutex> lock(subscriptions_mutex_);
 
-    for (const auto& [sub_id, subscription] : subscriptions_) {
-        if (subscription->MatchesEvent(event)) {
-            // Filter the event based on subscription columns
-            ChangefeedEvent filtered_event = subscription->FilterEvent(event);
+    // Parse the event's row payloads once; every candidate shares the result.
+    nlohmann::json new_columns, old_columns;
+    const nlohmann::json* new_ptr = nullptr;
+    const nlohmann::json* old_ptr = nullptr;
+    if (!event.new_value.empty() && ExtractRowColumns(event.new_value, new_columns))
+        new_ptr = &new_columns;
+    if (!event.old_value.empty() && ExtractRowColumns(event.old_value, old_columns))
+        old_ptr = &old_columns;
 
-            // Add client_id and filtered event to results
-            results.emplace_back(subscription->client_id, filtered_event);
-
-            spdlog::debug("Event matched subscription {} for client {}",
-                        sub_id, subscription->client_id);
+    // Only subscriptions on this event's table (plus catch-alls) are
+    // candidates; the per-table index avoids scanning every subscription.
+    auto evaluate = [&](const std::string& sub_id) {
+        auto it = subscriptions_.find(sub_id);
+        if (it == subscriptions_.end()) return;
+        const auto& subscription = it->second;
+        if (subscription->MatchesEvent(event, new_ptr, old_ptr)) {
+            results.emplace_back(subscription->client_id,
+                                 subscription->FilterEvent(event));
         }
+    };
+
+    auto table_it = table_index_.find(event.table);
+    if (table_it != table_index_.end()) {
+        for (const auto& sub_id : table_it->second) evaluate(sub_id);
     }
+    for (const auto& sub_id : all_tables_index_) evaluate(sub_id);
 
     return results;
+}
+
+void SqlSubscriptionManager::IndexSubscription(const SqlSubscription& subscription) {
+    if (subscription.type == SubscriptionType::ALL_TABLES) {
+        all_tables_index_.insert(subscription.id);
+    } else {
+        table_index_[subscription.table_name].insert(subscription.id);
+    }
+}
+
+void SqlSubscriptionManager::UnindexSubscription(const SqlSubscription& subscription) {
+    if (subscription.type == SubscriptionType::ALL_TABLES) {
+        all_tables_index_.erase(subscription.id);
+    } else {
+        auto it = table_index_.find(subscription.table_name);
+        if (it != table_index_.end()) {
+            it->second.erase(subscription.id);
+            if (it->second.empty()) table_index_.erase(it);
+        }
+    }
 }
 
 std::vector<SqlSubscription>

@@ -198,27 +198,30 @@ void BenchStorage() {
 // WAL recovery
 // ---------------------------------------------------------------------------
 
-void BenchWalRecovery(uint64_t rows) {
+void BenchWalRecovery(uint64_t rows, bool clean_shutdown) {
     auto dir = FreshDir("wal");
     {
         auto storage = MakeStorage(dir);
         CreateBenchTable(*storage);
         for (uint64_t i = 0; i < rows; i++) storage->Insert("bench", MakeRow(i));
-        storage->Shutdown();
+        // Clean shutdown writes a snapshot and truncates the WAL; skipping it
+        // simulates a crash, forcing full WAL replay on the next boot.
+        if (clean_shutdown) storage->Shutdown();
     }
-    uint64_t wal_bytes = 0;
+    uint64_t disk_bytes = 0;
     std::error_code ec;
     for (auto& e : std::filesystem::recursive_directory_iterator(dir, ec))
-        if (e.is_regular_file()) wal_bytes += e.file_size();
+        if (e.is_regular_file()) disk_bytes += e.file_size();
 
-    BenchResult r{.name = "wal_recovery_" + std::to_string(rows / 1000) + "k"};
+    std::string label = clean_shutdown ? "snapshot_recovery_" : "wal_replay_crash_";
+    BenchResult r{.name = label + std::to_string(rows / 1000) + "k"};
     Timer t;
-    auto storage = MakeStorage(dir);  // replays the WAL
+    auto storage = MakeStorage(dir);  // snapshot load and/or WAL replay
     r.seconds = t.Seconds();
     r.ops = rows;
-    r.notes = "WAL " + std::to_string(wal_bytes / 1024 / 1024) + "MB, replay " +
+    r.notes = "disk " + std::to_string(disk_bytes / 1024 / 1024) + "MB, boot " +
               std::to_string(r.seconds).substr(0, 5) + "s";
-    storage->Shutdown();
+    if (!storage->Get("bench", "key_" + std::to_string(rows - 1))) exit(2);
     std::filesystem::remove_all(dir);
     Report(std::move(r));
 }
@@ -429,7 +432,8 @@ void BenchSubscriptionMatching(size_t num_subs) {
     r.ops = EVENTS;
     r.seconds = total.Seconds();
     r.notes = std::to_string(num_subs) + " subs, " +
-              std::to_string(matched / EVENTS) + " matches/event";
+              std::to_string(static_cast<double>(matched) / EVENTS).substr(0, 4) +
+              " matches/event";
     Report(std::move(r));
 }
 
@@ -451,9 +455,10 @@ int main(int argc, char** argv) {
     auto module_bytes = LoadFixture(fixture);
 
     BenchStorage();
-    std::cout << "\nwal" << std::endl;
-    BenchWalRecovery(10000);
-    BenchWalRecovery(100000);
+    std::cout << "\nrecovery" << std::endl;
+    BenchWalRecovery(10000, false);
+    BenchWalRecovery(100000, false);
+    BenchWalRecovery(100000, true);
     BenchWasm(module_bytes);
     BenchChangefeedDelivery();
     std::cout << "\nsubscription matching" << std::endl;

@@ -32,23 +32,12 @@ public:
     }
 
     bool Append(const WALEntry& entry) {
-        spdlog::debug("WALImpl::Append: type={}, table={}, key={}, data_size={}",
-                     static_cast<int>(entry.type), entry.table_name, entry.key, entry.data.size());
-
         WALEntry timestamped_entry = entry;
         timestamped_entry.sequence = next_sequence_++;
         timestamped_entry.timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
 
-        spdlog::debug("WALImpl::Append: timestamped entry - seq={}, data_size={}",
-                     timestamped_entry.sequence, timestamped_entry.data.size());
-
-        // Serialize entry to JSON (simplified for prototype)
         std::string json_entry = SerializeEntry(timestamped_entry);
-        spdlog::debug("WALImpl::Append: serialized to {} bytes: {}", json_entry.size(),
-                     json_entry.length() > 200 ? json_entry.substr(0, 200) + "..." : json_entry);
-
-        // Write to file
         wal_file_ << json_entry << "\n";
 
         if (config_.sync_wal) {
@@ -56,13 +45,6 @@ public:
             // Note: std::ofstream doesn't have sync() on all platforms
             // In production, we'd use fsync() or platform-specific calls
         }
-
-        entries_.push_back(timestamped_entry);
-
-        spdlog::debug("WAL appended entry seq={}, type={}, table={}",
-                     timestamped_entry.sequence,
-                     static_cast<int>(timestamped_entry.type),
-                     timestamped_entry.table_name);
         return true;
     }
 
@@ -94,10 +76,20 @@ public:
     }
 
     bool Truncate(uint64_t sequence) {
-        // For prototype, just mark where to truncate
-        truncate_sequence_ = sequence;
-        spdlog::info("WAL marked for truncation at sequence {}", sequence);
-        return true;
+        // Discards all entries with sequence <= `sequence`. Only whole-file
+        // truncation is supported (used after a snapshot has captured the
+        // full state); a mid-file sequence keeps everything.
+        if (sequence < next_sequence_ - 1) {
+            spdlog::warn("WAL partial truncation not supported (seq {} < last {})",
+                        sequence, next_sequence_ - 1);
+            return false;
+        }
+        wal_file_.close();
+        wal_file_.open(wal_file_path_, std::ios::trunc | std::ios::binary);
+        wal_file_.close();
+        wal_file_.open(wal_file_path_, std::ios::app | std::ios::binary);
+        spdlog::info("WAL truncated after sequence {}", sequence);
+        return wal_file_.is_open();
     }
 
     void Flush() {
@@ -123,116 +115,106 @@ private:
         if (!entries.empty()) {
             next_sequence_ = entries.back().sequence + 1;
         }
-        entries_ = entries;
     }
 
     std::string SerializeEntry(const WALEntry& entry) {
-        // Simple JSON serialization for prototype
-        std::string json = "{";
-        json += "\"sequence\":" + std::to_string(entry.sequence) + ",";
-        json += "\"type\":" + std::to_string(static_cast<int>(entry.type)) + ",";
-        json += "\"transaction_id\":" + std::to_string(entry.transaction_id) + ",";
-        json += "\"timestamp\":" + std::to_string(entry.timestamp) + ",";
-        json += "\"table_name\":\"" + entry.table_name + "\",";
-        json += "\"key\":\"" + entry.key + "\",";
-        json += "\"data_size\":" + std::to_string(entry.data.size()) + ",";
-
-        // Encode binary data as hex string
-        json += "\"data\":\"";
+        // Same JSON-lines format as always (recovery-compatible); built in a
+        // single preallocated buffer with table-based hex encoding.
+        static const char* kHex = "0123456789abcdef";
+        std::string json;
+        json.reserve(160 + entry.table_name.size() + entry.key.size() +
+                     entry.data.size() * 2);
+        json += "{\"sequence\":";
+        json += std::to_string(entry.sequence);
+        json += ",\"type\":";
+        json += std::to_string(static_cast<int>(entry.type));
+        json += ",\"transaction_id\":";
+        json += std::to_string(entry.transaction_id);
+        json += ",\"timestamp\":";
+        json += std::to_string(entry.timestamp);
+        json += ",\"table_name\":\"";
+        json += entry.table_name;
+        json += "\",\"key\":\"";
+        json += entry.key;
+        json += "\",\"data_size\":";
+        json += std::to_string(entry.data.size());
+        json += ",\"data\":\"";
         for (uint8_t byte : entry.data) {
-            char hex[3];
-            sprintf(hex, "%02x", byte);
-            json += hex;
+            json += kHex[byte >> 4];
+            json += kHex[byte & 0xF];
         }
-        json += "\"";
-
-        json += "}";
+        json += "\"}";
         return json;
     }
 
     WALEntry DeserializeEntry(const std::string& json) {
+        // Single forward scan; fields are searched from the previous match
+        // position (the writer emits them in a fixed order) with a
+        // full-string fallback for entries written by older builds.
         WALEntry entry;
-        // Simple JSON parsing for prototype
-        // In production, use a proper JSON library
-
-        // Validate JSON structure
         if (json.empty() || json.front() != '{' || json.back() != '}') {
             throw std::runtime_error("Invalid JSON format: " + json.substr(0, 50));
         }
 
-        // Extract sequence
-        auto seq_pos = json.find("\"sequence\":");
-        if (seq_pos != std::string::npos) {
-            auto start = seq_pos + 11;
-            auto end = json.find(",", start);
-            if (end == std::string::npos) {
-                throw std::runtime_error("Malformed sequence field");
+        size_t cursor = 0;
+        auto find_field = [&](const char* marker, size_t marker_len) -> size_t {
+            size_t pos = json.find(marker, cursor);
+            if (pos == std::string::npos) pos = json.find(marker);  // fallback
+            if (pos == std::string::npos) return std::string::npos;
+            cursor = pos + marker_len;
+            return cursor;
+        };
+
+        auto parse_u64 = [&](const char* marker, size_t marker_len) -> uint64_t {
+            size_t start = find_field(marker, marker_len);
+            if (start == std::string::npos) return 0;
+            uint64_t value = 0;
+            size_t i = start;
+            while (i < json.size() && json[i] >= '0' && json[i] <= '9') {
+                value = value * 10 + (json[i] - '0');
+                i++;
             }
-            entry.sequence = std::stoull(json.substr(start, end - start));
-        }
+            cursor = i;
+            return value;
+        };
 
-        // Extract type
-        auto type_pos = json.find("\"type\":");
-        if (type_pos != std::string::npos) {
-            auto start = type_pos + 7;
-            auto end = json.find(",", start);
-            entry.type = static_cast<WALEntryType>(std::stoi(json.substr(start, end - start)));
-        }
+        auto parse_string = [&](const char* marker, size_t marker_len) -> std::string {
+            size_t start = find_field(marker, marker_len);
+            if (start == std::string::npos) return "";
+            size_t end = json.find('"', start);
+            if (end == std::string::npos)
+                throw std::runtime_error("Malformed string field");
+            cursor = end + 1;
+            return json.substr(start, end - start);
+        };
 
-        // Extract transaction_id
-        auto txn_pos = json.find("\"transaction_id\":");
-        if (txn_pos != std::string::npos) {
-            auto start = txn_pos + 17;
-            auto end = json.find(",", start);
-            entry.transaction_id = std::stoull(json.substr(start, end - start));
-        }
+        entry.sequence = parse_u64("\"sequence\":", 11);
+        entry.type = static_cast<WALEntryType>(parse_u64("\"type\":", 7));
+        entry.transaction_id = parse_u64("\"transaction_id\":", 17);
+        entry.timestamp = parse_u64("\"timestamp\":", 12);
+        entry.table_name = parse_string("\"table_name\":\"", 14);
+        entry.key = parse_string("\"key\":\"", 7);
 
-        // Extract timestamp
-        auto ts_pos = json.find("\"timestamp\":");
-        if (ts_pos != std::string::npos) {
-            auto start = ts_pos + 12;
-            auto end = json.find(",", start);
-            entry.timestamp = std::stoull(json.substr(start, end - start));
-        }
+        size_t data_start = find_field("\"data\":\"", 8);
+        if (data_start != std::string::npos) {
+            size_t data_end = json.find('"', data_start);
+            if (data_end == std::string::npos)
+                throw std::runtime_error("Malformed data field");
 
-        // Extract table_name
-        auto table_pos = json.find("\"table_name\":\"");
-        if (table_pos != std::string::npos) {
-            auto start = table_pos + 14;
-            auto end = json.find("\"", start);
-            entry.table_name = json.substr(start, end - start);
-        }
-
-        // Extract key
-        auto key_pos = json.find("\"key\":\"");
-        if (key_pos != std::string::npos) {
-            auto start = key_pos + 7;
-            auto end = json.find("\"", start);
-            entry.key = json.substr(start, end - start);
-        }
-
-        // Extract data (hex encoded)
-        auto data_pos = json.find("\"data\":\"");
-        if (data_pos != std::string::npos) {
-            auto start = data_pos + 8;
-            auto end = json.find("\"", start);
-            std::string hex_data = json.substr(start, end - start);
-
-            spdlog::debug("DeserializeEntry: found hex data field with {} chars", hex_data.length());
-
-            // Decode hex string to binary data
-            entry.data.clear();
-            for (size_t i = 0; i < hex_data.length(); i += 2) {
-                if (i + 1 < hex_data.length()) {
-                    std::string hex_byte = hex_data.substr(i, 2);
-                    uint8_t byte = static_cast<uint8_t>(std::stoi(hex_byte, nullptr, 16));
-                    entry.data.push_back(byte);
-                }
+            auto nibble = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return -1;
+            };
+            size_t len = data_end - data_start;
+            entry.data.reserve(len / 2);
+            for (size_t i = 0; i + 1 < len; i += 2) {
+                int hi = nibble(json[data_start + i]);
+                int lo = nibble(json[data_start + i + 1]);
+                if (hi < 0 || lo < 0) throw std::runtime_error("Invalid hex in data");
+                entry.data.push_back(static_cast<uint8_t>((hi << 4) | lo));
             }
-
-            spdlog::debug("DeserializeEntry: decoded {} bytes of binary data", entry.data.size());
-        } else {
-            spdlog::debug("DeserializeEntry: no data field found in JSON");
         }
 
         return entry;
@@ -244,8 +226,6 @@ private:
     StorageConfig config_;
     std::ofstream wal_file_;
     std::atomic<uint64_t> next_sequence_;
-    uint64_t truncate_sequence_ = 0;
-    std::vector<WALEntry> entries_;
 };
 
 WALImpl::WALImpl(const std::string& wal_dir, const StorageConfig& config)
