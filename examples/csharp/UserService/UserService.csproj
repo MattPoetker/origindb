@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>UserService</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- InstantDB requires core WASI p1 modules: net8.0 + wasi-wasm + the
+         wasi-experimental workload. Do NOT switch to .NET 9+/componentize-dotnet
+         (emits WASI p2 components, which the server rejects). -->
+    <RuntimeIdentifier Condition="'$(SkipWasi)' != 'true'">wasi-wasm</RuntimeIdentifier>
+    <WasmSingleFileBundle Condition="'$(SkipWasi)' != 'true'">true</WasmSingleFileBundle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- No NuGet package yet — compile the SDK source in directly. -->
+    <Compile Include="../../../sdk/csharp/InstantDB.cs" />
+  </ItemGroup>
+
+</Project>

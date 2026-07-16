@@ -14,10 +14,8 @@ namespace instantdb {
 class StorageEngine;
 class ChangefeedEngine;
 
-// Forward declarations
 class WasmModule;
-class WasmInstance;
-class WasmRuntime;
+struct WasmModuleImpl;
 
 // Value types that can be passed between host and WASM
 using WasmValue = std::variant<
@@ -30,9 +28,6 @@ using WasmValue = std::variant<
     std::string,
     std::vector<uint8_t>  // binary data
 >;
-
-// Function signature for WASM functions
-using WasmFunction = std::function<std::vector<WasmValue>(const std::vector<WasmValue>&)>;
 
 // Reducer context passed to WASM modules
 struct ReducerContext {
@@ -64,6 +59,14 @@ struct ModuleMetadata {
     std::vector<std::string> imports;
 };
 
+// Per-module sandbox restrictions. Zero/empty fields fall back to engine defaults.
+struct ModuleCapabilities {
+    std::vector<std::string> allowed_tables;  // empty = all tables
+    bool read_only = false;
+    uint32_t max_memory_mb = 0;
+    uint32_t timeout_ms = 0;
+};
+
 // Result of WASM operation
 struct WasmResult {
     bool success;
@@ -71,74 +74,32 @@ struct WasmResult {
     std::vector<WasmValue> values;
 };
 
-// WASM Module representation
+// A compiled WASM module plus its long-lived instance state.
 class WasmModule {
 public:
     WasmModule(const std::string& name, const std::vector<uint8_t>& bytecode);
     ~WasmModule();
 
-    bool Load();
-    bool Validate();
-    std::unique_ptr<WasmInstance> CreateInstance();
-
     const std::string& GetName() const { return name_; }
     const ModuleMetadata& GetMetadata() const { return metadata_; }
     const std::vector<uint8_t>& GetBytecode() const { return bytecode_; }
+    const ModuleCapabilities& GetCapabilities() const { return capabilities_; }
+    const std::string& GetLoadError() const { return load_error_; }
+    bool IsLoaded() const { return loaded_; }
 
 private:
-    friend class WasmInstance;
+    friend class WasmEngine;
 
     std::string name_;
     std::vector<uint8_t> bytecode_;
     ModuleMetadata metadata_;
-    void* module_handle_; // Implementation-specific handle
-    bool loaded_;
-    bool validated_;
-
-    bool ExtractMetadata();
+    ModuleCapabilities capabilities_;
+    std::string load_error_;
+    bool loaded_ = false;
+    std::unique_ptr<WasmModuleImpl> impl_;
 };
 
-// WASM Instance (runtime execution context)
-class WasmInstance {
-public:
-    WasmInstance(WasmModule* module);
-    ~WasmInstance();
-
-    bool Initialize();
-    void Shutdown();
-
-    // Execute a reducer function
-    WasmResult CallReducer(const std::string& reducer_name,
-                          const ReducerContext& ctx,
-                          const std::vector<WasmValue>& args);
-
-    // Execute arbitrary exported function
-    WasmResult CallFunction(const std::string& function_name,
-                           const std::vector<WasmValue>& args);
-
-    // Memory management
-    bool AllocateMemory(size_t size, uint32_t* address);
-    bool WriteMemory(uint32_t address, const void* data, size_t size);
-    bool ReadMemory(uint32_t address, void* data, size_t size);
-
-private:
-    WasmModule* module_;
-    void* instance_handle_; // Implementation-specific handle
-    bool initialized_;
-
-    // Host function implementations
-    void RegisterHostFunctions();
-
-    // Host functions callable from WASM
-    static WasmValue HostLog(const std::vector<WasmValue>& args);
-    static WasmValue HostTableInsert(const std::vector<WasmValue>& args);
-    static WasmValue HostTableSelect(const std::vector<WasmValue>& args);
-    static WasmValue HostTableUpdate(const std::vector<WasmValue>& args);
-    static WasmValue HostTableDelete(const std::vector<WasmValue>& args);
-    static WasmValue HostEmitEvent(const std::vector<WasmValue>& args);
-};
-
-// WASM Runtime Engine
+// WASM Runtime Engine (wasmtime-backed)
 class WasmEngine {
 public:
     WasmEngine(std::shared_ptr<StorageEngine> storage,
@@ -150,11 +111,15 @@ public:
     void RequestShutdown();
 
     // Module management
-    bool LoadModule(const std::string& name, const std::vector<uint8_t>& bytecode);
+    bool LoadModule(const std::string& name, const std::vector<uint8_t>& bytecode,
+                    const std::string& version = "",
+                    const ModuleCapabilities& capabilities = {});
     bool UnloadModule(const std::string& name);
     std::shared_ptr<WasmModule> GetModule(const std::string& name);
     std::vector<std::string> ListModules() const;
     std::vector<std::string> GetLoadedModules() const;
+    // Error text from the most recent failed LoadModule (best-effort).
+    std::string GetLastLoadError() const;
 
     // Reducer execution
     WasmResult ExecuteReducer(const std::string& module_name,
@@ -162,56 +127,32 @@ public:
                              const ReducerContext& ctx,
                              const std::vector<WasmValue>& args);
 
-    // Lifecycle events
+    // Lifecycle events (reserved invoke names __init/__client_connected/__client_disconnected)
     WasmResult OnModuleInit(const std::string& module_name, const ReducerContext& ctx);
     WasmResult OnClientConnected(const std::string& module_name, const ReducerContext& ctx);
     WasmResult OnClientDisconnected(const std::string& module_name, const ReducerContext& ctx);
 
-    // Configuration
-    void SetMaxInstances(size_t max_instances) { max_instances_ = max_instances; }
-    void SetTimeoutMs(uint32_t timeout_ms) { timeout_ms_ = timeout_ms; }
-    void SetMemoryLimitMB(uint32_t memory_limit_mb) { memory_limit_mb_ = memory_limit_mb; }
+    // Configuration (engine-wide defaults; per-module capabilities override)
+    void SetTimeoutMs(uint32_t timeout_ms);
+    void SetMemoryLimitMB(uint32_t memory_limit_mb);
 
     // Accessor methods
-    std::shared_ptr<StorageEngine> GetStorageEngine() const { return storage_; }
-    std::shared_ptr<ChangefeedEngine> GetChangefeedEngine() const { return changefeed_; }
+    std::shared_ptr<StorageEngine> GetStorageEngine() const;
+    std::shared_ptr<ChangefeedEngine> GetChangefeedEngine() const;
+
+    ReducerContext CreateReducerContext(const std::string& sender_identity,
+                                        const std::string& connection_id = "");
 
 private:
-    std::shared_ptr<StorageEngine> storage_;
-    std::shared_ptr<ChangefeedEngine> changefeed_;
-
-    // Module storage
-    std::unordered_map<std::string, std::shared_ptr<WasmModule>> modules_;
-
-    // Instance pool for performance
-    std::unordered_map<std::string, std::vector<std::unique_ptr<WasmInstance>>> instance_pools_;
-
-    // Configuration
-    size_t max_instances_;
-    uint32_t timeout_ms_;
-    uint32_t memory_limit_mb_;
-
-    bool initialized_;
-    std::atomic<bool> shutdown_requested_;
-    mutable std::mutex modules_mutex_;
-
-    // Instance management
-    std::unique_ptr<WasmInstance> GetOrCreateInstance(const std::string& module_name);
-    void ReturnInstance(const std::string& module_name, std::unique_ptr<WasmInstance> instance);
-
-    // Utility functions
-    bool ValidateModule(const WasmModule& module);
-    ReducerContext CreateReducerContext(const std::string& sender_identity,
-                                      const std::string& connection_id = "");
+    class Impl;
+    std::unique_ptr<Impl> impl_;
 };
 
 // Configuration for WASM engine
 struct WasmEngineConfig {
-    size_t max_instances = 10;
     uint32_t timeout_ms = 5000;
-    uint32_t memory_limit_mb = 64;
+    uint32_t memory_limit_mb = 256;
     bool enable_debug = false;
-    std::string runtime_type = "wasmtime"; // wasmtime, wasmer, etc.
 };
 
 } // namespace instantdb

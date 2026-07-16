@@ -108,6 +108,15 @@ message DeployModuleRequest {
   string version = 3;
   repeated TableSchema tables = 4;
   repeated ReducerDefinition reducers = 5;
+  ModuleCapabilities capabilities = 6;
+}
+
+// Sandbox restrictions for a deployed module. Unset/zero = engine defaults.
+message ModuleCapabilities {
+  repeated string allowed_tables = 1;  // empty = all tables
+  bool read_only = 2;
+  uint32 max_memory_mb = 3;
+  uint32 timeout_ms = 4;
 }
 
 // Module deployment response
@@ -174,6 +183,8 @@ message ModuleInfo {
   repeated ReducerDefinition reducers = 4;
   bool loaded = 5;
   bool validated = 6;
+  string sha256 = 7;
+  uint64 deployed_at_ms = 8;
 }
 
 // Table schema definition

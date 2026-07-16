@@ -1,352 +1,234 @@
 # InstantDB CLI Tool Guide
 
-The InstantDB CLI tool (`instantdb`) provides a comprehensive command-line interface for managing InstantDB servers, WASM modules, databases, and development workflows.
+The InstantDB CLI (`instantdb`) is the front door to the toolchain: it
+initializes module projects, starts/stops the server, tails logs, builds and
+publishes WASM modules, and dispatches to the bundled gRPC client. Most
+subcommands are thin wrappers that locate and exec the corresponding binary
+(`instantdb_server`, `instantdb_client`, `instantdb_init`, ...) from the same
+directory or `PATH`.
 
 ## Installation
 
-Build the CLI tool:
+Build the CLI and its companion binaries:
+
 ```bash
-cmake --build build --target instantdb
+cmake -B build -S .
+cmake --build build --target instantdb instantdb_server instantdb_client instantdb_init
 ```
 
-The CLI binary will be available at `./build/instantdb`.
+The binaries land in `./build/`.
 
-## Overview
+## Command Overview
 
-The CLI tool provides the following main commands:
+| Command | What it does |
+|---|---|
+| `init` | Initialize a new module/client project (via `instantdb_init`) |
+| `server` / `start` | Start the InstantDB server (via `instantdb_server`) |
+| `stop` | Stop a running server (`pkill instantdb_server`) |
+| `logs` | View/follow the server log file |
+| `publish` | Build the module project in the current directory and deploy it |
+| `client` | gRPC client: SQL, status, and WASM module management |
+| `sql` | One-shot local SQL executor (demo tool, in-process — not a server client) |
+| `demo` | Run the demo application |
+| `migrate` / `backup` / `restore` | **Not yet implemented** (print a placeholder and exit) |
 
-- `init` - Initialize new InstantDB projects with WASM modules
-- `server` - Manage the InstantDB server (start/stop/status)
-- `logs` - View server logs with tail functionality
-- `module` - Manage WASM modules (init/build/deploy/list)
-- `database` - Manage databases (create/list/drop/backup/restore)
-- `exec` - Execute reducer functions and SQL queries
-- `build` - Build project components
+Global options: `-h/--help`, `-v/--version`, `--verbose`.
 
 ## Command Reference
 
 ### Project Initialization
 
-Initialize a new InstantDB project with WASM module support:
-
 ```bash
-# Create a Rust-based project (default)
-instantdb init my_project
-
-# Create a C# project
-instantdb init --lang csharp my_server_module
-
-# Create a JavaScript/AssemblyScript project
-instantdb init --lang javascript chat_app
-
-# Supported languages: rust, csharp, javascript, go, cpp
+instantdb init myproject                       # C# WASM module (default)
+instantdb init mymodule --template typescript  # AssemblyScript WASM module
+instantdb init mygame --template unity         # Unity client project
+instantdb init myapp --template nodejs         # Node.js client application
 ```
 
-**Features:**
-- Creates complete project structure with config files
-- Sets up WASM module templates for chosen language
-- Generates build scripts and development environment
-- Creates `.gitignore` and documentation
+**Options:**
+- `--template TEMPLATE` — `csharp` (default), `typescript`, `unity`, `nodejs`
+- `--force` — overwrite existing files
+- `--no-git` — don't initialize a git repository
+
+The `csharp` and `typescript` templates produce WASM module projects that
+`instantdb publish` can build and deploy directly. The C# template requires
+the .NET 8 SDK with the `wasi-experimental` workload; the TypeScript
+template requires npm (AssemblyScript). Note the C# toolchain caveat in
+[sdk/csharp/README.md](sdk/csharp/README.md) — AssemblyScript is the fully
+verified module path today.
 
 ### Server Management
 
-Control the InstantDB server:
-
 ```bash
 # Start server (foreground)
-instantdb server start
+instantdb server
 
-# Start server as daemon
-instantdb server start --daemon
-
-# Start with custom configuration
-instantdb server start --port 9090 --websocket-port 8086 --config ./my-config.toml
+# Custom ports and data directory
+instantdb server -p 9090 -g 50052 -d ./mydata -l debug
 
 # Stop server
-instantdb server stop
-
-# Restart server
-instantdb server restart
-
-# Check server status
-instantdb server status
+instantdb stop
 ```
 
-**Server Options:**
-- `--port, -p` - HTTP server port (default: 8080)
-- `--websocket-port` - WebSocket port (default: 8085)
-- `--grpc-port` - gRPC port (default: 50051)
-- `--config, -c` - Configuration file path
-- `--data-dir` - Data directory path
-- `--log-level, -l` - Log level (debug/info/warn/error)
-- `--daemon, -d` - Run as background daemon
+**Server options** (passed through to `instantdb_server`):
+- `-p, --port PORT` — WebSocket port (default: 8080)
+- `-g, --grpc-port PORT` — gRPC port (default: 50051)
+- `-d, --data-dir DIR` — data directory (default: `./instantdb_data`)
+- `-l, --log-level LEVEL` — `trace`, `debug`, `info`, `warn`, `error`
+- `-c, --config FILE` — config file path
+
+**Environment variables** (read by the server):
+- `INSTANTDB_WS_PORT`, `INSTANTDB_GRPC_PORT`, `INSTANTDB_DATA_DIR`,
+  `INSTANTDB_LOG_LEVEL`
+
+There is no built-in daemon mode; use your shell (`... &`), `systemd`, or a
+process manager for background operation. `instantdb stop` simply kills any
+running `instantdb_server` process.
 
 ### Log Viewing
 
-View and follow server logs:
+```bash
+instantdb logs                 # last 50 lines of ./logs/instantdb.log
+instantdb logs -n 100          # last 100 lines
+instantdb logs --follow        # follow (tail -f)
+instantdb logs --file ./path/to/other.log
+```
+
+### Publishing WASM Modules
+
+`instantdb publish` builds the module project in the target directory and
+deploys the resulting `.wasm` to a running server over gRPC. Deployment goes
+through the bundled `instantdb_client` — **no `grpcurl` required**.
 
 ```bash
-# View last 50 lines (default)
-instantdb logs
-
-# View last 100 lines
-instantdb logs --lines 100
-
-# Follow logs in real-time
-instantdb logs --follow
-
-# View stderr logs
-instantdb logs --stderr
-
-# View specific log file
-instantdb logs --file ./logs/custom.log
+instantdb publish
+instantdb publish --path=./my-module --server=prod.example.com:50051 --version=1.2.0
 ```
 
-### WASM Module Management
+**Options:**
+- `--server HOST:PORT` — InstantDB gRPC endpoint (default: `localhost:50051`)
+- `--path PATH` — project path (default: current directory)
+- `--version VERSION` — module version (default: `1.0.0`)
 
-Manage WASM modules for server-side logic:
+**Project detection:**
+
+| Marker file | Project type | Build command | Expected output |
+|---|---|---|---|
+| `asconfig.json` | AssemblyScript | `npm run asbuild` | `build/module.wasm` or `build/release.wasm` |
+| `*.csproj` | C# (.NET 8 + `wasi-experimental`) | `dotnet publish --configuration Release` | `bin/Release/net8.0/wasi-wasm/AppBundle/<Name>.wasm` (or `publish/`) |
+
+The module is deployed under the project name (the `.csproj` stem, or the
+directory name for AssemblyScript projects). After a successful publish,
+test it with:
 
 ```bash
-# Initialize new module
-instantdb module init auth_module
-instantdb module init --lang rust user_service
-
-# Build modules
-instantdb module build                    # Build all modules
-instantdb module build auth_module        # Build specific module
-
-# Deploy modules
-instantdb module deploy --all             # Deploy all modules
-instantdb module deploy auth_module       # Deploy specific module
-
-# List modules
-instantdb module list
-
-# Remove module
-instantdb module remove auth_module
+instantdb client -s localhost:50051 modules
+instantdb client -s localhost:50051 call <module> <Reducer> '["arg1", 2]'
 ```
 
-**Module Languages:**
-- **Rust** - Full WASM support with `wasm-bindgen`
-- **C#** - .NET 8 with AOT compilation to WASM
-- **JavaScript** - AssemblyScript for WASM compilation
-- **Go** - WASM compilation with `GOOS=wasip1`
-- **C++** - Emscripten-based WASM compilation
+### gRPC Client (`instantdb client`)
 
-### Database Operations
-
-Manage databases and perform administrative tasks:
+`instantdb client` dispatches to `instantdb_client`, which talks to the
+server's gRPC API (SQL + WASM services).
 
 ```bash
-# Create database
-instantdb database create myapp
-
-# Create isolated database
-instantdb database create --isolated testdb
-
-# List databases
-instantdb database list
-
-# Drop database
-instantdb database drop myapp
-
-# Backup database
-instantdb database backup myapp ./backups/myapp_backup.db
-
-# Restore database
-instantdb database restore myapp ./backups/myapp_backup.db
+instantdb client [-s HOST:PORT] COMMAND [ARGS]
 ```
 
-### Reducer Execution
+**Options:**
+- `-s, --server ADDRESS` — server address (default: `localhost:50051`)
 
-Execute WASM reducer functions and SQL queries:
+**Commands:**
+
+| Command | Purpose |
+|---|---|
+| `status` | Server status: version, uptime, storage/network/gRPC stats |
+| `exec "SQL"` | Execute a SQL statement |
+| `interactive` | Interactive SQL shell against the server |
+| `deploy NAME FILE.wasm [VERSION]` | Deploy a WASM module |
+| `undeploy NAME` | Remove a WASM module (also deletes its persisted files) |
+| `modules` | List deployed modules (name, version, sha256) |
+| `call MODULE REDUCER [JSON_ARGS]` | Execute a reducer; args are a JSON array |
+
+**Examples:**
 
 ```bash
-# Execute reducer with JSON input
-instantdb exec create_user --input '{"name":"John","email":"john@example.com"}'
+instantdb client status
+instantdb client exec "CREATE TABLE users (id INT64 PRIMARY KEY, name STRING)"
+instantdb client exec "INSERT INTO users VALUES (1, 'Alice')"
+instantdb client exec "SELECT * FROM users"
 
-# Execute reducer with input from file
-instantdb exec process_order --file order_data.json
-
-# Execute SQL query
-instantdb exec --sql "SELECT * FROM users LIMIT 10"
-
-# Execute on specific server
-instantdb exec get_user --server localhost:50052 --input '{"id":123}'
+instantdb client deploy user_service ./UserService.wasm 1.0.0
+instantdb client call user_service CreateUser '["Alice", "alice@example.com"]'
+instantdb client modules
+instantdb client undeploy user_service
 ```
 
-### Build System
+JSON argument mapping: booleans, integers, floats, and strings map to the
+corresponding reducer argument types; anything else is passed as its JSON
+string form. Binary arguments use `{"$bytes": "<base64>"}` per the
+[WASM ABI](docs/WASM_ABI.md).
 
-Build project components:
+### SQL Notes
+
+The SQL layer is intentionally minimal (regex-based) right now:
+
+- `CREATE TABLE`, `INSERT`, `SELECT * FROM table`, and simplified `UPDATE
+  ... WHERE id=value` work.
+- `SELECT` does **not** support WHERE clauses or column projection at the
+  SQL layer (subscription-side WHERE filtering on the WebSocket API *is*
+  supported); `DELETE` is unimplemented; `CREATE TABLE` currently ignores
+  the column definitions you write.
+- Identifiers preserve case.
+
+`instantdb sql "STATEMENT"` runs a single statement against a throwaway
+in-process engine — useful for syntax experiments only. Use
+`instantdb client exec` / `instantdb client interactive` to talk to a real
+server.
+
+## Typical Development Flow
 
 ```bash
-# Build all components
-instantdb build
+# 1. Create a module project
+./build/instantdb init todo --template typescript
+cd todo && npm install
 
-# Build specific targets
-instantdb build server               # Build server only
-instantdb build client               # Build client only
+# 2. Start the server (separate terminal)
+./build/instantdb server -d ./data
 
-# Release build
-instantdb build --release
+# 3. Build + deploy the module
+../build/instantdb publish
 
-# Parallel build
-instantdb build --jobs 8
+# 4. Call reducers and inspect state
+../build/instantdb client call todo addTodo '["buy milk"]'
+../build/instantdb client exec "SELECT * FROM todos"
 
-# Clean build directory
-instantdb build clean
+# 5. Watch logs
+../build/instantdb logs --follow
 ```
 
-## Configuration
-
-### Environment Variables
-
-The CLI tool respects these environment variables:
-
-- `INSTANTDB_CONFIG_PATH` - Default config file path
-- `INSTANTDB_DATA_DIR` - Default data directory
-- `INSTANTDB_LOG_LEVEL` - Default log level
-
-### Configuration Files
-
-Projects can use TOML configuration files:
-
-```toml
-[server]
-port = 8080
-websocket_port = 8085
-grpc_port = 50051
-data_dir = "./data"
-log_level = "info"
-log_file = "./logs/instantdb.log"
-
-[database]
-name = "myapp"
-wal_enabled = true
-max_connections = 100
-
-[wasm]
-modules_dir = "./modules"
-max_memory = "128MB"
-timeout = "30s"
-```
-
-## Development Workflow
-
-### Typical Development Flow
-
-1. **Initialize Project:**
-   ```bash
-   instantdb init --lang rust my_realtime_app
-   cd my_realtime_app
-   ```
-
-2. **Start Development Server:**
-   ```bash
-   instantdb server start --daemon
-   ```
-
-3. **Develop WASM Modules:**
-   ```bash
-   # Edit ./modules/main/src/lib.rs
-   instantdb module build main
-   instantdb module deploy main
-   ```
-
-4. **Monitor and Debug:**
-   ```bash
-   instantdb logs --follow
-   instantdb server status
-   ```
-
-5. **Test Functionality:**
-   ```bash
-   instantdb exec my_reducer --input '{"test": "data"}'
-   instantdb exec --sql "SELECT * FROM my_table"
-   ```
-
-### Multi-Language Projects
-
-You can have modules in different languages within the same project:
-
-```bash
-# Create modules in different languages
-instantdb module init --lang rust auth_service
-instantdb module init --lang csharp payment_service
-instantdb module init --lang javascript notification_service
-
-# Build all modules
-instantdb module build --all
-
-# Deploy all modules
-instantdb module deploy --all
-```
+For real-time subscriptions, connect a WebSocket client to
+`ws://localhost:8080` and send `sql_subscribe` / `subscribe_to_all_tables` /
+`wasm_subscribe` messages (see `WASM_MODULES.md` and
+`QA_TESTING_GUIDE.md`).
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Server won't start:**
-   ```bash
-   instantdb server status           # Check if already running
-   instantdb logs --stderr          # Check error logs
-   ```
-
-2. **Module build fails:**
-   ```bash
-   cd modules/module_name
-   ./build.sh                       # Run build script directly
-   ```
-
-3. **CLI not found:**
-   ```bash
-   cmake --build build --target instantdb  # Rebuild CLI
-   ```
-
-### Debug Mode
-
-Enable verbose logging for troubleshooting:
-
-```bash
-instantdb --verbose server start
-instantdb --verbose module build
-```
-
-## Integration with Development Tools
-
-### IDE Setup
-
-The CLI generates `compile_commands.json` for IDE integration:
-
-```bash
-instantdb build                     # Generates compile_commands.json
-```
-
-### CI/CD Integration
-
-Example CI workflow:
-
-```bash
-# In CI/CD pipeline
-instantdb build --release
-instantdb module build --all
-instantdb database create test_db
-# Run tests...
-instantdb database drop test_db
-```
-
-## API Reference
-
-For programmatic access, the CLI uses the same gRPC and WebSocket APIs as the server. You can also interact directly with:
-
-- **gRPC API:** `localhost:50051` (default)
-- **WebSocket API:** `localhost:8085` (default)
-- **HTTP API:** `localhost:8080` (default)
-
-## Examples
-
-See the `examples/` directory for complete project examples using the CLI tool.
+1. **`Could not find 'instantdb_server' binary`** — the CLI looks in its own
+   directory, `PATH`, and a few common install locations. Build the missing
+   target or run the CLI from the build directory.
+2. **Publish build fails (C#)** — requires .NET 8 SDK with
+   `dotnet workload install wasi-experimental`. See
+   [sdk/csharp/README.md](sdk/csharp/README.md) for the .NET 8 pinning and
+   export-support caveat.
+3. **Publish build fails (AssemblyScript)** — run `npm install` in the
+   project first.
+4. **Deployment fails** — is the server running, and is `--server` pointing
+   at the gRPC port (default 50051, not the WebSocket port)?
+5. **Log file not found** — `instantdb logs` defaults to
+   `./logs/instantdb.log` relative to the current directory; pass `--file`
+   if your server logs elsewhere.
 
 ---
 
-For more information, use `instantdb <command> --help` for detailed command documentation.
+For per-command help, use `instantdb <command> --help`.

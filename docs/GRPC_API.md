@@ -6,13 +6,21 @@ InstantDB provides a high-performance gRPC API for executing SQL statements and 
 
 ## Service Definition
 
-The gRPC service is defined in `proto/instantdb.proto` and provides the following operations:
+The gRPC services are defined in `proto/instantdb.proto`:
 
 ```protobuf
 service SQLService {
   rpc Execute(SQLRequest) returns (SQLResponse);
   rpc ExecuteTransaction(SQLTransactionRequest) returns (SQLTransactionResponse);
   rpc GetStatus(StatusRequest) returns (StatusResponse);
+}
+
+service WasmService {
+  rpc DeployModule(DeployModuleRequest) returns (DeployModuleResponse);
+  rpc UndeployModule(UndeployModuleRequest) returns (UndeployModuleResponse);
+  rpc ListModules(ListModulesRequest) returns (ListModulesResponse);
+  rpc GetModule(GetModuleRequest) returns (GetModuleResponse);
+  rpc ExecuteReducer(ExecuteReducerRequest) returns (ExecuteReducerResponse);
 }
 ```
 
@@ -171,6 +179,31 @@ message StatusResponse {
 }
 ```
 
+### WASM Module Management
+
+`WasmService` deploys and executes WebAssembly modules (see
+[../WASM_MODULES.md](../WASM_MODULES.md) and [WASM_ABI.md](WASM_ABI.md)).
+
+**DeployModuleRequest** carries `name`, `version`, raw `bytecode`, and
+optional deploy-time capabilities:
+
+```protobuf
+message ModuleCapabilities {
+  repeated string allowed_tables = 1;  // empty = all tables
+  bool read_only = 2;
+  uint32 max_memory_mb = 3;            // 0 = default (256 MiB)
+  uint32 timeout_ms = 4;               // 0 = default (5000 ms)
+}
+```
+
+**ExecuteReducerRequest** carries `module_name`, `reducer_name`,
+`sender_identity`, and typed `args` (`WasmValue`: int64/string/double/
+bool/bytes). The response includes success, error, execution time, and
+result values.
+
+Modules persist under `<data_dir>/modules/` and are restored on server
+restart; `UndeployModule` removes them.
+
 ## Using the gRPC Client
 
 ### Command Line Client
@@ -188,6 +221,12 @@ InstantDB includes a command-line gRPC client for testing and administration:
 
 # Interactive mode
 ./instantdb_client interactive
+
+# WASM module management
+./instantdb_client deploy user_service ./module.wasm 1.0.0
+./instantdb_client modules
+./instantdb_client call user_service CreateUser '["Alice", "alice@example.com"]'
+./instantdb_client undeploy user_service
 ```
 
 **Interactive Mode:**
@@ -237,21 +276,21 @@ instantdb> exit
 
 class InstantDBClient {
 private:
-    std::unique_ptr<instantdb::SQLService::Stub> stub_;
+    std::unique_ptr<instantdb::grpc::SQLService::Stub> stub_;
 
 public:
     InstantDBClient(const std::string& server_address) {
         auto channel = grpc::CreateChannel(server_address,
                                          grpc::InsecureChannelCredentials());
-        stub_ = instantdb::SQLService::NewStub(channel);
+        stub_ = instantdb::grpc::SQLService::NewStub(channel);
     }
 
     bool CreateTable(const std::string& table_name) {
-        instantdb::SQLRequest request;
+        instantdb::grpc::SQLRequest request;
         request.set_sql("CREATE TABLE " + table_name +
                        " (id INT64 PRIMARY KEY, name STRING)");
 
-        instantdb::SQLResponse response;
+        instantdb::grpc::SQLResponse response;
         grpc::ClientContext context;
 
         grpc::Status status = stub_->Execute(&context, request, &response);
@@ -259,11 +298,11 @@ public:
     }
 
     bool InsertUser(int64_t id, const std::string& name) {
-        instantdb::SQLRequest request;
+        instantdb::grpc::SQLRequest request;
         request.set_sql("INSERT INTO users VALUES (" +
                        std::to_string(id) + ", '" + name + "')");
 
-        instantdb::SQLResponse response;
+        instantdb::grpc::SQLResponse response;
         grpc::ClientContext context;
 
         grpc::Status status = stub_->Execute(&context, request, &response);
@@ -273,10 +312,10 @@ public:
     std::vector<std::pair<int64_t, std::string>> GetAllUsers() {
         std::vector<std::pair<int64_t, std::string>> users;
 
-        instantdb::SQLRequest request;
+        instantdb::grpc::SQLRequest request;
         request.set_sql("SELECT * FROM users");
 
-        instantdb::SQLResponse response;
+        instantdb::grpc::SQLResponse response;
         grpc::ClientContext context;
 
         grpc::Status status = stub_->Execute(&context, request, &response);
@@ -418,7 +457,7 @@ if response and response.success:
    // Reuse connections
    auto channel = grpc::CreateChannel(server_address,
                                     grpc::InsecureChannelCredentials());
-   auto stub = instantdb::SQLService::NewStub(channel);
+   auto stub = instantdb::grpc::SQLService::NewStub(channel);
    ```
 
 2. **Error Checking**
@@ -460,12 +499,12 @@ if response and response.success:
 1. **Batch Operations**
    ```cpp
    // Instead of multiple Execute calls
-   instantdb::SQLTransactionRequest request;
+   instantdb::grpc::SQLTransactionRequest request;
    request.add_sql_statements("INSERT INTO users VALUES (1, 'Alice')");
    request.add_sql_statements("INSERT INTO users VALUES (2, 'Bob')");
    request.add_sql_statements("INSERT INTO users VALUES (3, 'Charlie')");
 
-   instantdb::SQLTransactionResponse response;
+   instantdb::grpc::SQLTransactionResponse response;
    stub->ExecuteTransaction(&context, request, &response);
    ```
 
@@ -473,12 +512,12 @@ if response and response.success:
    ```cpp
    // Create once, use many times
    class DatabaseManager {
-       std::unique_ptr<instantdb::SQLService::Stub> stub_;
+       std::unique_ptr<instantdb::grpc::SQLService::Stub> stub_;
    public:
        DatabaseManager() {
            auto channel = grpc::CreateChannel("localhost:50051",
                                             grpc::InsecureChannelCredentials());
-           stub_ = instantdb::SQLService::NewStub(channel);
+           stub_ = instantdb::grpc::SQLService::NewStub(channel);
        }
    };
    ```
@@ -577,24 +616,26 @@ sudo ufw status
 - Monitor server load
 - Verify client-side timeouts
 
-## Migration Guide
+## API Split: WebSocket vs gRPC
 
-### From WebSocket to gRPC
+The WebSocket API does **not** execute SQL — it is subscription-only
+(`sql_subscribe`, `subscribe_to_all_tables`, `wasm_subscribe`). All SQL
+execution and module management goes over gRPC:
 
-**WebSocket (JSON):**
+**WebSocket (JSON) — subscribe to changes:**
 ```javascript
 ws.send(JSON.stringify({
-    action: 'execute',
+    type: 'sql_subscribe',
     sql: 'SELECT * FROM users'
 }));
 ```
 
-**gRPC (Protobuf):**
+**gRPC (Protobuf) — execute statements:**
 ```cpp
-instantdb::SQLRequest request;
+instantdb::grpc::SQLRequest request;
 request.set_sql("SELECT * FROM users");
 
-instantdb::SQLResponse response;
+instantdb::grpc::SQLResponse response;
 stub->Execute(&context, request, &response);
 ```
 

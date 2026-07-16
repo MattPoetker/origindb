@@ -1,373 +1,167 @@
+// =============================================================================
+// CounterModule — reference example for the InstantDB C# SDK.
+//
+// Demonstrates:
+//   * Registering reducers with Reducers.Register from a [ModuleInitializer]
+//   * Table read/write/delete/scan with JSON string values
+//   * Returning results (serialized via host_set_result by the SDK)
+//   * Failing a call with ReducerException (negative ABI status)
+//   * A subscription filter registered with Reducers.RegisterFilter
+//
+// Build (from a project that includes this file + InstantDB.cs):
+//   dotnet publish -c Release
+//   → bin/Release/net8.0/wasi-wasm/AppBundle/<Project>.wasm
+// =============================================================================
+
+#nullable enable
+
 using System;
-using System.Text.Json.Serialization;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using InstantDB;
 
-/// <summary>
-/// Counter Module Example
-///
-/// This example demonstrates:
-/// - Defining table schemas with attributes
-/// - Implementing reducers with ReducerContext
-/// - Reading and writing to database tables using ctx.Db
-/// - Automatic changefeed event emission (no manual Events.Emit needed)
-/// - Module lifecycle management
-/// </summary>
 namespace CounterModule
 {
-    // =============================================================================
-    // Data Structures
-    // =============================================================================
-
-    /// <summary>
-    /// Counter table schema
-    /// </summary>
-    [Table(Name = "counters")]
-    public class Counter
+    public static class Program
     {
-        [PrimaryKey]
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = "";
+        // WASI command entry point (required by OutputType=Exe). Registration
+        // does not happen here — the host may never call _start.
+        public static void Main() { }
 
-        [JsonPropertyName("value")]
-        public long Value { get; set; }
-
-        [JsonPropertyName("last_updated")]
-        public ulong LastUpdated { get; set; }
-
-        [JsonPropertyName("created_by")]
-        public string CreatedBy { get; set; } = "";
-    }
-
-    /// <summary>
-    /// Counter event for real-time subscriptions
-    /// </summary>
-    [Event(Name = "counter_events")]
-    public class CounterEvent
-    {
-        [JsonPropertyName("counter_id")]
-        public string CounterId { get; set; } = "";
-
-        [JsonPropertyName("action")]
-        public string Action { get; set; } = "";
-
-        [JsonPropertyName("old_value")]
-        public long OldValue { get; set; }
-
-        [JsonPropertyName("new_value")]
-        public long NewValue { get; set; }
-
-        [JsonPropertyName("timestamp")]
-        public ulong Timestamp { get; set; }
-
-        [JsonPropertyName("user_id")]
-        public string UserId { get; set; } = "";
-    }
-
-    /// <summary>
-    /// User table schema
-    /// </summary>
-    [Table(Name = "users")]
-    public class User
-    {
-        [PrimaryKey]
-        [JsonPropertyName("id")]
-        public ulong Id { get; set; }
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = "";
-
-        [JsonPropertyName("email")]
-        public string Email { get; set; } = "";
-
-        [JsonPropertyName("created_at")]
-        public ulong CreatedAt { get; set; }
-    }
-
-    // =============================================================================
-    // Counter Module Implementation
-    // =============================================================================
-
-    /// <summary>
-    /// Main counter module class with reducers
-    /// </summary>
-    public class CounterModuleImpl : ModuleBase
-    {
-        /// <summary>
-        /// Create a new counter with initial value
-        /// </summary>
-        [Reducer]
-        public static int CreateCounter(ReducerContext ctx, string counterId, long initialValue, string createdBy)
+        // Runs before any export is dispatched, so the registry is always
+        // populated before the host's first instantdb_invoke/describe call.
+        [ModuleInitializer]
+        internal static void Init()
         {
-            try
+            Reducers.SetModuleInfo("counter", "1.0.0");
+            Reducers.DeclareTable("counters");
+
+            Reducers.Register("CreateCounter", CreateCounter, "counterId", "initialValue");
+            Reducers.Register("Increment", Increment, "counterId", "amount");
+            Reducers.Register("GetCounter", GetCounter, "counterId");
+            Reducers.Register("DeleteCounter", DeleteCounter, "counterId");
+            Reducers.Register("ListCounters", ListCounters);
+
+            // Lifecycle hooks are ordinary registrations under reserved names.
+            Reducers.Register("__init", _ =>
             {
-                // Validate inputs
-                if (string.IsNullOrWhiteSpace(counterId))
-                {
-                    Utils.LogError("Counter ID cannot be empty");
-                    return -1;
-                }
+                Host.LogInfo("counter module initialized");
+                return null;
+            });
 
-                if (string.IsNullOrWhiteSpace(createdBy))
-                {
-                    Utils.LogError("Created by cannot be empty");
-                    return -1;
-                }
-
-                // Check if counter already exists
-                var existing = ctx.Db.GetTable<Counter>().Find(counterId);
-                if (existing != null)
-                {
-                    Utils.LogWarn($"Counter already exists: {counterId}");
-                    return 0; // Already exists, not an error
-                }
-
-                // Create new counter
-                var counter = new Counter
-                {
-                    Id = counterId,
-                    Value = initialValue,
-                    LastUpdated = Utils.Now(),
-                    CreatedBy = createdBy
-                };
-
-                // Insert into database (automatically triggers changefeed)
-                ctx.Db.GetTable<Counter>().Insert(counter);
-
-                // Note: Changefeed events are now automatically emitted by the database layer
-                // No need for manual Events.Emit() calls
-
-                Utils.LogInfo($"Created counter: {counterId} with value: {initialValue} by {createdBy}");
-                return 1; // Success
-
-            }
-            catch (Exception ex)
+            // Subscription filter: only forward changefeed events whose new
+            // value is >= 10. Event fields: table, operation, offset,
+            // transaction_id, key, new_value, old_value.
+            Reducers.RegisterFilter("OnlyBigValues", ev =>
             {
-                Utils.LogError($"Exception in CreateCounter: {ex.Message}");
-                return -1;
-            }
+                if (ev.ValueKind != JsonValueKind.Object) return true;
+                if (ev.TryGetProperty("new_value", out JsonElement nv) &&
+                    nv.ValueKind == JsonValueKind.Object &&
+                    nv.TryGetProperty("value", out JsonElement v) &&
+                    v.ValueKind == JsonValueKind.Number)
+                {
+                    return v.GetInt64() >= 10;
+                }
+                return true;
+            });
         }
 
-        /// <summary>
-        /// Increment a counter by the specified amount
-        /// </summary>
-        [Reducer]
-        public static int IncrementCounter(ReducerContext ctx, string counterId, long amount, string userId)
+        private static object? CreateCounter(JsonElement[] args)
         {
-            try
+            string counterId = GetStringArg(args, 0, "counterId");
+            long initialValue = args.Length > 1 && args[1].ValueKind == JsonValueKind.Number
+                ? args[1].GetInt64()
+                : 0;
+
+            if (Db.Read("counters", counterId) is not null)
+                throw new ReducerException($"counter '{counterId}' already exists", -3);
+
+            var row = new Dictionary<string, object?>
             {
-                // Validate inputs
-                if (string.IsNullOrWhiteSpace(counterId))
-                {
-                    Utils.LogError("Counter ID cannot be empty");
-                    return -1;
-                }
+                ["id"] = counterId,
+                ["value"] = initialValue,
+                ["updated_at"] = Host.NowMs(),
+            };
+            Db.Write("counters", counterId, JsonSerializer.Serialize(row));
 
-                // Read current counter
-                var current = ctx.Db.GetTable<Counter>().Find(counterId);
-                if (current == null)
-                {
-                    Utils.LogError($"Counter not found: {counterId}");
-                    return -2; // Not found
-                }
-
-                long oldValue = current.Value;
-
-                // Update counter
-                current.Value += amount;
-                current.LastUpdated = Utils.Now();
-
-                // Update in database (automatically triggers changefeed)
-                ctx.Db.GetTable<Counter>().Update(current);
-
-                // Note: Changefeed events are now automatically emitted by the database layer
-
-                Utils.LogInfo($"Incremented counter: {counterId} by {amount} " +
-                             $"(old: {oldValue}, new: {current.Value})");
-
-                return 1; // Success
-
-            }
-            catch (Exception ex)
-            {
-                Utils.LogError($"Exception in IncrementCounter: {ex.Message}");
-                return -1;
-            }
+            Host.LogInfo($"created counter '{counterId}' = {initialValue}");
+            return new Dictionary<string, object?> { ["id"] = counterId, ["value"] = initialValue };
         }
 
-        /// <summary>
-        /// Set counter to a specific value
-        /// </summary>
-        [Reducer]
-        public static int SetCounterValue(ReducerContext ctx, string counterId, long newValue, string userId)
+        private static object? Increment(JsonElement[] args)
         {
-            try
+            string counterId = GetStringArg(args, 0, "counterId");
+            long amount = args.Length > 1 && args[1].ValueKind == JsonValueKind.Number
+                ? args[1].GetInt64()
+                : 1;
+
+            string? json = Db.Read("counters", counterId)
+                ?? throw new ReducerException($"counter '{counterId}' not found", -3);
+
+            using JsonDocument doc = JsonDocument.Parse(json);
+            long value = doc.RootElement.TryGetProperty("value", out JsonElement v) &&
+                         v.ValueKind == JsonValueKind.Number
+                ? v.GetInt64()
+                : 0;
+
+            long newValue = value + amount;
+            var row = new Dictionary<string, object?>
             {
-                // Read current counter
-                var current = ctx.Db.GetTable<Counter>().Find(counterId);
-                if (current == null)
+                ["id"] = counterId,
+                ["value"] = newValue,
+                ["updated_at"] = Host.NowMs(),
+            };
+            Db.Write("counters", counterId, JsonSerializer.Serialize(row));
+
+            // Custom changefeed event on top of the automatic table change event.
+            Host.EmitEvent("counter_events", counterId, JsonSerializer.Serialize(
+                new Dictionary<string, object?>
                 {
-                    Utils.LogError($"Counter not found: {counterId}");
-                    return -2; // Not found
-                }
+                    ["counter_id"] = counterId,
+                    ["old_value"] = value,
+                    ["new_value"] = newValue,
+                }));
 
-                long oldValue = current.Value;
-
-                // Update counter
-                current.Value = newValue;
-                current.LastUpdated = Utils.Now();
-
-                // Update in database (automatically triggers changefeed)
-                ctx.Db.GetTable<Counter>().Update(current);
-
-                // Note: Changefeed events are now automatically emitted by the database layer
-
-                Utils.LogInfo($"Set counter: {counterId} to {newValue} " +
-                             $"(old: {oldValue}, new: {newValue})");
-
-                return 1; // Success
-
-            }
-            catch (Exception ex)
-            {
-                Utils.LogError($"Exception in SetCounterValue: {ex.Message}");
-                return -1;
-            }
+            return new Dictionary<string, object?> { ["id"] = counterId, ["value"] = newValue };
         }
 
-        /// <summary>
-        /// Get current counter value
-        /// </summary>
-        [Reducer]
-        public static long GetCounterValue(ReducerContext ctx, string counterId)
+        private static object? GetCounter(JsonElement[] args)
         {
-            try
-            {
-                var counter = ctx.Db.GetTable<Counter>().Find(counterId);
-                if (counter == null)
-                {
-                    Utils.LogWarn($"Counter not found: {counterId}");
-                    return 0; // Return 0 for not found
-                }
-
-                return counter.Value;
-
-            }
-            catch (Exception ex)
-            {
-                Utils.LogError($"Exception in GetCounterValue: {ex.Message}");
-                return -1;
-            }
+            string counterId = GetStringArg(args, 0, "counterId");
+            string? json = Db.Read("counters", counterId);
+            // RawJson passes an existing JSON document through verbatim.
+            return json is null ? new RawJson("null") : new RawJson(json);
         }
 
-        /// <summary>
-        /// Delete a counter
-        /// </summary>
-        [Reducer]
-        public static int DeleteCounter(ReducerContext ctx, string counterId, string userId)
+        private static object? DeleteCounter(JsonElement[] args)
         {
-            try
-            {
-                // Read current value to check if exists
-                var current = ctx.Db.GetTable<Counter>().Find(counterId);
-                if (current == null)
-                {
-                    return 0; // Already deleted or never existed
-                }
-
-                // Delete the counter (automatically triggers changefeed)
-                bool wasDeleted = ctx.Db.GetTable<Counter>().Delete(counterId);
-                if (wasDeleted)
-                {
-                    Utils.LogInfo($"Deleted counter: {counterId}");
-                }
-
-                // Note: Changefeed events are now automatically emitted by the database layer
-                return wasDeleted ? 1 : 0;
-
-            }
-            catch (Exception ex)
-            {
-                Utils.LogError($"Exception in DeleteCounter: {ex.Message}");
-                return -1;
-            }
+            string counterId = GetStringArg(args, 0, "counterId");
+            Db.Delete("counters", counterId);
+            return new Dictionary<string, object?> { ["deleted"] = counterId };
         }
 
-        /// <summary>
-        /// Create a new user (example of working with multiple tables)
-        /// </summary>
-        [Reducer]
-        public static int CreateUser(ReducerContext ctx, string name, string email)
+        private static object? ListCounters(JsonElement[] args)
         {
-            try
+            // Scan returns [{"key": str, "value": obj}, ...]; project the values.
+            using JsonDocument doc = JsonDocument.Parse(Db.Scan("counters"));
+            var counters = new List<JsonElement>();
+            foreach (JsonElement row in doc.RootElement.EnumerateArray())
             {
-                // Validate inputs
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    Utils.LogError("Name cannot be empty");
-                    return -1;
-                }
-
-                if (string.IsNullOrWhiteSpace(email))
-                {
-                    Utils.LogError("Email cannot be empty");
-                    return -1;
-                }
-
-                // Create new user
-                var user = new User
-                {
-                    Id = Utils.GenerateId(),
-                    Name = name,
-                    Email = email,
-                    CreatedAt = Utils.Now()
-                };
-
-                // Insert into database (automatically triggers changefeed)
-                ctx.Db.GetTable<User>().Insert(user);
-
-                Utils.LogInfo($"Created user: {user.Id} ({name}, {email})");
-                return (int)user.Id; // Return user ID
-
+                if (row.TryGetProperty("value", out JsonElement value))
+                    counters.Add(value.Clone());
             }
-            catch (Exception ex)
-            {
-                Utils.LogError($"Exception in CreateUser: {ex.Message}");
-                return -1;
-            }
+            return counters;
         }
 
-        // =============================================================================
-        // Module Lifecycle Overrides
-        // =============================================================================
-
-        public override int Initialize()
+        private static string GetStringArg(JsonElement[] args, int index, string name)
         {
-            Utils.LogInfo("Counter module initialized successfully");
-
-            // Note: In the new API, initialization would use a system context
-            // For now, initialization is simpler without complex database operations
-
-            return 0;
-        }
-
-        public override int OnClientConnected(string connectionId)
-        {
-            Utils.LogInfo($"Client connected to counter module: {connectionId}");
-
-            // Note: Client lifecycle events could trigger reducer calls with system context
-            // For now, keep these simple without database operations
-
-            return 0;
-        }
-
-        public override int OnClientDisconnected(string connectionId)
-        {
-            Utils.LogInfo($"Client disconnected from counter module: {connectionId}");
-
-            // Note: Client lifecycle events could trigger reducer calls with system context
-            // For now, keep these simple without database operations
-
-            return 0;
+            if (args.Length <= index || args[index].ValueKind != JsonValueKind.String)
+                throw new ReducerException($"argument {index} ('{name}') must be a string", -3);
+            string value = args[index].GetString() ?? "";
+            if (value.Length == 0)
+                throw new ReducerException($"argument '{name}' must not be empty", -3);
+            return value;
         }
     }
 }

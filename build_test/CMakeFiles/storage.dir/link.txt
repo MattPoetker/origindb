@@ -1,2 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libstorage.a CMakeFiles/storage.dir/src/storage/mem_table.cpp.o CMakeFiles/storage.dir/src/storage/storage_engine.cpp.o CMakeFiles/storage.dir/src/storage/transaction_impl.cpp.o CMakeFiles/storage.dir/src/storage/wal_impl.cpp.o
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libstorage.a

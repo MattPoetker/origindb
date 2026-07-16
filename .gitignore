@@ -1,2 +1,57 @@
-.DS_STORE
+# Build directories
+build/
+build_new/
+build_test/
+_deps/
+CMakeFiles/
+generated/
 
+# In-source CMake state (legacy; use out-of-source builds)
+CMakeCache.txt
+cmake_install.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+Makefile
+compile_commands.json
+
+# Build outputs
+*.a
+*.o
+/instantdb
+/instantdb_client
+/instantdb_demo
+/instantdb_init
+/instantdb_server
+/instantdb_sql
+/binary_protocol_test
+
+# Runtime data / logs / test residue
+logs/
+instantdb_data/
+nightboard_data/
+test_results.json
+storage_results.json
+
+# Node
+node_modules/
+
+# AssemblyScript build output
+sdk/typescript/build/
+
+# .NET
+bin/
+obj/
+
+# OS / editor
+.DS_Store
+.DS_STORE
+.playwright-mcp/
+.vscode/
+.idea/
+test_data/
+tests/performance/reports/
+tests/performance/benchmark_compare
+tests/performance/binary_protocol_test
+tests/performance/perf_test_runner
+tests/performance/storage_perf_runner
+tests/performance/test_data_generator

@@ -1,4 +1,5 @@
 #include "changefeed/sql_subscription.h"
+#include "changefeed/predicate_evaluator.h"
 #include <spdlog/spdlog.h>
 #include <algorithm>
 #include <sstream>
@@ -6,6 +7,28 @@
 #include <nlohmann/json.hpp>
 
 namespace instantdb {
+
+namespace {
+
+// Parses a serialized row value (shaped {"key":...,"columns":{...}}) and
+// extracts the flat column object. Falls back to the whole object if no
+// "columns" field is present. Returns false on JSON parse failure.
+bool ExtractRowColumns(const std::vector<uint8_t>& value, nlohmann::json& out) {
+    try {
+        std::string json_str(value.begin(), value.end());
+        auto parsed = nlohmann::json::parse(json_str);
+        if (parsed.is_object() && parsed.contains("columns") && parsed["columns"].is_object()) {
+            out = parsed["columns"];
+        } else {
+            out = parsed;
+        }
+        return true;
+    } catch (const std::exception&) {
+        return false;
+    }
+}
+
+} // namespace
 
 // ==================== SqlSubscription Methods ====================
 
@@ -25,9 +48,58 @@ bool SqlSubscription::MatchesEvent(const ChangefeedEvent& event) const {
         return false;
     }
 
-    // TODO: Evaluate WHERE clause if present
-    // This would require SQL expression evaluation
-    // For now, we'll match if table matches
+    // Evaluate WHERE clause predicate if present
+    if (predicate) {
+        if (event.operation == "DELETE") {
+            // DELETE events carry only the old row
+            if (event.old_value.empty()) {
+                spdlog::debug("Subscription {}: DELETE event on table {} has no old_value, "
+                              "cannot evaluate WHERE clause",
+                              id, event.table);
+                return false;
+            }
+            nlohmann::json old_columns;
+            if (!ExtractRowColumns(event.old_value, old_columns)) {
+                spdlog::warn("Subscription {}: failed to parse old_value JSON for {} event on table {}",
+                             id, event.operation, event.table);
+                return false;
+            }
+            return predicate->Evaluate(old_columns);
+        }
+
+        if (event.operation == "UPDATE") {
+            // Match if either the new or the old row satisfies the predicate
+            bool matched = false;
+            if (!event.new_value.empty()) {
+                nlohmann::json new_columns;
+                if (ExtractRowColumns(event.new_value, new_columns)) {
+                    matched = predicate->Evaluate(new_columns);
+                } else {
+                    spdlog::warn("Subscription {}: failed to parse new_value JSON for UPDATE event on table {}",
+                                 id, event.table);
+                }
+            }
+            if (!matched && !event.old_value.empty()) {
+                nlohmann::json old_columns;
+                if (ExtractRowColumns(event.old_value, old_columns)) {
+                    matched = predicate->Evaluate(old_columns);
+                } else {
+                    spdlog::warn("Subscription {}: failed to parse old_value JSON for UPDATE event on table {}",
+                                 id, event.table);
+                }
+            }
+            return matched;
+        }
+
+        // INSERT: evaluate the new row
+        nlohmann::json new_columns;
+        if (!ExtractRowColumns(event.new_value, new_columns)) {
+            spdlog::warn("Subscription {}: failed to parse new_value JSON for {} event on table {}",
+                         id, event.operation, event.table);
+            return false;
+        }
+        return predicate->Evaluate(new_columns);
+    }
 
     return true;
 }
@@ -127,9 +199,18 @@ std::unique_ptr<SqlSubscription> SqlSubscriptionParser::Parse(
             subscription->columns = ParseColumns(select_clause);
         }
 
-        // Set WHERE clause if present
+        // Set WHERE clause if present and compile it into a predicate
         if (!where_clause.empty()) {
             subscription->where_clause = where_clause;
+
+            std::string predicate_error;
+            auto predicate = PredicateEvaluator::Parse(where_clause, predicate_error);
+            if (!predicate) {
+                spdlog::error("Failed to parse WHERE clause '{}' for subscription {}: {}",
+                             where_clause, subscription_id, predicate_error);
+                return nullptr;
+            }
+            subscription->predicate = std::move(predicate);
         }
 
         spdlog::info("Parsed SQL subscription: {} - SELECT {} FROM {} {}",

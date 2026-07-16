@@ -7,10 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Real WASM execution** via the wasmtime C API (LTS line, prebuilt, platform-selected
+  by CMake). Modules are compiled and structurally validated at deploy, imports are
+  allow-listed (`env.host_*` + WASI preview 1), and required exports are enforced.
+  The module ABI is documented in `docs/WASM_ABI.md` (single-dispatch
+  `instantdb_invoke`, guest allocator, `host_set_result` payloads).
+- **Host API implementation**: `host_table_read/write/delete/scan` (staged-write
+  overlay with read-your-writes), `host_emit_event` (published post-commit),
+  `host_now_ms` (fixed per call), `host_generate_id`, `host_log`, `host_abort`,
+  `host_alloc/free`, `host_set_result`.
+- **Sandboxing**: epoch-based CPU deadlines honoring the configured timeout, store
+  memory limiter, per-module deploy-time capabilities (`allowed_tables`, `read_only`,
+  `max_memory_mb`, `timeout_ms` — new `ModuleCapabilities` proto message).
+- **Module persistence**: deployed modules are stored under `<data_dir>/modules/`
+  (bytecode + sha256-verified manifest) and restored on server boot.
+- **Subscription WHERE evaluation**: `sql_subscribe` WHERE clauses are parsed into a
+  predicate AST and evaluated per event (comparisons, `AND`/`OR`/`NOT`, parentheses,
+  `LIKE`, `IS [NOT] NULL`). Invalid predicates reject the subscription with an error.
+- **Changefeed `old_value`**: UPDATE/DELETE events now carry the previous row.
+- `instantdb_client` subcommands: `deploy`, `undeploy`, `modules`, `call`.
+- Unit tests (googletest): WASM engine (WAT fixtures), predicate evaluator,
+  module store. `scripts/e2e_verify.sh` covers deploy → execute → SQL → filtered
+  websocket delivery → restart persistence → undeploy.
+
+### Changed
+- **BREAKING**: the hardcoded stub reducers (`CreateUser`/`GetUsers` simulated in C++)
+  are gone; reducers now require a real WASM module. `test_module.wasm`/`.hex`
+  (plain-text fakes) removed.
+- **BREAKING**: changefeed events are emitted once per write (by the storage commit);
+  the duplicate SQL-layer emission was removed. Event counts halve for SQL writes.
+- `instantdb publish` deploys through the bundled `instantdb_client` (grpcurl no
+  longer required) and supports AssemblyScript projects alongside C#.
+- gRPC WASM service returns real status codes (INVALID_ARGUMENT/NOT_FOUND/INTERNAL)
+  and honest module metadata (version, sha256, deployed_at).
+- SQL identifiers preserve their original case (previously forced to uppercase).
+- `StorageEngine::Get` reads committed data directly (previously always returned
+  empty via the transaction read stub).
+
+### Removed
+- Dead parallel architecture: `src/net/`, `src/cmd/server_main.cpp`,
+  `include/wasm/wasm_runtime.h`, `include/wasm/host_api.h`, `include/modules/`,
+  `src/raft/`, `include/admin/`, `CMakeLists_full.txt`, `CMakeLists_minimal.txt`.
+
 ### Planned
-- gRPC API for SQL operations
 - Configuration file support (JSON/YAML)
-- Enhanced SQL operations (UPDATE, DELETE)
+- Enhanced SQL operations (DELETE, JOINs, WHERE on SELECT)
 - Basic authentication system
 
 ## [0.1.0] - 2024-01-15

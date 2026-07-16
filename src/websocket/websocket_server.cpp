@@ -202,30 +202,43 @@ void WebSocketServer::HandleClient(int client_socket) {
             welcome["features"] = nlohmann::json::array({"changefeed", "wasm_subscriptions"});
             SendWebSocketFrame(client_socket, welcome.dump());
 
-            // Handle WebSocket messages
-            while (running_) {
-                bytes_read = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
+            // Handle WebSocket messages. TCP gives no frame alignment: one
+            // recv may carry several websocket frames (coalesced sends) or a
+            // partial one, so accumulate bytes and drain complete frames.
+            std::string pending;
+            bool client_closed = false;
+            while (running_ && !client_closed) {
+                bytes_read = recv(client_socket, buffer, sizeof(buffer), 0);
                 if (bytes_read <= 0) {
                     spdlog::info("WebSocket client disconnected (recv returned {})", bytes_read);
                     break;
                 }
+                pending.append(buffer, static_cast<size_t>(bytes_read));
 
-                buffer[bytes_read] = '\0';
-                std::string frame_data(buffer, bytes_read);
+                while (true) {
+                    size_t frame_size = CompleteFrameSize(pending);
+                    if (frame_size == 0 || frame_size > pending.size()) break;
 
-                // Check for close frame before parsing
-                if (bytes_read >= 2) {
+                    std::string frame_data = pending.substr(0, frame_size);
+                    pending.erase(0, frame_size);
+
                     uint8_t opcode = frame_data[0] & 0x0F;
                     if (opcode == 8) { // Close frame
                         spdlog::info("Received WebSocket close frame, disconnecting client");
+                        client_closed = true;
                         break;
+                    }
+
+                    std::string message = ParseWebSocketFrame(frame_data);
+                    if (!message.empty()) {
+                        HandleWebSocketMessage(client_socket, message);
                     }
                 }
 
-                std::string message = ParseWebSocketFrame(frame_data);
-
-                if (!message.empty()) {
-                    HandleWebSocketMessage(client_socket, message);
+                // Backstop against malformed frames growing the buffer forever.
+                if (pending.size() > 16 * 1024 * 1024) {
+                    spdlog::warn("WebSocket client buffer exceeded 16MiB, disconnecting");
+                    break;
                 }
             }
 
@@ -270,6 +283,34 @@ void WebSocketServer::HandleClient(int client_socket) {
     }
 
     close(client_socket);
+}
+
+size_t WebSocketServer::CompleteFrameSize(const std::string& data) {
+    // Returns the total byte size of the first websocket frame in `data`,
+    // or 0 if the header is not complete yet. The caller checks whether the
+    // full frame has arrived.
+    if (data.size() < 2) return 0;
+
+    size_t header = 2;
+    uint64_t payload_len = static_cast<uint8_t>(data[1]) & 0x7F;
+    bool masked = (static_cast<uint8_t>(data[1]) & 0x80) != 0;
+
+    if (payload_len == 126) {
+        if (data.size() < 4) return 0;
+        payload_len = (static_cast<uint64_t>(static_cast<uint8_t>(data[2])) << 8) |
+                      static_cast<uint8_t>(data[3]);
+        header = 4;
+    } else if (payload_len == 127) {
+        if (data.size() < 10) return 0;
+        payload_len = 0;
+        for (int i = 0; i < 8; i++) {
+            payload_len = (payload_len << 8) | static_cast<uint8_t>(data[2 + i]);
+        }
+        header = 10;
+    }
+    if (masked) header += 4;
+
+    return header + payload_len;
 }
 
 bool WebSocketServer::HandleWebSocketHandshake(int client_socket, const std::string& request) {

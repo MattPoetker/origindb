@@ -1,527 +1,322 @@
-# WASM Module System 🚀
+# WASM Module System
 
-InstantDB's **WebAssembly Module System** brings programmable capabilities to a high-performance SQL database. Users can upload custom application logic that runs safely inside the database server, with full access to transactional operations and real-time event emission.
+InstantDB runs user-supplied WebAssembly modules inside the database server
+on **wasmtime** (LTS C API). Modules implement *reducers* — atomic,
+transactional functions that read and write tables, emit changefeed events,
+and can filter or transform real-time subscriptions.
 
-## 🌟 Overview
+The normative contract between the server and a module is
+[docs/WASM_ABI.md](docs/WASM_ABI.md) (ABI v1). This document is the
+practical guide: how to build, deploy, call, and troubleshoot modules.
 
-The WASM module system allows you to:
+## Overview
 
-- **Upload custom code** as WebAssembly modules
-- **Execute reducers** - atomic, transactional functions
-- **Access database tables** within transactions
-- **Emit real-time events** to WebSocket subscribers
-- **Handle lifecycle events** (init, client connect/disconnect)
-- **Run safely sandboxed** with memory and CPU limits
+- **Single dispatch entry point**: every reducer and lifecycle hook goes
+  through one export, `instantdb_invoke(name, args)`. Args are a UTF-8 JSON
+  array; results come back through `host_set_result`.
+- **Real sandboxing**: epoch-based CPU deadlines (default 5000 ms/call) and
+  a per-module memory limiter (default 256 MiB), both configurable per
+  module at deploy time.
+- **Deploy-time capabilities**: `allowed_tables`, `read_only`,
+  `max_memory_mb`, `timeout_ms` (`ModuleCapabilities` in
+  `proto/instantdb.proto`). Capability violations return error `-2` from
+  table operations.
+- **Transactional writes**: each call runs against a staged-write overlay
+  that commits atomically only when the call returns a non-negative status
+  without trapping. Changefeed events are emitted by the storage commit.
+- **Persistence**: deployed modules survive server restarts.
 
-## 🏗️ Architecture
+## Writing a module
 
+Don't implement the ABI by hand — use an SDK:
+
+| SDK | Status | Docs |
+|---|---|---|
+| **AssemblyScript** (`sdk/typescript/`) | Verified end-to-end; recommended | [sdk/typescript/README.md](sdk/typescript/README.md) |
+| **C#** (`sdk/csharp/`) | Works only with a .NET 8 `wasi-experimental` workload build that supports `[UnmanagedCallersOnly]` exports — support is incomplete upstream; see the SDK README | [sdk/csharp/README.md](sdk/csharp/README.md) |
+
+### AssemblyScript example
+
+```ts
+import {
+  JsonValue, registerReducer, registerFilter, setModuleInfo, declareTable,
+  writeTable, generateId, nowMs,
+} from "../../assembly/index";
+
+export {
+  instantdb_alloc, instantdb_free, instantdb_describe, instantdb_invoke,
+  __instantdb_abort,
+} from "../../assembly/index";
+
+setModuleInfo("todo", "1.0.0");
+declareTable("todos");
+
+registerReducer("addTodo", (args: Array<JsonValue>): JsonValue | null => {
+  const text = args.length > 0 ? args[0].asString() : "";
+  const id = generateId().toString();
+  writeTable("todos", id, JsonValue.newObject()
+    .setString("id", id)
+    .setString("text", text)
+    .setBool("done", false)
+    .setNumber("created_at", <f64>nowMs())
+    .toString());
+  return JsonValue.newObject().setString("id", id);
+}, ["text"]);
+
+registerFilter("onlyPending", (ev: JsonValue): bool =>
+  ev.getString("operation") == "INSERT");
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    WASM Module System                       │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
-│  │   Module    │    │   Module    │    │   Module    │     │
-│  │ Management  │    │  Instance   │    │    Host     │     │
-│  │             │    │   Pooling   │    │     API     │     │
-│  └─────────────┘    └─────────────┘    └─────────────┘     │
-│          │                   │                   │         │
-│          └───────────────────┼───────────────────┘         │
-│                              │                             │
-├──────────────────────────────┼─────────────────────────────┤
-│         Database Layer       │                             │
-│                              ▼                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
-│  │  Storage    │◀──▶│   SQL       │◀──▶│ Changefeed  │     │
-│  │  Engine     │    │  Engine     │    │   Engine    │     │
-│  │ (Tables)    │    │ (Queries)   │    │  (Events)   │     │
-│  └─────────────┘    └─────────────┘    └─────────────┘     │
-└─────────────────────────────────────────────────────────────┘
-```
 
-## ✨ Key Features
+The complete buildable example is `sdk/typescript/examples/todo/`.
 
-### 🔒 **Sandboxed Execution**
-- **Memory isolation**: Each module runs in its own WASM memory space
-- **CPU limits**: Configurable instruction count and timeout limits
-- **Resource control**: Memory allocation caps and execution timeouts
-- **No system access**: Modules cannot access file system or network directly
+### C# example
 
-### ⚛️ **Atomic Reducers**
-- **Transactional**: All database operations happen within database transactions
-- **Deterministic**: Same inputs always produce same outputs
-- **Rollback support**: Failed reducers automatically roll back all changes
-- **Concurrent safe**: Multiple reducers can run simultaneously with MVCC
+```csharp
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using InstantDB;
 
-### 📊 **Database Integration**
-- **Table access**: Read and write to any table within transaction
-- **Schema awareness**: Modules define their own table schemas
-- **Index support**: Leverage database indexes for performance
-- **Foreign keys**: Maintain referential integrity across tables
+public static class Program
+{
+    public static void Main() { }   // WASI entry point; may stay empty
 
-### 📡 **Real-time Events**
-- **Event emission**: Trigger notifications to WebSocket subscribers
-- **Structured data**: Rich event payloads with custom schemas
-- **Delivery guarantees**: At-least-once delivery with replay capability
-- **Filtering**: Server-side event filtering for efficiency
+    [ModuleInitializer]
+    internal static void Init()
+    {
+        Reducers.SetModuleInfo("user_service", "1.0.0");
+        Reducers.DeclareTable("users");
 
-## 🛠️ Implementation Status
+        Reducers.Register("CreateUser", args =>
+        {
+            string name = args[0].GetString()!;
+            long id = Host.GenerateId();
+            Db.Write("users", id.ToString(), JsonSerializer.Serialize(new
+            {
+                id = id.ToString(),
+                name,
+                created_at = Host.NowMs(),
+            }));
+            return new { id = id.ToString() };
+        }, "name");
 
-### ✅ **Completed Features**
-
-#### **Core Runtime**
-- ✅ **WasmEngine**: Complete engine with module loading and execution
-- ✅ **WasmModule**: Module metadata extraction and validation
-- ✅ **WasmInstance**: Instance management with pooling for performance
-- ✅ **Host API**: Database access functions (read, write, delete, emit)
-
-#### **Type System**
-- ✅ **WasmValue**: Rich value types for host-WASM communication
-  - `int64`, `string`, `double`, `bool`, `bytes`
-  - Automatic conversion between WASM and host types
-- ✅ **ReducerContext**: Transaction context with sender identity and timestamps
-- ✅ **ModuleMetadata**: Table schemas and reducer definitions
-
-#### **Security & Sandboxing**
-- ✅ **Resource limits**: Memory and CPU timeout configuration
-- ✅ **Capability model**: Explicit permissions for module operations
-- ✅ **Instance isolation**: Separate memory spaces per module instance
-- ✅ **Thread safety**: Concurrent module execution with proper locking
-
-#### **Performance Optimizations**
-- ✅ **Instance pooling**: Reuse WASM instances for better performance
-- ✅ **Lazy loading**: Modules loaded on-demand with caching
-- ✅ **Batch operations**: Group database operations for efficiency
-- ✅ **Lock-free reads**: MVCC enables concurrent read access
-
-### 🚧 **In Progress**
-
-#### **Runtime Integration**
-- 🚧 **Full Wasmtime C API**: Complete integration with production runtime
-- 🚧 **Memory management**: Advanced WASM linear memory handling
-- 🚧 **Error handling**: Comprehensive error propagation and recovery
-
-#### **API Endpoints**
-- 🚧 **gRPC service handlers**: Complete implementation of WasmService
-- 🚧 **Module deployment**: Upload and install workflows
-- 🚧 **Administrative APIs**: Module listing, status, and metrics
-
-### 📋 **Planned Features**
-
-#### **Advanced Capabilities**
-- 📋 **Cross-module calls**: Modules calling other modules
-- 📋 **Streaming operations**: Large data processing capabilities
-- 📋 **Async operations**: Non-blocking I/O within modules
-- 📋 **Module versioning**: Semantic versioning and rollback support
-
-#### **Developer Experience**
-- 📋 **SDK libraries**: Rust, C++, and AssemblyScript SDKs
-- 📋 **Testing framework**: Unit testing for modules
-- 📋 **Debugging tools**: Runtime inspection and profiling
-- 📋 **Documentation generator**: Auto-generated API docs from modules
-
-## 📚 Programming Model
-
-### Reducer Functions
-
-Reducers are the core abstraction - atomic functions that can read/write database state:
-
-```rust
-use instantdb_sdk::*;
-
-#[reducer]
-pub fn create_user(name: String, email: String) -> Result<UserId, String> {
-    // Validate input
-    if name.is_empty() {
-        return Err("Name cannot be empty".to_string());
+        Reducers.RegisterFilter("OnlyInserts",
+            ev => ev.GetProperty("operation").GetString() == "INSERT");
     }
-
-    // Generate unique ID
-    let user_id = generate_id();
-
-    // Write to database (atomic within this transaction)
-    table_write("users", &user_id, &User {
-        id: user_id,
-        name,
-        email,
-        created_at: now(),
-    })?;
-
-    // Emit event for real-time subscribers
-    emit_event("user_created", &user_id.to_string(), &UserCreatedEvent {
-        user_id,
-        timestamp: now(),
-    })?;
-
-    Ok(user_id)
 }
 ```
 
-### Table Schemas
+The complete buildable example is `examples/csharp/UserService/`.
 
-Modules define their table schemas:
+### Module requirements (summary — see the ABI doc)
 
-```rust
-#[table]
-pub struct User {
-    #[primary_key]
-    pub id: u64,
-    pub name: String,
-    pub email: String,
-    pub created_at: u64,
-}
+- Core WebAssembly module. WASI preview 1 imports are allowed; WASI
+  preview 2 *components* are rejected at deploy, as is any import outside
+  `env` / `wasi_snapshot_preview1`.
+- No filesystem, environment, args, or sockets inside modules.
+- Determinism: use `host_now_ms` (fixed per call) and `host_generate_id`
+  instead of wall-clock/random APIs.
+- Module linear memory does **not** survive traps, timeouts, or redeploys —
+  keep durable state in tables.
 
-#[table]
-pub struct Post {
-    #[primary_key]
-    pub id: u64,
-    #[foreign_key(User)]
-    pub author_id: u64,
-    pub title: String,
-    pub content: String,
-    pub created_at: u64,
-}
-```
+## Deploy lifecycle
 
-### Event Schemas
+### Option 1: `instantdb publish` (build + deploy)
 
-Define structured events for real-time subscriptions:
-
-```rust
-#[event]
-pub struct UserCreatedEvent {
-    pub user_id: u64,
-    pub timestamp: u64,
-}
-
-#[event]
-pub struct PostPublishedEvent {
-    pub post_id: u64,
-    pub author_id: u64,
-    pub title: String,
-}
-```
-
-## 🔧 Host API Reference
-
-The host API provides database access to WASM modules:
-
-### Database Operations
-
-```rust
-// Read a value from a table
-fn table_read<T>(table: &str, key: &Key) -> Result<Option<T>, Error>;
-
-// Write a value to a table
-fn table_write<T>(table: &str, key: &Key, value: &T) -> Result<(), Error>;
-
-// Delete a value from a table
-fn table_delete(table: &str, key: &Key) -> Result<bool, Error>;
-
-// Scan a table with optional prefix
-fn table_scan<T>(table: &str, prefix: Option<&[u8]>, limit: usize) -> Result<Vec<(Key, T)>, Error>;
-```
-
-### Event Emission
-
-```rust
-// Emit an event to the changefeed
-fn emit_event<T>(topic: &str, key: &str, payload: &T) -> Result<(), Error>;
-
-// Emit a raw event with binary payload
-fn emit_raw_event(topic: &str, key: &str, payload: &[u8]) -> Result<(), Error>;
-```
-
-### Utility Functions
-
-```rust
-// Get current timestamp (deterministic across cluster)
-fn now() -> u64;
-
-// Generate a unique ID
-fn generate_id() -> u64;
-
-// Get transaction context
-fn get_context() -> ReducerContext;
-
-// Abort the current transaction with an error
-fn abort(message: &str) -> !;
-```
-
-## 🚀 Getting Started
-
-### 1. Write Your Module
-
-```rust
-// src/lib.rs
-use instantdb_sdk::*;
-
-#[table]
-pub struct Counter {
-    #[primary_key]
-    pub id: String,
-    pub value: i64,
-}
-
-#[reducer]
-pub fn increment(counter_id: String) -> Result<i64, String> {
-    let current = table_read::<Counter>("counters", &counter_id)?
-        .map(|c| c.value)
-        .unwrap_or(0);
-
-    let new_value = current + 1;
-
-    table_write("counters", &counter_id, &Counter {
-        id: counter_id.clone(),
-        value: new_value,
-    })?;
-
-    emit_event("counter_updated", &counter_id, &CounterUpdated {
-        id: counter_id,
-        old_value: current,
-        new_value,
-    })?;
-
-    Ok(new_value)
-}
-
-#[event]
-pub struct CounterUpdated {
-    pub id: String,
-    pub old_value: i64,
-    pub new_value: i64,
-}
-```
-
-### 2. Compile to WASM
+From a module project directory, `instantdb publish` detects the project
+type, builds it, and deploys the resulting `.wasm` over gRPC (via the
+bundled `instantdb_client`; `grpcurl` is not needed):
 
 ```bash
-# Add WASM target
-rustup target add wasm32-wasi
-
-# Build WASM module
-cargo build --target wasm32-wasi --release
-
-# Output: target/wasm32-wasi/release/my_module.wasm
+instantdb publish
+instantdb publish --path=./my-module --server=prod.example.com:50051 --version=1.2.0
 ```
 
-### 3. Deploy via gRPC
+| Flag | Meaning |
+|---|---|
+| `--server HOST:PORT` | InstantDB gRPC endpoint (default `localhost:50051`) |
+| `--path PATH` | Project path (default: current directory) |
+| `--version VERSION` | Module version (default `1.0.0`) |
+
+Supported project types:
+
+- **C#** — a `.csproj` in the project directory; built with
+  `dotnet publish --configuration Release` (requires .NET 8 SDK + the
+  `wasi-experimental` workload). Output picked up from
+  `bin/Release/net8.0/wasi-wasm/AppBundle/` (or `publish/`).
+- **AssemblyScript** — an `asconfig.json` in the project directory; built
+  with `npm run asbuild`. Output picked up from `build/module.wasm` (or
+  `build/release.wasm`).
+
+The module name is the project name (`.csproj` stem, or the directory name
+for AssemblyScript projects).
+
+### Option 2: `instantdb_client` (deploy a prebuilt .wasm)
 
 ```bash
-# Deploy the module
-grpcurl -plaintext -import-path ./proto -proto instantdb.proto \
-  -d '{
-    "name": "counter_app",
-    "version": "1.0.0",
-    "bytecode": "'"$(base64 < target/wasm32-wasi/release/my_module.wasm)"'"
-  }' \
-  localhost:50051 instantdb.grpc.WasmService.DeployModule
+instantdb_client [-s HOST:PORT] deploy NAME FILE.wasm [VERSION]
+instantdb_client modules                       # list deployed modules (name, version, sha256)
+instantdb_client call MODULE REDUCER '[json, args]'
+instantdb_client undeploy NAME
 ```
 
-### 4. Execute Reducers
+Example:
 
 ```bash
-# Execute a reducer
-grpcurl -plaintext -import-path ./proto -proto instantdb.proto \
-  -d '{
-    "module_name": "counter_app",
-    "reducer_name": "increment",
-    "sender_identity": "user123",
-    "args": [{"string_value": "global_counter"}]
-  }' \
-  localhost:50051 instantdb.grpc.WasmService.ExecuteReducer
+instantdb_client deploy user_service ./UserService.wasm 1.0.0
+instantdb_client call user_service CreateUser '["Alice", "alice@example.com"]'
+instantdb_client modules
+instantdb_client undeploy user_service
 ```
 
-### 5. Subscribe to Events
+`call` arguments are a JSON array; booleans, integers, floats, and strings
+map to the corresponding reducer argument types.
+
+Both paths use the gRPC `WasmService` (`DeployModule`, `UndeployModule`,
+`ListModules`, `ExecuteReducer` in `proto/instantdb.proto`), which you can
+also call directly from your own client.
+
+### What happens at deploy
+
+1. Bytecode is validated (core module; imports checked against the ABI).
+2. `instantdb_describe` (if exported) is called once to collect module
+   metadata (name, version, reducers, tables).
+3. The module is instantiated; `_initialize` (or the start section) runs,
+   and the `__init` lifecycle hook is invoked if registered.
+4. Bytecode and a manifest are persisted (see below).
+
+## Capabilities and limits
+
+Capabilities are set at deploy time via the `capabilities` field of
+`DeployModuleRequest`:
+
+```protobuf
+message ModuleCapabilities {
+  repeated string allowed_tables = 1;  // empty = all tables
+  bool read_only = 2;
+  uint32 max_memory_mb = 3;            // 0 = default (256 MiB)
+  uint32 timeout_ms = 4;               // 0 = default (5000 ms)
+}
+```
+
+- **`allowed_tables`** — tables the module may read/write; empty means all.
+- **`read_only`** — write and delete operations fail.
+- Violations return error `-2` (permission denied) from the table
+  operations; the SDKs surface this to your reducer.
+- **CPU**: epoch-based deadline per call. A call that exceeds its timeout
+  traps; nothing is committed.
+- **Memory**: wasmtime store limiter caps linear memory growth.
+
+After a trap or timeout the module instance is discarded and lazily
+re-instantiated on the next call (fresh memory; `_initialize` runs again).
+Calls are serialized per module; different modules execute concurrently.
+
+## Persistence
+
+Deployed modules are stored under `<data_dir>/modules/<name>/`:
+
+- the raw bytecode
+- `manifest.json` — `name`, `version`, `sha256`, `deployed_at_ms`
+
+On boot the server restores every persisted module (log line:
+`Restored persisted module: <name>`), verifying the bytecode against the
+manifest's sha256; corrupt or mismatched entries are skipped with a
+warning. `undeploy` removes the module's files. Table data written by
+modules is recovered separately through the WAL like any other write.
+
+## Transactions and events
+
+Per the ABI transaction model:
+
+- Reads (`host_table_read` / `host_table_scan`) see the call's own staged
+  writes first, then committed data.
+- On return status `>= 0` with no trap, staged writes are applied
+  atomically through one storage transaction (WAL-logged). The storage
+  commit emits one changefeed event per write — exactly once.
+- Custom events staged with `host_emit_event` (operation `"EVENT"`) are
+  published only after a successful commit.
+- On trap, `host_abort`, timeout, memory-limit violation, or negative
+  status, nothing is applied.
+- Tables written by modules are auto-created on first commit (column types
+  inferred from the first staged row).
+
+## Lifecycle hooks
+
+Lifecycle hooks are ordinary reducer registrations under reserved names
+(all prefixed `__`). Unregistered reserved names return `-404`, which the
+host treats as a harmless no-op:
+
+| Name | When | Args |
+|---|---|---|
+| `__init` | after deploy/instantiation | — |
+| `__client_connected` | WebSocket client connects | `[connection_id]` |
+| `__client_disconnected` | WebSocket client disconnects | `[connection_id]` |
+| `__get_initial_data` | WASM subscription created with `include_initial_data` | `[where_clause]` |
+
+## Subscriptions (filter / transform)
+
+WebSocket clients can create module-backed subscriptions. The module's
+filter and transform functions are invoked through `instantdb_invoke`
+under the names the subscription registered:
 
 ```javascript
 const ws = new WebSocket('ws://localhost:8080');
 
-ws.onopen = () => {
-    // Subscribe to counter updates
-    ws.send(JSON.stringify({
-        action: 'subscribe',
-        subscription: 'counter_updates',
-        sql: 'SELECT * FROM counter_events',
-        start_offset: 0
-    }));
-};
+ws.send(JSON.stringify({
+  type: 'wasm_subscribe',
+  module_name: 'todo',
+  filter_function: 'onlyPending',      // optional
+  transform_function: 'addMetadata',   // optional
+  tables: ['todos'],                   // optional table filter
+  include_initial_data: true,          // optional; calls __get_initial_data
+  start_offset: 0                      // optional
+}));
 
-ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === 'event') {
-        console.log('Counter updated:', data.value);
-    }
-};
+// Server replies:
+// {"type": "wasm_subscription_created", "subscription_id": "...", ...}
+// Matching events arrive as:
+// {"type": "wasm_subscription_event", "subscription_id": "...", "data": ...}
 ```
 
-## ⚡ Performance Characteristics
+- **Filter functions** receive one argument — the event as a JSON object
+  `{table, operation, offset, transaction_id, key, new_value, old_value}` —
+  and return ABI status `1` (include) or `0` (exclude). The SDKs wrap this
+  as a boolean-returning function (`registerFilter` / `RegisterFilter`).
+- **Transform functions** receive the same event object and return the
+  transformed payload via `host_set_result`.
+- Plain SQL subscriptions (`sql_subscribe`, with per-event WHERE
+  evaluation) don't involve modules at all — see `QA_TESTING_GUIDE.md`.
 
-### Benchmarks (Single Node)
+## Debugging
 
-- **Module Loading**: ~5ms for 1MB WASM module
-- **Reducer Execution**: ~100μs overhead + business logic
-- **Database Operations**: ~10μs per table read/write
-- **Event Emission**: ~50μs per event
-- **Instance Creation**: ~1ms (mitigated by pooling)
+- `host_log` output from modules goes to the server log
+  (`instantdb server -l debug` for debug-level detail).
+- `host_abort` messages are recorded and included in the reducer error.
+- Module stdout/stderr are discarded unless the server runs with WASM
+  debug enabled.
+- `scripts/e2e_verify.sh` exercises the full pipeline (build → deploy →
+  execute → SQL verify → filtered WebSocket delivery → restart persistence
+  → undeploy) and is the quickest way to confirm a working setup.
 
-### Optimizations
+## Troubleshooting
 
-#### **Instance Pooling**
-- Pre-warmed instances reduce startup overhead
-- Configurable pool size per module
-- Automatic scaling based on demand
+| Symptom | Likely cause |
+|---|---|
+| Deploy rejected: unsupported import | Module imports something outside `env` / `wasi_snapshot_preview1` (e.g. AssemblyScript's default `env.abort` — use the SDK's abort handler wiring in `asconfig.json`). |
+| Deploy rejected: not a core module | The toolchain emitted a WASI preview 2 *component* (e.g. .NET 9+ / componentize-dotnet). Pin .NET 8 + `wasi-experimental`, or use AssemblyScript. |
+| Reducer returns `-404` | No handler registered under that name (check spelling; registration must happen in `_initialize` / start section / `[ModuleInitializer]`). C# only: your `wasi-experimental` workload build may not support `[UnmanagedCallersOnly]` exports at all — verify `instantdb_invoke` is exported (`wasm-tools print module.wasm | grep export`). |
+| Reducer returns `-2` | Capability violation: table not in `allowed_tables`, or a write in a `read_only` module. |
+| Reducer returns `-3` | Invalid argument (module-side validation). |
+| Call fails with timeout | Exceeded the per-module `timeout_ms` (default 5000 ms). The instance is discarded and recreated on the next call. |
+| Module state "disappears" | Linear memory does not survive traps/timeouts/redeploys/restarts. Keep durable state in tables. |
+| Module missing after restart | Check the boot log for `ModuleStore: skipping ...` warnings (missing/corrupt manifest, sha256 mismatch). |
 
-#### **Memory Management**
-- Efficient WASM linear memory allocation
-- Zero-copy operations where possible
-- Garbage collection of unused instances
+## Current limitations
 
-#### **Concurrency**
-- Multiple instances can run simultaneously
-- MVCC enables lock-free reads
-- Write operations use fine-grained locking
-
-## 🔧 Configuration
-
-### Engine Configuration
-
-```cpp
-WasmEngineConfig config;
-config.max_instances = 10;        // Max instances per module
-config.timeout_ms = 5000;         // Execution timeout
-config.memory_limit_mb = 64;      // Memory limit per instance
-config.enable_debug = false;      // Debug mode
-config.runtime_type = "wasmtime"; // Runtime implementation
-```
-
-### Module Capabilities
-
-```rust
-#[module]
-pub struct ModuleConfig {
-    // Tables this module can access
-    pub allowed_tables: Vec<String>,
-
-    // Whether module can emit events
-    pub can_emit_events: bool,
-
-    // Maximum memory usage
-    pub memory_limit: usize,
-
-    // Maximum execution time
-    pub timeout_ms: u32,
-}
-```
-
-## 🛡️ Security Model
-
-### Sandboxing
-
-- **Memory isolation**: Each instance has separate linear memory
-- **No system calls**: WASM cannot access OS directly
-- **Resource limits**: CPU and memory usage capped
-- **Deterministic execution**: No access to non-deterministic APIs
-
-### Capabilities
-
-- **Explicit permissions**: Modules declare required capabilities
-- **Table access control**: Fine-grained table permissions
-- **Event emission rights**: Control over changefeed access
-- **Resource quotas**: Per-module resource limits
-
-### Validation
-
-- **Bytecode verification**: WASM modules validated before execution
-- **Schema validation**: Table schemas checked for consistency
-- **Permission checking**: Runtime capability enforcement
-- **Code signing**: Optional module signing for authentication
-
-## 🔍 Debugging & Monitoring
-
-### Logging
-
-```bash
-# Enable WASM-specific logging
-export INSTANTDB_LOG_LEVEL=debug
-./build/instantdb_server
-
-# Example WASM logs
-[info] Loaded WASM module: counter_app
-[debug] Calling WASM reducer: increment with 1 args
-[debug] WASM reducer increment completed in 234 μs
-[info] Module counter_app emitted event: counter_updated
-```
-
-### Metrics
-
-```
-# Module execution metrics
-wasm_reducer_calls_total{module="counter_app",reducer="increment"} 1247
-wasm_reducer_duration_seconds{module="counter_app",reducer="increment"} 0.000234
-wasm_instance_pool_size{module="counter_app"} 5
-wasm_memory_usage_bytes{module="counter_app"} 2097152
-
-# Error metrics
-wasm_reducer_errors_total{module="counter_app",error="timeout"} 2
-wasm_module_load_failures_total{reason="validation_error"} 1
-```
-
-### Profiling
-
-```bash
-# Enable profiling (planned feature)
-export INSTANTDB_WASM_PROFILE=true
-./build/instantdb_server
-
-# View performance reports
-curl http://localhost:8080/wasm/profile/counter_app
-```
-
-## 🗺️ Roadmap
-
-### Short Term (v0.3.0)
-- ✅ Core WASM runtime integration
-- 🚧 Complete gRPC API implementation
-- 🚧 Production-ready Wasmtime integration
-- 📋 Basic SDK for Rust modules
-
-### Medium Term (v0.4.0)
-- 📋 Advanced error handling and recovery
-- 📋 Module versioning and hot reloading
-- 📋 Performance monitoring and profiling
-- 📋 Cross-module communication
-
-### Long Term (v1.0.0)
-- 📋 Multi-language SDK support (C++, AssemblyScript)
-- 📋 Advanced security features (code signing, auditing)
-- 📋 Distributed execution across cluster nodes
-- 📋 Integration with external services
-
-## 🤝 Contributing
-
-The WASM module system is actively being developed. Areas where contributions are especially welcome:
-
-### High Priority
-- **Wasmtime Integration**: Complete C API integration
-- **Error Handling**: Robust error propagation and recovery
-- **Performance**: Benchmarking and optimization
-- **Testing**: Module execution test framework
-
-### Medium Priority
-- **SDK Development**: Rust and C++ developer libraries
-- **Documentation**: Tutorials and examples
-- **Tooling**: Module development and deployment tools
-- **Security**: Advanced sandboxing and validation
-
-### Examples Needed
-- **Real-world modules**: Practical WASM module examples
-- **Performance benchmarks**: Comparative performance analysis
-- **Integration patterns**: Best practices for module design
-- **Migration guides**: From other platforms to InstantDB
-
----
-
-**InstantDB WASM Modules** - Programmable database logic at database speed 🚀
-
-*Combining the safety of WebAssembly with the performance of native database operations.*
+- No cross-module calls, no async I/O, no network access from modules.
+- No instance pooling: one long-lived instance per module, calls
+  serialized per module.
+- No hot reload; redeploying replaces the module (fresh instance).
+- Reducer results are surfaced through `host_set_result` payloads; there
+  is no typed result schema beyond JSON.
+- No Rust/Go/C++ SDKs yet (the ABI is documented, so any language that can
+  produce a conforming core module works in principle).

@@ -16,6 +16,9 @@
 #include "websocket/websocket_server.h"
 #include "wasm/wasm_engine.h"
 #include "wasm/wasm_subscription.h"
+#include "wasm/module_store.h"
+
+#include <filesystem>
 
 #ifdef GRPC_AVAILABLE
 #include "grpc/grpc_server.h"
@@ -79,11 +82,34 @@ public:
         // Initialize WASM engine
         spdlog::info("⚡ Initializing WASM Engine...");
         wasm_engine_ = std::make_shared<WasmEngine>(storage_engine_, changefeed_engine_);
+        wasm_engine_->SetTimeoutMs(
+            static_cast<uint32_t>(config_.wasm.max_execution_time_ns / 1000000));
+        wasm_engine_->SetMemoryLimitMB(
+            static_cast<uint32_t>(config_.wasm.instance_memory_limit / (1024 * 1024)));
         if (!wasm_engine_->Initialize()) {
             spdlog::error("❌ Failed to initialize WASM engine");
             return false;
         }
         spdlog::info("✅ WASM Engine ready");
+
+        // Restore persisted WASM modules
+        module_store_ = std::make_shared<ModuleStore>(
+            std::filesystem::path(config_.storage.data_dir) / "modules");
+        if (module_store_->Initialize()) {
+            for (const auto& m : module_store_->List()) {
+                std::string err;
+                auto bytes = module_store_->LoadBytecode(m.name, err);
+                if (bytes && wasm_engine_->LoadModule(m.name, *bytes, m.version)) {
+                    spdlog::info("♻️  Restored persisted module: {} (v{})", m.name,
+                                 m.version.empty() ? "?" : m.version);
+                } else {
+                    spdlog::warn("⚠️  Skipping persisted module {}: {}", m.name,
+                                 bytes ? wasm_engine_->GetLastLoadError() : err);
+                }
+            }
+        } else {
+            spdlog::warn("⚠️  Module store unavailable; deployed modules will not persist");
+        }
 
         // Initialize WASM subscription manager
         spdlog::info("🔔 Initializing WASM Subscription Manager...");
@@ -130,7 +156,8 @@ public:
         grpc_config.max_message_size = static_cast<int>(config_.grpc.max_message_size);
 
         grpc_server_ = std::make_shared<GrpcServer>(grpc_config, sql_engine_, storage_engine_,
-                                                   changefeed_engine_, websocket_server_, wasm_engine_);
+                                                   changefeed_engine_, websocket_server_, wasm_engine_,
+                                                   module_store_);
         if (!grpc_server_->Start()) {
             spdlog::error("❌ Failed to start gRPC server");
             return false;
@@ -314,6 +341,7 @@ private:
     std::shared_ptr<SqlSubscriptionManager> sql_subscription_manager_;
     std::shared_ptr<WebSocketServer> websocket_server_;
     std::shared_ptr<WasmEngine> wasm_engine_;
+    std::shared_ptr<ModuleStore> module_store_;
     std::shared_ptr<WasmSubscriptionManager> wasm_subscription_manager_;
 #ifdef GRPC_AVAILABLE
     std::shared_ptr<GrpcServer> grpc_server_;

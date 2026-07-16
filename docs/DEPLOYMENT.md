@@ -181,8 +181,8 @@ RUN chown instantdb:instantdb /var/lib/instantdb /var/log/instantdb
 # Switch to non-root user
 USER instantdb
 
-# Expose port
-EXPOSE 8080
+# Expose ports (WebSocket + gRPC)
+EXPOSE 8080 50051
 
 # Set working directory
 WORKDIR /var/lib/instantdb
@@ -201,9 +201,11 @@ services:
   instantdb:
     build: .
     ports:
-      - "8080:8080"
+      - "8080:8080"      # WebSocket
+      - "50051:50051"    # gRPC (SQL + WASM module deployment)
     environment:
       - INSTANTDB_WS_PORT=8080
+      - INSTANTDB_GRPC_PORT=50051
       - INSTANTDB_DATA_DIR=/var/lib/instantdb
       - INSTANTDB_LOG_LEVEL=info
     volumes:
@@ -237,12 +239,16 @@ docker-compose logs -f instantdb
 docker-compose down
 ```
 
-### Kubernetes Deployment
+### Kubernetes Deployment (planned — example manifests)
+
+> **Note:** the repository does not ship a `k8s/` directory; first-class
+> Kubernetes support is planned. The manifests below are illustrative
+> examples you would need to create and maintain yourself.
 
 #### Namespace and ConfigMap
 
 ```yaml
-# k8s/namespace.yaml
+# k8s/namespace.yaml (example — not in the repo)
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -395,7 +401,8 @@ kubectl port-forward service/instantdb-service 8080:8080 -n instantdb
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `INSTANTDB_WS_PORT` | 8080 | WebSocket server port |
-| `INSTANTDB_DATA_DIR` | ./instantdb_data | Data directory path |
+| `INSTANTDB_GRPC_PORT` | 50051 | gRPC server port (SQL + WASM services) |
+| `INSTANTDB_DATA_DIR` | ./instantdb_data | Data directory path (WAL + persisted WASM modules under `modules/`) |
 | `INSTANTDB_LOG_LEVEL` | info | Logging level (trace, debug, info, warn, error) |
 
 ### Command Line Options
@@ -405,6 +412,7 @@ Usage: instantdb_server [OPTIONS]
 
 Options:
   -p, --port PORT          WebSocket port (default: 8080)
+  -g, --grpc-port PORT     gRPC port (default: 50051)
   -d, --data-dir DIR       Data directory (default: ./instantdb_data)
   -l, --log-level LEVEL    Log level (default: info)
   -c, --config FILE        Config file path (default: instantdb.conf)
@@ -412,7 +420,7 @@ Options:
 
 Examples:
   instantdb_server                    # Start with defaults
-  instantdb_server -p 9090            # Custom port
+  instantdb_server -p 9090 -g 50052   # Custom ports
   instantdb_server --data-dir /data   # Custom data directory
 ```
 
@@ -543,6 +551,9 @@ echo "Network Connections: $(netstat -pan | grep $PID | wc -l)"
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow 8080/tcp comment "InstantDB WebSocket"
+# Only open the gRPC port to trusted hosts — it is unauthenticated and
+# allows SQL execution and WASM module deployment:
+sudo ufw allow from 10.0.0.0/8 to any port 50051 comment "InstantDB gRPC"
 sudo ufw enable
 ```
 

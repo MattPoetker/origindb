@@ -100,19 +100,19 @@ Follow the established project structure:
 
 ```
 src/
-├── cmd/           # Main executables
+├── cmd/           # Main executables (server, CLI, gRPC client, init)
 ├── storage/       # Storage engine implementation
 ├── sql/           # SQL parsing and execution
-├── changefeed/    # Changefeed engine
+├── changefeed/    # Changefeed engine + WHERE predicate evaluator
 ├── websocket/     # WebSocket server
+├── wasm/          # WASM engine (wasmtime), module store, subscriptions
+├── grpc/          # gRPC services (SQLService, WasmService)
 └── common/        # Shared utilities
 
-include/           # Public headers
-├── storage/
-├── sql/
-├── changefeed/
-├── websocket/
-└── common/
+include/           # Public headers (mirrors src/ layout)
+sdk/               # Module SDKs (typescript/AssemblyScript, csharp, ...)
+tests/             # gtest unit tests + WASM fixtures
+scripts/           # e2e_verify.sh and helper scripts
 ```
 
 #### Coding Standards
@@ -184,8 +184,9 @@ if (critical_system_failure) {
 - Handle error cases
 
 **3. Testing Phase**
-- Write unit tests (future: automated testing)
-- Test with demo application
+- Write unit tests (gtest; add sources to the `unit_tests` target in
+  CMakeLists.txt, run with `ctest --test-dir build`)
+- Run `scripts/e2e_verify.sh <build_dir>` for the full pipeline
 - Verify WebSocket integration
 - Test crash recovery scenarios
 
@@ -260,6 +261,19 @@ cmake --build build
 ```
 
 ### Testing
+
+#### Automated Testing
+
+```bash
+# Unit tests (wasm engine, predicate evaluator, module store)
+cmake --build build --target unit_tests
+ctest --test-dir build --output-on-failure
+
+# End-to-end verification: build -> server -> deploy WASM module ->
+# reducer -> SQL verify -> filtered websocket delivery -> restart
+# persistence -> undeploy
+scripts/e2e_verify.sh build
+```
 
 #### Manual Testing
 

@@ -271,31 +271,38 @@ int handleStopCommand(const std::vector<std::string>& args) {
 }
 
 int handlePublishCommand(const std::vector<std::string>& args) {
-    std::cout << "PUBLISH_DEBUG: Starting handlePublishCommand" << std::endl;
-    std::string server_url = "http://localhost:9090";
+    std::string grpc_endpoint = "localhost:50051";
     std::string project_path = ".";
+    std::string version = "1.0.0";
 
     // Parse arguments
     for (size_t i = 0; i < args.size(); i++) {
         const auto& arg = args[i];
         if (arg == "--server" && i + 1 < args.size()) {
-            server_url = args[++i];
+            grpc_endpoint = args[++i];
         } else if (arg.substr(0, 9) == "--server=") {
-            server_url = arg.substr(9);
+            grpc_endpoint = arg.substr(9);
         } else if (arg == "--path" && i + 1 < args.size()) {
             project_path = args[++i];
         } else if (arg.substr(0, 7) == "--path=") {
             project_path = arg.substr(7);
+        } else if (arg == "--version" && i + 1 < args.size()) {
+            version = args[++i];
+        } else if (arg.substr(0, 10) == "--version=") {
+            version = arg.substr(10);
         } else if (arg == "-h" || arg == "--help") {
             std::cout << BOLD << "Usage:" << RESET << " instantdb publish [OPTIONS]\n\n";
             std::cout << BOLD << "Options:\n" << RESET;
-            std::cout << "  --server URL    InstantDB server URL (default: http://localhost:9090)\n";
-            std::cout << "  --path PATH     Project path (default: current directory)\n";
-            std::cout << "  -h, --help      Show this help message\n\n";
+            std::cout << "  --server HOST:PORT  InstantDB gRPC endpoint (default: localhost:50051)\n";
+            std::cout << "  --path PATH         Project path (default: current directory)\n";
+            std::cout << "  --version VERSION   Module version (default: 1.0.0)\n";
+            std::cout << "  -h, --help          Show this help message\n\n";
+            std::cout << BOLD << "Supported projects:\n" << RESET;
+            std::cout << "  C# (.csproj):       .NET 8 + wasi-experimental workload\n";
+            std::cout << "  TypeScript (asconfig.json): AssemblyScript via npm run asbuild\n\n";
             std::cout << BOLD << "Examples:\n" << RESET;
             std::cout << "  instantdb publish\n";
-            std::cout << "  instantdb publish --server=http://localhost:9090\n";
-            std::cout << "  instantdb publish --path=./my-module --server=http://prod.example.com:9090\n";
+            std::cout << "  instantdb publish --path=./my-module --server=prod.example.com:50051\n";
             return 0;
         }
     }
@@ -314,191 +321,95 @@ int handlePublishCommand(const std::vector<std::string>& args) {
         return 1;
     }
 
-    // Step 1: Build the WASM module
-    std::cout << "📦 Building WASM module...\n";
-    int build_result = system("dotnet publish --configuration Release --verbosity quiet");
-    if (build_result != 0) {
-        std::cerr << RED << "Error: Build failed. Make sure you have .NET 8+ and wasm-tools workload installed." << RESET << "\n";
-        std::cerr << "Try: dotnet workload install wasm-tools\n";
-        chdir(original_dir);
-        return 1;
-    }
-
-    // Step 2: Find the WASM file
+    // Detect project type and build.
     std::string wasm_file;
     std::string project_name;
-
-    // Get project name from .csproj file
     fs::path current_path = fs::current_path();
-    for (const auto& entry : fs::directory_iterator(current_path)) {
-        if (entry.path().extension() == ".csproj") {
-            project_name = entry.path().stem().string();
-            // Try multiple possible WASM file locations
-            std::vector<std::string> wasm_paths = {
-                "bin/Release/net8.0/browser-wasm/AppBundle/_framework/" + project_name + ".wasm",
-                "bin/Release/net8.0/browser-wasm/publish/" + project_name + ".wasm",
-                "bin/Release/net8.0/wasm-wasi/publish/" + project_name + ".wasm"
-            };
 
-            for (const auto& path : wasm_paths) {
-                if (std::filesystem::exists(path)) {
-                    wasm_file = path;
-                    break;
-                }
+    if (fs::exists("asconfig.json")) {
+        // AssemblyScript (TypeScript) project
+        project_name = current_path.filename().string();
+        std::cout << "📦 Building AssemblyScript module...\n";
+        if (system("npm run asbuild --silent") != 0) {
+            std::cerr << RED << "Error: Build failed. Run 'npm install' first." << RESET << "\n";
+            chdir(original_dir);
+            return 1;
+        }
+        if (fs::exists("build/module.wasm")) {
+            wasm_file = "build/module.wasm";
+        } else if (fs::exists("build/release.wasm")) {
+            wasm_file = "build/release.wasm";
+        }
+    } else {
+        // C# project
+        for (const auto& entry : fs::directory_iterator(current_path)) {
+            if (entry.path().extension() == ".csproj") {
+                project_name = entry.path().stem().string();
+                break;
             }
+        }
+        if (project_name.empty()) {
+            std::cerr << RED << "Error: No .csproj or asconfig.json found in "
+                      << project_path << RESET << "\n";
+            chdir(original_dir);
+            return 1;
+        }
 
-            if (wasm_file.empty()) {
-                // Default to the first path for error reporting
-                wasm_file = wasm_paths[0];
+        std::cout << "📦 Building .NET WASM module...\n";
+        if (system("dotnet publish --configuration Release --verbosity quiet") != 0) {
+            std::cerr << RED << "Error: Build failed. Requires .NET 8 SDK with the wasi-experimental workload." << RESET << "\n";
+            std::cerr << "Try: dotnet workload install wasi-experimental\n";
+            chdir(original_dir);
+            return 1;
+        }
+
+        std::vector<std::string> wasm_paths = {
+            "bin/Release/net8.0/wasi-wasm/AppBundle/" + project_name + ".wasm",
+            "bin/Release/net8.0/wasi-wasm/publish/" + project_name + ".wasm",
+        };
+        for (const auto& path : wasm_paths) {
+            if (fs::exists(path)) {
+                wasm_file = path;
+                break;
             }
-            break;
         }
     }
 
-    if (project_name.empty()) {
-        std::cerr << RED << "Error: No .csproj file found in current directory" << RESET << "\n";
-        chdir(original_dir);
-        return 1;
-    }
-
-    if (!fs::exists(wasm_file)) {
-        std::cerr << RED << "Error: WASM file not found: " << wasm_file << RESET << "\n";
-        std::cerr << "Build may have failed or output path is incorrect.\n";
+    if (wasm_file.empty() || !fs::exists(wasm_file)) {
+        std::cerr << RED << "Error: Built WASM file not found" << RESET << "\n";
+        std::cerr << "Build may have failed or the output path is unexpected.\n";
         chdir(original_dir);
         return 1;
     }
 
     std::cout << GREEN << "✅ Build successful: " << wasm_file << RESET << "\n";
+    std::cout << "🌐 Deploying to " << grpc_endpoint << "\n";
 
-    // Step 3: Deploy via gRPC
-    std::cout << "🌐 Deploying to server: " << server_url << "\n";
-
-    // Convert http to grpc port (http://localhost:9090 -> localhost:50051)
-    std::string grpc_endpoint = "localhost:50051";
-    if (server_url.find("localhost") != std::string::npos) {
-        grpc_endpoint = "localhost:50051";
-    } else {
-        // For production servers, assume gRPC is on port 50051
-        size_t protocol_pos = server_url.find("://");
-        if (protocol_pos != std::string::npos) {
-            std::string host_part = server_url.substr(protocol_pos + 3);
-            size_t port_pos = host_part.find(":");
-            if (port_pos != std::string::npos) {
-                grpc_endpoint = host_part.substr(0, port_pos) + ":50051";
-            } else {
-                grpc_endpoint = host_part + ":50051";
-            }
-        }
-    }
-
-    // Create gRPC deployment command - use installed proto file if available
-    std::string proto_args;
-    if (access("/usr/local/share/instantdb/instantdb.proto", F_OK) == 0) {
-        // Use installed proto file
-        proto_args = "-import-path /usr/local/share/instantdb -proto instantdb.proto ";
-    } else if (access("instantdb.proto", F_OK) == 0) {
-        // Use local proto file if present
-        proto_args = "-import-path . -proto instantdb.proto ";
-    } else {
-        // Try to find proto file in common locations
-        const char* home = getenv("HOME");
-        std::string home_proto = std::string(home ? home : "") + "/.instantdb/instantdb.proto";
-        if (access(home_proto.c_str(), F_OK) == 0) {
-            proto_args = "-import-path " + std::string(home ? home : "") + "/.instantdb -proto instantdb.proto ";
-        } else {
-            std::cerr << RED << "Error: Could not find instantdb.proto file. Make sure InstantDB is properly installed." << RESET << "\n";
-            std::cerr << "Expected locations:\n";
-            std::cerr << "  - /usr/local/share/instantdb/instantdb.proto (installed)\n";
-            std::cerr << "  - ./instantdb.proto (current directory)\n";
-            std::cerr << "  - ~/.instantdb/instantdb.proto (home directory)\n";
-            return 1;
-        }
-    }
-
-    // Create JSON with base64-encoded WASM file
-    std::cout << YELLOW << "Debug: Starting base64 encoding..." << RESET << "\n";
-    std::cout.flush();
-
-    // First, base64 encode the file content
-    std::string base64_cmd = "base64 < " + wasm_file;
-    std::cout << YELLOW << "Debug: About to run: " << base64_cmd << RESET << "\n";
-    std::cout.flush();
-
-    FILE* pipe = popen(base64_cmd.c_str(), "r");
-    if (!pipe) {
-        std::cerr << RED << "Error: Failed to encode WASM file" << RESET << "\n";
+    // Deploy through the bundled gRPC client (no grpcurl dependency).
+    std::string client_binary = findBinary("instantdb_client");
+    if (client_binary.empty()) {
+        std::cerr << RED << "Error: instantdb_client binary not found (built without gRPC support?)" << RESET << "\n";
         chdir(original_dir);
         return 1;
     }
 
-    std::cout << YELLOW << "Debug: popen() succeeded, reading base64 data..." << RESET << "\n";
-    std::cout.flush();
-
-    std::string base64_content;
-    char buffer[128];
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        base64_content += buffer;
-    }
-    pclose(pipe);
-
-    std::cout << YELLOW << "Debug: Base64 encoding completed, length: " << base64_content.length() << RESET << "\n";
-    std::cout.flush();
-
-    // Remove newlines from base64 content
-    base64_content.erase(std::remove(base64_content.begin(), base64_content.end(), '\n'), base64_content.end());
-    base64_content.erase(std::remove(base64_content.begin(), base64_content.end(), '\r'), base64_content.end());
-
-    // Create the JSON payload
-    std::string json_payload = "{\"name\": \"" + project_name + "\", "
-                               "\"version\": \"1.0.0\", "
-                               "\"bytecode\": \"" + base64_content + "\"}";
-
-    // Write JSON to temporary file to avoid shell escaping issues
-    std::string temp_json = "/tmp/instantdb_deploy_" + std::to_string(getpid()) + ".json";
-    std::ofstream json_file(temp_json);
-    if (!json_file) {
-        std::cerr << RED << "Error: Failed to create temporary JSON file" << RESET << "\n";
-        chdir(original_dir);
-        return 1;
-    }
-    json_file << json_payload;
-    json_file.close();
-
-    // Create gRPC command using the JSON file
-    // grpcurl expects @ alone for stdin, so we'll cat the file
-    std::string grpc_cmd = "cat " + temp_json + " | grpcurl -plaintext " + proto_args +
-                          "-d @ " +
-                          grpc_endpoint + " instantdb.grpc.WasmService.DeployModule";
-
-    // Debug: Print the command we're about to run
-    std::cout << YELLOW << "Debug: NEW Running command: " << grpc_cmd << RESET << "\n";
-    std::cout << YELLOW << "Debug: About to call system()..." << RESET << "\n";
-    std::cout.flush(); // Ensure output is visible immediately
-
-    int deploy_result = system(grpc_cmd.c_str());
-
-    std::cout << YELLOW << "Debug: system() returned: " << deploy_result << RESET << "\n";
-
-    // Clean up temporary JSON file
-    std::remove(temp_json.c_str());
-
-    // Restore original directory
+    std::string deploy_cmd = "\"" + client_binary + "\" --server " + grpc_endpoint +
+                             " deploy \"" + project_name + "\" \"" + wasm_file +
+                             "\" \"" + version + "\"";
+    int deploy_result = system(deploy_cmd.c_str());
     chdir(original_dir);
 
     if (deploy_result == 0) {
-        std::cout << GREEN << BOLD << "🎉 Module published successfully!" << RESET << "\n\n";
+        std::cout << GREEN << BOLD << "\n🎉 Module published successfully!" << RESET << "\n\n";
         std::cout << "Module Name: " << CYAN << project_name << RESET << "\n";
-        std::cout << "Server: " << CYAN << server_url << RESET << "\n\n";
+        std::cout << "Server: " << CYAN << grpc_endpoint << RESET << "\n\n";
         std::cout << BOLD << "Test your reducers:" << RESET << "\n";
-        std::cout << "grpcurl -plaintext -d '{\n";
-        std::cout << "  \"module_name\": \"" << project_name << "\",\n";
-        std::cout << "  \"reducer_name\": \"CreateUser\",\n";
-        std::cout << "  \"sender_identity\": \"user123\",\n";
-        std::cout << "  \"args\": [{\"string_value\": \"Alice\"}, {\"string_value\": \"alice@example.com\"}]\n";
-        std::cout << "}' " << grpc_endpoint << " instantdb.grpc.WasmService.ExecuteReducer\n";
+        std::cout << "  instantdb client -s " << grpc_endpoint << " call "
+                  << project_name << " <ReducerName> '[\"arg1\", 2]'\n";
+        std::cout << "  instantdb client -s " << grpc_endpoint << " modules\n";
         return 0;
     } else {
-        std::cerr << RED << "Error: Deployment failed. Make sure the InstantDB server is running and grpcurl is installed." << RESET << "\n";
+        std::cerr << RED << "Error: Deployment failed. Is the InstantDB server running?" << RESET << "\n";
         return 1;
     }
 }

@@ -1,837 +1,190 @@
 # InstantDB 🚀
 
-A high-performance, distributed database with **WebAssembly module support** - bringing programmable capabilities to a production SQL engine.
-
-## ✨ Key Features
-
-- **🔥 Real-time Changefeeds**: Stream table changes to clients via WebSocket with initial state
-- **⚡ WASM Modules**: Run custom application logic inside the database server
-- **🔔 WASM Subscriptions**: Programmable real-time data streams with filtering & transformation
-- **🗃️ In-Memory Storage**: High-performance MVCC with persistent WAL
-- **🔍 SQL Interface**: Standard SQL with programmable extensions
-- **🌐 Multi-Protocol API**: gRPC and WebSocket endpoints
-- **🛡️ Sandboxed Execution**: Safe WASM runtime with resource limits
-- **🛠️ CLI Tool**: Comprehensive command-line interface for project management
-- **📊 Production Ready**: Structured logging, metrics, and observability
-
-## 🏗️ Architecture Overview
+A realtime WebSocket database with **user-programmable WASM modules**. Clients
+subscribe to a *filtered subset* of authoritative server changes — no client
+ever has to listen to the whole firehose — and application logic runs *inside*
+the database as sandboxed WebAssembly reducers.
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   SQL Engine    │───▶│  Storage Engine │───▶│   WAL Logger    │
-│  (Query Parser) │    │ (In-Memory MVCC)│    │   (Durable)     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                        │                        │
-         ▼                        ▼                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  WASM Engine    │    │ Changefeed Eng. │    │ Consensus Layer │
-│ (User Modules)  │───▶│ (Event Stream)  │    │   (Raft Ready)  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                        │                        │
-         ▼                        ▼                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ WASM Sub. Mgr   │    │  WebSocket API  │    │    gRPC API     │
-│ (Filter/Xform)  │───▶│ (Real-time Sub) │    │  (SQL & WASM)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+   browser / app                      InstantDB server                      disk
+┌───────────────┐   gRPC call    ┌──────────────────────┐
+│ call reducer ─┼───────────────▶│  WASM engine         │
+│               │                │  (wasmtime sandbox)  │
+│               │                │   your .wasm module  │
+│               │                │        │ staged      │
+│               │                │        ▼ writes      │
+│               │                │  Storage engine ─────┼──▶ WAL (crash recovery)
+│               │                │        │ commit      │
+│               │                │        ▼             │
+│               │                │  Changefeed engine   │
+│               │   websocket    │        │             │
+│ live events ◀─┼────────────────┼── per-client WHERE   │
+└───────────────┘   (filtered)   │    filtering         │
+                                 └──────────────────────┘
 ```
 
-## 💾 Current Status & Capabilities
+## ⚡ Try it: the NIGHTBOARD demo
 
-### ✅ **Implemented Features (v0.3.0)**
+A shared realtime wall — live cursors, pinned notes, and an activity tape for
+every connected device. Open it on your laptop and your phone at once; every
+cursor twitch travels through a WASM reducer, a transactional commit, the WAL,
+and a filtered changefeed before landing on the other screen.
 
-#### **Core Database Engine**
-- ✅ **In-Memory Storage**: Fast MVCC storage with indexes and transactions
-- ✅ **SQL Engine**: Parser and executor for CREATE, INSERT, SELECT operations
-- ✅ **Write-Ahead Log**: Durable transaction logging with crash recovery
-- ✅ **Changefeed Engine**: Real-time event streaming with subscriptions
-- ✅ **WebSocket Server**: Multi-client connection and broadcast management
-- ✅ **Initial State Broadcast**: Send current data on subscription, then incremental updates
+```bash
+# 1. build (see Quick Start below), then:
+build_new/instantdb_server -d ./nightboard_data -p 8787 -g 50051 &
+build_new/instantdb_client deploy collab sdk/typescript/build/collab.wasm 1.0.0
 
-#### **WASM Module System** 🆕 
-- ✅ **WASM Runtime**: Full engine integration with instance pooling
-- ✅ **Module Management**: Load, validate, and execute user modules
-- ✅ **Reducer System**: Atomic, transactional functions
-- ✅ **Host API**: Database access from WASM (read, write, emit events)
-- ✅ **Type System**: Rich value types for WASM-host communication
-- ✅ **Security Framework**: Memory limits, timeouts, sandboxing hooks
-- ✅ **Lifecycle Events**: Init, client connect/disconnect handlers
+# 2. start the web frontend
+cd examples/collab && npm install && node server.js --ws-port 8787 &
 
-#### **WASM Subscriptions** 🆕 *(Real-time Programmable Streams)*
-- ✅ **Subscription Manager**: Real-time event filtering and transformation
-- ✅ **Filter Functions**: Custom WASM functions to filter changefeed events
-- ✅ **Transform Functions**: Modify events before sending to clients
-- ✅ **Initial Data Support**: Send current state when clients first subscribe
-- ✅ **Client-specific Routing**: Route different data to different clients
-- ✅ **Performance Optimized**: Instance pooling and batched processing
+# 3. open http://<your-lan-ip>:9090 on every device
+```
 
-#### **Developer SDKs** 🆕
-- ✅ **C++ SDK**: Complete WASM module development framework
-- ✅ **C# SDK**: Type-safe .NET SDK with attributes and lifecycle support
-- ✅ **Example Modules**: Counter and subscription examples for both languages
-- ✅ **Documentation**: Comprehensive guides and API references
-- ✅ **Build Tools**: CMake and .NET build configurations for WASM
+- **move** your pointer/finger → your cursor appears on every screen
+- **double-click** (desktop) or **long-press** (mobile) → pin a note
+- the **TAPE** panel streams everyone's activity live
 
-#### **API & Integration**
-- ✅ **gRPC Service**: Complete API with SQL and WASM module endpoints
-- ✅ **WebSocket Protocol**: SQL/WASM subscriptions with initial state + real-time events
-- ✅ **Protocol Buffers**: Type-safe API definitions for all services
-- ✅ **Multi-Client Support**: Concurrent WebSocket connections with client tracking
-- ✅ **Real-time Sync**: Database changes → WASM processing → WebSocket delivery
+Everything on the board is four database tables (`cursors`, `notes`,
+`presence`, `activity`) written *only* by the reducers of one AssemblyScript
+module ([`sdk/typescript/examples/collab/index.ts`](sdk/typescript/examples/collab/index.ts)).
+The web page holds no state of its own — it is a pure subscriber. The tiny
+node server ([`examples/collab/server.js`](examples/collab/server.js)) exists
+only because browsers can't speak raw gRPC; realtime data flows straight from
+InstantDB's websocket to the page.
 
-#### **Operations & Observability**
-- ✅ **Structured Logging**: JSON logs with transaction tracing
-- ✅ **Metrics Collection**: WASM subscription performance metrics
-- ✅ **Health Endpoints**: Server status and statistics
-- ✅ **Command Line Tools**: `instantdb_sql` client for testing
-- ✅ **Configuration**: Environment variable and CLI argument support
+## 🏗️ How the architecture works
 
-#### **CLI Tool & Developer Experience** 🆕
-- ✅ **Comprehensive CLI**: Full-featured command-line interface for all operations
-- ✅ **Project Initialization**: Multi-language WASM project scaffolding
-- ✅ **Server Management**: Start/stop/status with daemon mode support
-- ✅ **Module Management**: Build, deploy, and manage WASM modules
-- ✅ **Database Operations**: Create, backup, restore database operations
-- ✅ **Log Viewing**: Real-time log tailing and monitoring
-- ✅ **Multi-Language Support**: Templates for Rust, C#, JavaScript, Go, C++
-- ✅ **Build System Integration**: CMake integration and parallel builds
+### 1. Writes go through WASM reducers
 
-### 🚧 **In Progress**
-- 🚧 **Full Wasmtime Integration**: Production-ready WASM runtime (placeholder implementation currently)
-- 🚧 **Advanced Query Engine**: Complex SQL features and optimizations
-- 🚧 **Performance Optimization**: Batching, caching, and connection pooling
+Clients don't mutate tables directly. They call named **reducers** —
+functions exported by a WASM module you deploy into the server:
 
-### 📋 **Planned Features**
-- 📋 **Raft Consensus**: Multi-node clustering and replication
-- 📋 **Rust SDK**: Additional language support for WASM modules
-- 📋 **Advanced Subscription Queries**: Complex filtering with SQL-like syntax
-- 📋 **Sharding**: Horizontal scaling across multiple nodes
-- 📋 **Production Hardening**: Advanced security, performance, monitoring
+```
+instantdb_client call collab addNote '["Ada", "#ffc24b", 0.31, 0.42, "hello"]'
+```
+
+The engine (wasmtime, LTS C API) runs the reducer in a sandbox:
+
+- **Staged writes** — `host_table_write`/`host_table_delete` accumulate in an
+  overlay; the module reads its own pending writes (`host_table_read`,
+  `host_table_scan` merge overlay + committed state).
+- **Atomic commit** — if the reducer returns success, the overlay is applied
+  through one storage transaction and logged to the WAL. A trap, `host_abort`,
+  timeout, or error status discards everything.
+- **Determinism aids** — `host_now_ms` is frozen per call, `host_generate_id`
+  is monotonic.
+- **Limits** — epoch-based CPU deadlines (default 5 s), a memory limiter
+  (default 256 MiB), and per-module deploy-time capabilities: allowed tables,
+  read-only mode, custom memory/time budgets. WASI is available but sees no
+  filesystem, environment, or network.
+
+The full guest ABI (exports, imports, memory ownership, error codes) is
+specified in [`docs/WASM_ABI.md`](docs/WASM_ABI.md). Modules persist under
+`<data_dir>/modules/` (sha256-verified) and are restored on boot.
+
+### 2. Commits feed the changefeed
+
+Every committed write emits exactly one `ChangefeedEvent` — table, operation,
+key, `new_value`, and `old_value` (for UPDATE/DELETE) — assigned a global
+monotonic offset and delivered in order by the changefeed engine. Reducers can
+also stage custom events (`host_emit_event`) that publish only after commit.
+
+### 3. Subscribers receive a filtered subset
+
+Clients subscribe over the websocket with SQL:
+
+```json
+{ "type": "sql_subscribe", "sql": "SELECT * FROM todos WHERE done = FALSE" }
+```
+
+- The server answers with an **initial state snapshot**, then streams
+  `sql_changefeed_event` messages.
+- **WHERE clauses are evaluated server-side per event** (comparisons,
+  `AND`/`OR`/`NOT`, parentheses, `LIKE`, `IS [NOT] NULL`). UPDATE events match
+  if the old *or* new row matches, so rows entering and leaving the filtered
+  set both notify. Column projection (`SELECT a, b`) is applied per client.
+- Invalid predicates reject the subscription with an error — nothing silently
+  falls back to match-all.
+- Modules can go further: `wasm_subscribe` routes events through a module's
+  own filter/transform functions for fully programmable streams.
+
+### 4. Storage: in-memory tables + write-ahead log
+
+Tables live in memory (hash maps under shared mutexes); durability comes from
+a JSON-lines WAL that is fully replayed on startup. Transactions are
+write-buffered and applied atomically at commit under a global lock — simple,
+correct for a single node. Raft-based replication is a future goal.
 
 ## 🚀 Quick Start
 
-### Building from Source
+Prereqs: CMake ≥ 3.20, a C++20 compiler, OpenSSL, and (optional, for gRPC)
+protobuf + grpc via Homebrew/pkg-config. The build fetches wasmtime, spdlog,
+fmt, nlohmann-json, and googletest automatically.
 
 ```bash
-# Clone repository
-git clone <repository-url>
-cd instant_db
+cmake -B build_new -S .
+cmake --build build_new -j8
 
-# Build with CMake (requires C++20, CMake 3.20+)
-cmake -B build -S .
-make -C build -j4
-
-# Build the CLI tool (recommended)
-cmake --build build --target instantdb
+build_new/unit_tests           # 53 tests: engine, predicate evaluator, module store
+./scripts/e2e_verify.sh        # full pipeline: deploy → execute → SQL → filtered ws → restart persistence
 ```
 
-### CLI Tool (Recommended) 🆕
-
-InstantDB now includes a comprehensive CLI tool for project management:
+Run a server and poke it:
 
 ```bash
-# Initialize a new project with WASM modules
-./build/instantdb init --lang rust my_realtime_app
-cd my_realtime_app
+build_new/instantdb_server -d ./data -p 8787 -g 50051
 
-# Start the server as a daemon
-./build/instantdb server start --daemon
-
-# Create and build a WASM module
-./build/instantdb module init auth_service
-./build/instantdb module build auth_service
-
-# Monitor logs
-./build/instantdb logs --follow
-
-# Execute reducers and SQL
-./build/instantdb exec create_user --input '{"name":"Alice","email":"alice@example.com"}'
-./build/instantdb exec --sql "SELECT * FROM users"
-
-# Manage databases
-./build/instantdb database create myapp
-./build/instantdb database list
+build_new/instantdb_client status
+build_new/instantdb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
+build_new/instantdb_client call todo addTodo '["ship it"]'
+build_new/instantdb_client call todo listTodos
+build_new/instantdb_client exec "SELECT * FROM todos"
 ```
 
-See [CLI_GUIDE.md](./CLI_GUIDE.md) for complete documentation.
-
-### Manual Usage (Alternative)
-
-```bash
-# 1. Start server in one terminal
-./build/instantdb_server --port 8080
-
-# 2. Connect WebSocket client in another terminal
-npm install -g wscat
-wscat -c ws://localhost:8080
-
-# 3. Subscribe to table changes (basic changefeed)
-{"type":"subscribe"}
-
-# 4. Execute SQL via gRPC (separate terminal)
-./build/instantdb_sql "CREATE TABLE users (id INT PRIMARY KEY, name TEXT)"
-./build/instantdb_sql "INSERT INTO users VALUES (1, 'Alice')"
-
-# 5. Watch real-time events appear in WebSocket client!
-```
-
-## 🎯 WASM Module System
-
-InstantDB supports **user-programmable modules** that run inside the database server.
-
-### Module Capabilities
-
-- **🔒 Sandboxed Execution**: WASM provides memory and CPU isolation
-- **💾 Database Access**: Modules can read/write tables within transactions
-- **📡 Event Emission**: Trigger real-time notifications to subscribers
-- **⚛️ Atomic Reducers**: All operations happen within database transactions
-- **🔄 Deterministic**: Same inputs always produce same outputs (crucial for clustering)
-
-### Example Module Workflow (C++)
-
-```cpp
-#include "instantdb.hpp"
-using namespace instantdb;
-
-// Transfer funds between accounts
-INSTANTDB_EXPORT int32_t transfer_funds(const char* from_id, const char* to_id, int64_t amount) {
-    try {
-        // Read current balances from database
-        auto from_result = db::read<int64_t>("accounts", std::string(from_id));
-        auto to_result = db::read<int64_t>("accounts", std::string(to_id));
-
-        if (from_result.is_err() || !from_result.unwrap().has_value()) {
-            utils::log(utils::LogLevel::Error, "From account not found");
-            return -1;
-        }
-
-        int64_t from_balance = from_result.unwrap().value();
-        int64_t to_balance = to_result.is_ok() && to_result.unwrap().has_value()
-                           ? to_result.unwrap().value() : 0;
-
-        // Validate transfer
-        if (from_balance < amount) {
-            utils::log(utils::LogLevel::Error, "Insufficient funds");
-            return -2;
-        }
-
-        // Execute transfer atomically within the database transaction
-        db::write("accounts", std::string(from_id), from_balance - amount);
-        db::write("accounts", std::string(to_id), to_balance + amount);
-
-        // Emit event for real-time notifications
-        TransferEvent event{from_id, to_id, amount, utils::now()};
-        events::emit("transfers", std::string(from_id) + ":" + std::string(to_id), event);
-
-        return 1; // Success
-    } catch (const std::exception& e) {
-        utils::log(utils::LogLevel::Error, "Transfer failed: " + std::string(e.what()));
-        return -1;
-    }
-}
-
-// Create new account
-INSTANTDB_EXPORT int32_t create_account(const char* user_id, int64_t initial_balance) {
-    try {
-        auto result = db::write("accounts", std::string(user_id), initial_balance);
-        if (result.is_err()) {
-            return -1;
-        }
-
-        AccountCreated event{user_id, initial_balance, utils::now()};
-        events::emit("accounts", std::string(user_id), event);
-        return 1;
-    } catch (const std::exception& e) {
-        return -1;
-    }
-}
-```
-
-### Example Module Workflow (C#)
-
-```csharp
-using InstantDB;
-
-public class BankingModule : ModuleBase
-{
-    [Reducer]
-    public static int TransferFunds(string fromId, string toId, long amount)
-    {
-        try
-        {
-            // Read current balances
-            var fromResult = DB.Read<long>(new Key(fromId));
-            var toResult = DB.Read<long>(new Key(toId));
-
-            if (fromResult.IsErr || fromResult.Unwrap() == null)
-            {
-                Utils.LogError("From account not found");
-                return -1;
-            }
-
-            long fromBalance = fromResult.Unwrap().Value;
-            long toBalance = toResult.IsOk && toResult.Unwrap() != null
-                           ? toResult.Unwrap().Value : 0;
-
-            // Validate transfer
-            if (fromBalance < amount)
-            {
-                Utils.LogError("Insufficient funds");
-                return -2;
-            }
-
-            // Execute transfer atomically
-            DB.Write(new Key(fromId), fromBalance - amount);
-            DB.Write(new Key(toId), toBalance + amount);
-
-            // Emit real-time event
-            var transferEvent = new TransferEvent
-            {
-                FromId = fromId,
-                ToId = toId,
-                Amount = amount,
-                Timestamp = Utils.Now()
-            };
-            Events.Emit($"{fromId}:{toId}", transferEvent);
-
-            return 1; // Success
-        }
-        catch (Exception ex)
-        {
-            Utils.LogError($"Transfer failed: {ex.Message}");
-            return -1;
-        }
-    }
-}
-```
-
-### Deployment Process
-
-1. **Compile** your module to WASM using C++/C#/Emscripten
-2. **Deploy** via gRPC API: `WasmService.DeployModule()`
-3. **Execute** reducers: `WasmService.ExecuteReducer()`
-4. **Subscribe** to events via WebSocket changefeeds or WASM subscriptions
-
-```bash
-# Build C++ module
-cd sdk/cpp/examples
-emcmake cmake -B build -S .
-cmake --build build
-
-# Deploy module
-grpcurl -plaintext -import-path ../../../proto -proto instantdb.proto \
-  -d '{
-    "name": "banking_app",
-    "version": "1.0.0",
-    "bytecode": "'$(base64 < build/banking_module.wasm)'"
-  }' \
-  localhost:50051 instantdb.grpc.WasmService.DeployModule
-
-# Execute reducer
-grpcurl -plaintext -import-path proto -proto instantdb.proto \
-  -d '{
-    "module_name": "banking_app",
-    "reducer_name": "transfer_funds",
-    "args": [
-      {"string_value": "alice"},
-      {"string_value": "bob"},
-      {"int64_value": 100}
-    ]
-  }' \
-  localhost:50051 instantdb.grpc.WasmService.ExecuteReducer
-```
-
-## 🛠️ WASM Development SDKs
-
-InstantDB provides complete SDKs for developing WASM modules in multiple languages:
-
-### C++ SDK (`sdk/cpp/`)
-
-- **Type-safe Operations**: Template-based database access with Result types
-- **Automatic Serialization**: Built-in support for common types
-- **Example Modules**: Counter and subscription examples included
-- **CMake Integration**: Easy build configuration for WebAssembly
-
-```bash
-cd sdk/cpp/examples
-emcmake cmake -B build -S .
-cmake --build build
-# Produces: build/counter_module.wasm
-```
-
-### C# SDK (`sdk/csharp/`)
-
-- **Attribute-based Schema**: Entity Framework-like table definitions
-- **JSON Serialization**: Automatic System.Text.Json integration
-- **Lifecycle Support**: Module initialization and client management
-- **.NET WebAssembly**: Full .NET 8 WASI support
-
-```bash
-cd sdk/csharp/Examples
-dotnet publish CounterModule.cs -c Release
-# Produces: bin/Release/net8.0/wasi-wasm/publish/CounterModule.wasm
-```
-
-### Key Features Available in Both SDKs
-
-- **Database Operations**: Type-safe read/write/delete with transactions
-- **Event Emission**: Real-time notifications to WebSocket clients
-- **Error Handling**: Comprehensive Result types and exception management
-- **Utility Functions**: Logging, timestamps, unique ID generation
-- **Subscription Support**: Filter and transform functions for real-time streams
-
-## 🔔 WASM Subscription System
-
-InstantDB's subscription system enables **programmable real-time data streams**:
-
-### Real-time Filtering
-```cpp
-// C++ filter function - only recent activities
-INSTANTDB_EXPORT bool filter_recent_activities(const std::vector<uint8_t>& event_data) {
-    // Parse event and check timestamp
-    // Return true to include, false to filter out
-}
-```
-
-### Data Transformation
-```csharp
-// C# transform function - add metadata
-[SubscriptionTransform]
-public static byte[] TransformAddMetadata(byte[] eventData) {
-    // Parse event, add computed fields, return transformed data
-}
-```
-
-### WebSocket Client Usage
-```javascript
-// Connect and create WASM subscription
-const client = new InstantDBClient('ws://localhost:8080');
-await client.connect();
-
-await client.createWasmSubscription({
-    moduleName: 'subscription_demo',
-    filter_function: 'filter_recent_activities',
-    transform_function: 'transform_add_metadata',
-    tables: ['user_activities'],
-    include_initial_data: true
-});
-```
-
-**[📚 Complete WASM Subscriptions Guide →](docs/WASM_SUBSCRIPTIONS.md)**
-
-## 🔧 API Reference
-
-### WebSocket Subscription Protocol
-
-#### Basic Changefeed Subscription
-```json
-{
-  "type": "subscribe"
-}
-```
-
-#### SQL Subscription (with Initial State) 🆕
-```json
-{
-  "type": "sql_subscribe",
-  "sql": "SELECT * FROM users WHERE active = true"
-}
-```
-
-#### All Tables Subscription (with Initial State) 🆕
-```json
-{
-  "type": "subscribe_to_all_tables"
-}
-```
-
-#### WASM Subscription (Programmable Filtering/Transformation) 🆕
-```json
-{
-  "type": "wasm_subscribe",
-  "module_name": "subscription_demo",
-  "filter_function": "filter_recent_activities",
-  "transform_function": "transform_add_metadata",
-  "tables": ["user_activities"],
-  "where_clause": "timestamp > :since",
-  "parameters": {
-    "since": 1704067200000,
-    "min_reputation": 50
-  },
-  "include_initial_data": true
-}
-```
-
-#### Receive Real-time Events
-```json
-{
-  "type": "changefeed_event",
-  "offset": 123,
-  "table": "users",
-  "operation": "INSERT",
-  "key": "1",
-  "new_value": "{\"id\": 1, \"name\": \"Alice\", \"active\": true}"
-}
-```
-
-#### Receive WASM Subscription Events 🆕
-```json
-{
-  "type": "wasm_subscription_event",
-  "subscription_id": "wasm_sub_1",
-  "client_id": "client_12345",
-  "data": {
-    "user_id": "user_123",
-    "action": "purchase",
-    "timestamp": 1704067260000,
-    "processed_at": 1704067261000,
-    "server_version": "1.0.0",
-    "user_reputation": 95
-  }
-}
-```
-
-#### Receive Initial State (SQL Subscription) 🆕
-```json
-{
-  "type": "initial_state",
-  "subscription_id": "sql_sub_1",
-  "sql": "SELECT * FROM users WHERE active = true",
-  "columns": [
-    {"name": "id", "type": "INT64", "nullable": false},
-    {"name": "name", "type": "STRING", "nullable": false},
-    {"name": "active", "type": "BOOLEAN", "nullable": false}
-  ],
-  "rows": [
-    {
-      "key": "1",
-      "version": 1,
-      "timestamp": 1704067200000,
-      "data": {"id": 1, "name": "Alice", "active": true}
-    },
-    {
-      "key": "2",
-      "version": 1,
-      "timestamp": 1704067205000,
-      "data": {"id": 2, "name": "Bob", "active": true}
-    }
-  ],
-  "rows_count": 2,
-  "execution_time_ms": 15
-}
-```
-
-#### Receive Initial State (All Tables) 🆕
-```json
-{
-  "type": "initial_state_all_tables",
-  "subscription_id": "all_tables_sub_1",
-  "tables": {
-    "users": {
-      "columns": [
-        {"name": "id", "type": "INT64", "nullable": false},
-        {"name": "name", "type": "STRING", "nullable": false}
-      ],
-      "rows": [
-        {
-          "key": "1",
-          "data": {"id": 1, "name": "Alice"}
-        }
-      ],
-      "rows_count": 1
-    },
-    "orders": {
-      "columns": [
-        {"name": "id", "type": "INT64", "nullable": false},
-        {"name": "user_id", "type": "INT64", "nullable": false}
-      ],
-      "rows": [
-        {
-          "key": "101",
-          "data": {"id": 101, "user_id": 1}
-        }
-      ],
-      "rows_count": 1
-    }
-  },
-  "tables_count": 2
-}
-```
-
-### gRPC API
-
-#### SQL Execution
-```protobuf
-service SQLService {
-  rpc Execute(SQLRequest) returns (SQLResponse);
-  rpc ExecuteTransaction(SQLTransactionRequest) returns (SQLTransactionResponse);
-  rpc GetStatus(StatusRequest) returns (StatusResponse);
-}
-```
-
-#### WASM Module Management 🆕
-```protobuf
-service WasmService {
-  rpc DeployModule(DeployModuleRequest) returns (DeployModuleResponse);
-  rpc UndeployModule(UndeployModuleRequest) returns (UndeployModuleResponse);
-  rpc ListModules(ListModulesRequest) returns (ListModulesResponse);
-  rpc GetModule(GetModuleRequest) returns (GetModuleResponse);
-  rpc ExecuteReducer(ExecuteReducerRequest) returns (ExecuteReducerResponse);
-}
-```
-
-## 📊 Performance & Benchmarks
-
-### Current Performance (Single Node)
-
-- **SQL Queries**: ~50,000 ops/sec (simple SELECT/INSERT)
-- **WebSocket Events**: ~10,000 events/sec broadcast to 100 clients
-- **WASM Execution**: ~1ms overhead per reducer call
-- **Memory Usage**: ~100MB baseline + data size
-- **Startup Time**: <100ms cold start
-
-### Optimization Features
-
-- **Instance Pooling**: Reuse WASM instances for better performance
-- **Batch Processing**: Group operations for higher throughput
-- **Connection Multiplexing**: Efficient client connection management
-- **MVCC Storage**: Lock-free concurrent access
-
-## 🔧 Configuration
-
-### Command Line Options
-
-```bash
-./build/instantdb_server --help
-
-Usage: instantdb_server [OPTIONS]
-
-Options:
-  -p, --port PORT          WebSocket port (default: 8080)
-  -g, --grpc-port PORT     gRPC port (default: 50051)
-  -d, --data-dir DIR       Data directory (default: ./instantdb_data)
-  -l, --log-level LEVEL    Log level: trace,debug,info,warn,error
-  -c, --config FILE        Config file path
-  -h, --help               Show this help message
-
-Examples:
-  instantdb_server                    # Start with defaults
-  instantdb_server -p 9090            # WebSocket on port 9090
-  instantdb_server -g 50052           # gRPC on port 50052
-  instantdb_server 9090               # WebSocket port 9090 (short form)
-```
-
-### Environment Variables
-
-```bash
-# Data storage location
-export INSTANTDB_DATA_DIR="/var/lib/instantdb"
-
-# WebSocket port
-export INSTANTDB_WS_PORT="8080"
-
-# gRPC API port
-export INSTANTDB_GRPC_PORT="50051"
-
-# Logging level
-export INSTANTDB_LOG_LEVEL="info"  # trace, debug, info, warn, error
-```
-
-## 🛠️ Development
-
-### Prerequisites
-
-- **CMake** 3.20+
-- **C++20** compatible compiler (GCC 10+, Clang 12+)
-- **Protocol Buffers** 3.0+
-- **gRPC** 1.40+
-- **OpenSSL** (for WebSocket handshake)
-
-Auto-fetched dependencies:
-- **spdlog** (logging)
-- **nlohmann/json** (JSON handling)
-- **fmt** (formatting)
-
-### Building
-
-```bash
-# Development build with debug symbols
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
-make -C build -j4
-
-# Release build with optimizations
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-make -C build -j4
-
-# Run tests (when available)
-cd build && ctest
-```
-
-### Project Structure
+## 🛠️ Writing modules
+
+| Language | SDK | Status |
+|---|---|---|
+| **TypeScript (AssemblyScript)** | [`sdk/typescript/`](sdk/typescript/) | ✅ verified end-to-end (todo + collab examples) |
+| **C#** | [`sdk/csharp/`](sdk/csharp/) | ⚠️ compiles against the ABI; .NET 8 `wasi-experimental` export support is flaky upstream — see the SDK README |
+| C++ | [`sdk/cpp/`](sdk/cpp/) | header available; not yet aligned to ABI v1 |
+
+Scaffold a project with `instantdb init` (templates: `typescript`, `csharp`,
+`unity`, `nodejs`) and ship it with `instantdb publish`. Guides:
+[`WASM_MODULES.md`](WASM_MODULES.md), [`CLI_GUIDE.md`](CLI_GUIDE.md),
+[`docs/WASM_ABI.md`](docs/WASM_ABI.md).
+
+## 📦 Repository layout
 
 ```
-src/
-├── cmd/                 # Executables (server, clients, demo)
-│   ├── instantdb_server.cpp    # Production server
-│   ├── instantdb_demo.cpp      # Interactive demo
-│   ├── sql_demo.cpp            # SQL client
-│   └── grpc_client.cpp         # gRPC test client
-├── storage/             # In-memory storage engine + WAL
-├── sql/                 # SQL parser and execution engine
-├── changefeed/          # Event streaming and subscriptions
-├── websocket/           # WebSocket server implementation
-├── wasm/               # WASM runtime and module management 🆕
-├── grpc/               # gRPC service implementations
-└── common/             # Shared utilities and configuration
-
-include/                # Public headers
-proto/                  # Protocol buffer definitions
-docs/                   # Additional documentation
-tests/                  # Unit and integration tests (planned)
+src/storage/       in-memory tables, WAL, transactions
+src/changefeed/    event stream, SQL subscriptions, WHERE predicate evaluator
+src/wasm/          wasmtime engine, host ABI, module store (persistence)
+src/websocket/     RFC6455 server, JSON subscription protocol
+src/grpc/          SQLService + WasmService (deploy/execute)
+src/sql/           regex-based SQL layer (prototype)
+sdk/               module SDKs (typescript, csharp, cpp) + examples
+examples/collab/   NIGHTBOARD realtime demo webapp
+tests/             gtest suites + WAT fixtures; tests/performance harness
+scripts/           e2e_verify.sh and friends
+docs/              WASM_ABI.md (normative), architecture & API guides
 ```
 
-## 🔍 Monitoring & Observability
+## ⚠️ Honest limitations
 
-### Server Statistics
-
-InstantDB provides comprehensive runtime statistics:
-
-```bash
-# Via server logs (every 30 seconds)
-📈 Server Stats: 2 tables, 150 rows, 4.2KB, 5 WS connections, 3 subscriptions, 420 events, 2 modules
-
-# Via gRPC status endpoint
-./build/instantdb_sql "SELECT 1"  # Basic connectivity test
-```
-
-### Structured Logging
-
-```bash
-# Enable debug logging
-export INSTANTDB_LOG_LEVEL=debug
-./build/instantdb_server
-
-# Example log output with WASM module execution
-{"timestamp":"2024-01-20T10:30:00.123Z","level":"info","msg":"⚡ Initializing WASM Engine..."}
-{"timestamp":"2024-01-20T10:30:00.124Z","level":"info","msg":"✅ WASM Engine ready"}
-{"timestamp":"2024-01-20T10:30:01.500Z","level":"debug","msg":"Calling WASM reducer: transfer_funds with 3 args","module":"finance_app","txn_id":"tx-001"}
-{"timestamp":"2024-01-20T10:30:01.502Z","level":"debug","msg":"WASM reducer transfer_funds completed in 1234 μs","success":true}
-```
-
-### Health Monitoring
-
-```bash
-# Check server status
-curl -X POST -H "Content-Type: application/grpc" \
-  http://localhost:50051/instantdb.grpc.SQLService/GetStatus
-
-# WebSocket connection test
-wscat -c ws://localhost:8080
-```
-
-## 📋 Roadmap
-
-### Current Version (v0.3.0) ✅
-- ✅ **WASM Module System**: Full integration with reducer support
-- ✅ **WASM Subscriptions**: Real-time programmable data streams
-- ✅ **Module SDKs**: Complete C++ and C# development frameworks
-- ✅ **gRPC API**: Complete SQL and module management endpoints
-- ✅ **Production Server**: CLI configuration, graceful shutdown
-- ✅ **Real-time Changefeeds**: WebSocket streaming with subscriptions
-
-### Next Version (v0.4.0) 🚧
-- 🚧 **Full Wasmtime Runtime**: Production WASM execution
-- 🚧 **Advanced SQL**: UPDATE, DELETE, JOINs, transactions
-- 🚧 **Authentication**: Basic user management and security
-- 🚧 **Rust SDK**: Additional language support for modules
-
-### Future Versions 📋
-- 📋 **Raft Consensus**: Multi-node clustering and replication
-- 📋 **Subscription Queries**: Advanced filtering and materialized views
-- 📋 **Performance**: Sharding, indexing, query optimization
-- 📋 **Admin Interface**: Web-based management dashboard
-- 📋 **Prometheus Metrics**: Production monitoring integration
-
-## 🤝 Contributing
-
-We welcome contributions! Areas where help is especially needed:
-
-### High Priority
-- **WASM Runtime**: Complete Wasmtime C API integration
-- **Module SDK**: Developer tooling and documentation
-- **Performance**: Benchmarking and optimization
-- **Testing**: Comprehensive test coverage
-
-### Medium Priority
-- **Clustering**: Raft consensus implementation
-- **Query Engine**: Advanced SQL features
-- **Security**: Authentication and authorization
-- **Documentation**: Tutorials and API docs
-
-### Getting Started
-
-1. Check out the [CLI Guide](CLI_GUIDE.md) for comprehensive command-line usage
-2. Review the [Project roadmap](PROJECT.md) for the full vision
-3. Look at the [prototype demo](PROTOTYPE_DEMO.md) to understand the flow
-4. Browse the source code in areas of interest
-5. Open an issue to discuss your contribution ideas
-
-## 🎉 Demo & Examples
-
-### Interactive Demo
-
-```bash
-# Run the interactive demo
-./build/instantdb_demo
-
-# Expected output:
-🚀 InstantDB Prototype Demo
-==============================
-📦 Initializing Storage Engine...
-✅ Storage Engine ready
-⚡ Initializing WASM Engine...
-✅ WASM Engine ready
-🌐 Initializing WebSocket Server...
-✅ WebSocket Server listening on 127.0.0.1:8080
-📡 Change event published to 1 subscribers
-🎉 Demo completed successfully!
-```
-
-### SQL Examples
-
-```sql
--- Create tables
-CREATE TABLE users (id INT PRIMARY KEY, name TEXT);
-CREATE TABLE accounts (user_id INT PRIMARY KEY, balance INT);
-
--- Insert data
-INSERT INTO users VALUES (1, 'Alice');
-INSERT INTO accounts VALUES (1, 1000);
-
--- Query data
-SELECT * FROM users;
-SELECT * FROM accounts WHERE balance > 500;
-```
-
-### WASM Module Examples
-
-See the SDK directories for complete examples:
-- **C++ SDK**: [`sdk/cpp/`](sdk/cpp/) - Complete framework with examples
-- **C# SDK**: [`sdk/csharp/`](sdk/csharp/) - .NET SDK with type-safe attributes
-- **Subscription System**: [`docs/WASM_SUBSCRIPTIONS.md`](docs/WASM_SUBSCRIPTIONS.md) - Real-time programmable streams
+- **SQL is a prototype**: regex parser; `SELECT` has no WHERE/projection,
+  `DELETE` is unimplemented, `CREATE TABLE` ignores column definitions.
+  (Subscription WHERE filtering is real and separate.)
+- **No authentication** on the websocket or gRPC endpoints — anyone who can
+  reach the gRPC port can deploy modules. LAN/dev use only.
+- **Single node**: no replication yet; WAL flush is not fsync'd.
+- Cursor-grade write volume runs the full commit+WAL pipeline (~1 ms per
+  reducer call) — fine for demos and moderate loads; an ephemeral table class
+  is on the roadmap.
+- Subscription delivery is best-effort (at-most-once) with a single delivery
+  thread; backpressure handling is planned.
 
 ## 📄 License
 
-[License information to be added]
-
-## 🙏 Acknowledgments
-
-- **gRPC Community**: For the excellent RPC framework
-- **Wasmtime Project**: For the robust WASM runtime
-- **spdlog**: For fast, structured logging
-- **nlohmann/json**: For JSON handling
-
----
-
-**InstantDB** - Real-time database with programmable WASM modules 🚀
-
-*Built for modern applications that need both performance and flexibility.*
+MIT — see [LICENSE](LICENSE).

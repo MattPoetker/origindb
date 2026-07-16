@@ -9,6 +9,8 @@
 
 namespace instantdb {
 
+class PredicateEvaluator;
+
 // SQL subscription query types
 enum class SubscriptionType {
     SELECT_ALL,      // SELECT * FROM table
@@ -24,6 +26,7 @@ struct SqlSubscription {
     std::string table_name;                    // Empty for ALL_TABLES
     std::vector<std::string> columns;          // Empty for SELECT_ALL
     std::optional<std::string> where_clause;   // Optional WHERE clause
+    std::shared_ptr<PredicateEvaluator> predicate;  // Compiled WHERE clause (null if none)
     bool is_active;
 
     // Check if this subscription matches an event

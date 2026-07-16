@@ -1,0 +1,16 @@
+{
+  "name": "@instantdb/module-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "InstantDB WASM module SDK for AssemblyScript (WASM ABI v1)",
+  "type": "module",
+  "scripts": {
+    "asbuild": "asc --target release",
+    "asbuild:debug": "asc --target debug",
+    "build": "npm run asbuild",
+    "test": "npm run asbuild && node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.27.0"
+  }
+}

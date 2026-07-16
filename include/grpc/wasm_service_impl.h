@@ -5,10 +5,12 @@
 namespace instantdb {
 
 class WasmEngine;
+class ModuleStore;
 
 class WasmServiceImpl {
 public:
-    explicit WasmServiceImpl(std::shared_ptr<WasmEngine> wasm_engine);
+    WasmServiceImpl(std::shared_ptr<WasmEngine> wasm_engine,
+                    std::shared_ptr<ModuleStore> module_store = nullptr);
 
     // WASM service methods
     void* DeployModule(void* context, const void* request, void* response);
@@ -19,6 +21,7 @@ public:
 
 private:
     std::shared_ptr<WasmEngine> wasm_engine_;
+    std::shared_ptr<ModuleStore> module_store_;
 };
 
 } // namespace instantdb

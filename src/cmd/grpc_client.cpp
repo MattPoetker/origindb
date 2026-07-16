@@ -1,7 +1,10 @@
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 #include <grpcpp/grpcpp.h>
+#include <nlohmann/json.hpp>
 #include "instantdb.grpc.pb.h"
 
 using grpc::Channel;
@@ -11,7 +14,8 @@ using grpc::Status;
 class InstantDBClient {
 public:
     InstantDBClient(std::shared_ptr<Channel> channel)
-        : stub_(instantdb::grpc::SQLService::NewStub(channel)) {}
+        : stub_(instantdb::grpc::SQLService::NewStub(channel)),
+          wasm_stub_(instantdb::grpc::WasmService::NewStub(channel)) {}
 
     std::string ExecuteSQL(const std::string& sql) {
         instantdb::grpc::SQLRequest request;
@@ -95,8 +99,105 @@ public:
         }
     }
 
+    std::string DeployModule(const std::string& name, const std::string& wasm_path,
+                             const std::string& version) {
+        std::ifstream in(wasm_path, std::ios::binary);
+        if (!in) return "❌ Cannot read file: " + wasm_path;
+        std::string bytecode((std::istreambuf_iterator<char>(in)),
+                             std::istreambuf_iterator<char>());
+
+        instantdb::grpc::DeployModuleRequest request;
+        request.set_name(name);
+        request.set_bytecode(bytecode);
+        request.set_version(version);
+
+        instantdb::grpc::DeployModuleResponse response;
+        ClientContext context;
+        Status status = wasm_stub_->DeployModule(&context, request, &response);
+
+        if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
+        if (!response.success()) return "❌ Deploy failed: " + response.error();
+        return "✅ Deployed module '" + name + "' (" +
+               std::to_string(bytecode.size()) + " bytes)";
+    }
+
+    std::string UndeployModule(const std::string& name) {
+        instantdb::grpc::UndeployModuleRequest request;
+        request.set_name(name);
+        instantdb::grpc::UndeployModuleResponse response;
+        ClientContext context;
+        Status status = wasm_stub_->UndeployModule(&context, request, &response);
+
+        if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
+        if (!response.success()) return "❌ Undeploy failed: " + response.error();
+        return "✅ Undeployed module '" + name + "'";
+    }
+
+    std::string ListModules() {
+        instantdb::grpc::ListModulesRequest request;
+        instantdb::grpc::ListModulesResponse response;
+        ClientContext context;
+        Status status = wasm_stub_->ListModules(&context, request, &response);
+
+        if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
+        if (response.modules_size() == 0) return "No modules deployed";
+
+        std::string result = "📦 Deployed modules:\n";
+        for (const auto& module : response.modules()) {
+            result += "  " + module.name();
+            if (!module.version().empty()) result += " v" + module.version();
+            if (!module.sha256().empty())
+                result += "  sha256:" + module.sha256().substr(0, 12);
+            result += "\n";
+        }
+        return result;
+    }
+
+    std::string CallReducer(const std::string& module, const std::string& reducer,
+                            const std::string& args_json) {
+        instantdb::grpc::ExecuteReducerRequest request;
+        request.set_module_name(module);
+        request.set_reducer_name(reducer);
+        request.set_sender_identity("instantdb_client");
+
+        if (!args_json.empty()) {
+            auto args = nlohmann::json::parse(args_json, nullptr, false);
+            if (args.is_discarded() || !args.is_array())
+                return "❌ Arguments must be a JSON array, e.g. '[\"Alice\", 42]'";
+            for (const auto& arg : args) {
+                auto* value = request.add_args();
+                if (arg.is_boolean()) value->set_bool_value(arg.get<bool>());
+                else if (arg.is_number_integer()) value->set_int64_value(arg.get<int64_t>());
+                else if (arg.is_number_float()) value->set_double_value(arg.get<double>());
+                else if (arg.is_string()) value->set_string_value(arg.get<std::string>());
+                else value->set_string_value(arg.dump());
+            }
+        }
+
+        instantdb::grpc::ExecuteReducerResponse response;
+        ClientContext context;
+        Status status = wasm_stub_->ExecuteReducer(&context, request, &response);
+
+        if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
+        if (!response.success()) return "❌ Reducer failed: " + response.error();
+
+        std::string result = "✅ " + module + "." + reducer + " (" +
+                             std::to_string(response.execution_time_micros()) + " μs)";
+        for (const auto& value : response.results()) {
+            result += "\n  → ";
+            if (value.has_int64_value()) result += std::to_string(value.int64_value());
+            else if (value.has_string_value()) result += value.string_value();
+            else if (value.has_double_value()) result += std::to_string(value.double_value());
+            else if (value.has_bool_value()) result += value.bool_value() ? "true" : "false";
+            else if (value.has_bytes_value()) result += value.bytes_value();
+            else result += "null";
+        }
+        return result;
+    }
+
 private:
     std::unique_ptr<instantdb::grpc::SQLService::Stub> stub_;
+    std::unique_ptr<instantdb::grpc::WasmService::Stub> wasm_stub_;
 };
 
 void PrintUsage(const char* program_name) {
@@ -105,21 +206,24 @@ void PrintUsage(const char* program_name) {
     std::cout << "  -s, --server ADDRESS     Server address (default: localhost:50051)\n";
     std::cout << "  -h, --help               Show this help message\n\n";
     std::cout << "Commands:\n";
-    std::cout << "  status                   Get server status\n";
-    std::cout << "  exec \"SQL\"               Execute SQL statement\n";
-    std::cout << "  interactive              Start interactive mode\n\n";
+    std::cout << "  status                             Get server status\n";
+    std::cout << "  exec \"SQL\"                         Execute SQL statement\n";
+    std::cout << "  interactive                        Start interactive mode\n";
+    std::cout << "  deploy NAME FILE.wasm [VERSION]    Deploy a WASM module\n";
+    std::cout << "  undeploy NAME                      Remove a WASM module\n";
+    std::cout << "  modules                            List deployed WASM modules\n";
+    std::cout << "  call MODULE REDUCER [JSON_ARGS]    Execute a reducer\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " status\n";
-    std::cout << "  " << program_name << " exec \"CREATE TABLE users (id INT64 PRIMARY KEY, name STRING)\"\n";
-    std::cout << "  " << program_name << " exec \"INSERT INTO users VALUES (1, 'Alice')\"\n";
     std::cout << "  " << program_name << " exec \"SELECT * FROM users\"\n";
-    std::cout << "  " << program_name << " interactive\n";
+    std::cout << "  " << program_name << " deploy user_service ./module.wasm 1.0.0\n";
+    std::cout << "  " << program_name << " call user_service CreateUser '[\"Alice\", \"alice@example.com\"]'\n";
 }
 
 int main(int argc, char* argv[]) {
     std::string server_address = "localhost:50051";
     std::string command;
-    std::string sql;
+    std::vector<std::string> args;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -137,14 +241,11 @@ int main(int argc, char* argv[]) {
             }
         } else if (command.empty()) {
             command = arg;
-        } else if (command == "exec" && sql.empty()) {
-            sql = arg;
         } else {
-            std::cerr << "Error: Unknown argument " << arg << "\n";
-            PrintUsage(argv[0]);
-            return 1;
+            args.push_back(arg);
         }
     }
+    std::string sql = args.empty() ? "" : args[0];
 
     if (command.empty()) {
         std::cerr << "Error: No command specified\n";
@@ -187,6 +288,34 @@ int main(int argc, char* argv[]) {
                     std::cout << client.ExecuteSQL(line) << std::endl;
                 }
             }
+        } else if (command == "deploy") {
+            if (args.size() < 2) {
+                std::cerr << "Error: deploy requires NAME and FILE.wasm\n";
+                return 1;
+            }
+            std::string result = client.DeployModule(
+                args[0], args[1], args.size() > 2 ? args[2] : "");
+            std::cout << result << std::endl;
+            return result.rfind("✅", 0) == 0 ? 0 : 1;
+        } else if (command == "undeploy") {
+            if (args.empty()) {
+                std::cerr << "Error: undeploy requires NAME\n";
+                return 1;
+            }
+            std::string result = client.UndeployModule(args[0]);
+            std::cout << result << std::endl;
+            return result.rfind("✅", 0) == 0 ? 0 : 1;
+        } else if (command == "modules") {
+            std::cout << client.ListModules() << std::endl;
+        } else if (command == "call") {
+            if (args.size() < 2) {
+                std::cerr << "Error: call requires MODULE and REDUCER\n";
+                return 1;
+            }
+            std::string result = client.CallReducer(
+                args[0], args[1], args.size() > 2 ? args[2] : "");
+            std::cout << result << std::endl;
+            return result.rfind("✅", 0) == 0 ? 0 : 1;
         } else {
             std::cerr << "Error: Unknown command " << command << "\n";
             PrintUsage(argv[0]);

@@ -1,2 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libwasm_engine.a CMakeFiles/wasm_engine.dir/src/wasm/wasm_engine.cpp.o CMakeFiles/wasm_engine.dir/src/wasm/wasm_subscription.cpp.o
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libwasm_engine.a

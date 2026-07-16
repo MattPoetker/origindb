@@ -4,304 +4,198 @@
 
 ### Connection
 
-Connect to the WebSocket server to receive real-time changefeed events.
-
 **Endpoint:** `ws://localhost:8080`
 
-### Connection Flow
-
-1. **Establish Connection**
-   ```javascript
-   const ws = new WebSocket('ws://localhost:8080');
-   ```
-
-2. **Handle Connection Events**
-   ```javascript
-   ws.onopen = function(event) {
-       console.log('Connected to InstantDB WebSocket server');
-   };
-
-   ws.onclose = function(event) {
-       console.log('Connection closed:', event.code, event.reason);
-   };
-
-   ws.onerror = function(error) {
-       console.error('WebSocket error:', error);
-   };
-   ```
-
-3. **Receive Changefeed Events**
-   ```javascript
-   ws.onmessage = function(event) {
-       try {
-           const data = JSON.parse(event.data);
-           handleChangefeedEvent(data);
-       } catch (e) {
-           console.error('Failed to parse message:', e);
-       }
-   };
-   ```
-
-### Event Format
-
-Changefeed events are sent as JSON messages with the following structure:
+On connect the server sends a welcome message:
 
 ```json
 {
-    "type": "changefeed_event",
-    "table": "users",
-    "operation": "INSERT"
+  "type": "welcome",
+  "client_id": "client_12345_67890",
+  "server_version": "0.1.0",
+  "features": ["changefeed", "wasm_subscriptions"]
 }
 ```
 
-#### Fields
+Clients then create subscriptions; events are delivered per subscription
+(there is no unsolicited broadcast).
 
-- **type**: Always `"changefeed_event"` for changefeed notifications
-- **table**: Name of the table that was modified
-- **operation**: Type of operation performed (`INSERT`, `UPDATE`, `DELETE`)
+### Subscription messages
 
-### Example Implementation
+#### SQL subscription
+
+```json
+{"type": "sql_subscribe", "sql": "SELECT * FROM users WHERE name = 'Alice'"}
+```
+
+Responses, in order:
+
+1. Confirmation:
+```json
+{"type": "sql_subscription_created", "subscription_id": "sql_sub_1",
+ "client_id": "...", "sql": "..."}
+```
+2. Initial snapshot (current table contents; **not** WHERE/column
+   filtered — the SQL layer doesn't support that yet):
+```json
+{"type": "initial_state", "subscription_id": "sql_sub_1", "sql": "...",
+ "columns": [...], "rows": [...], "rows_count": 2, "execution_time_ms": 0.4}
+```
+3. Change events, filtered per subscription:
+
+```json
+{
+  "type": "sql_changefeed_event",
+  "subscription_id": "sql_sub_1",
+  "offset": 42,
+  "table": "users",
+  "operation": "INSERT",
+  "transaction_id": "...",
+  "timestamp": 1705123456789,
+  "key": "1",
+  "new_value": "{...row JSON...}",
+  "old_value": "{...previous row JSON...}"
+}
+```
+
+- `operation` is `INSERT`, `UPDATE`, `DELETE`, or `EVENT` (custom
+  module-emitted events).
+- `old_value` is present on UPDATE/DELETE.
+- WHERE clauses are evaluated **per event**: comparisons (`=`, `!=`, `<>`,
+  `<`, `<=`, `>`, `>=`), `AND`/`OR`/`NOT`, parentheses, `LIKE`,
+  `IS [NOT] NULL`. UPDATE events match if the old OR new row matches.
+- Column projection (`SELECT id, name FROM ...`) filters the columns
+  inside event values.
+- Invalid SQL or an unparsable WHERE clause rejects the subscription with
+  an `error` frame.
+
+#### All-tables subscription
+
+```json
+{"type": "subscribe_to_all_tables"}
+```
+
+Confirmed with `all_tables_subscription_created`, followed by
+`initial_state_all_tables` (a `tables` object with columns/rows/rows_count
+per table, plus `tables_count`), then every change event.
+
+#### WASM subscription
+
+```json
+{"type": "wasm_subscribe", "module_name": "todo",
+ "filter_function": "onlyPending", "transform_function": "addMetadata",
+ "tables": ["todos"], "include_initial_data": true}
+```
+
+Confirmed with `wasm_subscription_created`; events arrive as
+`wasm_subscription_event`. See
+[WASM_SUBSCRIPTIONS.md](WASM_SUBSCRIPTIONS.md).
+
+#### Errors
+
+```json
+{"type": "error", "message": "..."}
+{"type": "initial_state_error", "subscription_id": "...", "message": "..."}
+```
+
+### Example client
 
 ```javascript
-class InstantDBClient {
-    constructor(url = 'ws://localhost:8080') {
-        this.url = url;
-        this.ws = null;
-        this.reconnectInterval = 5000;
-        this.maxReconnectAttempts = 10;
-        this.reconnectAttempts = 0;
-    }
+const ws = new WebSocket('ws://localhost:8080');
 
-    connect() {
-        this.ws = new WebSocket(this.url);
+ws.onopen = () => {
+    ws.send(JSON.stringify({ type: 'sql_subscribe',
+                             sql: 'SELECT * FROM users' }));
+};
 
-        this.ws.onopen = (event) => {
-            console.log('Connected to InstantDB');
-            this.reconnectAttempts = 0;
-            this.onConnected?.(event);
-        };
-
-        this.ws.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                this.handleMessage(data);
-            } catch (e) {
-                console.error('Failed to parse message:', e);
-            }
-        };
-
-        this.ws.onclose = (event) => {
-            console.log('Connection closed:', event.code);
-            this.onDisconnected?.(event);
-            this.scheduleReconnect();
-        };
-
-        this.ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            this.onError?.(error);
-        };
-    }
-
-    handleMessage(data) {
-        if (data.type === 'changefeed_event') {
-            this.onChangefeedEvent?.(data);
-        } else {
-            console.log('Unknown message type:', data.type);
-        }
-    }
-
-    scheduleReconnect() {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.reconnectAttempts++;
-            console.log(`Reconnecting in ${this.reconnectInterval}ms (attempt ${this.reconnectAttempts})`);
-            setTimeout(() => this.connect(), this.reconnectInterval);
-        } else {
-            console.error('Max reconnection attempts reached');
-        }
-    }
-
-    disconnect() {
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-    }
-
-    // Event handlers (override these)
-    onConnected(event) {}
-    onDisconnected(event) {}
-    onError(error) {}
-    onChangefeedEvent(event) {}
-}
-
-// Usage
-const client = new InstantDBClient();
-
-client.onChangefeedEvent = (event) => {
-    console.log('Table changed:', event.table, event.operation);
-
-    // Handle different operations
-    switch (event.operation) {
-        case 'INSERT':
-            console.log('New record added to', event.table);
+ws.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    switch (msg.type) {
+        case 'welcome':
+            console.log('client id:', msg.client_id);
             break;
-        case 'UPDATE':
-            console.log('Record updated in', event.table);
+        case 'initial_state':
+            console.log('current rows:', msg.rows);
             break;
-        case 'DELETE':
-            console.log('Record deleted from', event.table);
+        case 'sql_changefeed_event':
+            console.log(msg.operation, 'on', msg.table, '->', msg.new_value);
+            break;
+        case 'error':
+            console.error(msg.message);
             break;
     }
 };
-
-client.connect();
 ```
 
-## SQL Interface (Demo Only)
+Reconnection is the client's responsibility — subscriptions do not survive
+a dropped connection or a server restart (data does, via the WAL).
 
-The current version provides basic SQL operations through the demo interface.
+## SQL Interface
 
-### Supported Operations
+SQL executes over gRPC (`SQLService.Execute`, default port 50051) — use
+`instantdb_client exec "SQL"` or `instantdb_client interactive`.
 
-#### CREATE TABLE
-
-```sql
-CREATE TABLE table_name (
-    column_name data_type [PRIMARY KEY],
-    ...
-);
-```
-
-**Supported Data Types:**
-- `INT64` - 64-bit integer
-- `STRING` - Variable-length string
-
-**Example:**
-```sql
-CREATE TABLE users (
-    id INT64 PRIMARY KEY,
-    name STRING
-);
-```
-
-#### INSERT
+### Supported operations
 
 ```sql
-INSERT INTO table_name VALUES (value1, value2, ...);
-```
-
-**Example:**
-```sql
+CREATE TABLE users (id INT64 PRIMARY KEY, name STRING);
 INSERT INTO users VALUES (1, 'Alice');
-INSERT INTO users VALUES (2, 'Bob');
-```
-
-#### SELECT
-
-```sql
-SELECT * FROM table_name;
-```
-
-**Example:**
-```sql
 SELECT * FROM users;
+UPDATE users SET name='Alicia' WHERE id=1;   -- simplified: WHERE key=value only
 ```
 
-### SQL Execution (Demo)
+### Current SQL limitations (regex-based parser)
 
-SQL commands are executed through the demo application:
+- `SELECT` ignores WHERE clauses and column projection (full table is
+  returned). Use WebSocket subscriptions for server-side filtering.
+- `DELETE` is unimplemented.
+- `CREATE TABLE` currently ignores the column definitions you write.
+- No JOINs, aggregates, or prepared statements.
+- Identifiers preserve case (`Users` ≠ `users`).
+- Data types: `INT64`, `STRING` (plus doubles/bools/bytes at the storage
+  layer).
 
-```cpp
-// C++ API (demo only)
-auto result = sql_engine->Execute("SELECT * FROM users");
+Tables are also created implicitly when a WASM module first commits a
+write to a new table.
 
-if (result.success) {
-    for (const auto& row : result.rows) {
-        // Process row data
-    }
-} else {
-    std::cerr << "Query failed: " << result.error << std::endl;
-}
-```
+## WASM Module Management API
+
+Modules are managed over gRPC (`WasmService`): `DeployModule`,
+`UndeployModule`, `ListModules`, `GetModule`, `ExecuteReducer`. Use
+`instantdb_client deploy/undeploy/modules/call` or call the service
+directly. See [../WASM_MODULES.md](../WASM_MODULES.md) and
+[GRPC_API.md](GRPC_API.md).
 
 ## Error Handling
 
-### WebSocket Errors
-
-Common WebSocket connection issues:
-
-1. **Connection Refused**
-   - Ensure server is running
-   - Check port availability
-   - Verify firewall settings
-
-2. **Handshake Failure**
-   - Verify WebSocket protocol version
-   - Check for proxy interference
-
-3. **Unexpected Disconnection**
-   - Implement reconnection logic
-   - Handle network interruptions gracefully
-
-### SQL Errors
-
-Common SQL execution errors:
-
-1. **Table Not Found**
-   - Verify table exists
-   - Check table name spelling
-
-2. **Schema Mismatch**
-   - Ensure column types match
-   - Verify primary key constraints
-
-3. **Parsing Error**
-   - Check SQL syntax
-   - Ensure proper quoting for strings
-
-## Performance Considerations
-
 ### WebSocket
 
-- **Connection Pooling**: Reuse connections when possible
-- **Message Batching**: Consider batching small messages
-- **Heartbeat**: Implement ping/pong for connection health
-
-### SQL Operations
-
-- **Prepared Statements**: Not yet implemented (future feature)
-- **Batch Inserts**: Consider multiple INSERT statements
-- **Indexing**: Currently only primary key indexing supported
-
-## Limitations (v0.1.0)
+1. **Connection refused** — server not running / wrong port / firewall.
+2. **Handshake failure** — proxy interference or protocol version.
+3. **Unexpected disconnect** — implement reconnect + re-subscribe.
 
 ### SQL
-- No UPDATE or DELETE operations
-- No JOIN operations
-- No aggregate functions (COUNT, SUM, etc.)
-- No complex WHERE clauses
-- Limited data types
 
-### WebSocket
-- No authentication
-- No message acknowledgment
-- No subscription filtering
+1. **Table not found** — check spelling *and case* (identifiers are
+   case-sensitive).
+2. **Parsing error** — the parser is regex-based and strict about shape;
+   check quoting.
+
+## Limitations (current version)
+
+### Security
+- No authentication, authorization, or TLS on either API.
 
 ### Storage
-- No data compression
-- No backup/restore
-- Single-node only (no clustering)
+- Single-node only; no clustering, no backup/restore tooling.
 
-## Future API Extensions
+### WebSocket
+- No message acknowledgment or replay from arbitrary offsets for SQL
+  subscriptions.
 
-### Planned for v0.2.0
-- gRPC API for SQL operations
-- Enhanced SQL operations (UPDATE, DELETE)
-- WebSocket subscription filtering
-- Configuration API
+## See also
 
-### Planned for Future Versions
-- Authentication and authorization
-- Cluster management API
-- Metrics and monitoring API
-- WASM module management API
+- [GRPC_API.md](GRPC_API.md) — gRPC service reference
+- [WASM_ABI.md](WASM_ABI.md) — module ABI
+- [../QA_TESTING_GUIDE.md](../QA_TESTING_GUIDE.md) — testable behavior,
+  message-by-message

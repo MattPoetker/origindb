@@ -53,14 +53,23 @@ public:
     // Get connection statistics
     size_t GetActiveConnections() const;
 
+    // Enable/disable binary protocol for a client
+    void SetClientProtocol(int client_socket, bool use_binary);
+
+    // Check if client is using binary protocol
+    bool IsClientBinary(int client_socket) const;
+
 private:
     void RunServer();
     void HandleClient(int client_socket);
     bool HandleWebSocketHandshake(int client_socket, const std::string& request);
     void HandleWebSocketMessage(int client_socket, const std::string& message);
     void SendWebSocketFrame(int client_socket, const std::string& message);
+    void SendBinaryWebSocketFrame(int client_socket, const std::vector<uint8_t>& data);
     void BroadcastToAllClients(const std::string& message);
+    void BroadcastBinaryToAllClients(const std::vector<uint8_t>& data);
     std::string ParseWebSocketFrame(const std::string& data);
+    static size_t CompleteFrameSize(const std::string& data);
     std::string GenerateWebSocketAccept(const std::string& key);
 
     // Changefeed event handler
@@ -97,6 +106,7 @@ private:
     std::vector<int> active_clients_;
     std::unordered_map<int, std::string> client_subscriptions_;
     std::unordered_map<int, std::string> client_ids_;  // Map socket to client ID
+    std::unordered_map<int, bool> client_use_binary_;  // Map socket to binary protocol preference
 };
 
 } // namespace instantdb

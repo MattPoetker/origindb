@@ -1,2 +1,0 @@
-# Hashes of file build rules.
-93e77aaf2549929942fdfecdf7983602 generated/instantdb.pb.cc

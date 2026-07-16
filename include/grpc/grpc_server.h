@@ -13,6 +13,7 @@ class StorageEngine;
 class ChangefeedEngine;
 class WebSocketServer;
 class WasmEngine;
+class ModuleStore;
 
 class GrpcServer {
 public:
@@ -27,7 +28,8 @@ public:
                std::shared_ptr<StorageEngine> storage_engine,
                std::shared_ptr<ChangefeedEngine> changefeed_engine,
                std::shared_ptr<WebSocketServer> websocket_server,
-               std::shared_ptr<WasmEngine> wasm_engine);
+               std::shared_ptr<WasmEngine> wasm_engine,
+               std::shared_ptr<ModuleStore> module_store = nullptr);
 
     ~GrpcServer();
 

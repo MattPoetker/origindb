@@ -1,2 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libchangefeed_engine.a CMakeFiles/changefeed_engine.dir/src/changefeed/changefeed_engine.cpp.o CMakeFiles/changefeed_engine.dir/src/changefeed/sql_subscription.cpp.o
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libchangefeed_engine.a

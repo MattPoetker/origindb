@@ -1,581 +1,703 @@
+// Wasmtime-backed WASM engine. Modules are compiled once at deploy, run as a
+// long-lived instance serialized by a per-module mutex, and are re-instantiated
+// after a trap/timeout. See docs/WASM_ABI.md for the guest contract.
+
 #include "wasm/wasm_engine.h"
+#include "wasm_runtime_internal.h"
+
 #include "storage/storage_engine.h"
 #include "changefeed/changefeed_engine.h"
+
 #include <spdlog/spdlog.h>
-#include <nlohmann/json.hpp>
+
 #include <chrono>
-#include <mutex>
+#include <cstring>
 #include <thread>
-#include <atomic>
+#include <unordered_map>
 
 namespace instantdb {
 
 namespace {
-    // Thread-local instance for host function callbacks
-    thread_local WasmInstance* current_instance = nullptr;
-    thread_local ReducerContext* current_context = nullptr;
+
+constexpr const char* kRequiredExports[] = {"memory", "instantdb_invoke",
+                                            "instantdb_alloc"};
+
+const std::unordered_map<std::string, int> kKnownEnvImports = {
+    {"host_table_read", 0},  {"host_table_write", 0}, {"host_table_delete", 0},
+    {"host_table_scan", 0},  {"host_emit_event", 0},  {"host_now_ms", 0},
+    {"host_generate_id", 0}, {"host_log", 0},         {"host_abort", 0},
+    {"host_alloc", 0},       {"host_free", 0},        {"host_set_result", 0},
+};
+
+bool IsReservedName(const std::string& name) {
+    return name.rfind("__", 0) == 0;
 }
 
-// WasmModule implementation
+std::string NameToString(const wasm_name_t* n) {
+    return std::string(n->data, n->size);
+}
+
+}  // namespace
+
+// ---------------------------------------------------------------------------
+// WasmModuleImpl
+// ---------------------------------------------------------------------------
+
+void WasmModuleImpl::DestroyInstance() {
+    if (store) {
+        wasmtime_store_delete(store);
+        store = nullptr;
+    }
+    instantiated = false;
+    has_free = has_describe = has_initialize = false;
+}
+
+WasmModuleImpl::~WasmModuleImpl() {
+    DestroyInstance();
+    if (module) {
+        wasmtime_module_delete(module);
+        module = nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// WasmModule
+// ---------------------------------------------------------------------------
+
 WasmModule::WasmModule(const std::string& name, const std::vector<uint8_t>& bytecode)
-    : name_(name), bytecode_(bytecode), module_handle_(nullptr), loaded_(false), validated_(false) {
+    : name_(name), bytecode_(bytecode) {
+    metadata_.name = name;
 }
 
-WasmModule::~WasmModule() {
-    // Cleanup will be implemented when we have proper Wasmtime integration
-}
+WasmModule::~WasmModule() = default;
 
-bool WasmModule::Load() {
-    if (loaded_) return true;
+// ---------------------------------------------------------------------------
+// WasmEngine::Impl
+// ---------------------------------------------------------------------------
 
-    // For now, just mark as loaded - full Wasmtime integration will be added later
-    loaded_ = true;
+class WasmEngine::Impl {
+public:
+    Impl(std::shared_ptr<StorageEngine> storage,
+         std::shared_ptr<ChangefeedEngine> changefeed)
+        : storage_(std::move(storage)), changefeed_(std::move(changefeed)) {}
 
-    // Extract metadata from the module
-    if (!ExtractMetadata()) {
-        spdlog::warn("Failed to extract metadata from module: {}", name_);
-    }
+    ~Impl() { Shutdown(); }
 
-    spdlog::info("Loaded WASM module: {}", name_);
-    return true;
-}
+    bool Initialize() {
+        if (engine_) return true;
 
-bool WasmModule::Validate() {
-    if (!loaded_) return false;
-    if (validated_) return true;
-
-    // Basic validation - check that required exports exist
-    validated_ = true;
-    return true;
-}
-
-std::unique_ptr<WasmInstance> WasmModule::CreateInstance() {
-    if (!loaded_ || !validated_) return nullptr;
-
-    auto instance = std::make_unique<WasmInstance>(this);
-    if (!instance->Initialize()) {
-        return nullptr;
-    }
-
-    return instance;
-}
-
-bool WasmModule::ExtractMetadata() {
-    // In a real implementation, we'd parse custom sections or use reflection
-    metadata_.name = name_;
-    metadata_.version = "1.0.0";
-
-    // Placeholder metadata
-    ReducerDef init_reducer;
-    init_reducer.name = "init";
-    init_reducer.is_init = true;
-    metadata_.reducers.push_back(init_reducer);
-
-    return true;
-}
-
-// WasmInstance implementation
-WasmInstance::WasmInstance(WasmModule* module)
-    : module_(module), instance_handle_(nullptr), initialized_(false) {
-}
-
-WasmInstance::~WasmInstance() {
-    Shutdown();
-}
-
-bool WasmInstance::Initialize() {
-    if (initialized_) return true;
-    if (!module_) return false;
-
-    // For now, just mark as initialized - full implementation will come later
-    initialized_ = true;
-
-    spdlog::debug("Initialized WASM instance for module: {}", module_->GetName());
-    return true;
-}
-
-void WasmInstance::Shutdown() {
-    if (instance_handle_) {
-        // Cleanup will be implemented
-        instance_handle_ = nullptr;
-    }
-    initialized_ = false;
-}
-
-WasmResult WasmInstance::CallReducer(const std::string& reducer_name,
-                                    const ReducerContext& ctx,
-                                    const std::vector<WasmValue>& args) {
-    spdlog::info("DEBUG: CallReducer ENTRY for reducer: {}", reducer_name);
-
-    if (!initialized_) {
-        spdlog::error("DEBUG: CallReducer - instance not initialized for reducer: {}", reducer_name);
-        return {false, "Instance not initialized", {}};
-    }
-
-    spdlog::info("DEBUG: CallReducer - setting thread-local context for reducer: {}", reducer_name);
-    // Set thread-local context for host function access
-    current_instance = this;
-    current_context = const_cast<ReducerContext*>(&ctx);
-
-    auto start_time = std::chrono::high_resolution_clock::now();
-
-    spdlog::info("DEBUG: CallReducer - about to execute reducer logic for: {}", reducer_name);
-    spdlog::debug("Calling WASM reducer: {} with {} args", reducer_name, args.size());
-
-    // Simulate basic reducer execution with actual database operations
-    WasmResult result;
-    result.success = true;
-
-    spdlog::info("DEBUG: CallReducer - entering reducer dispatch for: {}", reducer_name);
-
-    // Provide different stub behaviors for common reducers
-    if (reducer_name == "init") {
-        // Handle module initialization - this should be fast and simple
-        spdlog::info("DEBUG: CallReducer - handling 'init' reducer");
-        result.values.push_back(std::string("init_success"));
-        spdlog::info("WASM reducer {} initialized successfully", reducer_name);
-    } else if (reducer_name == "CreateUser" || reducer_name == "create_user") {
-        // Simulate creating a user by inserting into the database
-        if (ctx.storage && args.size() >= 1) {
-            try {
-                // Extract user name from arguments
-                std::string user_name = "TestUser";
-                if (std::holds_alternative<std::string>(args[0])) {
-                    user_name = std::get<std::string>(args[0]);
-                }
-
-                // Create a simple row for the users table
-                Row user_row;
-                user_row.key = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::system_clock::now().time_since_epoch()).count() % 10000); // Simple ID
-                user_row.columns["id"] = std::stoll(user_row.key);
-                user_row.columns["name"] = user_name;
-
-                // Insert into storage
-                bool inserted = ctx.storage->Insert("USERS", user_row);
-                if (inserted) {
-                    result.values.push_back(user_row.key);
-                    spdlog::info("WASM reducer {} created user: {}", reducer_name, user_name);
-                } else {
-                    result.success = false;
-                    result.error = "Failed to insert user into database";
-                }
-            } catch (const std::exception& e) {
-                result.success = false;
-                result.error = "Exception in CreateUser: " + std::string(e.what());
-            }
-        } else {
-            result.success = false;
-            result.error = "CreateUser requires storage context and user name argument";
+        wasm_config_t* config = wasm_config_new();
+        wasmtime_config_epoch_interruption_set(config, true);
+        engine_ = wasm_engine_new_with_config(config);
+        if (!engine_) {
+            spdlog::error("Failed to create wasmtime engine");
+            return false;
         }
-    } else if (reducer_name == "GetUsers" || reducer_name == "get_users") {
-        // Simulate getting users by querying the database
-        if (ctx.storage) {
-            try {
-                auto table = ctx.storage->GetTable("USERS");
-                if (table) {
-                    std::vector<Row> users;
-                    table->Scan("", "", [&users](const std::string& key, const Row& row) {
-                        users.push_back(row);
-                        return true; // Continue scanning
-                    });
 
-                    result.values.push_back(static_cast<int64_t>(users.size()));
-                    spdlog::info("WASM reducer {} found {} users", reducer_name, users.size());
-                } else {
-                    result.values.push_back(int64_t(0));
-                    spdlog::warn("WASM reducer {}: USERS table not found", reducer_name);
-                }
-            } catch (const std::exception& e) {
-                result.success = false;
-                result.error = "Exception in GetUsers: " + std::string(e.what());
+        ticker_running_ = true;
+        epoch_thread_ = std::thread([this] {
+            while (ticker_running_.load()) {
+                wasmtime_engine_increment_epoch(engine_);
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(WASM_EPOCH_TICK_MS));
             }
-        } else {
-            result.success = false;
-            result.error = "GetUsers requires storage context";
+        });
+
+        spdlog::info("WASM engine initialized (wasmtime, epoch tick {}ms)",
+                     WASM_EPOCH_TICK_MS);
+        return true;
+    }
+
+    void Shutdown() {
+        if (!engine_) return;
+        RequestShutdown();
+
+        {
+            std::lock_guard<std::mutex> lock(modules_mutex_);
+            modules_.clear();  // destroys stores + modules
         }
-    } else {
-        // Default behavior for unknown reducers
-        result.values.push_back(std::string("success"));
-        spdlog::info("WASM reducer {} executed successfully (default behavior)", reducer_name);
+
+        ticker_running_ = false;
+        if (epoch_thread_.joinable()) epoch_thread_.join();
+        wasm_engine_delete(engine_);
+        engine_ = nullptr;
+        spdlog::info("WASM engine shut down");
     }
 
-    spdlog::info("DEBUG: CallReducer - about to simulate execution time for: {}", reducer_name);
-    // Simulate some execution time
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-
-    spdlog::info("DEBUG: CallReducer - execution completed for: {}, duration: {} μs", reducer_name, duration.count());
-    spdlog::debug("WASM reducer {} completed in {} μs", reducer_name, duration.count());
-
-    spdlog::info("DEBUG: CallReducer - clearing thread-local context for: {}", reducer_name);
-    // Clear thread-local context
-    current_instance = nullptr;
-    current_context = nullptr;
-
-    spdlog::info("DEBUG: CallReducer EXIT for reducer: {}, success: {}", reducer_name, result.success);
-    return result;
-}
-
-WasmResult WasmInstance::CallFunction(const std::string& function_name,
-                                     const std::vector<WasmValue>& args) {
-    return CallReducer(function_name, {}, args); // Simplified for now
-}
-
-bool WasmInstance::AllocateMemory(size_t size, uint32_t* address) {
-    // TODO: Implement WASM memory allocation
-    *address = 0x1000; // Placeholder
-    return true;
-}
-
-bool WasmInstance::WriteMemory(uint32_t address, const void* data, size_t size) {
-    // TODO: Implement WASM memory writing
-    return true;
-}
-
-bool WasmInstance::ReadMemory(uint32_t address, void* data, size_t size) {
-    // TODO: Implement WASM memory reading
-    return true;
-}
-
-void WasmInstance::RegisterHostFunctions() {
-    // TODO: Register host functions with Wasmtime
-    spdlog::debug("Registering host functions for WASM instance");
-}
-
-// Host function stubs (will be properly implemented with Wasmtime)
-WasmValue WasmInstance::HostLog(const std::vector<WasmValue>& args) {
-    if (args.size() >= 2) {
-        spdlog::info("WASM Log: [message from module]");
+    void RequestShutdown() {
+        if (shutdown_requested_.exchange(true)) return;
+        // Trip every in-flight epoch deadline (deadlines are timeout_ms/tick
+        // ticks ahead; 100k increments covers timeouts up to ~1000s).
+        if (engine_) {
+            for (int i = 0; i < 100000; i++) wasmtime_engine_increment_epoch(engine_);
+        }
     }
-    return static_cast<int32_t>(1); // success
-}
 
-WasmValue WasmInstance::HostTableInsert(const std::vector<WasmValue>& args) {
-    spdlog::debug("WASM module called HostTableInsert");
-    return static_cast<int32_t>(1); // success
-}
+    bool LoadModule(const std::string& name, const std::vector<uint8_t>& bytecode,
+                    const std::string& version, const ModuleCapabilities& caps) {
+        if (!engine_) {
+            SetLoadError(name, "engine not initialized");
+            return false;
+        }
+        if (shutdown_requested_.load()) {
+            SetLoadError(name, "engine shutting down");
+            return false;
+        }
+        if (bytecode.empty()) {
+            SetLoadError(name, "empty module bytecode");
+            return false;
+        }
 
-WasmValue WasmInstance::HostTableSelect(const std::vector<WasmValue>& args) {
-    spdlog::debug("WASM module called HostTableSelect");
-    return static_cast<int32_t>(1); // success
-}
+        auto module = std::make_shared<WasmModule>(name, bytecode);
+        module->capabilities_ = caps;
+        module->metadata_.version = version;
+        module->impl_ = std::make_unique<WasmModuleImpl>();
+        auto* impl = module->impl_.get();
+        impl->engine = engine_;
+        impl->caps = &module->capabilities_;
+        impl->module_name = name;
+        impl->memory_limit_bytes =
+            static_cast<uint64_t>(caps.max_memory_mb ? caps.max_memory_mb
+                                                     : memory_limit_mb_.load()) *
+            1024 * 1024;
+        impl->timeout_ms = caps.timeout_ms ? caps.timeout_ms : timeout_ms_.load();
+        impl->debug_stdio = false;
 
-WasmValue WasmInstance::HostTableUpdate(const std::vector<WasmValue>& args) {
-    spdlog::debug("WASM module called HostTableUpdate");
-    return static_cast<int32_t>(1); // success
-}
+        std::string error;
+        if (!Compile(*module, error) || !Instantiate(*impl, error)) {
+            SetLoadError(name, error);
+            spdlog::error("Failed to load WASM module {}: {}", name, error);
+            return false;
+        }
+        module->loaded_ = true;
 
-WasmValue WasmInstance::HostTableDelete(const std::vector<WasmValue>& args) {
-    spdlog::debug("WASM module called HostTableDelete");
-    return static_cast<int32_t>(1); // success
-}
+        ExtractMetadata(*module);
 
-WasmValue WasmInstance::HostEmitEvent(const std::vector<WasmValue>& args) {
-    spdlog::debug("WASM module called HostEmitEvent");
-    return static_cast<int32_t>(1); // success
-}
+        {
+            std::lock_guard<std::mutex> lock(modules_mutex_);
+            if (modules_.count(name))
+                spdlog::warn("Module {} already loaded, replacing", name);
+            modules_[name] = module;
+        }
 
-// WasmEngine implementation
+        // Run the module's init hook outside modules_mutex_.
+        ReducerContext ctx = CreateReducerContext("system", "");
+        auto init = Execute(module, "__init", ctx, {});
+        if (!init.success) {
+            spdlog::error("Module {} __init failed: {}", name, init.error);
+            UnloadModule(name);
+            SetLoadError(name, "__init failed: " + init.error);
+            return false;
+        }
+
+        spdlog::info("Loaded WASM module {} (version '{}', {} bytes)", name,
+                     version.empty() ? module->metadata_.version : version,
+                     bytecode.size());
+        return true;
+    }
+
+    bool UnloadModule(const std::string& name) {
+        std::lock_guard<std::mutex> lock(modules_mutex_);
+        auto it = modules_.find(name);
+        if (it == modules_.end()) return false;
+        modules_.erase(it);
+        spdlog::info("Unloaded WASM module: {}", name);
+        return true;
+    }
+
+    std::shared_ptr<WasmModule> GetModule(const std::string& name) const {
+        std::lock_guard<std::mutex> lock(modules_mutex_);
+        auto it = modules_.find(name);
+        return it == modules_.end() ? nullptr : it->second;
+    }
+
+    std::vector<std::string> ListModules() const {
+        std::lock_guard<std::mutex> lock(modules_mutex_);
+        std::vector<std::string> names;
+        names.reserve(modules_.size());
+        for (const auto& [name, _] : modules_) names.push_back(name);
+        return names;
+    }
+
+    WasmResult Execute(const std::shared_ptr<WasmModule>& module,
+                       const std::string& reducer_name, const ReducerContext& ctx,
+                       const std::vector<WasmValue>& args) {
+        auto* impl = module->impl_.get();
+        std::lock_guard<std::mutex> call_lock(impl->call_mutex);
+
+        if (shutdown_requested_.load())
+            return {false, "engine shutting down", {}};
+
+        std::string error;
+        if (!impl->instantiated && !Instantiate(*impl, error))
+            return {false, "re-instantiation failed: " + error, {}};
+
+        wasmtime_context_t* wctx = wasmtime_store_context(impl->store);
+
+        HostCallContext call;
+        call.rctx = &ctx;
+        call.mod = impl;
+        impl->current_call = &call;
+
+        wasmtime_context_set_epoch_deadline(
+            wctx, std::max<uint64_t>(1, impl->timeout_ms / WASM_EPOCH_TICK_MS));
+
+        int32_t status = 0;
+        bool trapped = false;
+        std::string trap_msg;
+        if (!CallInvoke(*impl, wctx, reducer_name, SerializeArgs(args), status,
+                        trapped, trap_msg)) {
+            impl->current_call = nullptr;
+            impl->DestroyInstance();  // poisoned: trap, timeout or engine error
+            std::string msg = !call.abort_msg.empty()
+                                  ? "aborted: " + call.abort_msg
+                                  : trap_msg.empty() ? "execution failed" : trap_msg;
+            spdlog::warn("WASM {}.{} failed: {}", impl->module_name, reducer_name, msg);
+            return {false, msg, {}};
+        }
+        impl->current_call = nullptr;
+
+        // -404 from the SDK dispatcher = no handler registered for this name.
+        if (status == WASM_ERR_NO_HANDLER) {
+            if (IsReservedName(reducer_name)) return {true, "", {}};
+            return {false, "unknown reducer: " + reducer_name, {}};
+        }
+
+        if (status < 0) {
+            std::string detail(call.result.begin(), call.result.end());
+            return {false,
+                    "reducer returned error " + std::to_string(status) +
+                        (detail.empty() ? "" : ": " + detail),
+                    {}};
+        }
+
+        std::string commit_error;
+        if (!CommitHostCall(call, commit_error)) {
+            spdlog::error("WASM {}.{} commit failed: {}", impl->module_name,
+                          reducer_name, commit_error);
+            return {false, "commit failed: " + commit_error, {}};
+        }
+
+        WasmResult result;
+        result.success = true;
+        if (call.has_result)
+            result.values.push_back(std::move(call.result));
+        else
+            result.values.push_back(status);
+        return result;
+    }
+
+    ReducerContext CreateReducerContext(const std::string& sender_identity,
+                                        const std::string& connection_id) {
+        ReducerContext ctx;
+        ctx.sender_identity = sender_identity;
+        ctx.connection_id = connection_id;
+        ctx.timestamp_micros =
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::system_clock::now().time_since_epoch())
+                .count();
+        ctx.storage = storage_;
+        ctx.changefeed = changefeed_;
+        return ctx;
+    }
+
+    std::string GetLastLoadError() const {
+        std::lock_guard<std::mutex> lock(load_error_mutex_);
+        return last_load_error_;
+    }
+
+    std::shared_ptr<StorageEngine> storage_;
+    std::shared_ptr<ChangefeedEngine> changefeed_;
+    std::atomic<uint32_t> timeout_ms_{5000};
+    std::atomic<uint32_t> memory_limit_mb_{256};
+
+private:
+    void SetLoadError(const std::string& name, const std::string& error) {
+        std::lock_guard<std::mutex> lock(load_error_mutex_);
+        last_load_error_ = name + ": " + error;
+    }
+
+    bool Compile(WasmModule& module, std::string& error) {
+        auto* impl = module.impl_.get();
+        wasmtime_error_t* err = wasmtime_module_new(
+            engine_, module.bytecode_.data(), module.bytecode_.size(), &impl->module);
+        if (err) {
+            error = "invalid WASM module: " + ConsumeError(err);
+            return false;
+        }
+
+        // Import allow-list: env.<known> and any wasi_snapshot_preview1.
+        wasm_importtype_vec_t imports;
+        wasmtime_module_imports(impl->module, &imports);
+        bool ok = true;
+        for (size_t i = 0; i < imports.size && ok; i++) {
+            std::string mod = NameToString(wasm_importtype_module(imports.data[i]));
+            std::string name = NameToString(wasm_importtype_name(imports.data[i]));
+            module.metadata_.imports.push_back(mod + "." + name);
+            if (mod == "wasi_snapshot_preview1") continue;
+            if (mod == "env" && kKnownEnvImports.count(name)) continue;
+            error = "disallowed import: " + mod + "." + name;
+            ok = false;
+        }
+        wasm_importtype_vec_delete(&imports);
+        if (!ok) return false;
+
+        // Required exports.
+        wasm_exporttype_vec_t exports;
+        wasmtime_module_exports(impl->module, &exports);
+        for (size_t i = 0; i < exports.size; i++)
+            module.metadata_.exports.push_back(
+                NameToString(wasm_exporttype_name(exports.data[i])));
+        wasm_exporttype_vec_delete(&exports);
+
+        for (const char* required : kRequiredExports) {
+            bool found = false;
+            for (const auto& e : module.metadata_.exports)
+                if (e == required) { found = true; break; }
+            if (!found) {
+                error = std::string("missing required export: ") + required;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool Instantiate(WasmModuleImpl& impl, std::string& error) {
+        impl.DestroyInstance();
+
+        impl.store = wasmtime_store_new(engine_, &impl, nullptr);
+        wasmtime_context_t* ctx = wasmtime_store_context(impl.store);
+        wasmtime_store_limiter(impl.store,
+                               static_cast<int64_t>(impl.memory_limit_bytes),
+                               100000 /*table elements*/, -1, -1, -1);
+
+        wasi_config_t* wasi = wasi_config_new();
+        if (impl.debug_stdio) {
+            wasi_config_inherit_stdout(wasi);
+            wasi_config_inherit_stderr(wasi);
+        }
+        if (wasmtime_error_t* err = wasmtime_context_set_wasi(ctx, wasi)) {
+            error = "WASI setup failed: " + ConsumeError(err);
+            impl.DestroyInstance();
+            return false;
+        }
+
+        wasmtime_linker_t* linker = wasmtime_linker_new(engine_);
+        if (wasmtime_error_t* err = wasmtime_linker_define_wasi(linker)) {
+            error = "WASI linker setup failed: " + ConsumeError(err);
+            wasmtime_linker_delete(linker);
+            impl.DestroyInstance();
+            return false;
+        }
+        if (!RegisterHostFunctions(linker, &impl, error)) {
+            wasmtime_linker_delete(linker);
+            impl.DestroyInstance();
+            return false;
+        }
+
+        // Instantiation may run a start function; bound it like a call.
+        wasmtime_context_set_epoch_deadline(
+            ctx, std::max<uint64_t>(1, impl.timeout_ms / WASM_EPOCH_TICK_MS));
+
+        wasm_trap_t* trap = nullptr;
+        wasmtime_error_t* err = wasmtime_linker_instantiate(
+            linker, ctx, impl.module, &impl.instance, &trap);
+        wasmtime_linker_delete(linker);
+        if (err || trap) {
+            error = "instantiation failed: " +
+                    (err ? ConsumeError(err) : ConsumeTrap(trap));
+            impl.DestroyInstance();
+            return false;
+        }
+
+        if (!ResolveExports(impl, error)) {
+            impl.DestroyInstance();
+            return false;
+        }
+
+        // WASI reactor init (runs C#/clang static constructors, Main, etc.).
+        if (impl.has_initialize) {
+            wasm_trap_t* itrap = nullptr;
+            wasmtime_error_t* ierr = wasmtime_func_call(
+                ctx, &impl.fn_initialize, nullptr, 0, nullptr, 0, &itrap);
+            if (ierr || itrap) {
+                error = "_initialize failed: " +
+                        (ierr ? ConsumeError(ierr) : ConsumeTrap(itrap));
+                impl.DestroyInstance();
+                return false;
+            }
+        }
+
+        impl.instantiated = true;
+        return true;
+    }
+
+    bool ResolveExports(WasmModuleImpl& impl, std::string& error) {
+        wasmtime_context_t* ctx = wasmtime_store_context(impl.store);
+        wasmtime_extern_t item;
+
+        auto get_func = [&](const char* name, wasmtime_func_t* out) {
+            if (!wasmtime_instance_export_get(ctx, &impl.instance, name,
+                                              strlen(name), &item))
+                return false;
+            if (item.kind != WASMTIME_EXTERN_FUNC) return false;
+            *out = item.of.func;
+            return true;
+        };
+
+        if (!wasmtime_instance_export_get(ctx, &impl.instance, "memory", 6, &item) ||
+            item.kind != WASMTIME_EXTERN_MEMORY) {
+            error = "module does not export memory";
+            return false;
+        }
+        impl.memory = item.of.memory;
+
+        if (!get_func("instantdb_invoke", &impl.fn_invoke)) {
+            error = "module does not export instantdb_invoke";
+            return false;
+        }
+        if (!get_func("instantdb_alloc", &impl.fn_alloc)) {
+            error = "module does not export instantdb_alloc";
+            return false;
+        }
+        impl.has_free = get_func("instantdb_free", &impl.fn_free);
+        impl.has_describe = get_func("instantdb_describe", &impl.fn_describe);
+        impl.has_initialize = get_func("_initialize", &impl.fn_initialize);
+        return true;
+    }
+
+    // Writes a buffer into guest memory via instantdb_alloc. Returns false on
+    // allocation failure.
+    bool WriteGuestBuffer(WasmModuleImpl& impl, wasmtime_context_t* ctx,
+                          const std::string& data, uint32_t& ptr_out) {
+        wasmtime_val_t arg;
+        arg.kind = WASMTIME_I32;
+        arg.of.i32 = static_cast<int32_t>(data.size());
+        wasmtime_val_t res;
+        wasm_trap_t* trap = nullptr;
+        wasmtime_error_t* err =
+            wasmtime_func_call(ctx, &impl.fn_alloc, &arg, 1, &res, 1, &trap);
+        if (err) { ConsumeError(err); return false; }
+        if (trap) { ConsumeTrap(trap); return false; }
+        ptr_out = static_cast<uint32_t>(res.of.i32);
+        if (ptr_out == 0 && !data.empty()) return false;
+
+        uint8_t* base = wasmtime_memory_data(ctx, &impl.memory);
+        size_t size = wasmtime_memory_data_size(ctx, &impl.memory);
+        if (static_cast<uint64_t>(ptr_out) + data.size() > size) return false;
+        memcpy(base + ptr_out, data.data(), data.size());
+        return true;
+    }
+
+    bool CallInvoke(WasmModuleImpl& impl, wasmtime_context_t* ctx,
+                    const std::string& name, const std::string& args_json,
+                    int32_t& status_out, bool& trapped, std::string& trap_msg) {
+        uint32_t name_ptr = 0, args_ptr = 0;
+        if (!WriteGuestBuffer(impl, ctx, name, name_ptr) ||
+            !WriteGuestBuffer(impl, ctx, args_json, args_ptr)) {
+            trapped = true;
+            trap_msg = "failed to write call arguments into guest memory";
+            return false;
+        }
+
+        wasmtime_val_t call_args[4];
+        for (auto& a : call_args) a.kind = WASMTIME_I32;
+        call_args[0].of.i32 = static_cast<int32_t>(name_ptr);
+        call_args[1].of.i32 = static_cast<int32_t>(name.size());
+        call_args[2].of.i32 = static_cast<int32_t>(args_ptr);
+        call_args[3].of.i32 = static_cast<int32_t>(args_json.size());
+
+        wasmtime_val_t result;
+        wasm_trap_t* trap = nullptr;
+        wasmtime_error_t* err = wasmtime_func_call(ctx, &impl.fn_invoke, call_args,
+                                                   4, &result, 1, &trap);
+        if (err) {
+            trapped = true;
+            trap_msg = ConsumeError(err);
+            return false;
+        }
+        if (trap) {
+            trapped = true;
+            trap_msg = ConsumeTrap(trap);
+            return false;
+        }
+        status_out = result.of.i32;
+        return true;
+    }
+
+    static std::string SerializeArgs(const std::vector<WasmValue>& args) {
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& value : args) {
+            std::visit(
+                [&](const auto& v) {
+                    using T = std::decay_t<decltype(v)>;
+                    if constexpr (std::is_same_v<T, std::monostate>)
+                        arr.push_back(nullptr);
+                    else if constexpr (std::is_same_v<T, std::vector<uint8_t>>)
+                        arr.push_back({{"$bytes", Base64Encode(v.data(), v.size())}});
+                    else
+                        arr.push_back(v);
+                },
+                value);
+        }
+        return arr.dump();
+    }
+
+    void ExtractMetadata(WasmModule& module) {
+        auto* impl = module.impl_.get();
+        if (!impl->has_describe) return;
+
+        wasmtime_context_t* ctx = wasmtime_store_context(impl->store);
+        wasmtime_val_t result;
+        wasm_trap_t* trap = nullptr;
+        wasmtime_error_t* err = wasmtime_func_call(ctx, &impl->fn_describe,
+                                                   nullptr, 0, &result, 1, &trap);
+        if (err) { ConsumeError(err); return; }
+        if (trap) { ConsumeTrap(trap); return; }
+
+        uint64_t packed = static_cast<uint64_t>(result.of.i64);
+        uint32_t ptr = static_cast<uint32_t>(packed >> 32);
+        uint32_t len = static_cast<uint32_t>(packed & 0xFFFFFFFF);
+
+        uint8_t* base = wasmtime_memory_data(ctx, &impl->memory);
+        size_t size = wasmtime_memory_data_size(ctx, &impl->memory);
+        if (static_cast<uint64_t>(ptr) + len > size) {
+            spdlog::warn("Module {} instantdb_describe returned out-of-bounds blob",
+                         module.name_);
+            return;
+        }
+
+        const char* blob = reinterpret_cast<const char*>(base + ptr);
+        auto meta = nlohmann::json::parse(blob, blob + len, nullptr, false);
+        if (meta.is_discarded() || !meta.is_object()) {
+            spdlog::warn("Module {} instantdb_describe returned invalid JSON",
+                         module.name_);
+            return;
+        }
+
+        if (module.metadata_.version.empty() && meta.contains("version") &&
+            meta["version"].is_string())
+            module.metadata_.version = meta["version"].get<std::string>();
+        if (meta.contains("reducers") && meta["reducers"].is_array()) {
+            for (const auto& r : meta["reducers"]) {
+                ReducerDef def;
+                if (r.is_string()) {
+                    def.name = r.get<std::string>();
+                } else if (r.is_object() && r.contains("name")) {
+                    def.name = r["name"].get<std::string>();
+                    if (r.contains("params") && r["params"].is_array())
+                        for (const auto& p : r["params"])
+                            def.param_types.push_back(p.is_string() ? p.get<std::string>()
+                                                                    : "any");
+                } else {
+                    continue;
+                }
+                def.is_init = def.name == "__init";
+                def.is_client_connected = def.name == "__client_connected";
+                def.is_client_disconnected = def.name == "__client_disconnected";
+                module.metadata_.reducers.push_back(std::move(def));
+            }
+        }
+    }
+
+    wasm_engine_t* engine_ = nullptr;
+    std::thread epoch_thread_;
+    std::atomic<bool> ticker_running_{false};
+    std::atomic<bool> shutdown_requested_{false};
+
+    mutable std::mutex modules_mutex_;
+    std::unordered_map<std::string, std::shared_ptr<WasmModule>> modules_;
+
+    mutable std::mutex load_error_mutex_;
+    std::string last_load_error_;
+};
+
+// ---------------------------------------------------------------------------
+// WasmEngine public API
+// ---------------------------------------------------------------------------
+
 WasmEngine::WasmEngine(std::shared_ptr<StorageEngine> storage,
                        std::shared_ptr<ChangefeedEngine> changefeed)
-    : storage_(storage), changefeed_(changefeed),
-      max_instances_(10), timeout_ms_(5000), memory_limit_mb_(64),
-      initialized_(false), shutdown_requested_(false) {
-}
+    : impl_(std::make_unique<Impl>(std::move(storage), std::move(changefeed))) {}
 
-WasmEngine::~WasmEngine() {
-    Shutdown();
-}
+WasmEngine::~WasmEngine() = default;
 
-bool WasmEngine::Initialize() {
-    if (initialized_) return true;
+bool WasmEngine::Initialize() { return impl_->Initialize(); }
+void WasmEngine::Shutdown() { impl_->Shutdown(); }
+void WasmEngine::RequestShutdown() { impl_->RequestShutdown(); }
 
-    spdlog::info("Initializing WASM Engine");
-
-    initialized_ = true;
-    spdlog::info("WASM Engine initialized successfully");
-    return true;
-}
-
-void WasmEngine::Shutdown() {
-    if (!initialized_) return;
-
-    spdlog::info("Shutting down WASM Engine");
-
-    std::lock_guard<std::mutex> lock(modules_mutex_);
-
-    // Clear all modules and instances
-    instance_pools_.clear();
-    modules_.clear();
-
-    initialized_ = false;
-    spdlog::info("WASM Engine shutdown complete");
-}
-
-void WasmEngine::RequestShutdown() {
-    shutdown_requested_.store(true);
-    spdlog::info("WASM Engine shutdown requested");
-}
-
-bool WasmEngine::LoadModule(const std::string& name, const std::vector<uint8_t>& bytecode) {
-    spdlog::info("DEBUG: LoadModule called with name: {}, bytecode size: {}", name, bytecode.size());
-
-    if (!initialized_) {
-        spdlog::error("DEBUG: WasmEngine not initialized");
-        return false;
-    }
-
-    // Scope the mutex lock to only cover the module loading/registration part
-    {
-        spdlog::info("DEBUG: Acquiring mutex lock");
-        std::lock_guard<std::mutex> lock(modules_mutex_);
-        spdlog::info("DEBUG: Mutex acquired");
-
-        // Check if module already exists
-        if (modules_.find(name) != modules_.end()) {
-            spdlog::warn("Module {} already loaded, replacing", name);
-        }
-
-        spdlog::info("DEBUG: Creating WasmModule instance");
-        auto module = std::make_shared<WasmModule>(name, bytecode);
-
-        spdlog::info("DEBUG: About to call module->Load()");
-        if (!module->Load()) {
-            spdlog::error("DEBUG: module->Load() failed for {}", name);
-            return false;
-        }
-
-        spdlog::info("DEBUG: About to call module->Validate()");
-        if (!module->Validate()) {
-            spdlog::error("DEBUG: module->Validate() failed for {}", name);
-            return false;
-        }
-
-        spdlog::info("DEBUG: Module {} loaded and validated successfully", name);
-
-        modules_[name] = module;
-        instance_pools_[name] = std::vector<std::unique_ptr<WasmInstance>>();
-
-        spdlog::info("Successfully loaded WASM module: {}", name);
-        spdlog::info("DEBUG: Releasing mutex before OnModuleInit");
-    } // Mutex is released here
-
-    // Check for shutdown before calling init
-    if (shutdown_requested_.load()) {
-        spdlog::info("Module loading interrupted by shutdown for {}", name);
-        UnloadModule(name);
-        return false;
-    }
-
-    // Call module initialization WITHOUT holding the mutex
-    spdlog::info("DEBUG: About to call OnModuleInit (mutex released)");
-    ReducerContext ctx = CreateReducerContext("system", "");
-    auto result = OnModuleInit(name, ctx);
-    spdlog::info("DEBUG: OnModuleInit returned success: {}", result.success);
-
-    if (!result.success) {
-        spdlog::error("Module initialization failed for {}: {}", name, result.error);
-        UnloadModule(name);
-        return false;
-    }
-
-    return true;
+bool WasmEngine::LoadModule(const std::string& name,
+                            const std::vector<uint8_t>& bytecode,
+                            const std::string& version,
+                            const ModuleCapabilities& capabilities) {
+    return impl_->LoadModule(name, bytecode, version, capabilities);
 }
 
 bool WasmEngine::UnloadModule(const std::string& name) {
-    std::lock_guard<std::mutex> lock(modules_mutex_);
-
-    auto it = modules_.find(name);
-    if (it == modules_.end()) {
-        return false;
-    }
-
-    // Clear instance pool
-    instance_pools_.erase(name);
-
-    // Remove module
-    modules_.erase(it);
-
-    spdlog::info("Unloaded WASM module: {}", name);
-    return true;
+    return impl_->UnloadModule(name);
 }
 
 std::shared_ptr<WasmModule> WasmEngine::GetModule(const std::string& name) {
-    std::lock_guard<std::mutex> lock(modules_mutex_);
-
-    auto it = modules_.find(name);
-    if (it != modules_.end()) {
-        return it->second;
-    }
-    return nullptr;
+    return impl_->GetModule(name);
 }
 
 std::vector<std::string> WasmEngine::ListModules() const {
-    std::lock_guard<std::mutex> lock(modules_mutex_);
-
-    std::vector<std::string> module_names;
-    for (const auto& [name, module] : modules_) {
-        module_names.push_back(name);
-    }
-    return module_names;
+    return impl_->ListModules();
 }
 
 std::vector<std::string> WasmEngine::GetLoadedModules() const {
-    return ListModules(); // For now, all modules in memory are "loaded"
+    return impl_->ListModules();
+}
+
+std::string WasmEngine::GetLastLoadError() const {
+    return impl_->GetLastLoadError();
 }
 
 WasmResult WasmEngine::ExecuteReducer(const std::string& module_name,
-                                     const std::string& reducer_name,
-                                     const ReducerContext& ctx,
-                                     const std::vector<WasmValue>& args) {
-    spdlog::info("DEBUG: ExecuteReducer ENTRY for {}.{}", module_name, reducer_name);
-
-    auto instance = GetOrCreateInstance(module_name);
-    if (!instance) {
-        spdlog::error("DEBUG: ExecuteReducer - failed to get instance for {}.{}", module_name, reducer_name);
-        return {false, "Failed to get module instance", {}};
-    }
-
-    spdlog::info("DEBUG: ExecuteReducer - got instance, starting background thread for {}.{}", module_name, reducer_name);
-
-    // Execute with timeout to prevent hanging
-    std::atomic<bool> completed{false};
-    WasmResult result;
-    std::thread execution_thread([&]() {
-        spdlog::info("DEBUG: ExecuteReducer - background thread started for {}.{}", module_name, reducer_name);
-        result = instance->CallReducer(reducer_name, ctx, args);
-        spdlog::info("DEBUG: ExecuteReducer - background thread completed for {}.{}", module_name, reducer_name);
-        completed.store(true);
-    });
-
-    // Wait with timeout
-    auto start = std::chrono::steady_clock::now();
-    constexpr std::chrono::seconds timeout{10}; // 10 second timeout
-
-    spdlog::info("DEBUG: ExecuteReducer - starting timeout loop for {}.{}", module_name, reducer_name);
-
-    while (!completed.load() && (std::chrono::steady_clock::now() - start) < timeout) {
-        // Check for shutdown signal
-        if (shutdown_requested_.load()) {
-            spdlog::info("WASM ExecuteReducer interrupted by shutdown signal for {}.{}", module_name, reducer_name);
-            execution_thread.detach(); // Let it finish in background
-            ReturnInstance(module_name, std::move(instance));
-            return {false, "Interrupted by shutdown", {}};
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
-    if (!completed.load()) {
-        // Timeout occurred
-        spdlog::error("DEBUG: ExecuteReducer - TIMEOUT occurred for {}.{} after 10 seconds", module_name, reducer_name);
-        spdlog::error("WASM ExecuteReducer timeout for {}.{}", module_name, reducer_name);
-        execution_thread.detach(); // Let it finish in background
-        ReturnInstance(module_name, std::move(instance));
-        return {false, "Execution timeout", {}};
-    }
-
-    spdlog::info("DEBUG: ExecuteReducer - execution completed successfully for {}.{}", module_name, reducer_name);
-    execution_thread.join();
-
-    // Return instance to pool
-    spdlog::info("DEBUG: ExecuteReducer - returning instance to pool for {}.{}", module_name, reducer_name);
-    ReturnInstance(module_name, std::move(instance));
-
-    spdlog::info("DEBUG: ExecuteReducer EXIT for {}.{}, success: {}", module_name, reducer_name, result.success);
-    return result;
+                                      const std::string& reducer_name,
+                                      const ReducerContext& ctx,
+                                      const std::vector<WasmValue>& args) {
+    auto module = impl_->GetModule(module_name);
+    if (!module) return {false, "module not found: " + module_name, {}};
+    return impl_->Execute(module, reducer_name, ctx, args);
 }
 
-WasmResult WasmEngine::OnModuleInit(const std::string& module_name, const ReducerContext& ctx) {
-    spdlog::info("DEBUG: OnModuleInit starting for module: {}", module_name);
-
-    // Add timeout to prevent hanging - init should be fast
-    auto start_time = std::chrono::steady_clock::now();
-    constexpr std::chrono::seconds timeout{5}; // 5 second timeout for init
-
-    auto result = ExecuteReducer(module_name, "init", ctx, {});
-
-    auto elapsed = std::chrono::steady_clock::now() - start_time;
-    if (elapsed > timeout) {
-        spdlog::warn("OnModuleInit took {}ms for module {}",
-                    std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count(),
-                    module_name);
-    }
-
-    spdlog::info("DEBUG: OnModuleInit completed for module: {}", module_name);
-    return result;
+WasmResult WasmEngine::OnModuleInit(const std::string& module_name,
+                                    const ReducerContext& ctx) {
+    return ExecuteReducer(module_name, "__init", ctx, {});
 }
 
-WasmResult WasmEngine::OnClientConnected(const std::string& module_name, const ReducerContext& ctx) {
-    return ExecuteReducer(module_name, "client_connected", ctx, {});
+WasmResult WasmEngine::OnClientConnected(const std::string& module_name,
+                                         const ReducerContext& ctx) {
+    return ExecuteReducer(module_name, "__client_connected", ctx,
+                          {WasmValue(ctx.connection_id)});
 }
 
-WasmResult WasmEngine::OnClientDisconnected(const std::string& module_name, const ReducerContext& ctx) {
-    return ExecuteReducer(module_name, "client_disconnected", ctx, {});
+WasmResult WasmEngine::OnClientDisconnected(const std::string& module_name,
+                                            const ReducerContext& ctx) {
+    return ExecuteReducer(module_name, "__client_disconnected", ctx,
+                          {WasmValue(ctx.connection_id)});
 }
 
-std::unique_ptr<WasmInstance> WasmEngine::GetOrCreateInstance(const std::string& module_name) {
-    spdlog::info("DEBUG: GetOrCreateInstance - attempting to acquire mutex for module: {}", module_name);
-    std::lock_guard<std::mutex> lock(modules_mutex_);
-    spdlog::info("DEBUG: GetOrCreateInstance - mutex acquired for module: {}", module_name);
-
-    auto module_it = modules_.find(module_name);
-    if (module_it == modules_.end()) {
-        spdlog::error("DEBUG: GetOrCreateInstance - module not found: {}", module_name);
-        return nullptr;
-    }
-
-    auto& instances = instance_pools_[module_name];
-
-    // Try to reuse an existing instance
-    if (!instances.empty()) {
-        spdlog::info("DEBUG: GetOrCreateInstance - reusing existing instance for module: {}", module_name);
-        auto instance = std::move(instances.back());
-        instances.pop_back();
-        return instance;
-    }
-
-    // Create new instance
-    spdlog::info("DEBUG: GetOrCreateInstance - creating new instance for module: {}", module_name);
-    auto new_instance = module_it->second->CreateInstance();
-    spdlog::info("DEBUG: GetOrCreateInstance - instance created for module: {}", module_name);
-    return new_instance;
+void WasmEngine::SetTimeoutMs(uint32_t timeout_ms) {
+    impl_->timeout_ms_ = timeout_ms;
 }
 
-void WasmEngine::ReturnInstance(const std::string& module_name, std::unique_ptr<WasmInstance> instance) {
-    if (!instance) return;
+void WasmEngine::SetMemoryLimitMB(uint32_t memory_limit_mb) {
+    impl_->memory_limit_mb_ = memory_limit_mb;
+}
 
-    std::lock_guard<std::mutex> lock(modules_mutex_);
+std::shared_ptr<StorageEngine> WasmEngine::GetStorageEngine() const {
+    return impl_->storage_;
+}
 
-    auto& instances = instance_pools_[module_name];
-    if (instances.size() < max_instances_) {
-        instances.push_back(std::move(instance));
-    }
-    // If pool is full, instance will be destroyed
+std::shared_ptr<ChangefeedEngine> WasmEngine::GetChangefeedEngine() const {
+    return impl_->changefeed_;
 }
 
 ReducerContext WasmEngine::CreateReducerContext(const std::string& sender_identity,
-                                               const std::string& connection_id) {
-    ReducerContext ctx;
-    ctx.sender_identity = sender_identity;
-    ctx.module_identity = "module"; // In real implementation, this would be the actual module identity
-    ctx.connection_id = connection_id;
-    ctx.timestamp_micros = std::chrono::duration_cast<std::chrono::microseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
-    ctx.storage = storage_;
-    ctx.changefeed = changefeed_;
-    return ctx;
-}
-
-bool WasmEngine::ValidateModule(const WasmModule& module) {
-    // In a real implementation, we'd perform security checks:
-    // - Memory usage limits
-    // - Import/export validation
-    // - Code analysis for forbidden operations
-    // - Signature verification
-    return true;
+                                                const std::string& connection_id) {
+    return impl_->CreateReducerContext(sender_identity, connection_id);
 }
 
 } // namespace instantdb

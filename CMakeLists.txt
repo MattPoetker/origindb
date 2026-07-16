@@ -56,6 +56,10 @@ endif()
 # Third-party dependencies (minimal)
 include(FetchContent)
 
+# Fetched projects declare old cmake_minimum_required versions; CMake 4 removed
+# compatibility with <3.5, so raise the floor for all FetchContent builds.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 # JSON library
 FetchContent_Declare(
     json
@@ -78,6 +82,37 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(json spdlog fmt)
+
+# Wasmtime C API (prebuilt, platform-selected)
+set(WASMTIME_VERSION "36.0.2" CACHE STRING "Wasmtime C API version (LTS line)")
+if(APPLE)
+    set(WASMTIME_OS "macos")
+elseif(UNIX)
+    set(WASMTIME_OS "linux")
+else()
+    message(FATAL_ERROR "Unsupported platform for wasmtime prebuilt C API")
+endif()
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+    set(WASMTIME_ARCH "aarch64")
+else()
+    set(WASMTIME_ARCH "x86_64")
+endif()
+FetchContent_Declare(
+    wasmtime
+    URL https://github.com/bytecodealliance/wasmtime/releases/download/v${WASMTIME_VERSION}/wasmtime-v${WASMTIME_VERSION}-${WASMTIME_ARCH}-${WASMTIME_OS}-c-api.tar.xz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(wasmtime)
+
+add_library(wasmtime_c_api STATIC IMPORTED GLOBAL)
+set_target_properties(wasmtime_c_api PROPERTIES
+    IMPORTED_LOCATION ${wasmtime_SOURCE_DIR}/lib/libwasmtime.a
+    INTERFACE_INCLUDE_DIRECTORIES ${wasmtime_SOURCE_DIR}/include
+)
+if(NOT APPLE)
+    set_property(TARGET wasmtime_c_api APPEND PROPERTY
+        INTERFACE_LINK_LIBRARIES dl m pthread rt)
+endif()
 
 # Generate gRPC and Protocol Buffer files (only if gRPC is available)
 if(GRPC_AVAILABLE)
@@ -118,12 +153,12 @@ file(GLOB_RECURSE STORAGE_SRCS "src/storage/*.cpp")
 file(GLOB_RECURSE SQL_SRCS "src/sql/*.cpp")
 set(CHANGEFEED_SRCS
     "src/changefeed/changefeed_engine.cpp"
+    "src/changefeed/predicate_evaluator.cpp"
     "src/changefeed/sql_subscription.cpp"
 )
 file(GLOB_RECURSE WEBSOCKET_SRCS "src/websocket/*.cpp")
 file(GLOB_RECURSE COMMON_SRCS "src/common/*.cpp")
 file(GLOB_RECURSE WASM_SRCS "src/wasm/*.cpp")
-file(GLOB_RECURSE CLI_SRCS "src/cli/*.cpp")
 
 # gRPC sources (only if available)
 if(GRPC_AVAILABLE)
@@ -173,10 +208,14 @@ target_link_libraries(common_lib
 
 add_library(wasm_engine STATIC ${WASM_SRCS})
 target_link_libraries(wasm_engine
-    storage
-    changefeed_engine
-    spdlog::spdlog
-    nlohmann_json::nlohmann_json
+    PUBLIC
+        storage
+        changefeed_engine
+        spdlog::spdlog
+        nlohmann_json::nlohmann_json
+        OpenSSL::Crypto
+    PRIVATE
+        wasmtime_c_api
 )
 
 # gRPC service library (only if available)
@@ -299,6 +338,7 @@ if(GRPC_AVAILABLE)
         target_link_libraries(instantdb_client
             ${PROTOBUF_LIBRARIES}
             ${GRPC_LIBRARIES}
+            nlohmann_json::nlohmann_json
             Threads::Threads
         )
         target_compile_options(instantdb_client PRIVATE ${PROTOBUF_CFLAGS_OTHER} ${GRPC_CFLAGS_OTHER})
@@ -307,6 +347,7 @@ if(GRPC_AVAILABLE)
         target_link_libraries(instantdb_client
             protobuf::libprotobuf
             gRPC::grpc++
+            nlohmann_json::nlohmann_json
             Threads::Threads
         )
     endif()
@@ -438,5 +479,44 @@ install(FILES
     RENAME instantdb
     COMPONENT Runtime
 )
+
+# Unit tests
+option(BUILD_TESTS "Build unit tests" ON)
+if(BUILD_TESTS)
+    enable_testing()
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.14.0
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+
+    add_executable(unit_tests
+        tests/wasm/wasm_engine_test.cpp
+        tests/unit/predicate_evaluator_test.cpp
+        tests/unit/module_store_test.cpp
+    )
+    target_link_libraries(unit_tests PRIVATE
+        wasm_engine
+        changefeed_engine
+        storage
+        wasmtime_c_api
+        GTest::gtest_main
+    )
+    include(GoogleTest)
+    gtest_discover_tests(unit_tests)
+
+    # Small utility to compile .wat fixtures to .wasm for e2e testing
+    add_executable(wat2wasm_tool tools/wat2wasm_tool.cpp)
+    target_link_libraries(wat2wasm_tool PRIVATE wasmtime_c_api)
+endif()
+
+# Performance Testing Framework (optional)
+option(BUILD_PERFORMANCE_TESTS "Build performance testing framework" ON)
+if(BUILD_PERFORMANCE_TESTS)
+    message(STATUS "Building performance testing framework")
+    add_subdirectory(tests/performance)
+endif()
 
 include(CPack)

@@ -1,6 +1,7 @@
 #include "wasm/wasm_subscription.h"
 #include "storage/storage_engine.h"
 #include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 #include <chrono>
 #include <mutex>
 #include <thread>
@@ -353,7 +354,14 @@ private:
                 );
 
                 if (filter_result.success && !filter_result.values.empty() &&
-                    std::holds_alternative<bool>(filter_result.values[0])) {
+                    std::holds_alternative<int32_t>(filter_result.values[0])) {
+                    // ABI: instantdb_invoke returns 1 = include, 0 = exclude.
+                    should_emit = std::get<int32_t>(filter_result.values[0]) != 0;
+                    if (!should_emit) {
+                        metrics_.events_filtered++;
+                    }
+                } else if (filter_result.success && !filter_result.values.empty() &&
+                           std::holds_alternative<bool>(filter_result.values[0])) {
                     should_emit = std::get<bool>(filter_result.values[0]);
                     if (!should_emit) {
                         metrics_.events_filtered++;
@@ -442,23 +450,32 @@ private:
     }
 
     WasmValue ConvertEventToWasmValue(const ChangefeedEvent& event) {
-        // Convert ChangefeedEvent to a structured WasmValue
-        // This would typically involve JSON serialization
-        std::unordered_map<std::string, WasmValue> event_map;
+        // Serialize the full event as a JSON string for the module's
+        // filter/transform functions. Values are UTF-8 JSON where possible;
+        // non-JSON bytes fall back to raw strings.
+        nlohmann::json obj;
+        obj["table"] = event.table;
+        obj["operation"] = event.operation;
+        obj["offset"] = event.offset;
+        obj["transaction_id"] = event.transaction_id;
+        obj["key"] = std::string(event.key.begin(), event.key.end());
 
-        event_map["table"] = WasmValue(event.table);
-        event_map["operation"] = WasmValue(event.operation);
-        event_map["offset"] = WasmValue(static_cast<int64_t>(event.offset));
-        event_map["transaction_id"] = WasmValue(event.transaction_id);
+        auto embed = [&obj](const char* field, const std::vector<uint8_t>& bytes) {
+            if (bytes.empty()) {
+                obj[field] = nullptr;
+                return;
+            }
+            auto parsed = nlohmann::json::parse(bytes.begin(), bytes.end(),
+                                                nullptr, false);
+            if (!parsed.is_discarded())
+                obj[field] = std::move(parsed);
+            else
+                obj[field] = std::string(bytes.begin(), bytes.end());
+        };
+        embed("new_value", event.new_value);
+        embed("old_value", event.old_value);
 
-        // Convert key and values to base64 or hex strings
-        event_map["key"] = WasmValue(event.key);
-        event_map["old_value"] = WasmValue(event.old_value);
-        event_map["new_value"] = WasmValue(event.new_value);
-
-        // For now, return serialized bytes
-        // In production, this would be properly serialized
-        return WasmValue(event.new_value);
+        return WasmValue(obj.dump());
     }
 
 private:

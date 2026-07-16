@@ -1,650 +1,218 @@
 # InstantDB API Guide
 
-## 🎯 SpacetimeDB-like API Overview
+InstantDB exposes three surfaces:
 
-InstantDB provides a SpacetimeDB-compatible API with automatic change detection and real-time streaming. This guide covers all the API patterns and usage examples.
+1. **Module API** — reducers, filters, and lifecycle hooks running inside
+   the server as WASM modules (SpacetimeDB-inspired programming model).
+2. **WebSocket API** — real-time subscriptions (`ws://localhost:8080`).
+3. **gRPC API** — SQL execution and module management
+   (`localhost:50051`; see [GRPC_API.md](GRPC_API.md)).
 
-## 📊 Table Definition
+The module-side contract is normatively defined in
+[WASM_ABI.md](WASM_ABI.md). This guide covers usage patterns.
 
-### Defining Tables with Attributes
+## Module API
+
+Modules are written against an SDK that implements the ABI's registry
+pattern: register named reducers/filters at initialization; the host
+dispatches every call through `instantdb_invoke(name, json_args)`.
+
+- **AssemblyScript** (`sdk/typescript/`) — recommended, verified
+  end-to-end. See [../sdk/typescript/README.md](../sdk/typescript/README.md).
+- **C#** (`sdk/csharp/`) — works only where the .NET 8 `wasi-experimental`
+  workload supports `[UnmanagedCallersOnly]` exports; see
+  [../sdk/csharp/README.md](../sdk/csharp/README.md).
+
+There is no attribute-based `[Table]`/`[Reducer]`/`ctx.Db.GetTable<T>()`
+API — earlier drafts of this document described a planned design that was
+not built. The real API is an explicit registry:
+
+### Reducers (C#)
 
 ```csharp
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using InstantDB;
 
-[Table(Name = "users")]
-public class User
+public static class Program
 {
-    [PrimaryKey]
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = "";
+    public static void Main() { }
 
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = "";
-
-    [JsonPropertyName("email")]
-    public string Email { get; set; } = "";
-
-    [JsonPropertyName("premium")]
-    public bool Premium { get; set; }
-
-    [JsonPropertyName("created_at")]
-    public ulong CreatedAt { get; set; }
-}
-
-[Table(Name = "user_activities")]
-public class UserActivity
-{
-    [PrimaryKey]
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = "";
-
-    [JsonPropertyName("user_id")]
-    public string UserId { get; set; } = "";
-
-    [JsonPropertyName("action")]
-    public string Action { get; set; } = "";
-
-    [JsonPropertyName("timestamp")]
-    public ulong Timestamp { get; set; }
-}
-```
-
-### Table Attributes
-- `[Table(Name = "table_name")]` - Defines the table name in the database
-- `[PrimaryKey]` - Marks the primary key field
-- `[JsonPropertyName("field")]` - Controls JSON serialization field names
-
-## 🔄 Reducer Functions
-
-### Basic Reducer Pattern
-
-```csharp
-public class UserModule : ModuleBase
-{
-    [Reducer]
-    public static int CreateUser(ReducerContext ctx, string name, string email, bool premium)
+    [ModuleInitializer]
+    internal static void Init()
     {
-        try
+        Reducers.SetModuleInfo("user_module", "1.0.0");
+        Reducers.DeclareTable("users");
+
+        Reducers.Register("CreateUser", args =>
         {
-            // Input validation
+            string name = args[0].GetString()!;
+            string email = args[1].GetString()!;
             if (string.IsNullOrWhiteSpace(name))
+                throw new ReducerException("name required", -3);
+
+            long id = Host.GenerateId();
+            Db.Write("users", id.ToString(), JsonSerializer.Serialize(new
             {
-                Utils.LogError("Name cannot be empty");
-                return -1;
-            }
-
-            // Create new user
-            var user = new User
-            {
-                Id = Utils.GenerateId(),
-                Name = name,
-                Email = email,
-                Premium = premium,
-                CreatedAt = Utils.Now()
-            };
-
-            // Insert into database (automatically triggers changefeed)
-            ctx.Db.GetTable<User>().Insert(user);
-
-            Utils.LogInfo($"Created user: {user.Id} ({name})");
-            return (int)user.Id; // Return success
-        }
-        catch (Exception ex)
-        {
-            Utils.LogError($"Exception in CreateUser: {ex.Message}");
-            return -1;
-        }
-    }
-
-    [Reducer]
-    public static int UpdateUserPremium(ReducerContext ctx, string userId, bool premium)
-    {
-        try
-        {
-            // Find existing user
-            var user = ctx.Db.GetTable<User>().Find(userId);
-            if (user == null)
-            {
-                Utils.LogError($"User not found: {userId}");
-                return -2; // Not found
-            }
-
-            // Update premium status
-            user.Premium = premium;
-
-            // Update in database (automatically triggers changefeed)
-            ctx.Db.GetTable<User>().Update(user);
-
-            Utils.LogInfo($"Updated user {userId} premium status to {premium}");
-            return 1; // Success
-        }
-        catch (Exception ex)
-        {
-            Utils.LogError($"Exception in UpdateUserPremium: {ex.Message}");
-            return -1;
-        }
-    }
-
-    [Reducer]
-    public static int DeleteUser(ReducerContext ctx, string userId)
-    {
-        try
-        {
-            // Check if user exists
-            var user = ctx.Db.GetTable<User>().Find(userId);
-            if (user == null)
-            {
-                return 0; // Already deleted or never existed
-            }
-
-            // Delete user (automatically triggers changefeed)
-            bool wasDeleted = ctx.Db.GetTable<User>().Delete(userId);
-
-            if (wasDeleted)
-            {
-                Utils.LogInfo($"Deleted user: {userId}");
-            }
-
-            return wasDeleted ? 1 : 0;
-        }
-        catch (Exception ex)
-        {
-            Utils.LogError($"Exception in DeleteUser: {ex.Message}");
-            return -1;
-        }
+                id = id.ToString(),
+                name,
+                email,
+                created_at = Host.NowMs(),
+            }));
+            return new { id = id.ToString() };
+        }, "name", "email");
     }
 }
 ```
 
-### Reducer Context API
+### Reducers (AssemblyScript)
 
-The `ReducerContext` provides access to the database and execution context:
+```ts
+import { JsonValue, registerReducer, setModuleInfo, declareTable,
+         writeTable, generateId, nowMs, abortCall } from "../../assembly/index";
+export { instantdb_alloc, instantdb_free, instantdb_describe,
+         instantdb_invoke, __instantdb_abort } from "../../assembly/index";
 
-```csharp
-public class ReducerContext
-{
-    public string Sender { get; internal set; } = "";      // Identity of caller
-    public Random Random { get; internal set; } = new Random(); // Deterministic RNG
-    public DbContext Db { get; internal set; } = new DbContext(); // Database access
-}
+setModuleInfo("todo", "1.0.0");
+declareTable("todos");
+
+registerReducer("addTodo", (args: Array<JsonValue>): JsonValue | null => {
+  const text = args.length > 0 ? args[0].asString() : "";
+  if (text.length == 0) abortCall("addTodo: text required");
+  const id = generateId().toString();
+  writeTable("todos", id, JsonValue.newObject()
+    .setString("id", id).setString("text", text)
+    .setBool("done", false).setNumber("created_at", <f64>nowMs())
+    .toString());
+  return JsonValue.newObject().setString("id", id);
+}, ["text"]);
 ```
 
-## 🗄️ Database Operations
+### Database operations (per call, staged + atomic)
 
-### Type-Safe Table Access
+| Operation | Semantics | Changefeed event |
+|---|---|---|
+| write (`Db.Write` / `writeTable`) | Stages an upsert | INSERT/UPDATE on commit |
+| delete (`Db.Delete` / `deleteTable`) | Stages a delete | DELETE on commit |
+| read (`Db.Read` / `readTable`) | Sees own staged writes, then committed data | none |
+| scan (`Db.Scan` / `scanTable`) | Prefix scan, committed merged with staged | none |
+| emit event (`Host.EmitEvent` / `emitEvent`) | Custom `EVENT` payload | published after commit |
 
-```csharp
-[Reducer]
-public static int ProcessActivity(ReducerContext ctx, string userId, string action)
-{
-    // Type-safe table access
-    var userTable = ctx.Db.GetTable<User>();
-    var activityTable = ctx.Db.GetTable<UserActivity>();
+All staged writes commit atomically when the call returns a non-negative
+status without trapping; on any failure nothing is applied. Changefeed
+events for table writes are emitted automatically by the storage commit —
+**no manual event emission is needed for row changes** (use
+`emit event` only for custom, non-row payloads).
 
-    // Find user
-    var user = userTable.Find(userId);
-    if (user == null)
-    {
-        return -1; // User not found
-    }
+### Return status conventions (ABI)
 
-    // Create activity
-    var activity = new UserActivity
-    {
-        Id = $"{userId}_{Utils.Now()}",
-        UserId = userId,
-        Action = action,
-        Timestamp = Utils.Now()
-    };
+| Status | Meaning |
+|---|---|
+| `0` | Success; staged writes commit |
+| `1` / `0` (filter functions) | Include / exclude the event (writes still commit) |
+| `< 0` | Error; everything staged is discarded |
+| `-1` internal, `-2` permission denied, `-3` invalid argument, `-5` limit exceeded, `-404` no handler | Reserved codes |
 
-    // Insert activity
-    activityTable.Insert(activity);
+Result payloads (query results, transformed events) are returned via
+`host_set_result`, which the SDKs wire to your function's return value.
 
-    return 1; // Success
-}
-```
-
-### Dynamic Table Access
+### Subscription filters and transforms
 
 ```csharp
-[Reducer]
-public static int UpdateConfig(ReducerContext ctx, string key, string value)
-{
-    // Dynamic table access
-    ctx.Db.config.Insert(new { Key = key, Value = value });
-
-    // Other dynamic tables
-    ctx.Db.users.Insert(user);
-    ctx.Db.server_state.Update(state);
-    ctx.Db.user_activities.Delete(activityId);
-
-    return 1;
-}
+Reducers.RegisterFilter("OnlyInserts",
+    ev => ev.GetProperty("operation").GetString() == "INSERT");
 ```
 
-### Available Operations
-
-| Operation | Description | Automatic Changefeed |
-|-----------|-------------|----------------------|
-| `Insert(T row)` | Add new row to table | ✅ |
-| `Update(T row)` | Update existing row | ✅ |
-| `Delete(object key)` | Delete row by primary key | ✅ |
-| `Find<T>(object key)` | Find row by primary key | ❌ (Read-only) |
-
-## 🔄 Automatic Change Detection
-
-### How It Works
-
-All database write operations automatically trigger changefeed events:
-
-```csharp
-[Reducer]
-public static int CreateOrder(ReducerContext ctx, string userId, string item, decimal amount)
-{
-    var order = new Order
-    {
-        Id = Utils.GenerateId(),
-        UserId = userId,
-        Item = item,
-        Amount = amount,
-        Status = "pending"
-    };
-
-    // This automatically emits a changefeed event:
-    // {
-    //   "table": "orders",
-    //   "operation": "INSERT",
-    //   "key": order.Id,
-    //   "new_value": { ... order data ... }
-    // }
-    ctx.Db.GetTable<Order>().Insert(order);
-
-    return 1;
-}
+```ts
+registerFilter("onlyPending", (ev: JsonValue): bool =>
+  ev.getString("operation") == "INSERT");
 ```
 
-### No Manual Events Needed
+The event argument is
+`{table, operation, offset, transaction_id, key, new_value, old_value}`.
+Details: [WASM_SUBSCRIPTIONS.md](WASM_SUBSCRIPTIONS.md).
 
-**❌ Old Manual Way (No Longer Needed):**
-```csharp
-// Don't do this anymore!
-ctx.Db.GetTable<Order>().Insert(order);
-Events.Emit("order_created", order); // Manual event emission
-```
+### Lifecycle hooks
 
-**✅ New Automatic Way:**
-```csharp
-// Just do this - events are automatic!
-ctx.Db.GetTable<Order>().Insert(order);
-```
+Plain registrations under the reserved names `__init`,
+`__client_connected`, `__client_disconnected`, `__get_initial_data`.
 
-## 📡 Real-time Subscriptions
+## WebSocket Client API
 
-### WASM Subscription Filters
+Connect to `ws://localhost:8080`. The server sends a `welcome` message
+with your `client_id`. Subscription types:
 
-```csharp
-[SubscriptionFilter(Name = "filter_premium_users")]
-public static bool FilterPremiumUsers(byte[] eventData)
-{
-    try
-    {
-        var eventJson = System.Text.Encoding.UTF8.GetString(eventData);
-        var eventObj = JsonSerializer.Deserialize<JsonElement>(eventJson);
-
-        if (!eventObj.TryGetProperty("new_value", out var newValueElement))
-            return false;
-
-        var activityJson = newValueElement.GetString();
-        var activity = JsonSerializer.Deserialize<UserActivity>(activityJson);
-
-        // Check if user has premium account
-        var user = DB.Read<User>(new Key(activity.UserId));
-        return user?.Premium == true;
-    }
-    catch (Exception ex)
-    {
-        Utils.LogError($"Filter error: {ex.Message}");
-        return false;
-    }
-}
-```
-
-### WASM Subscription Transforms
-
-```csharp
-[SubscriptionTransform(Name = "transform_anonymize")]
-public static byte[] TransformAnonymize(byte[] eventData)
-{
-    try
-    {
-        var eventJson = System.Text.Encoding.UTF8.GetString(eventData);
-        var eventObj = JsonSerializer.Deserialize<JsonElement>(eventJson);
-
-        if (eventObj.TryGetProperty("new_value", out var newValueElement))
-        {
-            var activityJson = newValueElement.GetString();
-            var activity = JsonSerializer.Deserialize<UserActivity>(activityJson);
-
-            // Anonymize user data
-            activity.UserId = $"anon_{Math.Abs(activity.UserId.GetHashCode() % 100000)}";
-
-            var transformedJson = JsonSerializer.Serialize(activity);
-            var newEventObj = JsonSerializer.Deserialize<Dictionary<string, object>>(eventJson);
-            newEventObj["new_value"] = transformedJson;
-
-            var resultJson = JsonSerializer.Serialize(newEventObj);
-            return System.Text.Encoding.UTF8.GetBytes(resultJson);
-        }
-
-        return eventData;
-    }
-    catch (Exception ex)
-    {
-        Utils.LogError($"Transform error: {ex.Message}");
-        return eventData;
-    }
-}
-```
-
-## 🌐 WebSocket Client API
-
-### JavaScript Client
+### SQL subscription (server-evaluated WHERE)
 
 ```javascript
-class InstantDBClient {
-    constructor(url) {
-        this.url = url;
-        this.ws = null;
-        this.clientId = null;
-        this.subscriptions = new Map();
-    }
-
-    async connect() {
-        return new Promise((resolve, reject) => {
-            this.ws = new WebSocket(this.url);
-
-            this.ws.onopen = () => {
-                console.log('Connected to InstantDB');
-            };
-
-            this.ws.onmessage = (event) => {
-                this.handleMessage(JSON.parse(event.data));
-            };
-
-            this.ws.onclose = () => {
-                console.log('Disconnected from InstantDB');
-            };
-
-            // Wait for welcome message
-            this.pendingRequests.set('welcome', { resolve, reject });
-        });
-    }
-
-    async createWasmSubscription(options) {
-        const request = {
-            type: 'wasm_subscribe',
-            module_name: options.moduleName,
-            filter_function: options.filter_function,
-            transform_function: options.transform_function,
-            tables: options.tables,
-            include_initial_data: options.include_initial_data || false
-        };
-
-        this.ws.send(JSON.stringify(request));
-    }
-
-    // Convenience methods
-    async subscribeToRecentActivities(onEvent) {
-        return this.createWasmSubscription({
-            moduleName: 'subscription_demo',
-            filter_function: 'filter_recent_activities',
-            transform_function: 'transform_add_metadata',
-            tables: ['user_activities'],
-            include_initial_data: true,
-            onEvent
-        });
-    }
-
-    async subscribeToPremiumUsers(onEvent) {
-        return this.createWasmSubscription({
-            moduleName: 'subscription_demo',
-            filter_function: 'filter_premium_users',
-            transform_function: 'transform_anonymize',
-            tables: ['user_activities'],
-            onEvent
-        });
-    }
-}
-
-// Usage
-const client = new InstantDBClient('ws://localhost:8080');
-await client.connect();
-
-// Real-time updates for recent activities
-await client.subscribeToRecentActivities((data) => {
-    console.log('📈 Recent Activity:', data);
-    // Handle real-time activity updates
-});
-
-// Real-time updates for premium users (anonymized)
-await client.subscribeToPremiumUsers((data) => {
-    console.log('👑 Premium User Activity:', data);
-    // Handle premium user activities
-});
+ws.send(JSON.stringify({
+  type: 'sql_subscribe',
+  sql: "SELECT * FROM users WHERE premium = true"
+}));
+// -> {"type":"sql_subscription_created", "subscription_id":"..."}
+// -> {"type":"initial_state", "columns":[...], "rows":[...], ...}
+//    (note: the initial snapshot is NOT where-filtered; events are)
+// -> {"type":"sql_changefeed_event", "table":"users", "operation":"INSERT",
+//     "key":"...", "new_value":"...", "old_value":"...", ...} per matching write
 ```
 
-## 🔧 gRPC API
+WHERE clauses support comparisons, `AND`/`OR`/`NOT`, parentheses, `LIKE`,
+and `IS [NOT] NULL`, evaluated per event. Invalid queries are rejected
+with an `error` frame. UPDATE events match if the old OR new row matches.
 
-### SQL Operations
+### All-tables subscription
+
+```javascript
+ws.send(JSON.stringify({ type: 'subscribe_to_all_tables' }));
+// -> all_tables_subscription_created, initial_state_all_tables, then all events
+```
+
+### WASM subscription (module filter/transform)
+
+```javascript
+ws.send(JSON.stringify({
+  type: 'wasm_subscribe',
+  module_name: 'todo',
+  filter_function: 'onlyPending',       // optional
+  transform_function: 'addMetadata',    // optional
+  tables: ['todos'],                    // optional
+  include_initial_data: true            // optional (__get_initial_data)
+}));
+// -> wasm_subscription_created, then wasm_subscription_event messages
+```
+
+## gRPC API
+
+Use the bundled client (`grpcurl` is not required):
 
 ```bash
-# Execute SQL with automatic changefeed events
-grpcurl -plaintext -import-path proto -proto instantdb.proto \
-  -d '{"sql": "INSERT INTO users VALUES (1, \"Alice\", \"alice@example.com\", true)"}' \
-  localhost:50051 instantdb.grpc.SqlService.ExecuteSQL
+# SQL
+./build/instantdb_client exec "INSERT INTO users VALUES (1, 'Alice')"
+
+# Modules
+./build/instantdb_client deploy user_module ./UserModule.wasm 1.0.0
+./build/instantdb_client call user_module CreateUser '["Alice", "alice@example.com"]'
+./build/instantdb_client modules
+./build/instantdb_client undeploy user_module
 ```
 
-### WASM Module Management
+Services (`proto/instantdb.proto`): `SQLService`
+(`Execute`, `ExecuteTransaction`, `GetStatus`) and `WasmService`
+(`DeployModule`, `UndeployModule`, `ListModules`, `GetModule`,
+`ExecuteReducer`). `DeployModuleRequest` carries optional
+`ModuleCapabilities` (`allowed_tables`, `read_only`, `max_memory_mb`,
+`timeout_ms`).
 
-```bash
-# Deploy WASM module
-grpcurl -plaintext -import-path proto -proto instantdb.proto \
-  -d '{
-    "name": "user_module",
-    "version": "1.0.0",
-    "bytecode": "'$(base64 < UserModule.wasm)'"
-  }' \
-  localhost:50051 instantdb.grpc.WasmService.DeployModule
+## Best Practices
 
-# Execute reducer
-grpcurl -plaintext -import-path proto -proto instantdb.proto \
-  -d '{
-    "module_name": "user_module",
-    "reducer_name": "CreateUser",
-    "args": [
-      {"string_value": "Alice"},
-      {"string_value": "alice@example.com"},
-      {"bool_value": true}
-    ]
-  }' \
-  localhost:50051 instantdb.grpc.WasmService.ExecuteReducer
-```
-
-## 🛡️ Error Handling
-
-### Reducer Error Patterns
-
-```csharp
-[Reducer]
-public static int SafeOperation(ReducerContext ctx, string input)
-{
-    try
-    {
-        // Input validation
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            Utils.LogError("Invalid input provided");
-            return -1; // Error code
-        }
-
-        // Business logic
-        var result = ProcessInput(input);
-
-        // Database operation
-        ctx.Db.results.Insert(result);
-
-        return 1; // Success
-    }
-    catch (ArgumentException ex)
-    {
-        Utils.LogError($"Argument error: {ex.Message}");
-        return -2; // Validation error
-    }
-    catch (Exception ex)
-    {
-        Utils.LogError($"Unexpected error: {ex.Message}");
-        return -1; // General error
-    }
-}
-```
-
-### Return Code Conventions
-
-| Return Code | Meaning |
-|-------------|---------|
-| `> 0` | Success (can return meaningful values) |
-| `0` | No-op or not found (not an error) |
-| `-1` | General error |
-| `-2` | Validation error |
-| `-3` | Permission denied |
-| `-4` | Resource not found |
-
-## 🎯 Best Practices
-
-### 1. Reducer Design
-
-```csharp
-[Reducer]
-public static int BestPracticeReducer(ReducerContext ctx, string param)
-{
-    // ✅ Always validate inputs
-    if (string.IsNullOrWhiteSpace(param))
-    {
-        Utils.LogError("Parameter cannot be empty");
-        return -1;
-    }
-
-    // ✅ Use try-catch for error handling
-    try
-    {
-        // ✅ Keep operations atomic
-        var entity = CreateEntity(param);
-        ctx.Db.GetTable<Entity>().Insert(entity);
-
-        // ✅ Log important operations
-        Utils.LogInfo($"Created entity: {entity.Id}");
-
-        // ✅ Return meaningful values
-        return entity.Id;
-    }
-    catch (Exception ex)
-    {
-        // ✅ Log errors with context
-        Utils.LogError($"Failed to create entity: {ex.Message}");
-        return -1;
-    }
-}
-```
-
-### 2. Database Operations
-
-```csharp
-// ✅ Use type-safe access when possible
-var userTable = ctx.Db.GetTable<User>();
-var user = userTable.Find(userId);
-
-// ✅ Check for null before operations
-if (user != null)
-{
-    user.LastSeen = Utils.Now();
-    userTable.Update(user);
-}
-
-// ✅ Use dynamic access for configuration
-ctx.Db.config.Insert(new { Key = "setting", Value = "value" });
-```
-
-### 3. Subscription Filters
-
-```csharp
-[SubscriptionFilter(Name = "example_filter")]
-public static bool ExampleFilter(byte[] eventData)
-{
-    try
-    {
-        // ✅ Always parse safely
-        var eventJson = System.Text.Encoding.UTF8.GetString(eventData);
-        var eventObj = JsonSerializer.Deserialize<JsonElement>(eventJson);
-
-        // ✅ Check required fields exist
-        if (!eventObj.TryGetProperty("new_value", out var newValueElement))
-            return false;
-
-        // ✅ Handle parsing errors
-        var data = JsonSerializer.Deserialize<YourDataType>(newValueElement.GetString());
-
-        // ✅ Apply filter logic
-        return data.SomeField > SomeThreshold;
-    }
-    catch (Exception ex)
-    {
-        // ✅ Log errors and return false (don't crash)
-        Utils.LogError($"Filter error: {ex.Message}");
-        return false;
-    }
-}
-```
-
-## 📊 Performance Tips
-
-### 1. Efficient Database Access
-
-```csharp
-// ✅ Batch operations when possible
-var users = GetUsersToUpdate();
-var userTable = ctx.Db.GetTable<User>();
-
-foreach (var user in users)
-{
-    user.LastProcessed = Utils.Now();
-    userTable.Update(user); // Each update triggers changefeed
-}
-
-// ✅ Use Find() for single lookups
-var user = ctx.Db.GetTable<User>().Find(userId);
-
-// ✅ Minimize database operations in loops
-```
-
-### 2. Memory Management
-
-```csharp
-// ✅ Avoid large object allocations
-public static int ProcessLargeDataset(ReducerContext ctx, string[] items)
-{
-    // Process in chunks instead of all at once
-    const int chunkSize = 100;
-
-    for (int i = 0; i < items.Length; i += chunkSize)
-    {
-        var chunk = items.Skip(i).Take(chunkSize);
-        ProcessChunk(ctx, chunk);
-    }
-
-    return 1;
-}
-```
-
----
-
-**InstantDB API Guide** - Complete reference for the SpacetimeDB-like API with automatic change detection 🚀
+1. **Validate inputs** in reducers; fail with a negative status
+   (`ReducerException` / `abortCall`) so staged writes roll back.
+2. **Keep durable state in tables** — module linear memory does not
+   survive traps, timeouts, redeploys, or restarts.
+3. **Use `host_now_ms` / `host_generate_id`** (via the SDK wrappers)
+   instead of wall-clock or random APIs; time is fixed per call for
+   deterministic replay.
+4. **Keep filters lightweight** — they run on every matching event and
+   calls into a module are serialized.
+5. **Log via the SDK log functions** (`host_log`) — output lands in the
+   server log; module stdout/stderr are discarded.

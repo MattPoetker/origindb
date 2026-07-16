@@ -5,7 +5,6 @@
 #include <regex>
 #include <algorithm>
 #include <cctype>
-#include <nlohmann/json.hpp>
 
 namespace instantdb {
 
@@ -146,9 +145,7 @@ private:
         // Execute the insert
         spdlog::info("ExecuteInsert: Calling storage->Insert");
         if (storage_->Insert(stmt.table_name, row)) {
-            // Emit change event for prototype
-            EmitChangeEvent(stmt.table_name, "INSERT", row.key, row);
-
+            // Changefeed event is emitted by the storage engine at commit
             spdlog::debug("Inserted row with key {} into {}", row.key, stmt.table_name);
             return {true, "", {}, {}, 1, 0};
         }
@@ -173,9 +170,6 @@ private:
 
             // Execute the update
             if (storage_->Update(stmt.table_name, row.key, updated_row)) {
-                // Emit change event for UPDATE operation with old_value
-                EmitChangeEvent(stmt.table_name, "UPDATE", row.key, updated_row, old_row);
-
                 spdlog::info("ExecuteInsert: Successfully converted INSERT to UPDATE for key {}", row.key);
                 return {true, "", {}, {}, 0, 1};  // 0 inserts, 1 update
             }
@@ -188,15 +182,8 @@ private:
             // Since INSERT failed with "already exists", we can assume the row exists and proceed with UPDATE
             spdlog::info("ExecuteInsert: GET returned null but INSERT failed with key collision, proceeding with UPDATE anyway");
 
-            // For the changefeed, we'll use an empty old row since we can't retrieve it
-            Row old_row;
-            old_row.key = row.key;
-
             // Execute the update with the new row data
             if (storage_->Update(stmt.table_name, row.key, row)) {
-                // Emit change event for UPDATE operation
-                EmitChangeEvent(stmt.table_name, "UPDATE", row.key, row, old_row);
-
                 spdlog::info("ExecuteInsert: Successfully converted INSERT to UPDATE for key {} (with empty old_row)", row.key);
                 return {true, "", {}, {}, 0, 1};  // 0 inserts, 1 update
             }
@@ -290,9 +277,7 @@ private:
         // Execute the update
         spdlog::info("ExecuteUpdate: Calling storage->Update");
         if (storage_->Update(stmt.table_name, key_value, updated_row)) {
-            // Emit change event with both old and new values
-            EmitChangeEvent(stmt.table_name, "UPDATE", key_value, updated_row, *existing_row);
-
+            // Changefeed event is emitted by the storage engine at commit
             spdlog::debug("Updated row with key {} in {}", key_value, stmt.table_name);
             return {true, "", {}, {}, 1, 0};
         }
@@ -320,150 +305,6 @@ private:
         }
     }
 
-    void EmitChangeEvent(const std::string& table, const std::string& op,
-                        const std::string& key, const Row& row) {
-        if (!changefeed_) {
-            spdlog::debug("Changefeed not available - skipping change event: {} on table {} key {}",
-                         op, table, key);
-            return;
-        }
-
-        // Create a changefeed event
-        ChangefeedEvent event;
-        event.table = table;
-        event.operation = op;
-        event.transaction_id = "txn-" + std::to_string(next_txn_id_.load());
-        event.timestamp = std::chrono::system_clock::now();
-
-        // Convert key to bytes
-        event.key = std::vector<uint8_t>(key.begin(), key.end());
-
-        // Serialize row data as JSON for new_value
-        nlohmann::json row_json;
-        row_json["key"] = row.key;
-
-        // Convert columns to JSON
-        nlohmann::json columns_json;
-        for (const auto& [col_name, col_value] : row.columns) {
-            std::visit([&columns_json, &col_name](const auto& v) {
-                using T = std::decay_t<decltype(v)>;
-                if constexpr (std::is_same_v<T, std::monostate>) {
-                    columns_json[col_name] = nullptr;
-                } else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>) {
-                    columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, std::string>) {
-                    columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
-                    columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, bool>) {
-                    columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
-                    // Encode binary data as base64 or hex string
-                    columns_json[col_name] = "binary_data";
-                }
-            }, col_value);
-        }
-        row_json["columns"] = columns_json;
-
-        std::string json_str = row_json.dump();
-        event.new_value = std::vector<uint8_t>(json_str.begin(), json_str.end());
-
-        // For INSERT, old_value is empty
-        // For UPDATE/DELETE, we'd need to fetch the old value first
-        if (op != "INSERT") {
-            // TODO: Fetch old value for UPDATE/DELETE
-            event.old_value = {};
-        }
-
-        // Publish the event
-        changefeed_->PublishEvent(event);
-
-        spdlog::debug("Published changefeed event: {} on table {} key {}",
-                     op, table, key);
-    }
-
-    // Overloaded version for UPDATE operations that includes old_value
-    void EmitChangeEvent(const std::string& table, const std::string& op,
-                        const std::string& key, const Row& new_row, const Row& old_row) {
-        if (!changefeed_) {
-            spdlog::debug("Changefeed not available - skipping change event: {} on table {} key {}",
-                         op, table, key);
-            return;
-        }
-
-        // Create a changefeed event
-        ChangefeedEvent event;
-        event.table = table;
-        event.operation = op;
-        event.transaction_id = "txn-" + std::to_string(next_txn_id_.load());
-        event.timestamp = std::chrono::system_clock::now();
-
-        // Convert key to bytes
-        event.key = std::vector<uint8_t>(key.begin(), key.end());
-
-        // Serialize new row data as JSON for new_value
-        nlohmann::json new_row_json;
-        new_row_json["key"] = new_row.key;
-
-        nlohmann::json new_columns_json;
-        for (const auto& [col_name, col_value] : new_row.columns) {
-            std::visit([&new_columns_json, &col_name](const auto& v) {
-                using T = std::decay_t<decltype(v)>;
-                if constexpr (std::is_same_v<T, std::monostate>) {
-                    new_columns_json[col_name] = nullptr;
-                } else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>) {
-                    new_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, std::string>) {
-                    new_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
-                    new_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, bool>) {
-                    new_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
-                    new_columns_json[col_name] = "binary_data";
-                }
-            }, col_value);
-        }
-        new_row_json["columns"] = new_columns_json;
-
-        std::string new_json_str = new_row_json.dump();
-        event.new_value = std::vector<uint8_t>(new_json_str.begin(), new_json_str.end());
-
-        // Serialize old row data as JSON for old_value
-        nlohmann::json old_row_json;
-        old_row_json["key"] = old_row.key;
-
-        nlohmann::json old_columns_json;
-        for (const auto& [col_name, col_value] : old_row.columns) {
-            std::visit([&old_columns_json, &col_name](const auto& v) {
-                using T = std::decay_t<decltype(v)>;
-                if constexpr (std::is_same_v<T, std::monostate>) {
-                    old_columns_json[col_name] = nullptr;
-                } else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>) {
-                    old_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, std::string>) {
-                    old_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
-                    old_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, bool>) {
-                    old_columns_json[col_name] = v;
-                } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
-                    old_columns_json[col_name] = "binary_data";
-                }
-            }, col_value);
-        }
-        old_row_json["columns"] = old_columns_json;
-
-        std::string old_json_str = old_row_json.dump();
-        event.old_value = std::vector<uint8_t>(old_json_str.begin(), old_json_str.end());
-
-        // Publish the event
-        changefeed_->PublishEvent(event);
-
-        spdlog::debug("Published changefeed event with old_value: {} on table {} key {}",
-                     op, table, key);
-    }
-
 private:
     std::shared_ptr<StorageEngine> storage_;
     std::shared_ptr<ChangefeedEngine> changefeed_;
@@ -479,13 +320,20 @@ std::optional<SqlStatement> SqlParser::Parse(const std::string& sql) {
     SqlStatement stmt;
     stmt.raw_sql = sql;
 
+    // Regexes match against upper_sql; identifiers must keep their original
+    // case (tables created by WASM modules are case-sensitive). toupper
+    // preserves length, so match positions map 1:1 onto the original string.
+    auto original_text = [&sql](const std::smatch& m, int group) {
+        return sql.substr(m.position(group), m.length(group));
+    };
+
     // Enhanced INSERT parsing: INSERT INTO table (col1, col2, ...) VALUES (val1, val2, ...)
     std::regex insert_regex(R"(INSERT\s+INTO\s+(\w+)\s*(?:\((.*?)\))?\s*VALUES\s*\((.*)\))");
     std::smatch match;
 
     if (std::regex_search(upper_sql, match, insert_regex)) {
         stmt.type = StatementType::INSERT;
-        std::string table_name = match[1].str();
+        std::string table_name = original_text(match, 1);
         stmt.table_name = table_name;
 
         // Parse column list if provided
@@ -540,7 +388,7 @@ std::optional<SqlStatement> SqlParser::Parse(const std::string& sql) {
     std::regex create_regex(R"(CREATE\s+TABLE\s+(\w+)\s*\((.*)\))");
     if (std::regex_search(upper_sql, match, create_regex)) {
         stmt.type = StatementType::CREATE_TABLE;
-        stmt.table_schema.name = match[1].str();
+        stmt.table_schema.name = original_text(match, 1);
 
         // Simplified column parsing for prototype
         instantdb::Column id_col;
@@ -571,7 +419,7 @@ std::optional<SqlStatement> SqlParser::Parse(const std::string& sql) {
     std::regex select_regex(R"(SELECT\s+.*\s+FROM\s+(\w+))");
     if (std::regex_search(upper_sql, match, select_regex)) {
         stmt.type = StatementType::SELECT;
-        std::string table_name = match[1].str();
+        std::string table_name = original_text(match, 1);
         stmt.table_name = table_name;
         return stmt;
     }
@@ -580,7 +428,7 @@ std::optional<SqlStatement> SqlParser::Parse(const std::string& sql) {
     std::regex update_regex(R"(UPDATE\s+(\w+)\s+SET\s+(.*?)(?:\s+WHERE\s+(.*))?$)");
     if (std::regex_search(upper_sql, match, update_regex)) {
         stmt.type = StatementType::UPDATE;
-        stmt.table_name = match[1].str();
+        stmt.table_name = original_text(match, 1);
 
         // Extract SET clause from original SQL (not uppercased) to preserve case
         std::smatch original_match;

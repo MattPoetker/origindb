@@ -3,6 +3,12 @@
  *
  * This example demonstrates how to connect to InstantDB and create
  * WASM-powered subscription queries via WebSocket.
+ *
+ * NOTE: the module ("subscription_demo") and function names used below are
+ * placeholders — no such module ships with the repo. To run this against a
+ * real module, deploy one first (e.g. sdk/typescript/examples/todo, which
+ * registers an "onlyPending" filter) and substitute its module/function
+ * names. See docs/WASM_SUBSCRIPTIONS.md.
  */
 
 class InstantDBClient {

@@ -1,2 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libgrpc_service.a CMakeFiles/grpc_service.dir/src/grpc/grpc_server.cpp.o CMakeFiles/grpc_service.dir/src/grpc/grpc_server_old.cpp.o CMakeFiles/grpc_service.dir/generated/instantdb.pb.cc.o CMakeFiles/grpc_service.dir/generated/instantdb.grpc.pb.cc.o
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libgrpc_service.a

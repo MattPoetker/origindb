@@ -145,7 +145,7 @@ public:
     }
 
     bool Commit(std::shared_ptr<TransactionImpl> txn) {
-        spdlog::info("StorageEngine::Commit: Starting commit for transaction");
+        spdlog::debug("StorageEngine::Commit: Starting commit for transaction");
 
         if (!txn->IsActive()) {
             spdlog::error("StorageEngine::Commit: Transaction not active");
@@ -154,18 +154,18 @@ public:
 
         // Get write set
         auto write_set = txn->GetWriteSet();
-        spdlog::info("StorageEngine::Commit: Write set has {} operations", write_set.size());
+        spdlog::debug("StorageEngine::Commit: Write set has {} operations", write_set.size());
 
         if (!write_set.empty()) {
             // Validate and apply writes
-            spdlog::info("StorageEngine::Commit: Acquiring tables lock");
+            spdlog::debug("StorageEngine::Commit: Acquiring tables lock");
             std::unique_lock lock(tables_mutex_);
-            spdlog::info("StorageEngine::Commit: Tables lock acquired");
+            spdlog::debug("StorageEngine::Commit: Tables lock acquired");
 
             for (const auto& write : write_set) {
-                spdlog::info("StorageEngine::Commit: Processing write for table {}", write.table_name);
+                spdlog::debug("StorageEngine::Commit: Processing write for table {}", write.table_name);
 
-                spdlog::info("StorageEngine::Commit: Getting table {}", write.table_name);
+                spdlog::debug("StorageEngine::Commit: Getting table {}", write.table_name);
                 // Don't call GetTable() here since we already hold tables_mutex_ lock
                 auto it = tables_.find(write.table_name);
                 if (it == tables_.end()) {
@@ -175,15 +175,30 @@ public:
                 }
                 auto table = it->second;
 
-                spdlog::info("StorageEngine::Commit: Table found, applying write operation {}", static_cast<int>(write.op));
+                spdlog::debug("StorageEngine::Commit: Table found, applying write operation {}", static_cast<int>(write.op));
+
+                // Capture the existing row for UPDATE/DELETE before applying
+                // the write, so changefeed consumers receive old_value
+                std::optional<Row> old_row;
+                if (write.op == WriteOp::UPDATE || write.op == WriteOp::DELETE) {
+                    old_row = table->Get(write.row.key);
+                }
+
                 // Apply write based on operation type
                 bool success = false;
                 switch (write.op) {
                     case WriteOp::INSERT:
-                        spdlog::info("StorageEngine::Commit: Calling table->Insert for key {}", write.row.key);
+                        spdlog::debug("StorageEngine::Commit: Calling table->Insert for key {}", write.row.key);
                         success = table->Insert(write.row);
-                        spdlog::info("StorageEngine::Commit: table->Insert returned {}", success);
-                        if (success) stats_.total_rows++;
+                        if (success) {
+                            stats_.total_rows++;
+                        } else if (table->Get(write.row.key)) {
+                            // Key was committed by a concurrent transaction after
+                            // this write was staged; resolve the upsert as UPDATE.
+                            old_row = table->Get(write.row.key);
+                            success = table->Update(write.row.key, write.row);
+                        }
+                        spdlog::debug("StorageEngine::Commit: table->Insert returned {}", success);
                         break;
                     case WriteOp::UPDATE:
                         success = table->Update(write.row.key, write.row);
@@ -200,7 +215,7 @@ public:
                     return false;
                 }
 
-                spdlog::info("StorageEngine::Commit: Write applied successfully, logging to WAL");
+                spdlog::debug("StorageEngine::Commit: Write applied successfully, logging to WAL");
                 // Log to WAL
                 WALEntry entry;
 
@@ -220,14 +235,14 @@ public:
                 entry.table_name = write.table_name;
                 entry.key = write.row.key;
 
-                spdlog::info("StorageEngine::Commit: Serializing row for WAL");
+                spdlog::debug("StorageEngine::Commit: Serializing row for WAL");
                 entry.data = SerializeRow(write.row);
-                spdlog::info("StorageEngine::Commit: Row serialized, appending to WAL");
+                spdlog::debug("StorageEngine::Commit: Row serialized, appending to WAL");
 
                 entry.transaction_id = txn->GetTimestamp(); // Use timestamp as ID
                 entry.timestamp = txn->GetTimestamp();
                 wal_->Append(entry);
-                spdlog::info("StorageEngine::Commit: WAL append completed");
+                spdlog::debug("StorageEngine::Commit: WAL append completed");
 
                 // Emit changefeed event if changefeed engine is available
                 if (changefeed_engine_) {
@@ -257,13 +272,16 @@ public:
                         cf_event.new_value = SerializeRow(write.row);
                     }
 
-                    // TODO: For UPDATE/DELETE operations, we should also set old_value
-                    // This would require reading the existing value before the operation
+                    // For UPDATE/DELETE operations, set old_value from the row
+                    // captured before the write was applied
+                    if (old_row) {
+                        cf_event.old_value = SerializeRow(*old_row);
+                    }
 
                     cf_event.timestamp = std::chrono::system_clock::now();
 
                     changefeed_engine_->PublishEvent(cf_event);
-                    spdlog::info("StorageEngine::Commit: Changefeed event emitted for table {}, operation {}",
+                    spdlog::debug("StorageEngine::Commit: Changefeed event emitted for table {}, operation {}",
                                 write.table_name, cf_event.operation);
                 }
             }
@@ -637,10 +655,10 @@ StorageEngine::Stats StorageEngine::GetStats() const {
 
 // Direct operations
 bool StorageEngine::Insert(const std::string& table, const Row& row) {
-    spdlog::info("StorageEngine::Insert: Starting transaction for table={}, key={}", table, row.key);
+    spdlog::debug("StorageEngine::Insert: Starting transaction for table={}, key={}", table, row.key);
 
     auto txn = BeginTransaction(IsolationLevel::READ_COMMITTED);
-    spdlog::info("StorageEngine::Insert: Created transaction");
+    spdlog::debug("StorageEngine::Insert: Created transaction");
 
     if (!txn->Insert(table, row)) {
         spdlog::error("StorageEngine::Insert: Transaction insert failed");
@@ -648,9 +666,9 @@ bool StorageEngine::Insert(const std::string& table, const Row& row) {
         return false;
     }
 
-    spdlog::info("StorageEngine::Insert: Transaction insert succeeded, committing");
+    spdlog::debug("StorageEngine::Insert: Transaction insert succeeded, committing");
     bool result = Commit(txn);
-    spdlog::info("StorageEngine::Insert: Commit result={}", result);
+    spdlog::debug("StorageEngine::Insert: Commit result={}", result);
     return result;
 }
 
@@ -673,16 +691,20 @@ bool StorageEngine::Delete(const std::string& table, const std::string& key) {
 }
 
 std::optional<Row> StorageEngine::Get(const std::string& table, const std::string& key) {
-    auto txn = BeginTransaction(IsolationLevel::READ_COMMITTED);
-    txn->SetReadOnly(true);
-    return txn->Get(table, key);
+    // Read committed state directly; TransactionImpl::Get only sees its own
+    // write set and would always miss here.
+    auto table_ptr = GetTable(table);
+    if (!table_ptr) return std::nullopt;
+    return table_ptr->Get(key);
 }
 
 void StorageEngine::Scan(const std::string& table, const std::string& start_key,
                          const std::string& end_key, ScanCallback callback) {
-    auto txn = BeginTransaction(IsolationLevel::READ_COMMITTED);
-    txn->SetReadOnly(true);
-    txn->Scan(table, start_key, end_key, callback);
+    // Read committed state directly; TransactionImpl::Scan is a stub that
+    // yields nothing.
+    auto table_ptr = GetTable(table);
+    if (!table_ptr) return;
+    table_ptr->Scan(start_key, end_key, callback);
 }
 
 } // namespace instantdb

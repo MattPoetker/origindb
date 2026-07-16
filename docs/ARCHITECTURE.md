@@ -88,9 +88,13 @@ struct WALEntry {
 The SQL engine handles query parsing, planning, and execution.
 
 #### Current Capabilities
-- **DDL**: CREATE TABLE statements
-- **DML**: INSERT and SELECT statements
-- **Basic Parsing**: Simple SQL syntax support
+- **DDL**: CREATE TABLE statements (column definitions are currently
+  ignored — a fixed schema is applied)
+- **DML**: INSERT, SELECT (full-table only — WHERE and column projection
+  are not applied), and simplified UPDATE (`WHERE key=value`); DELETE is
+  unimplemented
+- **Basic Parsing**: regex-based, not a real SQL parser; identifiers
+  preserve case
 - **Type Validation**: Ensures data type consistency
 
 #### SQL Execution Flow
@@ -117,8 +121,12 @@ The changefeed engine tracks data changes and publishes events to subscribers.
 
 #### Features
 - **Subscription Management**: Multiple subscribers per table
-- **Event Filtering**: Table-based filtering (more filters planned)
-- **Event Publishing**: Asynchronous event delivery
+- **Event Filtering**: table filtering, per-event WHERE-clause evaluation
+  (`src/changefeed/predicate_evaluator.cpp`: comparisons, AND/OR/NOT,
+  parentheses, LIKE, IS [NOT] NULL), and column projection
+- **Event Publishing**: Asynchronous event delivery; events carry both
+  `old_value` and `new_value`, emitted exactly once per write by the
+  storage commit
 - **Metrics Tracking**: Active subscriptions and event counts
 
 #### Event Flow
@@ -174,7 +182,33 @@ struct WebSocketFrame {
 - `0x9`: Ping frame
 - `0xA`: Pong frame
 
-### 6. Configuration System (`src/common/config.h`)
+### 6. WASM Engine (`src/wasm/`)
+
+Runs user modules on **wasmtime** (LTS C API). Each module gets one
+long-lived instance; calls are serialized per module and dispatched
+through the single `instantdb_invoke` export defined in
+[WASM_ABI.md](WASM_ABI.md).
+
+- **Sandboxing**: epoch-based CPU deadlines (default 5000 ms/call) and a
+  store memory limiter (default 256 MiB), overridable per module via
+  deploy-time `ModuleCapabilities` (`allowed_tables`, `read_only`,
+  `max_memory_mb`, `timeout_ms`)
+- **Transactions**: each call runs against a staged-write overlay that
+  commits atomically through one storage transaction on non-negative
+  status; traps/timeouts/negative status discard everything
+- **Persistence** (`src/wasm/module_store.cpp`): deployed bytecode plus a
+  sha256 manifest under `<data_dir>/modules/<name>/`; modules are restored
+  on boot and removed on undeploy
+- **Subscriptions** (`src/wasm/wasm_subscription.cpp`): filter/transform
+  functions applied to changefeed events before WebSocket delivery
+
+### 7. gRPC Service (`src/grpc/`)
+
+`SQLService` (Execute, ExecuteTransaction, GetStatus) and `WasmService`
+(DeployModule, UndeployModule, ListModules, GetModule, ExecuteReducer) on
+port 50051. `src/cmd/grpc_client.cpp` is the bundled CLI client.
+
+### 8. Configuration System (`src/common/config.h`)
 
 Centralized configuration management for all components.
 
@@ -325,20 +359,23 @@ Startup → WAL Recovery → Table Reconstruction → Ready
 
 ## Future Architecture Evolution
 
-### Near-term (v0.2.0)
-- **gRPC API**: High-performance SQL interface
-- **Configuration Files**: YAML/JSON configuration
-- **Enhanced SQL**: UPDATE, DELETE operations
-- **Basic Authentication**: Simple user management
+Already shipped (formerly on this roadmap): the gRPC API and the WASM
+runtime (wasmtime-backed modules with sandboxing, capabilities, and
+persistence).
 
-### Medium-term (v0.3.0)
+### Near-term
+- **Real SQL parser**: replace the regex-based parser; SELECT
+  WHERE/projection, DELETE, honored CREATE TABLE schemas
+- **Basic Authentication**: Simple user management
+- **Configuration Files**: richer YAML/JSON configuration
+
+### Medium-term
 - **Raft Consensus**: Multi-node clustering
 - **Data Replication**: Automatic failover
 - **Load Balancing**: Client connection distribution
 - **Backup/Restore**: Point-in-time recovery
 
-### Long-term (v1.0.0)
-- **WASM Runtime**: User-defined functions
-- **Complete SQL**: Full SQL:2016 compliance
+### Long-term
+- **Complete SQL**: joins, aggregates, query optimization
 - **Advanced Indexing**: B-tree and hash indexes
-- **Query Optimization**: Cost-based query planning
+- **Cross-module calls and async I/O** in the WASM runtime
