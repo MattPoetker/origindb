@@ -72,6 +72,21 @@ target_compile_features(websocket_perf_tests PRIVATE cxx_std_17)
 # TODO: Fix gRPC protobuf interfaces and re-enable
 set(ENABLE_GRPC_TESTS OFF)
 
+# Regression benchmark suite (fixed op counts, JSON baselines)
+add_executable(instantdb_bench
+    instantdb_bench.cpp
+)
+target_link_libraries(instantdb_bench
+    storage
+    changefeed_engine
+    wasm_engine
+    wasmtime_c_api
+    spdlog::spdlog
+    nlohmann_json::nlohmann_json
+    Threads::Threads
+)
+target_compile_features(instantdb_bench PRIVATE cxx_std_20)
+
 # Main performance test runner executable
 add_executable(perf_test_runner
     perf_test_runner.cpp
