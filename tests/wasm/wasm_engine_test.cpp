@@ -44,6 +44,7 @@ std::vector<uint8_t> Wat2Wasm(const std::string& wat) {
 //   "abort" (5,a)    -> write, then host_abort("boom") (rollback test)
 //   "wsecret" (7,w)  -> write to table "secret" (capability test)
 //   "growalot" (8,g) -> memory.grow(1024); -5 if denied (memory-limit test)
+//   "__migrate" (9,_) -> writes t/k1 (hot-swap migration test)
 //   anything else    -> -404
 const char* kTestModuleWat = R"WAT(
 (module
@@ -104,6 +105,10 @@ const char* kTestModuleWat = R"WAT(
     (if (i32.and (i32.eq (local.get $nl) (i32.const 6))
                  (i32.eq (local.get $fb) (i32.const 95)))   ;; '_' -> __init
       (then (return (i32.const 0))))
+
+    (if (i32.and (i32.eq (local.get $nl) (i32.const 9))
+                 (i32.eq (local.get $fb) (i32.const 95)))   ;; '_' -> __migrate
+      (then (return (call $do_write))))
 
     (if (i32.and (i32.eq (local.get $nl) (i32.const 1))
                  (i32.eq (local.get $fb) (i32.const 119)))  ;; 'w'
@@ -316,6 +321,56 @@ TEST_F(WasmEngineTest, UnknownReducerFailsButLifecycleNoops) {
     auto lifecycle = engine_->OnClientConnected(
         "m", engine_->CreateReducerContext("test", "conn-1"));
     EXPECT_TRUE(lifecycle.success) << lifecycle.error;
+}
+
+TEST_F(WasmEngineTest, HotSwapRunsMigrateHook) {
+    ASSERT_TRUE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "1.0.0"));
+    // No writes yet; __migrate must not run on first deploy.
+    EXPECT_FALSE(storage_->Get("t", "k1").has_value());
+
+    // Redeploy: __migrate writes t/k1 and its staged write must commit.
+    ASSERT_TRUE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "1.1.0"));
+    EXPECT_TRUE(storage_->Get("t", "k1").has_value());
+    EXPECT_EQ(engine_->GetModule("m")->GetMetadata().version, "1.1.0");
+}
+
+TEST_F(WasmEngineTest, FailedMigrateKeepsOldModuleServing) {
+    ASSERT_TRUE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "1.0.0"));
+
+    // Valid module whose invoke succeeds for __init (len 6) but fails
+    // everything else — including __migrate.
+    auto bad = Wat2Wasm(R"((module
+        (memory (export "memory") 1)
+        (func (export "origindb_alloc") (param i32) (result i32) (i32.const 1024))
+        (func (export "origindb_invoke") (param i32 i32 i32 i32) (result i32)
+          (if (i32.eq (local.get 1) (i32.const 6))
+            (then (return (i32.const 0))))
+          (i32.const -1))))");
+    ASSERT_FALSE(bad.empty());
+
+    EXPECT_FALSE(engine_->LoadModule("m", bad, "2.0.0"));
+    EXPECT_NE(engine_->GetLastLoadError().find("__migrate failed"),
+              std::string::npos)
+        << engine_->GetLastLoadError();
+
+    // Old module still deployed and still executes.
+    EXPECT_EQ(engine_->GetModule("m")->GetMetadata().version, "1.0.0");
+    EXPECT_TRUE(Run("w").success);
+}
+
+TEST_F(WasmEngineTest, VersionGateRejectsDowngrade) {
+    ASSERT_TRUE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "2.0.0"));
+
+    EXPECT_FALSE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "1.9.9"));
+    EXPECT_NE(engine_->GetLastLoadError().find("older than deployed"),
+              std::string::npos);
+    EXPECT_EQ(engine_->GetModule("m")->GetMetadata().version, "2.0.0");
+
+    // Equal version redeploys are allowed (dev iteration), as are upgrades;
+    // "2.0.10" must compare numerically greater than "2.0.9".
+    EXPECT_TRUE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "2.0.0"));
+    EXPECT_TRUE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "2.0.9"));
+    EXPECT_TRUE(engine_->LoadModule("m", Wat2Wasm(kTestModuleWat), "2.0.10"));
 }
 
 TEST_F(WasmEngineTest, ModulesExecuteConcurrently) {

@@ -32,6 +32,12 @@ All SDKs (C#, TypeScript/AssemblyScript, C++) must conform to this document.
 - `name` is the reducer name (UTF-8, exact match). Reserved lifecycle names
   begin with `__`:
   - `__init` — after deploy/instantiation
+  - `__migrate` — args: `[old_version, new_version]`; invoked on the NEW
+    module when it replaces an already-deployed module (hot-swap). Staged
+    writes commit like any reducer, so schema/data migrations are ordinary
+    table operations. A non-zero status aborts the swap and the old module
+    keeps serving. Deploys with a version lower than the deployed one are
+    rejected before `__migrate` runs.
   - `__client_connected` / `__client_disconnected` — args: `[connection_id]`
   - `__get_initial_data` — args: `[where_clause]`
   - filter/transform functions are invoked under whatever name the

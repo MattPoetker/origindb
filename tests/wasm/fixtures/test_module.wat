@@ -57,6 +57,10 @@
                  (i32.eq (local.get $fb) (i32.const 95)))   ;; '_' -> __init
       (then (return (i32.const 0))))
 
+    (if (i32.and (i32.eq (local.get $nl) (i32.const 9))
+                 (i32.eq (local.get $fb) (i32.const 95)))   ;; '_' -> __migrate
+      (then (return (call $do_write))))
+
     (if (i32.and (i32.eq (local.get $nl) (i32.const 1))
                  (i32.eq (local.get $fb) (i32.const 119)))  ;; 'w'
       (then (return (call $do_write))))

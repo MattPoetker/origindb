@@ -173,27 +173,95 @@ public:
 
         ExtractMetadata(*module);
 
+        // Hot-swap: the currently deployed module (if any) keeps serving until
+        // the new one has passed the version gate, __init, and __migrate.
+        std::shared_ptr<WasmModule> previous;
         {
             std::lock_guard<std::mutex> lock(modules_mutex_);
-            if (modules_.count(name))
-                spdlog::warn("Module {} already loaded, replacing", name);
-            modules_[name] = module;
+            auto it = modules_.find(name);
+            if (it != modules_.end()) previous = it->second;
         }
 
-        // Run the module's init hook outside modules_mutex_.
+        if (previous) {
+            const std::string& old_v = previous->metadata_.version;
+            const std::string& new_v = module->metadata_.version;
+            if (!old_v.empty() && !new_v.empty() &&
+                CompareVersions(new_v, old_v) < 0) {
+                SetLoadError(name, "version " + new_v +
+                                       " is older than deployed version " + old_v +
+                                       "; bump the version to redeploy");
+                spdlog::warn("Rejected downgrade of module {}: {} -> {}", name,
+                             old_v, new_v);
+                return false;
+            }
+        }
+
         ReducerContext ctx = CreateReducerContext("system", "");
         auto init = Execute(module, "__init", ctx, {});
         if (!init.success) {
-            spdlog::error("Module {} __init failed: {}", name, init.error);
-            UnloadModule(name);
             SetLoadError(name, "__init failed: " + init.error);
-            return false;
+            spdlog::error("Module {} __init failed: {}", name, init.error);
+            return false;  // previous module (if any) is untouched
         }
 
-        spdlog::info("Loaded WASM module {} (version '{}', {} bytes)", name,
-                     version.empty() ? module->metadata_.version : version,
-                     bytecode.size());
+        if (previous) {
+            // Reserved migration hook, invoked on the NEW module with
+            // (old_version, new_version). Modules without a handler no-op
+            // (-404). Failure aborts the swap; the old module keeps serving.
+            auto migrate = Execute(module, "__migrate", ctx,
+                                   {WasmValue(previous->metadata_.version),
+                                    WasmValue(module->metadata_.version)});
+            if (!migrate.success) {
+                SetLoadError(name, "__migrate failed: " + migrate.error);
+                spdlog::error("Module {} __migrate ({} -> {}) failed: {}", name,
+                              previous->metadata_.version,
+                              module->metadata_.version, migrate.error);
+                return false;
+            }
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(modules_mutex_);
+            modules_[name] = module;
+        }
+
+        if (previous) {
+            spdlog::info("Hot-swapped WASM module {} ({} -> {}, {} bytes)", name,
+                         previous->metadata_.version.empty()
+                             ? "?"
+                             : previous->metadata_.version,
+                         module->metadata_.version.empty()
+                             ? "?"
+                             : module->metadata_.version,
+                         bytecode.size());
+        } else {
+            spdlog::info("Loaded WASM module {} (version '{}', {} bytes)", name,
+                         module->metadata_.version, bytecode.size());
+        }
         return true;
+    }
+
+    // Dotted numeric version compare ("1.2.10" > "1.2.9"); missing segments
+    // are zero; non-numeric segments fall back to lexicographic comparison.
+    static int CompareVersions(const std::string& a, const std::string& b) {
+        size_t ia = 0, ib = 0;
+        while (ia < a.size() || ib < b.size()) {
+            std::string sa, sb;
+            while (ia < a.size() && a[ia] != '.') sa += a[ia++];
+            while (ib < b.size() && b[ib] != '.') sb += b[ib++];
+            if (ia < a.size()) ia++;
+            if (ib < b.size()) ib++;
+
+            bool na = !sa.empty() && sa.find_first_not_of("0123456789") == std::string::npos;
+            bool nb = !sb.empty() && sb.find_first_not_of("0123456789") == std::string::npos;
+            if (na && nb) {
+                long va = std::stol(sa), vb = std::stol(sb);
+                if (va != vb) return va < vb ? -1 : 1;
+            } else {
+                if (sa != sb) return sa < sb ? -1 : 1;
+            }
+        }
+        return 0;
     }
 
     bool UnloadModule(const std::string& name) {
