@@ -134,13 +134,37 @@ Run a server and poke it:
 
 ```bash
 build_new/origindb_server -d ./data -p 8787 -g 50051
+# on first boot it prints an ADMIN and a CLIENT token (stored in
+# <data_dir>/auth/tokens.json, mode 0600) — copy the ADMIN one:
+export ORIGINDB_TOKEN=odb_admin_...
 
 build_new/origindb_client status
 build_new/origindb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
 build_new/origindb_client call todo addTodo '["ship it"]'
-build_new/origindb_client call todo listTodos
 build_new/origindb_client exec "SELECT * FROM todos"
 ```
+
+### 🔐 Auth & TLS
+
+Token auth is **on by default**. Two scopes:
+
+| Scope | Grants |
+|---|---|
+| `admin` | deploy/undeploy modules, execute SQL |
+| `client` | call reducers, subscribe, read status (admin also grants this) |
+
+- Pass a token with `--token`/`-t` or the `ORIGINDB_TOKEN` env var. gRPC
+  clients send it as `authorization: Bearer <token>`; browsers connect to
+  the websocket with `ws://host:port/?token=<client-token>` (they can't set
+  headers). Tokens are auto-generated on first boot, or set explicitly via
+  `ORIGINDB_ADMIN_TOKEN` / `ORIGINDB_CLIENT_TOKEN`.
+- **TLS** on the gRPC endpoint: `--tls-cert cert.pem --tls-key key.pem`
+  (clients then use `--tls` / `--tls-ca ca.pem`). Generate a dev cert with
+  `openssl req -x509 -newkey rsa:2048 -nodes -days 365 -keyout key.pem -out
+  cert.pem -subj /CN=localhost -addext subjectAltName=DNS:localhost`.
+- `--no-auth` disables tokens for local hacking (logs a loud warning).
+- **Not yet**: TLS on the raw-socket websocket endpoint (needs OpenSSL
+  socket wrapping) — terminate it behind a TLS reverse proxy for now.
 
 ## 🛠️ Writing modules
 
@@ -335,9 +359,12 @@ docs/              WASM_ABI.md (normative), architecture & API guides
 - **SQL is a prototype**: regex parser; `SELECT` has no WHERE/projection,
   `DELETE` is unimplemented, `CREATE TABLE` ignores column definitions.
   (Subscription WHERE filtering is real and separate.)
-- **No authentication** on the websocket or gRPC endpoints — anyone who can
-  reach the gRPC port can deploy modules. LAN/dev use only.
-- **Single node**: no replication yet; WAL flush is not fsync'd.
+- **Auth is bearer-token only** (two static scopes, no per-user identity,
+  no revocation beyond rotating the file). TLS covers gRPC but not yet the
+  raw websocket endpoint — front it with a TLS proxy for real deployments.
+- **Single node**: no replication yet; **WAL flush is not fsync'd** — a
+  power loss can drop recently "committed" writes (group-commit + fsync is
+  the next durability work).
 - Cursor-grade write volume runs the full commit+WAL pipeline (~1 ms per
   reducer call) — fine for demos and moderate loads; an ephemeral table class
   is on the roadmap.

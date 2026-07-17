@@ -1,4 +1,6 @@
 #include "grpc/wasm_service_impl.h"
+#include "grpc/auth_check.h"
+#include "common/auth.h"
 #include "wasm/wasm_engine.h"
 #include "wasm/module_store.h"
 #include <spdlog/spdlog.h>
@@ -26,17 +28,22 @@ ModuleCapabilities CapabilitiesFromProto(
 }  // namespace
 
 WasmServiceImpl::WasmServiceImpl(std::shared_ptr<WasmEngine> wasm_engine,
-                                 std::shared_ptr<ModuleStore> module_store)
-    : wasm_engine_(std::move(wasm_engine)), module_store_(std::move(module_store)) {}
+                                 std::shared_ptr<ModuleStore> module_store,
+                                 std::shared_ptr<AuthManager> auth)
+    : wasm_engine_(std::move(wasm_engine)),
+      module_store_(std::move(module_store)),
+      auth_(std::move(auth)) {}
 
 void* WasmServiceImpl::DeployModule(void* context,
                                     const void* request,
                                     void* response) {
-    (void)context;
     auto deploy_request = static_cast<const origindb::grpc::DeployModuleRequest*>(request);
     auto deploy_response = static_cast<origindb::grpc::DeployModuleResponse*>(response);
 
     static thread_local ::grpc::Status status;
+    if (!CheckAuth(static_cast<::grpc::ServerContext*>(context), auth_,
+                   AuthScope::ADMIN, status))
+        return &status;
 
     spdlog::info("DeployModule: {} ({} bytes)", deploy_request->name(),
                  deploy_request->bytecode().size());
@@ -109,11 +116,13 @@ void* WasmServiceImpl::DeployModule(void* context,
 void* WasmServiceImpl::UndeployModule(void* context,
                                       const void* request,
                                       void* response) {
-    (void)context;
     auto undeploy_request = static_cast<const origindb::grpc::UndeployModuleRequest*>(request);
     auto undeploy_response = static_cast<origindb::grpc::UndeployModuleResponse*>(response);
 
     static thread_local ::grpc::Status status;
+    if (!CheckAuth(static_cast<::grpc::ServerContext*>(context), auth_,
+                   AuthScope::ADMIN, status))
+        return &status;
 
     try {
         bool success = wasm_engine_->UnloadModule(undeploy_request->name());
@@ -143,11 +152,13 @@ void* WasmServiceImpl::UndeployModule(void* context,
 void* WasmServiceImpl::ListModules(void* context,
                                    const void* request,
                                    void* response) {
-    (void)context;
     (void)request;
     auto list_response = static_cast<origindb::grpc::ListModulesResponse*>(response);
 
     static thread_local ::grpc::Status status;
+    if (!CheckAuth(static_cast<::grpc::ServerContext*>(context), auth_,
+                   AuthScope::CLIENT, status))
+        return &status;
 
     try {
         for (const auto& module_name : wasm_engine_->ListModules()) {
@@ -182,11 +193,13 @@ void* WasmServiceImpl::ListModules(void* context,
 void* WasmServiceImpl::GetModule(void* context,
                                  const void* request,
                                  void* response) {
-    (void)context;
     auto get_request = static_cast<const origindb::grpc::GetModuleRequest*>(request);
     auto get_response = static_cast<origindb::grpc::GetModuleResponse*>(response);
 
     static thread_local ::grpc::Status status;
+    if (!CheckAuth(static_cast<::grpc::ServerContext*>(context), auth_,
+                   AuthScope::CLIENT, status))
+        return &status;
 
     try {
         auto module = wasm_engine_->GetModule(get_request->name());
@@ -234,11 +247,13 @@ void* WasmServiceImpl::GetModule(void* context,
 void* WasmServiceImpl::ExecuteReducer(void* context,
                                       const void* request,
                                       void* response) {
-    (void)context;
     auto exec_request = static_cast<const origindb::grpc::ExecuteReducerRequest*>(request);
     auto exec_response = static_cast<origindb::grpc::ExecuteReducerResponse*>(response);
 
     static thread_local ::grpc::Status status;
+    if (!CheckAuth(static_cast<::grpc::ServerContext*>(context), auth_,
+                   AuthScope::CLIENT, status))
+        return &status;
 
     spdlog::debug("ExecuteReducer: {}.{}", exec_request->module_name(),
                   exec_request->reducer_name());

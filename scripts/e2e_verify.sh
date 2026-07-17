@@ -32,6 +32,8 @@ cmake --build "$BUILD_DIR" --target origindb_server origindb_client wat2wasm_too
 step "Compile test module (WAT -> wasm)"
 "$BUILD_DIR/wat2wasm_tool" tests/wasm/fixtures/test_module.wat "$DATA_DIR/test_module.wasm"
 
+ADMIN_TOKEN=""
+CLIENT_TOKEN=""
 BOOT=0
 start_server() {
     BOOT=$((BOOT + 1))
@@ -40,27 +42,43 @@ start_server() {
         > "$SERVER_LOG" 2>&1 &
     SERVER_PID=$!
     for _ in $(seq 1 50); do
-        grep -q "gRPC Server ready" "$SERVER_LOG" && return 0
+        grep -q "gRPC Server ready" "$SERVER_LOG" && break
         sleep 0.2
     done
-    fail "server did not start (see $SERVER_LOG)"
+    grep -q "gRPC Server ready" "$SERVER_LOG" || fail "server did not start (see $SERVER_LOG)"
+    # Tokens are generated on first boot and persisted; reuse them thereafter.
+    if [ -z "$ADMIN_TOKEN" ]; then
+        ADMIN_TOKEN=$(grep -o 'odb_admin_[a-f0-9]*' "$SERVER_LOG" | head -1)
+        CLIENT_TOKEN=$(grep -o 'odb_client_[a-f0-9]*' "$SERVER_LOG" | head -1)
+        [ -n "$ADMIN_TOKEN" ] || fail "admin token not found in startup log"
+    fi
 }
+admin() { "$CLI" -s localhost:$GRPC_PORT -t "$ADMIN_TOKEN" "$@"; }
 
 step "Start server"
 start_server
 
+step "Auth rejects unauthenticated deploy"
+if "$CLI" -s localhost:$GRPC_PORT deploy testmod "$DATA_DIR/test_module.wasm" 1.0.0 \
+       > /dev/null 2>&1; then
+    fail "deploy without a token should have been rejected"
+fi
+if "$CLI" -s localhost:$GRPC_PORT -t "$CLIENT_TOKEN" deploy testmod \
+       "$DATA_DIR/test_module.wasm" 1.0.0 > /dev/null 2>&1; then
+    fail "deploy with a client token should have been rejected"
+fi
+
 step "Deploy module"
-"$CLI" -s localhost:$GRPC_PORT deploy testmod "$DATA_DIR/test_module.wasm" 1.0.0 \
-    || fail "deploy"
-"$CLI" -s localhost:$GRPC_PORT modules | grep -q testmod || fail "module not listed"
+admin deploy testmod "$DATA_DIR/test_module.wasm" 1.0.0 || fail "deploy"
+admin modules | grep -q testmod || fail "module not listed"
 
 step "Execute reducer + verify via SQL"
-"$CLI" -s localhost:$GRPC_PORT call testmod w || fail "reducer execution"
-"$CLI" -s localhost:$GRPC_PORT exec "SELECT * FROM t" | grep -q "k1" \
-    || fail "row not visible via SQL"
+admin call testmod w || fail "reducer execution"
+admin exec "SELECT * FROM t" | grep -q "k1" || fail "row not visible via SQL"
 
 step "WHERE-filtered websocket delivery"
 python3 scripts/ws_filter_check.py "$ROOT/$CLI" $WS_PORT $GRPC_PORT \
+    "$ADMIN_TOKEN" "$CLIENT_TOKEN" \
     || fail "websocket WHERE filtering"
 
 step "Persistence across restart"
@@ -68,11 +86,11 @@ kill "$SERVER_PID"; wait "$SERVER_PID" 2>/dev/null || true; SERVER_PID=""
 start_server
 grep -q "Restored persisted module: testmod" "$SERVER_LOG" \
     || fail "module not restored after restart"
-"$CLI" -s localhost:$GRPC_PORT exec "SELECT * FROM t" | grep -q "k1" \
+admin exec "SELECT * FROM t" | grep -q "k1" \
     || fail "table data not recovered from WAL"
 
 step "Undeploy"
-"$CLI" -s localhost:$GRPC_PORT undeploy testmod || fail "undeploy"
+admin undeploy testmod || fail "undeploy"
 [ ! -d "$DATA_DIR/db/modules/testmod" ] || fail "module files not removed"
 
 echo

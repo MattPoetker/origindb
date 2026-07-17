@@ -81,6 +81,12 @@ struct LoggingConfig {
     size_t max_files = 10;
 };
 
+struct AuthConfig {
+    bool enabled = true;             // token auth on gRPC + websocket
+    std::string admin_token;         // explicit override; else load-or-generate
+    std::string client_token;        // explicit override; else load-or-generate
+};
+
 struct ServerConfig {
     std::string node_id;
     StorageConfig storage;
@@ -92,6 +98,7 @@ struct ServerConfig {
     ChangefeedConfig changefeed;
     MetricsConfig metrics;
     LoggingConfig logging;
+    AuthConfig auth;
 };
 
 bool ParseCommandLine(int argc, char* argv[], ServerConfig& config);

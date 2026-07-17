@@ -28,6 +28,9 @@ const PORT = parseInt(flag("--port", "9090"), 10);
 const GRPC_TARGET = flag("--grpc", "localhost:50051");
 const WS_PORT = parseInt(flag("--ws-port", "8080"), 10);
 const MODULE = "collab";
+// Client-scope token (call reducers + subscribe). Passed to the browser for
+// the websocket ?token=. Empty when the server runs with --no-auth.
+const CLIENT_TOKEN = flag("--token", process.env.ORIGINDB_TOKEN || "");
 
 // --- gRPC client -------------------------------------------------------------
 
@@ -39,6 +42,12 @@ const packageDef = protoLoader.loadSync(protoPath, {
 });
 const proto = grpc.loadPackageDefinition(packageDef).origindb.grpc;
 const wasm = new proto.WasmService(GRPC_TARGET, grpc.credentials.createInsecure());
+
+function authMeta() {
+  const meta = new grpc.Metadata();
+  if (CLIENT_TOKEN) meta.set("authorization", `Bearer ${CLIENT_TOKEN}`);
+  return meta;
+}
 
 function toWasmValue(v) {
   if (typeof v === "boolean") return { bool_value: v };
@@ -57,6 +66,7 @@ function executeReducer(reducer, argsList) {
         sender_identity: "collab-web",
         args: argsList.map(toWasmValue),
       },
+      authMeta(),
       { deadline: Date.now() + 5000 },
       (err, response) => (err ? reject(err) : resolvePromise(response)),
     );
@@ -85,8 +95,11 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
     if (req.method === "GET" && url.pathname === "/api/config") {
+      // The client token is low-privilege (call/subscribe only) and the
+      // browser needs it for the websocket ?token=. Admin tokens never leave
+      // the server.
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ wsPort: WS_PORT, module: MODULE }));
+      res.end(JSON.stringify({ wsPort: WS_PORT, module: MODULE, token: CLIENT_TOKEN }));
       return;
     }
 

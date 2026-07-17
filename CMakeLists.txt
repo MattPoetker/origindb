@@ -204,6 +204,8 @@ add_library(common_lib STATIC ${COMMON_SRCS})
 target_link_libraries(common_lib
     spdlog::spdlog
     fmt::fmt
+    nlohmann_json::nlohmann_json
+    OpenSSL::Crypto
 )
 
 add_library(wasm_engine STATIC ${WASM_SRCS})

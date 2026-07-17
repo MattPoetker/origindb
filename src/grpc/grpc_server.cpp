@@ -1,6 +1,11 @@
 #include "grpc/grpc_server.h"
+#include "grpc/auth_check.h"
 #include "grpc/wasm_service_impl.h"
+#include "common/auth.h"
 #include "wasm/module_store.h"
+
+#include <fstream>
+#include <sstream>
 #include "sql/sql_engine.h"
 #include "storage/storage_engine.h"
 #include "changefeed/changefeed_engine.h"
@@ -107,10 +112,11 @@ public:
          std::shared_ptr<ChangefeedEngine> changefeed_engine,
          std::shared_ptr<WebSocketServer> websocket_server,
          std::shared_ptr<WasmEngine> wasm_engine,
-         std::shared_ptr<ModuleStore> module_store)
+         std::shared_ptr<ModuleStore> module_store,
+         std::shared_ptr<AuthManager> auth)
         : config_(config)
-        , sql_service_(sql_engine, storage_engine, changefeed_engine, websocket_server)
-        , wasm_service_(wasm_engine, module_store)
+        , sql_service_(sql_engine, storage_engine, changefeed_engine, websocket_server, auth)
+        , wasm_service_(wasm_engine, module_store, auth)
         , grpc_service_(&sql_service_)
         , wasm_grpc_service_(&wasm_service_)
         , running_(false) {}
@@ -124,8 +130,31 @@ public:
         try {
             ::grpc::ServerBuilder builder;
 
-            // Configure server
-            builder.AddListeningPort(config_.listen_address, ::grpc::InsecureServerCredentials());
+            // Configure server credentials: TLS when cert+key are provided.
+            std::shared_ptr<::grpc::ServerCredentials> credentials;
+            if (!config_.tls_cert_path.empty() && !config_.tls_key_path.empty()) {
+                auto read_file = [](const std::string& path) {
+                    std::ifstream in(path);
+                    std::stringstream ss;
+                    ss << in.rdbuf();
+                    return ss.str();
+                };
+                std::string cert = read_file(config_.tls_cert_path);
+                std::string key = read_file(config_.tls_key_path);
+                if (cert.empty() || key.empty()) {
+                    spdlog::error("gRPC TLS: cannot read cert/key ({} / {})",
+                                  config_.tls_cert_path, config_.tls_key_path);
+                    return false;
+                }
+                ::grpc::SslServerCredentialsOptions ssl_opts;
+                ssl_opts.pem_key_cert_pairs.push_back({key, cert});
+                credentials = ::grpc::SslServerCredentials(ssl_opts);
+                spdlog::info("gRPC: TLS enabled ({})", config_.tls_cert_path);
+            } else {
+                credentials = ::grpc::InsecureServerCredentials();
+                spdlog::warn("gRPC: TLS disabled — plaintext transport (dev only)");
+            }
+            builder.AddListeningPort(config_.listen_address, credentials);
             builder.SetMaxReceiveMessageSize(config_.max_message_size);
             builder.SetMaxSendMessageSize(config_.max_message_size);
 
@@ -200,8 +229,9 @@ GrpcServer::GrpcServer(const Config& config,
                        std::shared_ptr<ChangefeedEngine> changefeed_engine,
                        std::shared_ptr<WebSocketServer> websocket_server,
                        std::shared_ptr<WasmEngine> wasm_engine,
-                       std::shared_ptr<ModuleStore> module_store)
-    : impl_(std::make_unique<Impl>(config, sql_engine, storage_engine, changefeed_engine, websocket_server, wasm_engine, module_store)) {}
+                       std::shared_ptr<ModuleStore> module_store,
+                       std::shared_ptr<AuthManager> auth)
+    : impl_(std::make_unique<Impl>(config, sql_engine, storage_engine, changefeed_engine, websocket_server, wasm_engine, module_store, auth)) {}
 
 GrpcServer::~GrpcServer() {
     if (impl_) {
@@ -230,11 +260,13 @@ std::string GrpcServer::GetListenAddress() const {
 SQLServiceImpl::SQLServiceImpl(std::shared_ptr<SqlEngine> sql_engine,
                                std::shared_ptr<StorageEngine> storage_engine,
                                std::shared_ptr<ChangefeedEngine> changefeed_engine,
-                               std::shared_ptr<WebSocketServer> websocket_server)
+                               std::shared_ptr<WebSocketServer> websocket_server,
+                               std::shared_ptr<AuthManager> auth)
     : sql_engine_(sql_engine)
     , storage_engine_(storage_engine)
     , changefeed_engine_(changefeed_engine)
     , websocket_server_(websocket_server)
+    , auth_(auth)
     , start_time_(std::chrono::steady_clock::now())
     , service_impl_(nullptr, [](void*){}) {}
 
@@ -244,6 +276,9 @@ void* SQLServiceImpl::Execute(void* context_ptr, const void* request_ptr, void* 
     auto* response = static_cast<origindb::grpc::SQLResponse*>(response_ptr);
 
     static thread_local ::grpc::Status status;
+
+    // SQL can mutate anything; admin scope required.
+    if (!CheckAuth(context, auth_, AuthScope::ADMIN, status)) return &status;
 
     total_queries_.fetch_add(1, std::memory_order_relaxed);
 
@@ -284,10 +319,13 @@ void* SQLServiceImpl::Execute(void* context_ptr, const void* request_ptr, void* 
 }
 
 void* SQLServiceImpl::ExecuteTransaction(void* context_ptr, const void* request_ptr, void* response_ptr) {
+    auto* context = static_cast<::grpc::ServerContext*>(context_ptr);
     auto* request = static_cast<const origindb::grpc::SQLTransactionRequest*>(request_ptr);
     auto* response = static_cast<origindb::grpc::SQLTransactionResponse*>(response_ptr);
 
     static thread_local ::grpc::Status status;
+
+    if (!CheckAuth(context, auth_, AuthScope::ADMIN, status)) return &status;
 
     spdlog::debug("gRPC ExecuteTransaction request with {} statements", request->sql_statements_size());
 
@@ -319,9 +357,12 @@ void* SQLServiceImpl::ExecuteTransaction(void* context_ptr, const void* request_
 }
 
 void* SQLServiceImpl::GetStatus(void* context_ptr, const void* request_ptr, void* response_ptr) {
+    auto* context = static_cast<::grpc::ServerContext*>(context_ptr);
     auto* response = static_cast<origindb::grpc::StatusResponse*>(response_ptr);
 
     static thread_local ::grpc::Status status;
+
+    if (!CheckAuth(context, auth_, AuthScope::CLIENT, status)) return &status;
 
     spdlog::debug("gRPC GetStatus request");
 

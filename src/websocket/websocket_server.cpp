@@ -174,6 +174,22 @@ void WebSocketServer::HandleClient(int client_socket) {
 
     // Check if it's a WebSocket upgrade request
     if (request.find("Upgrade: websocket") != std::string::npos) {
+        // Auth (client scope). Browsers can't set WebSocket headers, so the
+        // token rides in the GET target as ?token=... (falls back to the
+        // Authorization header for non-browser clients).
+        if (auth_) {
+            std::string token = ExtractRequestToken(request);
+            if (!auth_->Check(token, AuthScope::CLIENT)) {
+                const char* resp =
+                    "HTTP/1.1 401 Unauthorized\r\n"
+                    "Content-Length: 0\r\n"
+                    "Connection: close\r\n\r\n";
+                send(client_socket, resp, strlen(resp), 0);
+                close(client_socket);
+                spdlog::warn("WebSocket connection rejected: invalid/missing token");
+                return;
+            }
+        }
         if (HandleWebSocketHandshake(client_socket, request)) {
             // Generate client ID
             std::string client_id = "client_" + std::to_string(client_socket) + "_" +
@@ -283,6 +299,21 @@ void WebSocketServer::HandleClient(int client_socket) {
     }
 
     close(client_socket);
+}
+
+std::string WebSocketServer::ExtractRequestToken(const std::string& request) {
+    // Prefer the Authorization header (non-browser clients).
+    std::regex auth_re(R"(Authorization:\s*([^\r\n]+))", std::regex::icase);
+    std::smatch m;
+    if (std::regex_search(request, m, auth_re)) {
+        return AuthManager::StripBearer(m[1].str());
+    }
+    // Otherwise ?token=... in the request target (browsers).
+    std::regex token_re(R"([?&]token=([^&\s]+))");
+    if (std::regex_search(request, m, token_re)) {
+        return m[1].str();
+    }
+    return "";
 }
 
 size_t WebSocketServer::CompleteFrameSize(const std::string& data) {

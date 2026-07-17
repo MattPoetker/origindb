@@ -17,6 +17,7 @@
 #include "wasm/wasm_subscription.h"
 #include "sql/sql_engine.h"
 #include "storage/storage_engine.h"
+#include "common/auth.h"
 
 namespace origindb {
 
@@ -25,6 +26,7 @@ class WasmSubscriptionManager;
 class SqlSubscriptionManager;
 class SqlEngine;
 class StorageEngine;
+class AuthManager;
 
 // Simple WebSocket server using raw sockets
 class WebSocketServer {
@@ -50,6 +52,9 @@ public:
     // Set storage engine for getting table list
     void SetStorageEngine(std::shared_ptr<StorageEngine> storage_engine);
 
+    // Set the auth manager. Null = auth disabled (dev mode).
+    void SetAuthManager(std::shared_ptr<AuthManager> auth) { auth_ = std::move(auth); }
+
     // Get connection statistics
     size_t GetActiveConnections() const;
 
@@ -70,6 +75,7 @@ private:
     void BroadcastBinaryToAllClients(const std::vector<uint8_t>& data);
     std::string ParseWebSocketFrame(const std::string& data);
     static size_t CompleteFrameSize(const std::string& data);
+    static std::string ExtractRequestToken(const std::string& request);
     std::string GenerateWebSocketAccept(const std::string& key);
 
     // Changefeed event handler
@@ -101,6 +107,7 @@ private:
     std::shared_ptr<SqlSubscriptionManager> sql_manager_;
     std::shared_ptr<SqlEngine> sql_engine_;
     std::shared_ptr<StorageEngine> storage_engine_;
+    std::shared_ptr<AuthManager> auth_;
 
     mutable std::mutex clients_mutex_;
     std::vector<int> active_clients_;

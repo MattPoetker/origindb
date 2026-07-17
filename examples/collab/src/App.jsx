@@ -105,14 +105,16 @@ export default function App() {
     };
 
     const connect = async () => {
-      let wsPort = 8787;
+      let wsPort = 8787, token = "";
       try {
         const cfg = await fetch("/api/config").then((r) => r.json());
         wsPort = cfg.wsPort;
+        token = cfg.token || "";
       } catch { /* default */ }
       if (closed) return;
 
-      ws = new WebSocket(`ws://${location.hostname}:${wsPort}`);
+      const q = token ? `?token=${encodeURIComponent(token)}` : "";
+      ws = new WebSocket(`ws://${location.hostname}:${wsPort}${q}`);
       ws.onopen = () => {
         setConnected(true);
         for (const t of TABLES)

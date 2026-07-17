@@ -14,6 +14,7 @@ class ChangefeedEngine;
 class WebSocketServer;
 class WasmEngine;
 class ModuleStore;
+class AuthManager;
 
 class GrpcServer {
 public:
@@ -21,6 +22,9 @@ public:
         std::string listen_address = "0.0.0.0:50051";
         int max_concurrent_streams = 1000;
         int max_message_size = 64 * 1024 * 1024; // 64MB
+        // Both set = serve TLS; otherwise plaintext (dev only).
+        std::string tls_cert_path;
+        std::string tls_key_path;
     };
 
     GrpcServer(const Config& config,
@@ -29,7 +33,8 @@ public:
                std::shared_ptr<ChangefeedEngine> changefeed_engine,
                std::shared_ptr<WebSocketServer> websocket_server,
                std::shared_ptr<WasmEngine> wasm_engine,
-               std::shared_ptr<ModuleStore> module_store = nullptr);
+               std::shared_ptr<ModuleStore> module_store = nullptr,
+               std::shared_ptr<AuthManager> auth = nullptr);
 
     ~GrpcServer();
 
@@ -49,7 +54,8 @@ public:
     SQLServiceImpl(std::shared_ptr<SqlEngine> sql_engine,
                    std::shared_ptr<StorageEngine> storage_engine,
                    std::shared_ptr<ChangefeedEngine> changefeed_engine,
-                   std::shared_ptr<WebSocketServer> websocket_server);
+                   std::shared_ptr<WebSocketServer> websocket_server,
+                   std::shared_ptr<AuthManager> auth = nullptr);
 
     void* Execute(void* context, const void* request, void* response);
 
@@ -65,6 +71,7 @@ private:
     std::shared_ptr<StorageEngine> storage_engine_;
     std::shared_ptr<ChangefeedEngine> changefeed_engine_;
     std::shared_ptr<WebSocketServer> websocket_server_;
+    std::shared_ptr<AuthManager> auth_;
 
     std::chrono::steady_clock::time_point start_time_;
     std::atomic<uint64_t> total_queries_{0};

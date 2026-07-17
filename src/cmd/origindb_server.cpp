@@ -17,6 +17,7 @@
 #include "wasm/wasm_engine.h"
 #include "wasm/wasm_subscription.h"
 #include "wasm/module_store.h"
+#include "common/auth.h"
 
 #include <filesystem>
 
@@ -47,6 +48,21 @@ public:
     bool Initialize() {
         spdlog::info("🚀 Starting OriginDB Server");
         spdlog::info("=====================================");
+
+        // Initialize authentication (before any listener starts)
+        if (config_.auth.enabled) {
+            auth_ = std::make_shared<AuthManager>(
+                std::filesystem::path(config_.storage.data_dir) / "auth",
+                config_.auth.admin_token, config_.auth.client_token);
+            if (!auth_->Initialize()) {
+                spdlog::error("❌ Failed to initialize authentication");
+                return false;
+            }
+            spdlog::info("🔐 Authentication enabled");
+        } else {
+            spdlog::warn("⚠️  Authentication DISABLED (--no-auth) — anyone who can "
+                         "reach the ports can deploy code and read/write data");
+        }
 
         // Initialize storage engine
         spdlog::info("📦 Initializing Storage Engine...");
@@ -142,6 +158,7 @@ public:
         websocket_server_->SetSqlSubscriptionManager(sql_subscription_manager_);
         websocket_server_->SetSqlEngine(sql_engine_);
         websocket_server_->SetStorageEngine(storage_engine_);
+        websocket_server_->SetAuthManager(auth_);
         if (!websocket_server_->Start()) {
             spdlog::error("❌ Failed to start WebSocket server");
             return false;
@@ -154,10 +171,12 @@ public:
         GrpcServer::Config grpc_config;
         grpc_config.listen_address = config_.grpc.listen_address;
         grpc_config.max_message_size = static_cast<int>(config_.grpc.max_message_size);
+        grpc_config.tls_cert_path = config_.grpc.tls_cert;
+        grpc_config.tls_key_path = config_.grpc.tls_key;
 
         grpc_server_ = std::make_shared<GrpcServer>(grpc_config, sql_engine_, storage_engine_,
                                                    changefeed_engine_, websocket_server_, wasm_engine_,
-                                                   module_store_);
+                                                   module_store_, auth_);
         if (!grpc_server_->Start()) {
             spdlog::error("❌ Failed to start gRPC server");
             return false;
@@ -195,6 +214,17 @@ public:
         spdlog::info("  gRPC API: {}", grpc_display);
 #endif
         spdlog::info("");
+
+        if (auth_ && auth_->GeneratedThisBoot()) {
+            spdlog::warn("════════════════════════════════════════════════════════════");
+            spdlog::warn("🔑 New auth tokens generated (shown once, stored in {}/auth):",
+                         config_.storage.data_dir);
+            spdlog::warn("   ADMIN  (deploy/SQL):  {}", auth_->AdminToken());
+            spdlog::warn("   CLIENT (call/subscribe): {}", auth_->ClientToken());
+            spdlog::warn("   CLI:  origindb_client --token <ADMIN> ...");
+            spdlog::warn("   WS:   ws://host:port/?token=<CLIENT>");
+            spdlog::warn("════════════════════════════════════════════════════════════");
+        }
 
         return true;
     }
@@ -347,6 +377,7 @@ private:
     std::shared_ptr<WebSocketServer> websocket_server_;
     std::shared_ptr<WasmEngine> wasm_engine_;
     std::shared_ptr<ModuleStore> module_store_;
+    std::shared_ptr<AuthManager> auth_;
     std::shared_ptr<WasmSubscriptionManager> wasm_subscription_manager_;
 #ifdef GRPC_AVAILABLE
     std::shared_ptr<GrpcServer> grpc_server_;
@@ -444,6 +475,9 @@ void PrintUsage(const char* program_name) {
     std::cout << "  -p, --port PORT          WebSocket port (default: 8080)\n";
     std::cout << "  -g, --grpc-port PORT     gRPC port (default: 50051)\n";
     std::cout << "  -d, --data-dir DIR       Data directory (default: ./origindb_data)\n";
+    std::cout << "  --tls-cert FILE          TLS certificate (PEM) for the gRPC endpoint\n";
+    std::cout << "  --tls-key FILE           TLS private key (PEM) for the gRPC endpoint\n";
+    std::cout << "  --no-auth                Disable token auth (dev only; insecure)\n";
     std::cout << "  -l, --log-level LEVEL    Log level: trace,debug,info,warn,error (default: info)\n";
     std::cout << "  -c, --config FILE        Config file path (default: origindb.conf)\n";
     std::cout << "  -h, --help               Show this help message\n";
@@ -467,6 +501,9 @@ int main(int argc, char* argv[]) {
         std::string grpc_port_arg;
         std::string data_dir_arg;
         std::string log_level_arg;
+        std::string tls_cert_arg;
+        std::string tls_key_arg;
+        bool no_auth = false;
 
         for (int i = 1; i < argc; i++) {
             std::string arg = argv[i];
@@ -509,6 +546,14 @@ int main(int argc, char* argv[]) {
                     std::cerr << "Error: " << arg << " requires a config file path\n";
                     return 1;
                 }
+            } else if (arg == "--tls-cert") {
+                if (i + 1 < argc) tls_cert_arg = argv[++i];
+                else { std::cerr << "Error: --tls-cert requires a path\n"; return 1; }
+            } else if (arg == "--tls-key") {
+                if (i + 1 < argc) tls_key_arg = argv[++i];
+                else { std::cerr << "Error: --tls-key requires a path\n"; return 1; }
+            } else if (arg == "--no-auth") {
+                no_auth = true;
             } else if (arg[0] != '-') {
                 // Assume it's a port number (short form)
                 port_arg = arg;
@@ -531,6 +576,13 @@ int main(int argc, char* argv[]) {
         if (!data_dir_arg.empty()) {
             config.storage.data_dir = data_dir_arg;
         }
+        if (!tls_cert_arg.empty()) config.grpc.tls_cert = tls_cert_arg;
+        if (!tls_key_arg.empty()) config.grpc.tls_key = tls_key_arg;
+        if (const char* t = std::getenv("ORIGINDB_ADMIN_TOKEN"))
+            config.auth.admin_token = t;
+        if (const char* t = std::getenv("ORIGINDB_CLIENT_TOKEN"))
+            config.auth.client_token = t;
+        if (no_auth) config.auth.enabled = false;
         if (!log_level_arg.empty()) {
             if (log_level_arg == "trace") config.logging.level = spdlog::level::trace;
             else if (log_level_arg == "debug") config.logging.level = spdlog::level::debug;

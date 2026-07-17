@@ -16,11 +16,15 @@ import threading
 import time
 
 
+CLIENT_TOKEN = ""
+
+
 def ws_connect(host, port):
     s = socket.create_connection((host, port), timeout=10)
     key = base64.b64encode(os.urandom(16)).decode()
+    target = f"/?token={CLIENT_TOKEN}" if CLIENT_TOKEN else "/"
     req = (
-        f"GET / HTTP/1.1\r\nHost: {host}:{port}\r\n"
+        f"GET {target} HTTP/1.1\r\nHost: {host}:{port}\r\n"
         "Upgrade: websocket\r\nConnection: Upgrade\r\n"
         f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n"
     )
@@ -90,7 +94,10 @@ def subscriber(where, events, ready, ws_port):
 
 
 def main():
+    global CLIENT_TOKEN
     client, ws_port, grpc_port = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+    admin_token = sys.argv[4] if len(sys.argv) > 4 else ""
+    CLIENT_TOKEN = sys.argv[5] if len(sys.argv) > 5 else ""
     got_match, got_nomatch = [], []
     r1, r2 = threading.Event(), threading.Event()
     threading.Thread(target=subscriber, args=("a = 1", got_match, r1, ws_port),
@@ -101,8 +108,11 @@ def main():
     r2.wait(10)
     time.sleep(1)
 
-    subprocess.run([client, "-s", f"localhost:{grpc_port}", "call", "testmod", "w"],
-                   check=True, capture_output=True)
+    cmd = [client, "-s", f"localhost:{grpc_port}"]
+    if admin_token:
+        cmd += ["-t", admin_token]
+    cmd += ["call", "testmod", "w"]
+    subprocess.run(cmd, check=True, capture_output=True)
     time.sleep(4)
 
     print(f"WHERE a=1  received {len(got_match)} event(s); "

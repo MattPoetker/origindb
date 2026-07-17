@@ -274,6 +274,8 @@ int handlePublishCommand(const std::vector<std::string>& args) {
     std::string grpc_endpoint = "localhost:50051";
     std::string project_path = ".";
     std::string version = "1.0.0";
+    std::string token;
+    if (const char* t = std::getenv("ORIGINDB_TOKEN")) token = t;
 
     // Parse arguments
     for (size_t i = 0; i < args.size(); i++) {
@@ -290,12 +292,17 @@ int handlePublishCommand(const std::vector<std::string>& args) {
             version = args[++i];
         } else if (arg.substr(0, 10) == "--version=") {
             version = arg.substr(10);
+        } else if ((arg == "--token" || arg == "-t") && i + 1 < args.size()) {
+            token = args[++i];
+        } else if (arg.substr(0, 8) == "--token=") {
+            token = arg.substr(8);
         } else if (arg == "-h" || arg == "--help") {
             std::cout << BOLD << "Usage:" << RESET << " origindb publish [OPTIONS]\n\n";
             std::cout << BOLD << "Options:\n" << RESET;
             std::cout << "  --server HOST:PORT  OriginDB gRPC endpoint (default: localhost:50051)\n";
             std::cout << "  --path PATH         Project path (default: current directory)\n";
             std::cout << "  --version VERSION   Module version (default: 1.0.0)\n";
+            std::cout << "  --token TOKEN       Admin token (or ORIGINDB_TOKEN env var)\n";
             std::cout << "  -h, --help          Show this help message\n\n";
             std::cout << BOLD << "Supported projects:\n" << RESET;
             std::cout << "  C# (.csproj):       .NET 8 + wasi-experimental workload\n";
@@ -393,7 +400,8 @@ int handlePublishCommand(const std::vector<std::string>& args) {
         return 1;
     }
 
-    std::string deploy_cmd = "\"" + client_binary + "\" --server " + grpc_endpoint +
+    std::string token_arg = token.empty() ? "" : " --token \"" + token + "\"";
+    std::string deploy_cmd = "\"" + client_binary + "\"" + token_arg + " --server " + grpc_endpoint +
                              " deploy \"" + project_name + "\" \"" + wasm_file +
                              "\" \"" + version + "\"";
     int deploy_result = system(deploy_cmd.c_str());

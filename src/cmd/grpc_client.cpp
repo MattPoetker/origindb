@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <grpcpp/grpcpp.h>
@@ -13,6 +14,14 @@ using grpc::Status;
 
 class OriginDBClient {
 public:
+    // Attaches the bearer token to a context. Call credentials would be
+    // cleaner but gRPC forbids them over an insecure channel (dev/LAN), so
+    // set the metadata directly — works on both plaintext and TLS.
+    void Authorize(ClientContext& ctx) const {
+        if (!token_.empty()) ctx.AddMetadata("authorization", "Bearer " + token_);
+    }
+    void SetToken(std::string token) { token_ = std::move(token); }
+
     OriginDBClient(std::shared_ptr<Channel> channel)
         : stub_(origindb::grpc::SQLService::NewStub(channel)),
           wasm_stub_(origindb::grpc::WasmService::NewStub(channel)) {}
@@ -23,6 +32,7 @@ public:
 
         origindb::grpc::SQLResponse response;
         ClientContext context;
+        Authorize(context);
 
         Status status = stub_->Execute(&context, request, &response);
 
@@ -68,6 +78,7 @@ public:
         origindb::grpc::StatusRequest request;
         origindb::grpc::StatusResponse response;
         ClientContext context;
+        Authorize(context);
 
         Status status = stub_->GetStatus(&context, request, &response);
 
@@ -113,6 +124,7 @@ public:
 
         origindb::grpc::DeployModuleResponse response;
         ClientContext context;
+        Authorize(context);
         Status status = wasm_stub_->DeployModule(&context, request, &response);
 
         if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
@@ -126,6 +138,7 @@ public:
         request.set_name(name);
         origindb::grpc::UndeployModuleResponse response;
         ClientContext context;
+        Authorize(context);
         Status status = wasm_stub_->UndeployModule(&context, request, &response);
 
         if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
@@ -137,6 +150,7 @@ public:
         origindb::grpc::ListModulesRequest request;
         origindb::grpc::ListModulesResponse response;
         ClientContext context;
+        Authorize(context);
         Status status = wasm_stub_->ListModules(&context, request, &response);
 
         if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
@@ -176,6 +190,7 @@ public:
 
         origindb::grpc::ExecuteReducerResponse response;
         ClientContext context;
+        Authorize(context);
         Status status = wasm_stub_->ExecuteReducer(&context, request, &response);
 
         if (!status.ok()) return "❌ gRPC call failed: " + status.error_message();
@@ -198,12 +213,16 @@ public:
 private:
     std::unique_ptr<origindb::grpc::SQLService::Stub> stub_;
     std::unique_ptr<origindb::grpc::WasmService::Stub> wasm_stub_;
+    std::string token_;
 };
 
 void PrintUsage(const char* program_name) {
     std::cout << "Usage: " << program_name << " [OPTIONS] [COMMAND]\n\n";
     std::cout << "Options:\n";
     std::cout << "  -s, --server ADDRESS     Server address (default: localhost:50051)\n";
+    std::cout << "  -t, --token TOKEN        Auth token (or ORIGINDB_TOKEN env var)\n";
+    std::cout << "  --tls                    Use TLS transport\n";
+    std::cout << "  --tls-ca FILE            CA/self-signed cert to trust (implies --tls)\n";
     std::cout << "  -h, --help               Show this help message\n\n";
     std::cout << "Commands:\n";
     std::cout << "  status                             Get server status\n";
@@ -222,8 +241,13 @@ void PrintUsage(const char* program_name) {
 
 int main(int argc, char* argv[]) {
     std::string server_address = "localhost:50051";
+    std::string token;
+    std::string tls_ca;
+    bool use_tls = false;
     std::string command;
     std::vector<std::string> args;
+
+    if (const char* t = std::getenv("ORIGINDB_TOKEN")) token = t;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -239,6 +263,14 @@ int main(int argc, char* argv[]) {
                 std::cerr << "Error: " << arg << " requires a server address\n";
                 return 1;
             }
+        } else if (arg == "-t" || arg == "--token") {
+            if (i + 1 < argc) token = argv[++i];
+            else { std::cerr << "Error: " << arg << " requires a token\n"; return 1; }
+        } else if (arg == "--tls") {
+            use_tls = true;
+        } else if (arg == "--tls-ca") {
+            if (i + 1 < argc) { tls_ca = argv[++i]; use_tls = true; }
+            else { std::cerr << "Error: --tls-ca requires a path\n"; return 1; }
         } else if (command.empty()) {
             command = arg;
         } else {
@@ -254,9 +286,22 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        // Create gRPC channel
-        auto channel = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+        // Channel credentials: TLS transport (optional) + bearer-token call creds.
+        std::shared_ptr<grpc::ChannelCredentials> channel_creds;
+        if (use_tls) {
+            grpc::SslCredentialsOptions ssl_opts;
+            if (!tls_ca.empty()) {
+                std::ifstream in(tls_ca);
+                std::stringstream ss; ss << in.rdbuf();
+                ssl_opts.pem_root_certs = ss.str();
+            }
+            channel_creds = grpc::SslCredentials(ssl_opts);
+        } else {
+            channel_creds = grpc::InsecureChannelCredentials();
+        }
+        auto channel = grpc::CreateChannel(server_address, channel_creds);
         OriginDBClient client(channel);
+        client.SetToken(token);
 
         if (command == "status") {
             std::cout << client.GetStatus() << std::endl;
