@@ -148,12 +148,171 @@ build_new/origindb_client exec "SELECT * FROM todos"
 |---|---|---|
 | **TypeScript (AssemblyScript)** | [`sdk/typescript/`](sdk/typescript/) | ✅ verified end-to-end (todo + collab examples) |
 | **C#** | [`sdk/csharp/`](sdk/csharp/) | ⚠️ compiles against the ABI; .NET 8 `wasi-experimental` export support is flaky upstream — see the SDK README |
-| C++ | [`sdk/cpp/`](sdk/cpp/) | header available; not yet aligned to ABI v1 |
+| C++ / anything that emits WASM | [`docs/WASM_ABI.md`](docs/WASM_ABI.md) | the ABI is language-agnostic; `sdk/cpp/` is not yet aligned to ABI v1 |
 
-Scaffold a project with `origindb init` (templates: `typescript`, `csharp`,
-`unity`, `nodejs`) and ship it with `origindb publish`. Guides:
-[`WASM_MODULES.md`](WASM_MODULES.md), [`CLI_GUIDE.md`](CLI_GUIDE.md),
-[`docs/WASM_ABI.md`](docs/WASM_ABI.md).
+A module is a WebAssembly file that exports `origindb_invoke` (a single
+dispatch entry point), `origindb_alloc` (guest allocator), and `memory`.
+Both SDKs implement that plumbing; you just register **reducers** — named
+functions that receive JSON args, read/write tables through the host API,
+and either commit (return success) or roll back (throw/abort). Reserved
+names hook the module lifecycle:
+
+| Hook | When it runs |
+|---|---|
+| `__init` | after every deploy/instantiation |
+| `__migrate(old_version, new_version)` | on hot-swap over a live module — table writes commit like any reducer, so schema migrations are plain table ops; failure aborts the swap and the old version keeps serving |
+| `__client_connected` / `__client_disconnected` | websocket client lifecycle |
+| any other name | callable via `ExecuteReducer` / `origindb_client call` |
+
+Deploys with a version lower than the running one are rejected. Per-module
+sandbox limits (allowed tables, read-only, memory/CPU budgets) are set at
+deploy time via `ModuleCapabilities`.
+
+### TypeScript (AssemblyScript) — recommended
+
+One entry file; top-level statements run at instantiation, so registration
+lives there. From the todo example
+([`sdk/typescript/examples/todo/index.ts`](sdk/typescript/examples/todo/index.ts)):
+
+```ts
+import {
+  JsonValue, registerReducer, registerFilter, setModuleInfo, declareTable,
+  readTable, writeTable, scanTable, generateId, nowMs, logInfo, abortCall,
+} from "../../assembly/index";
+
+// REQUIRED: re-export the ABI surface from your entry file.
+export {
+  origindb_alloc, origindb_free, origindb_describe, origindb_invoke,
+  __origindb_abort,
+} from "../../assembly/index";
+
+setModuleInfo("todo", "1.0.0");
+declareTable("todos");
+
+registerReducer("addTodo", (args: Array<JsonValue>): JsonValue | null => {
+  const text = args.length > 0 ? args[0].asString() : "";
+  if (text.length == 0) abortCall("addTodo: text required");   // rolls back
+
+  const id = generateId().toString();
+  writeTable("todos", id, JsonValue.newObject()
+    .setString("id", id)
+    .setString("text", text)
+    .setBool("done", false)
+    .setNumber("created_at", <f64>nowMs())
+    .toString());
+  return JsonValue.newObject().setString("id", id);   // reducer result payload
+}, ["text"]);
+
+// Subscription filter: return true to forward the changefeed event.
+// Storage events wrap the row as {"key": ..., "columns": {...}}.
+registerFilter("onlyPending", (event: JsonValue): bool => {
+  const nv = event.get("new_value").get("columns");
+  return !nv.getBool("done", false);
+});
+```
+
+Build and ship:
+
+```bash
+cd sdk/typescript && npm install
+npm run asbuild                                   # → build/module.wasm (~20 KB)
+origindb_client deploy todo build/module.wasm 1.0.0
+origindb_client call todo addTodo '["ship it"]'
+```
+
+The collab module behind NIGHTBOARD
+([`sdk/typescript/examples/collab/index.ts`](sdk/typescript/examples/collab/index.ts))
+is the full-featured reference: read-modify-write reducers (`moveNote`,
+`editNote`), a chat table, and a real `__migrate` hook that seeded the chat
+table when v2 hot-swapped over v1 on a live server.
+
+### C#
+
+The SDK is one source file (`sdk/csharp/OriginDB.cs`) compiled into your
+project. Registration goes in a `[ModuleInitializer]` — guaranteed to run
+before any export executes. From
+[`examples/csharp/UserService/Program.cs`](examples/csharp/UserService/Program.cs):
+
+```csharp
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using OriginDB;
+
+public static class Program
+{
+    public static void Main() { }   // WASI entry point; leave empty
+
+    [ModuleInitializer]
+    internal static void Init()
+    {
+        Reducers.SetModuleInfo("user_service", "1.0.0");
+        Reducers.DeclareTable("users");
+        Reducers.Register("CreateUser", CreateUser, "name", "email");
+        Reducers.Register("GetUsers", GetUsers);
+        Reducers.RegisterFilter("OnlyUserInserts", OnlyUserInserts);
+    }
+
+    private static object? CreateUser(JsonElement[] args)
+    {
+        string name = args[0].GetString()!;
+        string email = args[1].GetString()!;
+        if (!email.Contains('@'))
+            throw new ReducerException($"'{email}' is not a valid email", -3);
+
+        long id = Host.GenerateId();
+        Db.Write("users", id.ToString(), JsonSerializer.Serialize(new
+        {
+            id = id.ToString(), name, email, created_at = Host.NowMs(),
+        }));
+        return new { id = id.ToString() };
+    }
+}
+```
+
+Build and ship (**pin .NET 8** — the server runs core WASI preview 1
+modules; .NET 9's componentize-dotnet emits preview 2 components it cannot
+run):
+
+```bash
+dotnet workload install wasi-experimental          # once, .NET 8.0.4xx
+dotnet publish -c Release
+origindb publish --path examples/csharp/UserService
+# or: origindb_client deploy user_service bin/Release/net8.0/wasi-wasm/AppBundle/UserService.wasm 1.0.0
+```
+
+Caveat: .NET 8's `wasi-experimental` has incomplete `[UnmanagedCallersOnly]`
+export support upstream. If `wasm-tools print *.wasm | grep export` doesn't
+show `origindb_invoke`, your workload build predates it — use AssemblyScript
+until then. Details in [`sdk/csharp/README.md`](sdk/csharp/README.md).
+
+### Any other language (C++, Rust, Zig, hand-written WAT…)
+
+The ABI is deliberately small: export `memory`, `origindb_alloc`, and
+`origindb_invoke(name_ptr, name_len, args_ptr, args_len) -> i32`; import
+whatever you need from `env` (`host_table_read/write/delete/scan`,
+`host_emit_event`, `host_set_result`, `host_log`, `host_abort`, …). Args
+arrive as a UTF-8 JSON array; return `0` to commit, negative to roll back,
+`-404` for "no such reducer"; payloads go out through `host_set_result`.
+The complete contract — memory ownership, error codes, WASI limits — is in
+[`docs/WASM_ABI.md`](docs/WASM_ABI.md), and
+[`tests/wasm/fixtures/test_module.wat`](tests/wasm/fixtures/test_module.wat)
+is a ~100-line hand-written module that exercises all of it (the e2e suite
+deploys it). `sdk/cpp/` predates ABI v1 and needs realignment before use.
+
+### Scaffolding and day-to-day flow
+
+```bash
+origindb init my-module          # templates: typescript, csharp, unity, nodejs
+origindb publish                 # build + deploy (detects .csproj / asconfig.json)
+origindb_client modules          # list deployed modules (version, sha256)
+origindb_client call m Reducer '["arg1", 2]'
+```
+
+Redeploying an existing name hot-swaps it: in-flight calls finish on the
+old version, new calls hit the new one, `__migrate` runs in between, and
+nothing is lost because durable state lives in tables — module linear
+memory is a cache that resets on swap. More depth:
+[`WASM_MODULES.md`](WASM_MODULES.md), [`CLI_GUIDE.md`](CLI_GUIDE.md).
 
 ## 📦 Repository layout
 
