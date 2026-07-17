@@ -2,6 +2,7 @@
 #include "storage/mem_table.h"
 #include "storage/transaction_impl.h"
 #include "storage/wal_impl.h"
+#include "storage/row_codec.h"
 #include "changefeed/changefeed_engine.h"
 
 #include <spdlog/spdlog.h>
@@ -318,7 +319,8 @@ public:
                     }
                     entry.table_name = write.table_name;
                     entry.key = write.row.key;
-                    entry.data = SerializeRow(write.row);
+                    // Binary row codec for the WAL hot path (was JSON+hex).
+                    entry.data = EncodeRow(write.row);
                     entry.transaction_id = txn->GetTimestamp();
                     wal_entries.push_back(std::move(entry));
 
@@ -441,7 +443,7 @@ public:
                     case WALEntryType::INSERT: {
                         auto table = GetTable(entry.table_name);
                         if (table) {
-                            Row row = DeserializeRow(entry.data);
+                            Row row = DecodeRow(entry.data);
                             table->Insert(row);
                             stats_.total_rows++;
                         } else {
@@ -452,7 +454,7 @@ public:
                     case WALEntryType::UPDATE: {
                         auto table = GetTable(entry.table_name);
                         if (table) {
-                            Row row = DeserializeRow(entry.data);
+                            Row row = DecodeRow(entry.data);
                             table->Update(entry.key, row);
                         } else {
                             spdlog::warn("Table '{}' not found during UPDATE recovery", entry.table_name);

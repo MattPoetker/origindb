@@ -18,6 +18,32 @@
 
 namespace origindb {
 
+namespace {
+
+// 8-byte file magic identifying the binary WAL format. Lets us cleanly reject a
+// legacy JSON-lines WAL (which starts with '{') instead of mis-parsing it.
+constexpr char kWalMagic[8] = {'O', 'R', 'W', 'A', 'L', 0x01, 0, 0};
+
+void PutU32(std::string& out, uint32_t v) {
+    out.push_back(static_cast<char>(v));
+    out.push_back(static_cast<char>(v >> 8));
+    out.push_back(static_cast<char>(v >> 16));
+    out.push_back(static_cast<char>(v >> 24));
+}
+void PutU64(std::string& out, uint64_t v) {
+    for (int i = 0; i < 8; i++) out.push_back(static_cast<char>(v >> (8 * i)));
+}
+void PutLenPrefixed(std::string& out, const std::string& s) {
+    PutU32(out, static_cast<uint32_t>(s.size()));
+    out += s;
+}
+void PutLenPrefixed(std::string& out, const std::vector<uint8_t>& b) {
+    PutU32(out, static_cast<uint32_t>(b.size()));
+    out.append(reinterpret_cast<const char*>(b.data()), b.size());
+}
+
+}  // namespace
+
 // A durable WAL with a dedicated writer thread and opportunistic group commit.
 //
 // Committers call AppendBatchAsync while holding the engine commit lock: that
@@ -55,6 +81,7 @@ public:
                           std::strerror(errno));
             return false;
         }
+        WriteMagicIfEmpty();
 
         RecoverSequenceNumber();
 
@@ -91,15 +118,14 @@ public:
         }
 
         std::string blob;
-        blob.reserve(160 * entries.size());
+        blob.reserve(64 * entries.size());
         uint64_t ts = static_cast<uint64_t>(
             std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now().time_since_epoch()).count());
         for (auto& e : entries) {
             e.sequence = next_sequence_++;
             e.timestamp = ts;
-            blob += SerializeEntry(e);
-            blob += '\n';
+            blob += SerializeRecord(e);
         }
 
         queue_.push_back(PendingBatch{std::move(blob), std::move(promise)});
@@ -109,17 +135,42 @@ public:
 
     std::vector<WALEntry> ReadAll() {
         std::vector<WALEntry> result;
-        std::ifstream file(wal_file_path_);
+        std::ifstream file(wal_file_path_, std::ios::binary);
         if (!file.is_open()) return result;
 
-        std::string line;
-        while (std::getline(file, line)) {
-            if (line.empty()) continue;
+        // Verify the file magic; a legacy JSON-lines WAL (or garbage) is
+        // rejected wholesale rather than mis-parsed. Recovery then falls back
+        // to the snapshot.
+        char magic[sizeof(kWalMagic)];
+        file.read(magic, sizeof(magic));
+        if (file.gcount() != static_cast<std::streamsize>(sizeof(magic)) ||
+            std::memcmp(magic, kWalMagic, sizeof(magic)) != 0) {
+            if (file.gcount() > 0) {
+                spdlog::warn("WAL {} has no/unknown magic — ignoring (expected "
+                             "binary WAL; legacy JSON WALs are not supported)",
+                             wal_file_path_);
+            }
+            return result;
+        }
+
+        // Records: [u32 record_len][record_bytes]. A short read at the end is a
+        // torn tail from a crash mid-write — stop cleanly, keeping prior records.
+        while (true) {
+            uint8_t lenbuf[4];
+            file.read(reinterpret_cast<char*>(lenbuf), 4);
+            if (file.gcount() != 4) break;
+            uint32_t rlen = static_cast<uint32_t>(lenbuf[0]) |
+                            (static_cast<uint32_t>(lenbuf[1]) << 8) |
+                            (static_cast<uint32_t>(lenbuf[2]) << 16) |
+                            (static_cast<uint32_t>(lenbuf[3]) << 24);
+            std::string rec(rlen, '\0');
+            file.read(rec.data(), rlen);
+            if (file.gcount() != static_cast<std::streamsize>(rlen)) break;
             try {
-                auto entry = DeserializeEntry(line);
-                if (entry.sequence > 0) result.push_back(entry);
+                auto entry = DeserializeRecord(rec);
+                if (entry.sequence > 0) result.push_back(std::move(entry));
             } catch (const std::exception& e) {
-                spdlog::warn("Skipping malformed WAL entry: {}", e.what());
+                spdlog::warn("Skipping malformed WAL record: {}", e.what());
             }
         }
         spdlog::info("Read {} entries from WAL", result.size());
@@ -147,6 +198,7 @@ public:
                           std::strerror(errno));
             return false;
         }
+        WriteMagicIfEmpty();  // freshly truncated file needs the magic header
         spdlog::info("WAL truncated after sequence {}", sequence);
         return true;
     }
@@ -293,101 +345,87 @@ private:
         next_sequence_ = max_seq + 1;
     }
 
-    std::string SerializeEntry(const WALEntry& entry) {
-        static const char* kHex = "0123456789abcdef";
-        std::string json;
-        json.reserve(160 + entry.table_name.size() + entry.key.size() +
-                     entry.data.size() * 2);
-        json += "{\"sequence\":";
-        json += std::to_string(entry.sequence);
-        json += ",\"type\":";
-        json += std::to_string(static_cast<int>(entry.type));
-        json += ",\"transaction_id\":";
-        json += std::to_string(entry.transaction_id);
-        json += ",\"timestamp\":";
-        json += std::to_string(entry.timestamp);
-        json += ",\"table_name\":\"";
-        json += entry.table_name;
-        json += "\",\"key\":\"";
-        json += entry.key;
-        json += "\",\"data_size\":";
-        json += std::to_string(entry.data.size());
-        json += ",\"data\":\"";
-        for (uint8_t byte : entry.data) {
-            json += kHex[byte >> 4];
-            json += kHex[byte & 0xF];
+    void WriteMagicIfEmpty() {
+        std::error_code ec;
+        auto size = std::filesystem::file_size(wal_file_path_, ec);
+        if (!ec && size == 0 && fd_ >= 0) {
+            ssize_t n = ::write(fd_, kWalMagic, sizeof(kWalMagic));
+            if (n != static_cast<ssize_t>(sizeof(kWalMagic))) {
+                spdlog::error("Failed to write WAL magic: {}", std::strerror(errno));
+            }
         }
-        json += "\"}";
-        return json;
     }
 
-    WALEntry DeserializeEntry(const std::string& json) {
+    // Binary record: [u32 record_len][ record_bytes ] where record_bytes =
+    //   [u8 type][u64 seq][u64 txn_id][u64 timestamp]
+    //   [u32 table_len][table][u32 key_len][key][u32 data_len][data]
+    // The `data` blob is an opaque, already-binary row payload (row_codec).
+    std::string SerializeRecord(const WALEntry& entry) {
+        std::string rec;
+        rec.reserve(33 + entry.table_name.size() + entry.key.size() +
+                    entry.data.size());
+        rec.push_back(static_cast<char>(static_cast<int>(entry.type)));
+        PutU64(rec, entry.sequence);
+        PutU64(rec, entry.transaction_id);
+        PutU64(rec, entry.timestamp);
+        PutLenPrefixed(rec, entry.table_name);
+        PutLenPrefixed(rec, entry.key);
+        PutLenPrefixed(rec, entry.data);
+
+        std::string framed;
+        framed.reserve(4 + rec.size());
+        PutU32(framed, static_cast<uint32_t>(rec.size()));
+        framed += rec;
+        return framed;
+    }
+
+    WALEntry DeserializeRecord(const std::string& rec) {
+        const uint8_t* p = reinterpret_cast<const uint8_t*>(rec.data());
+        const uint8_t* end = p + rec.size();
+        auto need = [&](size_t n) {
+            if (static_cast<size_t>(end - p) < n)
+                throw std::runtime_error("truncated WAL record");
+        };
+        auto u32 = [&]() -> uint32_t {
+            need(4);
+            uint32_t v = static_cast<uint32_t>(p[0]) |
+                         (static_cast<uint32_t>(p[1]) << 8) |
+                         (static_cast<uint32_t>(p[2]) << 16) |
+                         (static_cast<uint32_t>(p[3]) << 24);
+            p += 4;
+            return v;
+        };
+        auto u64 = [&]() -> uint64_t {
+            need(8);
+            uint64_t v = 0;
+            for (int i = 0; i < 8; i++) v |= static_cast<uint64_t>(p[i]) << (8 * i);
+            p += 8;
+            return v;
+        };
+        auto str = [&]() -> std::string {
+            uint32_t n = u32();
+            need(n);
+            std::string s(reinterpret_cast<const char*>(p), n);
+            p += n;
+            return s;
+        };
+        auto bytes = [&]() -> std::vector<uint8_t> {
+            uint32_t n = u32();
+            need(n);
+            std::vector<uint8_t> b(p, p + n);
+            p += n;
+            return b;
+        };
+
         WALEntry entry;
-        if (json.empty() || json.front() != '{' || json.back() != '}') {
-            throw std::runtime_error("Invalid JSON format: " + json.substr(0, 50));
-        }
-
-        size_t cursor = 0;
-        auto find_field = [&](const char* marker, size_t marker_len) -> size_t {
-            size_t pos = json.find(marker, cursor);
-            if (pos == std::string::npos) pos = json.find(marker);  // fallback
-            if (pos == std::string::npos) return std::string::npos;
-            cursor = pos + marker_len;
-            return cursor;
-        };
-
-        auto parse_u64 = [&](const char* marker, size_t marker_len) -> uint64_t {
-            size_t start = find_field(marker, marker_len);
-            if (start == std::string::npos) return 0;
-            uint64_t value = 0;
-            size_t i = start;
-            while (i < json.size() && json[i] >= '0' && json[i] <= '9') {
-                value = value * 10 + (json[i] - '0');
-                i++;
-            }
-            cursor = i;
-            return value;
-        };
-
-        auto parse_string = [&](const char* marker, size_t marker_len) -> std::string {
-            size_t start = find_field(marker, marker_len);
-            if (start == std::string::npos) return "";
-            size_t end = json.find('"', start);
-            if (end == std::string::npos)
-                throw std::runtime_error("Malformed string field");
-            cursor = end + 1;
-            return json.substr(start, end - start);
-        };
-
-        entry.sequence = parse_u64("\"sequence\":", 11);
-        entry.type = static_cast<WALEntryType>(parse_u64("\"type\":", 7));
-        entry.transaction_id = parse_u64("\"transaction_id\":", 17);
-        entry.timestamp = parse_u64("\"timestamp\":", 12);
-        entry.table_name = parse_string("\"table_name\":\"", 14);
-        entry.key = parse_string("\"key\":\"", 7);
-
-        size_t data_start = find_field("\"data\":\"", 8);
-        if (data_start != std::string::npos) {
-            size_t data_end = json.find('"', data_start);
-            if (data_end == std::string::npos)
-                throw std::runtime_error("Malformed data field");
-
-            auto nibble = [](char c) -> int {
-                if (c >= '0' && c <= '9') return c - '0';
-                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-                return -1;
-            };
-            size_t len = data_end - data_start;
-            entry.data.reserve(len / 2);
-            for (size_t i = 0; i + 1 < len; i += 2) {
-                int hi = nibble(json[data_start + i]);
-                int lo = nibble(json[data_start + i + 1]);
-                if (hi < 0 || lo < 0) throw std::runtime_error("Invalid hex in data");
-                entry.data.push_back(static_cast<uint8_t>((hi << 4) | lo));
-            }
-        }
-
+        need(1);
+        entry.type = static_cast<WALEntryType>(*p++);
+        entry.sequence = u64();
+        entry.transaction_id = u64();
+        entry.timestamp = u64();
+        entry.table_name = str();
+        entry.key = str();
+        entry.data = bytes();
         return entry;
     }
 
