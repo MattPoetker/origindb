@@ -1,5 +1,5 @@
 // =============================================================================
-// UserService — example InstantDB WASM module in C#.
+// UserService — example OriginDB WASM module in C#.
 //
 // Reducers:
 //   CreateUser(name, email) -> {"id": "..."}
@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using InstantDB;
+using OriginDB;
 
 namespace UserService;
 

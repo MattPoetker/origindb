@@ -8,7 +8,7 @@
 
 #include "common/config.h"
 
-namespace instantdb {
+namespace origindb {
 
 // Metric types
 enum class MetricType {
@@ -83,4 +83,4 @@ private:
 // Global metrics instance
 extern std::shared_ptr<MetricsExporter> g_metrics;
 
-} // namespace instantdb
+} // namespace origindb

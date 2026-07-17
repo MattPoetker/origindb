@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# InstantDB Stress Test Runner
+# OriginDB Stress Test Runner
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,7 +8,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 BUILD_DIR="${PROJECT_ROOT}/build/tests/performance"
 REPORTS_DIR="${SCRIPT_DIR}/../reports"
 
-echo "🔥 InstantDB Stress Test Runner"
+echo "🔥 OriginDB Stress Test Runner"
 echo "==============================="
 
 # Create reports directory
@@ -21,19 +21,19 @@ if [ ! -x "${BUILD_DIR}/perf_test_runner" ]; then
     exit 1
 fi
 
-# Check if InstantDB server is running
+# Check if OriginDB server is running
 if ! curl -s "http://localhost:9090" > /dev/null 2>&1; then
-    echo "⚠️  InstantDB server not detected on localhost:9090"
+    echo "⚠️  OriginDB server not detected on localhost:9090"
     echo "   Starting server..."
 
     # Try to start the server
-    if [ -x "${PROJECT_ROOT}/instantdb_server" ]; then
-        "${PROJECT_ROOT}/instantdb_server" -p 9090 &
+    if [ -x "${PROJECT_ROOT}/origindb_server" ]; then
+        "${PROJECT_ROOT}/origindb_server" -p 9090 &
         SERVER_PID=$!
         echo "   Started server with PID: $SERVER_PID"
         sleep 5
     else
-        echo "❌ Cannot find instantdb_server binary"
+        echo "❌ Cannot find origindb_server binary"
         exit 1
     fi
 fi

@@ -1,7 +1,7 @@
 /**
  * WebSocket Subscription Client Example
  *
- * This example demonstrates how to connect to InstantDB and create
+ * This example demonstrates how to connect to OriginDB and create
  * WASM-powered subscription queries via WebSocket.
  *
  * NOTE: the module ("subscription_demo") and function names used below are
@@ -11,7 +11,7 @@
  * names. See docs/WASM_SUBSCRIPTIONS.md.
  */
 
-class InstantDBClient {
+class OriginDBClient {
     constructor(url) {
         this.url = url;
         this.ws = null;
@@ -26,7 +26,7 @@ class InstantDBClient {
             this.ws = new WebSocket(this.url);
 
             this.ws.onopen = () => {
-                console.log('Connected to InstantDB');
+                console.log('Connected to OriginDB');
             };
 
             this.ws.onmessage = (event) => {
@@ -34,7 +34,7 @@ class InstantDBClient {
             };
 
             this.ws.onclose = () => {
-                console.log('Disconnected from InstantDB');
+                console.log('Disconnected from OriginDB');
             };
 
             this.ws.onerror = (error) => {
@@ -184,7 +184,7 @@ class InstantDBClient {
 
 // Example usage
 async function main() {
-    const client = new InstantDBClient('ws://localhost:8080');
+    const client = new OriginDBClient('ws://localhost:8080');
 
     try {
         // Connect to the server
@@ -222,9 +222,9 @@ if (typeof window === 'undefined') {
     main().catch(console.error);
 } else {
     // Browser environment
-    window.InstantDBClient = InstantDBClient;
+    window.OriginDBClient = OriginDBClient;
     window.runExample = main;
-    console.log('InstantDBClient loaded. Call runExample() to start.');
+    console.log('OriginDBClient loaded. Call runExample() to start.');
 }
 
 /**

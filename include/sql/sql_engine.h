@@ -9,7 +9,7 @@
 #include "storage/table.h"
 #include "storage/storage_engine.h"
 
-namespace instantdb {
+namespace origindb {
 
 class StorageEngine;
 class ModuleStore;
@@ -148,4 +148,4 @@ private:
     std::shared_ptr<Transaction> txn_;
 };
 
-} // namespace instantdb
+} // namespace origindb

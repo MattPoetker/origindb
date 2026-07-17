@@ -13,32 +13,32 @@
 #include <thread>
 
 // Include protobuf headers AFTER our headers to avoid conflicts
-#include "instantdb.grpc.pb.h"
+#include "origindb.grpc.pb.h"
 
-namespace instantdb {
+namespace origindb {
 
 // Internal gRPC service implementation that inherits from protobuf service
-class GrpcServiceImpl : public instantdb::grpc::SQLService::Service {
+class GrpcServiceImpl : public origindb::grpc::SQLService::Service {
 public:
     GrpcServiceImpl(SQLServiceImpl* wrapper) : wrapper_(wrapper) {}
 
     ::grpc::Status Execute(::grpc::ServerContext* context,
-                        const instantdb::grpc::SQLRequest* request,
-                        instantdb::grpc::SQLResponse* response) override {
+                        const origindb::grpc::SQLRequest* request,
+                        origindb::grpc::SQLResponse* response) override {
         auto result = wrapper_->Execute(context, request, response);
         return *static_cast<::grpc::Status*>(result);
     }
 
     ::grpc::Status ExecuteTransaction(::grpc::ServerContext* context,
-                                  const instantdb::grpc::SQLTransactionRequest* request,
-                                  instantdb::grpc::SQLTransactionResponse* response) override {
+                                  const origindb::grpc::SQLTransactionRequest* request,
+                                  origindb::grpc::SQLTransactionResponse* response) override {
         auto result = wrapper_->ExecuteTransaction(context, request, response);
         return *static_cast<::grpc::Status*>(result);
     }
 
     ::grpc::Status GetStatus(::grpc::ServerContext* context,
-                          const instantdb::grpc::StatusRequest* request,
-                          instantdb::grpc::StatusResponse* response) override {
+                          const origindb::grpc::StatusRequest* request,
+                          origindb::grpc::StatusResponse* response) override {
         auto result = wrapper_->GetStatus(context, request, response);
         return *static_cast<::grpc::Status*>(result);
     }
@@ -48,27 +48,27 @@ private:
 };
 
 // Internal WASM gRPC service implementation
-class WasmGrpcServiceImpl : public instantdb::grpc::WasmService::Service {
+class WasmGrpcServiceImpl : public origindb::grpc::WasmService::Service {
 public:
     WasmGrpcServiceImpl(WasmServiceImpl* wrapper) : wrapper_(wrapper) {}
 
     ::grpc::Status DeployModule(::grpc::ServerContext* context,
-                               const instantdb::grpc::DeployModuleRequest* request,
-                               instantdb::grpc::DeployModuleResponse* response) override {
+                               const origindb::grpc::DeployModuleRequest* request,
+                               origindb::grpc::DeployModuleResponse* response) override {
         auto result = wrapper_->DeployModule(context, request, response);
         return *static_cast<::grpc::Status*>(result);
     }
 
     ::grpc::Status UndeployModule(::grpc::ServerContext* context,
-                                 const instantdb::grpc::UndeployModuleRequest* request,
-                                 instantdb::grpc::UndeployModuleResponse* response) override {
+                                 const origindb::grpc::UndeployModuleRequest* request,
+                                 origindb::grpc::UndeployModuleResponse* response) override {
         auto result = wrapper_->UndeployModule(context, request, response);
         return *static_cast<::grpc::Status*>(result);
     }
 
     ::grpc::Status ListModules(::grpc::ServerContext* context,
-                              const instantdb::grpc::ListModulesRequest* request,
-                              instantdb::grpc::ListModulesResponse* response) override {
+                              const origindb::grpc::ListModulesRequest* request,
+                              origindb::grpc::ListModulesResponse* response) override {
         try {
             auto result = wrapper_->ListModules(context, request, response);
             return *static_cast<::grpc::Status*>(result);
@@ -82,15 +82,15 @@ public:
     }
 
     ::grpc::Status GetModule(::grpc::ServerContext* context,
-                            const instantdb::grpc::GetModuleRequest* request,
-                            instantdb::grpc::GetModuleResponse* response) override {
+                            const origindb::grpc::GetModuleRequest* request,
+                            origindb::grpc::GetModuleResponse* response) override {
         auto result = wrapper_->GetModule(context, request, response);
         return *static_cast<::grpc::Status*>(result);
     }
 
     ::grpc::Status ExecuteReducer(::grpc::ServerContext* context,
-                                 const instantdb::grpc::ExecuteReducerRequest* request,
-                                 instantdb::grpc::ExecuteReducerResponse* response) override {
+                                 const origindb::grpc::ExecuteReducerRequest* request,
+                                 origindb::grpc::ExecuteReducerResponse* response) override {
         auto result = wrapper_->ExecuteReducer(context, request, response);
         return *static_cast<::grpc::Status*>(result);
     }
@@ -240,8 +240,8 @@ SQLServiceImpl::SQLServiceImpl(std::shared_ptr<SqlEngine> sql_engine,
 
 void* SQLServiceImpl::Execute(void* context_ptr, const void* request_ptr, void* response_ptr) {
     auto* context = static_cast<::grpc::ServerContext*>(context_ptr);
-    auto* request = static_cast<const instantdb::grpc::SQLRequest*>(request_ptr);
-    auto* response = static_cast<instantdb::grpc::SQLResponse*>(response_ptr);
+    auto* request = static_cast<const origindb::grpc::SQLRequest*>(request_ptr);
+    auto* response = static_cast<origindb::grpc::SQLResponse*>(response_ptr);
 
     static thread_local ::grpc::Status status;
 
@@ -284,8 +284,8 @@ void* SQLServiceImpl::Execute(void* context_ptr, const void* request_ptr, void* 
 }
 
 void* SQLServiceImpl::ExecuteTransaction(void* context_ptr, const void* request_ptr, void* response_ptr) {
-    auto* request = static_cast<const instantdb::grpc::SQLTransactionRequest*>(request_ptr);
-    auto* response = static_cast<instantdb::grpc::SQLTransactionResponse*>(response_ptr);
+    auto* request = static_cast<const origindb::grpc::SQLTransactionRequest*>(request_ptr);
+    auto* response = static_cast<origindb::grpc::SQLTransactionResponse*>(response_ptr);
 
     static thread_local ::grpc::Status status;
 
@@ -319,7 +319,7 @@ void* SQLServiceImpl::ExecuteTransaction(void* context_ptr, const void* request_
 }
 
 void* SQLServiceImpl::GetStatus(void* context_ptr, const void* request_ptr, void* response_ptr) {
-    auto* response = static_cast<instantdb::grpc::StatusResponse*>(response_ptr);
+    auto* response = static_cast<origindb::grpc::StatusResponse*>(response_ptr);
 
     static thread_local ::grpc::Status status;
 
@@ -373,7 +373,7 @@ void* SQLServiceImpl::GetServiceImpl() {
 void SQLServiceImpl::ConvertSqlResultToProto(const SqlResult& sql_result,
                                             void* response_ptr,
                                             int64_t execution_time_micros) {
-    auto* response = static_cast<instantdb::grpc::SQLResponse*>(response_ptr);
+    auto* response = static_cast<origindb::grpc::SQLResponse*>(response_ptr);
 
     response->set_success(sql_result.success);
     response->set_error(sql_result.error);
@@ -390,7 +390,7 @@ void SQLServiceImpl::ConvertSqlResultToProto(const SqlResult& sql_result,
 }
 
 void SQLServiceImpl::ConvertRowToProto(const Row& storage_row, void* proto_row_ptr) {
-    auto* proto_row = static_cast<instantdb::grpc::Row*>(proto_row_ptr);
+    auto* proto_row = static_cast<origindb::grpc::Row*>(proto_row_ptr);
 
     proto_row->set_key(storage_row.key);
 
@@ -402,7 +402,7 @@ void SQLServiceImpl::ConvertRowToProto(const Row& storage_row, void* proto_row_p
 
 void SQLServiceImpl::ConvertColumnValueToProto(const Value& value,
                                               void* proto_value_ptr) {
-    auto* proto_value = static_cast<instantdb::grpc::ColumnValue*>(proto_value_ptr);
+    auto* proto_value = static_cast<origindb::grpc::ColumnValue*>(proto_value_ptr);
 
     std::visit([proto_value](const auto& v) {
         using T = std::decay_t<decltype(v)>;
@@ -430,4 +430,4 @@ void SQLServiceImpl::ConvertColumnValueToProto(const Value& value,
     }, value);
 }
 
-} // namespace instantdb
+} // namespace origindb

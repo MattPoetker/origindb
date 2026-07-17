@@ -6,7 +6,7 @@
 #include <regex>
 #include <nlohmann/json.hpp>
 
-namespace instantdb {
+namespace origindb {
 
 namespace {
 
@@ -468,4 +468,4 @@ std::string SqlSubscriptionManager::GenerateSubscriptionId() {
     return "sql_sub_" + std::to_string(id);
 }
 
-} // namespace instantdb
+} // namespace origindb

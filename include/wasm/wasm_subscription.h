@@ -11,7 +11,7 @@
 #include "wasm/wasm_engine.h"
 #include "changefeed/changefeed_engine.h"
 
-namespace instantdb {
+namespace origindb {
 
 // Forward declarations
 class StorageEngine;
@@ -196,4 +196,4 @@ private:
     WasmSubscriptionQuery query_;
 };
 
-} // namespace instantdb
+} // namespace origindb

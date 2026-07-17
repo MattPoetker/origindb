@@ -17,17 +17,17 @@ compile_commands.json
 # Build outputs
 *.a
 *.o
-/instantdb
-/instantdb_client
-/instantdb_demo
-/instantdb_init
-/instantdb_server
-/instantdb_sql
+/origindb
+/origindb_client
+/origindb_demo
+/origindb_init
+/origindb_server
+/origindb_sql
 /binary_protocol_test
 
 # Runtime data / logs / test residue
 logs/
-instantdb_data/
+origindb_data/
 nightboard_data/
 test_results.json
 storage_results.json

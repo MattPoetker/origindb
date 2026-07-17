@@ -7,7 +7,7 @@
 #include <atomic>
 #include <fstream>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 struct SystemMetrics {
@@ -200,7 +200,7 @@ public:
         }
 
         try {
-            instantdb::grpc::StatusResponse response;
+            origindb::grpc::StatusResponse response;
             auto start = std::chrono::high_resolution_clock::now();
             bool success = client_->GetServerStatus(&response);
             auto end = std::chrono::high_resolution_clock::now();
@@ -420,7 +420,7 @@ private:
                 // Clear screen and show current status
                 std::cout << "\033[2J\033[H"; // ANSI clear screen and move cursor to top
 
-                std::cout << "🔍 InstantDB Performance Monitor - " << GetCurrentTimestamp() << "\n";
+                std::cout << "🔍 OriginDB Performance Monitor - " << GetCurrentTimestamp() << "\n";
                 std::cout << std::string(70, '=') << "\n";
 
                 std::cout << "🖥️  SYSTEM STATUS:\n";
@@ -467,11 +467,11 @@ private:
 };
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb
 
 void PrintUsage() {
     std::cout << R"(
-InstantDB Performance Monitor
+OriginDB Performance Monitor
 
 Usage: perf_monitor [OPTIONS]
 
@@ -542,7 +542,7 @@ int main(int argc, char* argv[]) {
         spdlog::set_level(spdlog::level::info);
     }
 
-    spdlog::info("🔍 InstantDB Performance Monitor");
+    spdlog::info("🔍 OriginDB Performance Monitor");
     spdlog::info("Server: {}", server_address);
     spdlog::info("Interval: {}ms", interval_ms);
     if (duration_seconds > 0) {
@@ -552,7 +552,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Create and start monitor
-    instantdb::performance::PerformanceMonitor monitor(server_address, interval_ms);
+    origindb::performance::PerformanceMonitor monitor(server_address, interval_ms);
     monitor.Start();
 
     // Handle duration limit

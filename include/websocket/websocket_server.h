@@ -18,7 +18,7 @@
 #include "sql/sql_engine.h"
 #include "storage/storage_engine.h"
 
-namespace instantdb {
+namespace origindb {
 
 class ChangefeedEngine;
 class WasmSubscriptionManager;
@@ -109,4 +109,4 @@ private:
     std::unordered_map<int, bool> client_use_binary_;  // Map socket to binary protocol preference
 };
 
-} // namespace instantdb
+} // namespace origindb

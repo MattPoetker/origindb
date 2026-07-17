@@ -1,11 +1,11 @@
 // =============================================================================
-// InstantDB AssemblyScript SDK
+// OriginDB AssemblyScript SDK
 //
-// Implements the InstantDB WASM ABI v1 (docs/WASM_ABI.md):
-//   * the guest exports instantdb_alloc / instantdb_free / instantdb_describe /
-//     instantdb_invoke (re-export them from your module's entry file!)
+// Implements the OriginDB WASM ABI v1 (docs/WASM_ABI.md):
+//   * the guest exports origindb_alloc / origindb_free / origindb_describe /
+//     origindb_invoke (re-export them from your module's entry file!)
 //   * typed wrappers over the "env" host imports
-//   * a reducer/filter registry that instantdb_invoke dispatches through
+//   * a reducer/filter registry that origindb_invoke dispatches through
 //     (unregistered names return -404 per the ABI)
 //   * a hand-rolled minimal JSON value type (JsonValue) — chosen over json-as
 //     to keep the SDK dependency-free and predictable under the "minimal"
@@ -14,8 +14,8 @@
 // Module entry files must re-export the ABI surface:
 //
 //   export {
-//     instantdb_alloc, instantdb_free, instantdb_describe, instantdb_invoke,
-//     __instantdb_abort,
+//     origindb_alloc, origindb_free, origindb_describe, origindb_invoke,
+//     __origindb_abort,
 //   } from "<path>/assembly/index";
 //
 // and register reducers in top-level statements (they run in the wasm start
@@ -488,7 +488,7 @@ function ptrOf(buf: ArrayBuffer): usize {
   return changetype<usize>(buf);
 }
 
-// Decode + free a guest buffer that the host filled via our instantdb_alloc
+// Decode + free a guest buffer that the host filled via our origindb_alloc
 // (heap.alloc — same allocator, NOT host_free).
 function takeGuestBuffer(ptr: usize, len: i32): string {
   if (ptr == 0) return "";
@@ -736,13 +736,13 @@ const declaredTables = new Array<string>();
 let moduleName = "module";
 let moduleVersion = "1.0.0";
 
-/** Module name/version reported by instantdb_describe. */
+/** Module name/version reported by origindb_describe. */
 export function setModuleInfo(name: string, version: string = "1.0.0"): void {
   moduleName = name;
   moduleVersion = version;
 }
 
-/** Declare a table for instantdb_describe metadata (informational). */
+/** Declare a table for origindb_describe metadata (informational). */
 export function declareTable(table: string): void {
   if (!declaredTables.includes(table)) declaredTables.push(table);
 }
@@ -823,14 +823,14 @@ function unwrapEvent(args: Array<JsonValue>): JsonValue {
 /**
  * Guest allocator. The host uses it for every host->guest buffer (invoke
  * name/args, read/scan results). Buffers are owned by the guest and freed
- * with heap.free / instantdb_free. Returns 0 on failure per the ABI
+ * with heap.free / origindb_free. Returns 0 on failure per the ABI
  * (allocation failure traps in AS, which the host also treats as an error).
  */
-export function instantdb_alloc(size: i32): usize {
+export function origindb_alloc(size: i32): usize {
   return heap.alloc(<usize>(size > 0 ? size : 1));
 }
 
-export function instantdb_free(ptr: usize): void {
+export function origindb_free(ptr: usize): void {
   if (ptr != 0) heap.free(ptr);
 }
 
@@ -838,7 +838,7 @@ export function instantdb_free(ptr: usize): void {
 let describePin: ArrayBuffer | null = null;
 
 /** Returns (ptr << 32) | len of the module metadata JSON. */
-export function instantdb_describe(): i64 {
+export function origindb_describe(): i64 {
   const buf = utf8(buildDescribeJson());
   describePin = buf;
   return (<i64>ptrOf(buf) << 32) | (<i64>buf.byteLength & 0xffffffff);
@@ -849,11 +849,11 @@ export function instantdb_describe(): i64 {
  * filters. Status: 0 ok, 1/0 filter include/exclude, <0 error, -404 no
  * handler registered for this name.
  */
-export function instantdb_invoke(namePtr: usize, nameLen: i32, argsPtr: usize, argsLen: i32): i32 {
+export function origindb_invoke(namePtr: usize, nameLen: i32, argsPtr: usize, argsLen: i32): i32 {
   const name = nameLen > 0 ? String.UTF8.decodeUnsafe(namePtr, <usize>nameLen) : "";
   const argsJson = argsLen > 0 ? String.UTF8.decodeUnsafe(argsPtr, <usize>argsLen) : "[]";
 
-  // The host wrote name/args via instantdb_alloc; the guest owns (and now
+  // The host wrote name/args via origindb_alloc; the guest owns (and now
   // frees) those buffers.
   if (namePtr != 0) heap.free(namePtr);
   if (argsPtr != 0) heap.free(argsPtr);
@@ -879,11 +879,11 @@ export function instantdb_invoke(namePtr: usize, nameLen: i32, argsPtr: usize, a
 
 /**
  * Custom AssemblyScript abort handler, wired via asconfig
- * ("use": ["abort=assembly/index/__instantdb_abort"]). Routes assertion
+ * ("use": ["abort=assembly/index/__origindb_abort"]). Routes assertion
  * failures and `throw` to host_abort so the failure message reaches the
  * server log instead of requiring an env.abort import the host rejects.
  */
-export function __instantdb_abort(
+export function __origindb_abort(
   message: string | null,
   fileName: string | null,
   lineNumber: u32,

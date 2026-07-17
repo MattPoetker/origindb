@@ -100,9 +100,9 @@ jobs:
       if: matrix.build_type == 'Release'
       uses: actions/upload-artifact@v3
       with:
-        name: instantdb-${{ runner.os }}-${{ runner.arch }}
+        name: origindb-${{ runner.os }}-${{ runner.arch }}
         path: |
-          build/instantdb*
+          build/origindb*
           build/*.exe
         retention-days: 7
 
@@ -205,7 +205,7 @@ jobs:
     - name: Upload packages
       uses: actions/upload-artifact@v3
       with:
-        name: instantdb-${{ matrix.package_type }}-${{ matrix.arch }}
+        name: origindb-${{ matrix.package_type }}-${{ matrix.arch }}
         path: build/*.{deb,rpm,dmg,msi,zip}
         retention-days: 30
 
@@ -232,7 +232,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: instantdb/instantdb
+        images: origindb/origindb
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -274,17 +274,17 @@ jobs:
 
         # Create platform-specific archives for binary distributions
         for os in Linux macOS Windows; do
-          if [ -d "artifacts/instantdb-$os-X64" ]; then
-            cd "artifacts/instantdb-$os-X64"
+          if [ -d "artifacts/origindb-$os-X64" ]; then
+            cd "artifacts/origindb-$os-X64"
             case "$os" in
               Linux)
-                tar czf "../../release/instantdb-linux-x64.tar.gz" instantdb*
+                tar czf "../../release/origindb-linux-x64.tar.gz" origindb*
                 ;;
               macOS)
-                tar czf "../../release/instantdb-macos-x64.tar.gz" instantdb*
+                tar czf "../../release/origindb-macos-x64.tar.gz" origindb*
                 ;;
               Windows)
-                zip -r "../../release/instantdb-windows-x64.zip" *.exe
+                zip -r "../../release/origindb-windows-x64.zip" *.exe
                 ;;
             esac
             cd ../..
@@ -308,39 +308,39 @@ jobs:
           ### One-Liner Install (Recommended)
           ```bash
           # macOS & Linux
-          curl -sSf https://install.instantdb.com | sh
+          curl -sSf https://install.origindb.com | sh
 
           # Windows (PowerShell)
-          iwr -useb https://install.instantdb.com/windows | iex
+          iwr -useb https://install.origindb.com/windows | iex
 
           # Windows (Command Prompt)
-          curl -sSf https://install.instantdb.com/windows.bat | cmd
+          curl -sSf https://install.origindb.com/windows.bat | cmd
           ```
 
           ### Manual Installation
           ```bash
           # macOS
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/instantdb-macos-x64.tar.gz | tar xz
-          sudo mv instantdb /usr/local/bin/
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/origindb-macos-x64.tar.gz | tar xz
+          sudo mv origindb /usr/local/bin/
 
           # Linux
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/instantdb-linux-x64.tar.gz | tar xz
-          sudo mv instantdb /usr/local/bin/
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/origindb-linux-x64.tar.gz | tar xz
+          sudo mv origindb /usr/local/bin/
 
           # Windows (PowerShell)
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/instantdb-windows-x64.zip" -OutFile "instantdb.zip"
-          Expand-Archive -Path "instantdb.zip" -DestinationPath "C:\tools\instantdb"
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/origindb-windows-x64.zip" -OutFile "origindb.zip"
+          Expand-Archive -Path "origindb.zip" -DestinationPath "C:\tools\origindb"
           ```
 
           ### Package Managers
-          - **Debian/Ubuntu**: Download the `.deb` file and run `sudo dpkg -i instantdb_*.deb`
-          - **CentOS/RHEL/Fedora**: Download the `.rpm` file and run `sudo rpm -i instantdb-*.rpm`
-          - **macOS**: Download the `.dmg` file and drag InstantDB to Applications
+          - **Debian/Ubuntu**: Download the `.deb` file and run `sudo dpkg -i origindb_*.deb`
+          - **CentOS/RHEL/Fedora**: Download the `.rpm` file and run `sudo rpm -i origindb-*.rpm`
+          - **macOS**: Download the `.dmg` file and drag OriginDB to Applications
           - **Windows**: Download the `.msi` file and run the installer
 
           ### Docker
           ```bash
-          docker run -p 8080:8080 -p 50051:50051 instantdb/instantdb:${{ github.ref_name }}
+          docker run -p 8080:8080 -p 50051:50051 origindb/origindb:${{ github.ref_name }}
           ```
 
           See [INSTALL.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/INSTALL.md) for complete installation instructions.

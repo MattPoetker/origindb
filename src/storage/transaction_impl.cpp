@@ -2,7 +2,7 @@
 #include "storage/storage_engine.h"
 #include <spdlog/spdlog.h>
 
-namespace instantdb {
+namespace origindb {
 
 TransactionImpl::TransactionImpl(uint64_t id, uint64_t timestamp,
                                 IsolationLevel level, void* engine)
@@ -122,4 +122,4 @@ void TransactionImpl::SetAborted() {
     state_ = State::ABORTED;
 }
 
-} // namespace instantdb
+} // namespace origindb

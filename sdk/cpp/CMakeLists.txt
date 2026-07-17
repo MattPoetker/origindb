@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(InstantDB_CPP_SDK VERSION 1.0.0 LANGUAGES CXX)
+project(OriginDB_CPP_SDK VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,7 +15,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MAXIMUM_MEMORY=67108864") # 64MB limit
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2") # Optimize for size and speed
 
-    # Export functions for InstantDB host
+    # Export functions for OriginDB host
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s EXPORTED_FUNCTIONS=['_malloc','_free']")
 
 else()
@@ -32,13 +32,13 @@ else()
     endif()
 endif()
 
-# InstantDB SDK library (header-only)
-add_library(instantdb_sdk INTERFACE)
-target_include_directories(instantdb_sdk INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+# OriginDB SDK library (header-only)
+add_library(origindb_sdk INTERFACE)
+target_include_directories(origindb_sdk INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Example: Counter module
 add_executable(counter_module examples/counter_module.cpp)
-target_link_libraries(counter_module instantdb_sdk)
+target_link_libraries(counter_module origindb_sdk)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     # Set output extension for WASM
@@ -51,30 +51,30 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
 endif()
 
 # Installation
-install(FILES instantdb.hpp DESTINATION include/instantdb)
-install(DIRECTORY examples/ DESTINATION share/instantdb/examples
+install(FILES origindb.hpp DESTINATION include/origindb)
+install(DIRECTORY examples/ DESTINATION share/origindb/examples
         FILES_MATCHING PATTERN "*.cpp" PATTERN "*.hpp")
 
 # Package configuration
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/InstantDBConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/InstantDBConfig.cmake"
-    INSTALL_DESTINATION lib/cmake/InstantDB
+    "${CMAKE_CURRENT_SOURCE_DIR}/OriginDBConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/OriginDBConfig.cmake"
+    INSTALL_DESTINATION lib/cmake/OriginDB
 )
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/InstantDBConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/OriginDBConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/InstantDBConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/InstantDBConfigVersion.cmake"
-    DESTINATION lib/cmake/InstantDB
+    "${CMAKE_CURRENT_BINARY_DIR}/OriginDBConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/OriginDBConfigVersion.cmake"
+    DESTINATION lib/cmake/OriginDB
 )
 
-export(TARGETS instantdb_sdk FILE "${CMAKE_CURRENT_BINARY_DIR}/InstantDBTargets.cmake")
-install(EXPORT InstantDBTargets DESTINATION lib/cmake/InstantDB)
+export(TARGETS origindb_sdk FILE "${CMAKE_CURRENT_BINARY_DIR}/OriginDBTargets.cmake")
+install(EXPORT OriginDBTargets DESTINATION lib/cmake/OriginDB)

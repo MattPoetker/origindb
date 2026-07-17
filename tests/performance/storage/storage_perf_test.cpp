@@ -5,7 +5,7 @@
 #include <chrono>
 #include <cassert>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // TestDataGenerator Implementation
@@ -811,4 +811,4 @@ DataGenConfig StorageTestFactory::GetLargeDataConfig() {
 }
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

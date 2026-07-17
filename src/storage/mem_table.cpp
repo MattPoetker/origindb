@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <shared_mutex>
 
-namespace instantdb {
+namespace origindb {
 
 class MemTable::Impl {
 public:
@@ -190,4 +190,4 @@ std::vector<std::string> MemTable::GetIndexNames() const {
     return impl_->GetIndexNames();
 }
 
-} // namespace instantdb
+} // namespace origindb

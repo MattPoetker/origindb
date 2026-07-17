@@ -8,7 +8,7 @@
 #include <vector>
 #include <random>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // Data generation configuration
@@ -255,4 +255,4 @@ public:
 };
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

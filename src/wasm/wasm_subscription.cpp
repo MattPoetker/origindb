@@ -7,7 +7,7 @@
 #include <thread>
 #include <algorithm>
 
-namespace instantdb {
+namespace origindb {
 
 // =============================================================================
 // WasmSubscriptionManager Implementation
@@ -355,7 +355,7 @@ private:
 
                 if (filter_result.success && !filter_result.values.empty() &&
                     std::holds_alternative<int32_t>(filter_result.values[0])) {
-                    // ABI: instantdb_invoke returns 1 = include, 0 = exclude.
+                    // ABI: origindb_invoke returns 1 = include, 0 = exclude.
                     should_emit = std::get<int32_t>(filter_result.values[0]) != 0;
                     if (!should_emit) {
                         metrics_.events_filtered++;
@@ -654,4 +654,4 @@ WasmSubscriptionQuery SubscriptionQueryBuilder::Build() const {
     return query_;
 }
 
-} // namespace instantdb
+} // namespace origindb

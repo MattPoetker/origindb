@@ -1,12 +1,12 @@
 // Collab demo web server.
 //
 // Serves the static frontend on :9090 and bridges browser HTTP calls to the
-// InstantDB gRPC WasmService (browsers cannot speak raw gRPC). Realtime data
-// flows the other way: the browser subscribes directly to InstantDB's
+// OriginDB gRPC WasmService (browsers cannot speak raw gRPC). Realtime data
+// flows the other way: the browser subscribes directly to OriginDB's
 // websocket (:8080) and receives WHERE-filtered changefeed events.
 //
-//   browser --POST /api/call--> this server --gRPC ExecuteReducer--> InstantDB
-//   browser <--ws sql_changefeed_event------------------------------ InstantDB
+//   browser --POST /api/call--> this server --gRPC ExecuteReducer--> OriginDB
+//   browser <--ws sql_changefeed_event------------------------------ OriginDB
 //
 // Usage: node server.js [--port 9090] [--grpc localhost:50051] [--ws-port 8080]
 
@@ -31,13 +31,13 @@ const MODULE = "collab";
 
 // --- gRPC client -------------------------------------------------------------
 
-const protoPath = resolve(__dirname, "../../proto/instantdb.proto");
+const protoPath = resolve(__dirname, "../../proto/origindb.proto");
 const packageDef = protoLoader.loadSync(protoPath, {
   keepCase: true,
   longs: String,
   defaults: true,
 });
-const proto = grpc.loadPackageDefinition(packageDef).instantdb.grpc;
+const proto = grpc.loadPackageDefinition(packageDef).origindb.grpc;
 const wasm = new proto.WasmService(GRPC_TARGET, grpc.credentials.createInsecure());
 
 function toWasmValue(v) {

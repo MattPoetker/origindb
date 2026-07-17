@@ -1,15 +1,15 @@
-# InstantDB Installation Script for Windows (PowerShell)
-# Usage: iwr -useb https://install.instantdb.com/windows | iex
+# OriginDB Installation Script for Windows (PowerShell)
+# Usage: iwr -useb https://install.origindb.com/windows | iex
 
 param(
-    [string]$InstallDir = "$env:ProgramFiles\InstantDB",
+    [string]$InstallDir = "$env:ProgramFiles\OriginDB",
     [string]$Version = "latest"
 )
 
 # Configuration
-$GitHubRepo = "your-org/instantdb"
-$BinaryName = "instantdb.exe"
-$TmpDir = "$env:TEMP\instantdb-install"
+$GitHubRepo = "your-org/origindb"
+$BinaryName = "origindb.exe"
+$TmpDir = "$env:TEMP\origindb-install"
 
 # Colors for console output
 function Write-ColorOutput {
@@ -90,10 +90,10 @@ function Get-LatestVersion {
 }
 
 # Download and extract
-function Install-InstantDB {
+function Install-OriginDB {
     param([string]$Architecture, [string]$Version)
 
-    Write-Info "Downloading InstantDB for Windows $Architecture..."
+    Write-Info "Downloading OriginDB for Windows $Architecture..."
 
     # Create temporary directory
     if (Test-Path $TmpDir) {
@@ -103,12 +103,12 @@ function Install-InstantDB {
 
     # Download URL
     $downloadUrl = if ($Version -eq "latest") {
-        "https://github.com/$GitHubRepo/releases/latest/download/instantdb-windows-$Architecture.zip"
+        "https://github.com/$GitHubRepo/releases/latest/download/origindb-windows-$Architecture.zip"
     } else {
-        "https://github.com/$GitHubRepo/releases/download/$Version/instantdb-windows-$Architecture.zip"
+        "https://github.com/$GitHubRepo/releases/download/$Version/origindb-windows-$Architecture.zip"
     }
 
-    $zipPath = "$TmpDir\instantdb.zip"
+    $zipPath = "$TmpDir\origindb.zip"
 
     try {
         # Download file
@@ -122,14 +122,14 @@ function Install-InstantDB {
         Write-Success "Download completed"
     }
     catch {
-        Write-Error "Failed to download InstantDB: $($_.Exception.Message)"
+        Write-Error "Failed to download OriginDB: $($_.Exception.Message)"
         exit 1
     }
 }
 
 # Install binary to system
 function Install-Binary {
-    Write-Info "Installing InstantDB..."
+    Write-Info "Installing OriginDB..."
 
     # Create install directory
     if (!(Test-Path $InstallDir)) {
@@ -149,7 +149,7 @@ function Install-Binary {
 
     try {
         Copy-Item $sourcePath $destPath -Force
-        Write-Success "InstantDB installed to $destPath"
+        Write-Success "OriginDB installed to $destPath"
     }
     catch {
         Write-Error "Failed to install binary: $($_.Exception.Message)"
@@ -159,14 +159,14 @@ function Install-Binary {
 
 # Add to PATH
 function Add-ToPath {
-    Write-Info "Adding InstantDB to PATH..."
+    Write-Info "Adding OriginDB to PATH..."
 
     # Get current PATH
     $currentPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
 
     # Check if already in PATH
     if ($currentPath -like "*$InstallDir*") {
-        Write-Info "InstantDB is already in PATH"
+        Write-Info "OriginDB is already in PATH"
         return
     }
 
@@ -178,7 +178,7 @@ function Add-ToPath {
         # Also add to current session
         $env:PATH += ";$InstallDir"
 
-        Write-Success "Added InstantDB to system PATH"
+        Write-Success "Added OriginDB to system PATH"
         Write-Info "You may need to restart your terminal for PATH changes to take effect"
     }
     catch {
@@ -204,7 +204,7 @@ function Test-Installation {
     try {
         $version = & $binaryPath --version 2>$null
         if ($LASTEXITCODE -eq 0) {
-            Write-Success "InstantDB installed successfully!"
+            Write-Success "OriginDB installed successfully!"
             Write-Success "Version: $version"
             Write-Success "Location: $binaryPath"
         } else {
@@ -226,7 +226,7 @@ function Remove-TempFiles {
 
 # Main installation function
 function Install-Main {
-    Write-Info "Starting InstantDB installation..."
+    Write-Info "Starting OriginDB installation..."
 
     try {
         # Check if running as admin
@@ -247,7 +247,7 @@ function Install-Main {
         Write-Info "Installing version: $version"
 
         # Download and extract
-        Install-InstantDB $architecture $version
+        Install-OriginDB $architecture $version
 
         # Install binary
         Install-Binary
@@ -258,13 +258,13 @@ function Install-Main {
         # Verify installation
         Test-Installation
 
-        Write-Success "🚀 InstantDB installation completed!"
+        Write-Success "🚀 OriginDB installation completed!"
         Write-Host ""
         Write-Host "Next steps:" -ForegroundColor Yellow
         Write-Host "  1. Restart your terminal or open a new one"
-        Write-Host "  2. Start the InstantDB server: instantdb server"
-        Write-Host "  3. Check out the documentation: https://docs.instantdb.com"
-        Write-Host "  4. Try the C# quickstart: https://docs.instantdb.com/csharp"
+        Write-Host "  2. Start the OriginDB server: origindb server"
+        Write-Host "  3. Check out the documentation: https://docs.origindb.com"
+        Write-Host "  4. Try the C# quickstart: https://docs.origindb.com/csharp"
         Write-Host ""
     }
     catch {

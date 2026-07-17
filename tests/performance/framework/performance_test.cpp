@@ -20,7 +20,7 @@
 #include <fstream>
 #endif
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // PerformanceTest implementation
@@ -375,7 +375,7 @@ void TestReporter::GenerateHtmlReport(const std::string& filename, const std::ve
     file << R"(<!DOCTYPE html>
 <html>
 <head>
-    <title>InstantDB Performance Test Results</title>
+    <title>OriginDB Performance Test Results</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
@@ -386,7 +386,7 @@ void TestReporter::GenerateHtmlReport(const std::string& filename, const std::ve
     </style>
 </head>
 <body>
-    <h1>InstantDB Performance Test Results</h1>
+    <h1>OriginDB Performance Test Results</h1>
     <div class="chart-container">
         <canvas id="throughputChart"></canvas>
     </div>
@@ -453,4 +453,4 @@ void TestReporter::PrintComparison(const std::vector<std::shared_ptr<Metrics>>& 
 }
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

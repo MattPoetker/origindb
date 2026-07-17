@@ -1,8 +1,8 @@
 {
-  "name": "@instantdb/module-sdk",
+  "name": "@origindb/module-sdk",
   "version": "0.1.0",
   "private": true,
-  "description": "InstantDB WASM module SDK for AssemblyScript (WASM ABI v1)",
+  "description": "OriginDB WASM module SDK for AssemblyScript (WASM ABI v1)",
   "type": "module",
   "scripts": {
     "asbuild": "asc --target release",

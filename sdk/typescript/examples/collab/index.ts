@@ -1,5 +1,5 @@
 // =============================================================================
-// InstantDB example module: collab — shared realtime workspace
+// OriginDB example module: collab — shared realtime workspace
 //
 // Reducers:
 //   join(user, color)                  -> presence row + activity entry
@@ -15,7 +15,7 @@
 // Build (from sdk/typescript):
 //   npx asc examples/collab/index.ts --outFile build/collab.wasm \
 //     --runtime minimal --exportRuntime false \
-//     --use abort=assembly/index/__instantdb_abort -O3 --shrinkLevel 1
+//     --use abort=assembly/index/__origindb_abort -O3 --shrinkLevel 1
 // =============================================================================
 
 import {
@@ -33,11 +33,11 @@ import {
 } from "../../assembly/index";
 
 export {
-  instantdb_alloc,
-  instantdb_free,
-  instantdb_describe,
-  instantdb_invoke,
-  __instantdb_abort,
+  origindb_alloc,
+  origindb_free,
+  origindb_describe,
+  origindb_invoke,
+  __origindb_abort,
 } from "../../assembly/index";
 
 setModuleInfo("collab", "1.0.0");

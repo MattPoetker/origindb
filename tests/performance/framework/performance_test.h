@@ -11,7 +11,7 @@
 #include <mutex>
 #include <fstream>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // Performance metrics structure
@@ -158,4 +158,4 @@ private:
 };
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

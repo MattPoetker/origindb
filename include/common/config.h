@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <spdlog/common.h>
 
-namespace instantdb {
+namespace origindb {
 
 struct StorageConfig {
     std::string data_dir = "./data";
@@ -17,7 +17,7 @@ struct StorageConfig {
 
 struct RaftConfig {
     std::string node_id;
-    std::string cluster_id = "instantdb-cluster";
+    std::string cluster_id = "origindb-cluster";
     std::string listen_address = "0.0.0.0:9001";
     std::vector<std::string> peer_addresses;
     uint32_t election_timeout_ms = 3000;
@@ -97,4 +97,4 @@ struct ServerConfig {
 bool ParseCommandLine(int argc, char* argv[], ServerConfig& config);
 bool LoadConfigFile(const std::string& path, ServerConfig& config);
 
-} // namespace instantdb
+} // namespace origindb

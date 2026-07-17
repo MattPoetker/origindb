@@ -14,7 +14,7 @@ WS_PORT=18080
 GRPC_PORT=15051
 DATA_DIR="$(mktemp -d)"
 SERVER_LOG="$DATA_DIR/server.log"
-CLI="$BUILD_DIR/instantdb_client"
+CLI="$BUILD_DIR/origindb_client"
 SERVER_PID=""
 
 cleanup() {
@@ -27,7 +27,7 @@ fail() { echo "❌ FAIL: $1"; exit 1; }
 step() { echo; echo "=== $1 ==="; }
 
 step "Build"
-cmake --build "$BUILD_DIR" --target instantdb_server instantdb_client wat2wasm_tool -j8 > /dev/null
+cmake --build "$BUILD_DIR" --target origindb_server origindb_client wat2wasm_tool -j8 > /dev/null
 
 step "Compile test module (WAT -> wasm)"
 "$BUILD_DIR/wat2wasm_tool" tests/wasm/fixtures/test_module.wat "$DATA_DIR/test_module.wasm"
@@ -36,7 +36,7 @@ BOOT=0
 start_server() {
     BOOT=$((BOOT + 1))
     SERVER_LOG="$DATA_DIR/server_boot$BOOT.log"
-    "$BUILD_DIR/instantdb_server" -d "$DATA_DIR/db" -p $WS_PORT -g $GRPC_PORT \
+    "$BUILD_DIR/origindb_server" -d "$DATA_DIR/db" -p $WS_PORT -g $GRPC_PORT \
         > "$SERVER_LOG" 2>&1 &
     SERVER_PID=$!
     for _ in $(seq 1 50); do

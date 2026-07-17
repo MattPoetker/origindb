@@ -1,0 +1,18 @@
+{
+    "name": "OriginDB.Unity.Editor",
+    "rootNamespace": "OriginDB.Unity.Editor",
+    "references": [
+        "OriginDB.Unity"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

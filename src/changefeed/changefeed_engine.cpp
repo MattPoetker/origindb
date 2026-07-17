@@ -7,7 +7,7 @@
 #include <condition_variable>
 #include <unordered_map>
 
-namespace instantdb {
+namespace origindb {
 
 class ChangefeedEngine::Impl {
 public:
@@ -470,4 +470,4 @@ uint64_t ChangefeedEngine::GetOldestRetainedOffset() const {
     return impl_->GetOldestRetainedOffset();
 }
 
-} // namespace instantdb
+} // namespace origindb

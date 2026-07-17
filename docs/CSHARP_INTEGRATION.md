@@ -1,16 +1,16 @@
-# InstantDB C# Integration Guide
+# OriginDB C# Integration Guide
 
-C# fits into InstantDB in two distinct ways:
+C# fits into OriginDB in two distinct ways:
 
 1. **Server-side WASM modules** — write reducers in C#, compile to
    WebAssembly, deploy into the server. This is supported today via the
    single-file SDK in `sdk/csharp/` (with an important .NET 8 toolchain
    caveat, below).
 2. **Client applications** (Unity, WPF, ASP.NET, ...) — there is currently
-   **no official InstantDB C# client library, NuGet package, or Unity
+   **no official OriginDB C# client library, NuGet package, or Unity
    package**. Clients talk to the server directly over its WebSocket JSON
    protocol and/or gRPC. Earlier versions of this document described an
-   `InstantDB.Client`/Unity SDK that does not exist; treat any such API as
+   `OriginDB.Client`/Unity SDK that does not exist; treat any such API as
    unimplemented.
 
 ## 1. Writing server-side modules in C#
@@ -23,14 +23,14 @@ Summary:
   those emit WASI preview 2 *components*, which the server rejects.
 - **Known limitation**: .NET 8 `wasi-experimental` support for
   `[UnmanagedCallersOnly]` exports is incomplete upstream. If your
-  published module doesn't export `instantdb_invoke`, your workload build
+  published module doesn't export `origindb_invoke`, your workload build
   predates export support — the AssemblyScript SDK (`sdk/typescript/`) is
   the fully verified module path today.
 
 ```csharp
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using InstantDB;
+using OriginDB;
 
 public static class Program
 {
@@ -64,15 +64,15 @@ dotnet publish -c Release
 # → bin/Release/net8.0/wasi-wasm/AppBundle/<ProjectName>.wasm
 
 # One-step build + deploy from the project directory:
-instantdb publish --server=localhost:50051
+origindb publish --server=localhost:50051
 
 # Or deploy a prebuilt .wasm:
-instantdb_client deploy user_service bin/Release/net8.0/wasi-wasm/AppBundle/UserService.wasm 1.0.0
-instantdb_client call user_service CreateUser '["Alice"]'
+origindb_client deploy user_service bin/Release/net8.0/wasi-wasm/AppBundle/UserService.wasm 1.0.0
+origindb_client call user_service CreateUser '["Alice"]'
 ```
 
 A complete buildable example lives at `examples/csharp/UserService/`.
-`instantdb init myproject` (the default `csharp` template) scaffolds a new
+`origindb init myproject` (the default `csharp` template) scaffolds a new
 module project with the SDK wired in.
 
 ## 2. Building C# clients
@@ -110,20 +110,20 @@ evaluation), `subscribe_to_all_tables`, and `wasm_subscribe`
 
 ### Commands and queries: gRPC
 
-Generate a C# client from `proto/instantdb.proto` with `Grpc.Tools`:
+Generate a C# client from `proto/origindb.proto` with `Grpc.Tools`:
 
 ```xml
 <ItemGroup>
   <PackageReference Include="Google.Protobuf" Version="3.*" />
   <PackageReference Include="Grpc.Net.Client" Version="2.*" />
   <PackageReference Include="Grpc.Tools" Version="2.*" PrivateAssets="All" />
-  <Protobuf Include="proto/instantdb.proto" GrpcServices="Client" />
+  <Protobuf Include="proto/origindb.proto" GrpcServices="Client" />
 </ItemGroup>
 ```
 
 ```csharp
 using Grpc.Net.Client;
-using Instantdb.Grpc;
+using Origindb.Grpc;
 
 var channel = GrpcChannel.ForAddress("http://localhost:50051");
 var sql = new SQLService.SQLServiceClient(channel);
@@ -147,9 +147,9 @@ version — keep it on a trusted network.
 
 ### Unity
 
-`instantdb init mygame --template unity` scaffolds a Unity project with
+`origindb init mygame --template unity` scaffolds a Unity project with
 example scripts, but those scripts reference a client wrapper
-(`InstantDB.Unity`) that is not shipped yet — treat them as a starting
+(`OriginDB.Unity`) that is not shipped yet — treat them as a starting
 sketch. A working Unity integration today means using
 `ClientWebSocket` (as above) from your own MonoBehaviours and marshalling
 events onto the main thread yourself.

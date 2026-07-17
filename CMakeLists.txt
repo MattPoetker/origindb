@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(InstantDB VERSION 0.1.0 LANGUAGES CXX C)
+project(OriginDB VERSION 0.1.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -120,10 +120,10 @@ if(GRPC_AVAILABLE)
     set(GENERATED_PROTOBUF_PATH ${CMAKE_BINARY_DIR}/generated)
     file(MAKE_DIRECTORY ${GENERATED_PROTOBUF_PATH})
 
-    set(PROTO_SRCS "${GENERATED_PROTOBUF_PATH}/instantdb.pb.cc")
-    set(PROTO_HDRS "${GENERATED_PROTOBUF_PATH}/instantdb.pb.h")
-    set(GRPC_SRCS "${GENERATED_PROTOBUF_PATH}/instantdb.grpc.pb.cc")
-    set(GRPC_HDRS "${GENERATED_PROTOBUF_PATH}/instantdb.grpc.pb.h")
+    set(PROTO_SRCS "${GENERATED_PROTOBUF_PATH}/origindb.pb.cc")
+    set(PROTO_HDRS "${GENERATED_PROTOBUF_PATH}/origindb.pb.h")
+    set(GRPC_SRCS "${GENERATED_PROTOBUF_PATH}/origindb.grpc.pb.cc")
+    set(GRPC_HDRS "${GENERATED_PROTOBUF_PATH}/origindb.grpc.pb.h")
 
     # Find protoc and grpc_cpp_plugin
     find_program(PROTOC_EXECUTABLE protoc REQUIRED)
@@ -136,8 +136,8 @@ if(GRPC_AVAILABLE)
              --cpp_out=${GENERATED_PROTOBUF_PATH}
              --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
              --proto_path=${PROTO_DIR}
-             ${PROTO_DIR}/instantdb.proto
-        DEPENDS ${PROTO_DIR}/instantdb.proto
+             ${PROTO_DIR}/origindb.proto
+        DEPENDS ${PROTO_DIR}/origindb.proto
         COMMENT "Generating gRPC and Protocol Buffer files"
     )
 
@@ -257,8 +257,8 @@ if(GRPC_AVAILABLE)
 endif()
 
 # Demo executable with WebSocket server
-add_executable(instantdb_demo src/cmd/prototype_demo.cpp)
-target_link_libraries(instantdb_demo
+add_executable(origindb_demo src/cmd/prototype_demo.cpp)
+target_link_libraries(origindb_demo
     storage
     sql_engine
     changefeed_engine
@@ -271,8 +271,8 @@ target_link_libraries(instantdb_demo
 )
 
 # Simple SQL client (always available, no gRPC required)
-add_executable(instantdb_sql src/cmd/sql_demo.cpp)
-target_link_libraries(instantdb_sql
+add_executable(origindb_sql src/cmd/sql_demo.cpp)
+target_link_libraries(origindb_sql
     storage
     sql_engine
     common_lib
@@ -282,8 +282,8 @@ target_link_libraries(instantdb_sql
 )
 
 # Init command for project scaffolding
-add_executable(instantdb_init src/cmd/instantdb_init.cpp)
-target_link_libraries(instantdb_init
+add_executable(origindb_init src/cmd/origindb_init.cpp)
+target_link_libraries(origindb_init
     common_lib
     Threads::Threads
     spdlog::spdlog
@@ -291,8 +291,8 @@ target_link_libraries(instantdb_init
 )
 
 # Production server executable
-add_executable(instantdb_server src/cmd/instantdb_server.cpp)
-target_link_libraries(instantdb_server
+add_executable(origindb_server src/cmd/origindb_server.cpp)
+target_link_libraries(origindb_server
     storage
     sql_engine
     changefeed_engine
@@ -307,18 +307,18 @@ target_link_libraries(instantdb_server
 
 # Add gRPC support if available
 if(GRPC_AVAILABLE)
-    target_link_libraries(instantdb_server grpc_service)
-    target_compile_definitions(instantdb_server PRIVATE GRPC_AVAILABLE)
+    target_link_libraries(origindb_server grpc_service)
+    target_compile_definitions(origindb_server PRIVATE GRPC_AVAILABLE)
 
     # Add protobuf/grpc library directories if using pkg-config
     if(PROTOBUF_FOUND AND GRPC_FOUND)
-        target_link_directories(instantdb_server PRIVATE ${PROTOBUF_LIBRARY_DIRS} ${GRPC_LIBRARY_DIRS})
+        target_link_directories(origindb_server PRIVATE ${PROTOBUF_LIBRARY_DIRS} ${GRPC_LIBRARY_DIRS})
     endif()
 endif()
 
 # CLI executable (main wrapper for all commands)
-add_executable(instantdb src/cmd/instantdb_cli.cpp)
-target_link_libraries(instantdb
+add_executable(origindb src/cmd/origindb_cli.cpp)
+target_link_libraries(origindb
     common_lib
     Threads::Threads
     spdlog::spdlog
@@ -329,22 +329,22 @@ target_link_libraries(instantdb
 
 # gRPC client executable (only if gRPC is available)
 if(GRPC_AVAILABLE)
-    add_executable(instantdb_client src/cmd/grpc_client.cpp ${PROTO_SRCS} ${GRPC_SRCS})
+    add_executable(origindb_client src/cmd/grpc_client.cpp ${PROTO_SRCS} ${GRPC_SRCS})
 
     if(PROTOBUF_FOUND AND GRPC_FOUND)
         # Use pkg-config flags
-        target_include_directories(instantdb_client PRIVATE ${PROTOBUF_INCLUDE_DIRS} ${GRPC_INCLUDE_DIRS})
-        target_link_directories(instantdb_client PRIVATE ${PROTOBUF_LIBRARY_DIRS} ${GRPC_LIBRARY_DIRS})
-        target_link_libraries(instantdb_client
+        target_include_directories(origindb_client PRIVATE ${PROTOBUF_INCLUDE_DIRS} ${GRPC_INCLUDE_DIRS})
+        target_link_directories(origindb_client PRIVATE ${PROTOBUF_LIBRARY_DIRS} ${GRPC_LIBRARY_DIRS})
+        target_link_libraries(origindb_client
             ${PROTOBUF_LIBRARIES}
             ${GRPC_LIBRARIES}
             nlohmann_json::nlohmann_json
             Threads::Threads
         )
-        target_compile_options(instantdb_client PRIVATE ${PROTOBUF_CFLAGS_OTHER} ${GRPC_CFLAGS_OTHER})
+        target_compile_options(origindb_client PRIVATE ${PROTOBUF_CFLAGS_OTHER} ${GRPC_CFLAGS_OTHER})
     else()
         # Use CMake targets
-        target_link_libraries(instantdb_client
+        target_link_libraries(origindb_client
             protobuf::libprotobuf
             gRPC::grpc++
             nlohmann_json::nlohmann_json
@@ -353,21 +353,21 @@ if(GRPC_AVAILABLE)
     endif()
 
     # Installation with gRPC client
-    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb_client instantdb instantdb_init DESTINATION bin)
+    install(TARGETS origindb_demo origindb_server origindb_sql origindb_client origindb origindb_init DESTINATION bin)
 else()
     # Installation without gRPC client
-    install(TARGETS instantdb_demo instantdb_server instantdb_sql instantdb instantdb_init DESTINATION bin)
+    install(TARGETS origindb_demo origindb_server origindb_sql origindb origindb_init DESTINATION bin)
 endif()
 
 # Package configuration with CPack
-set(CPACK_PACKAGE_NAME "InstantDB")
-set(CPACK_PACKAGE_VENDOR "InstantDB Project")
+set(CPACK_PACKAGE_NAME "OriginDB")
+set(CPACK_PACKAGE_VENDOR "OriginDB Project")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Real-time database with WebAssembly module support")
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "InstantDB")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "OriginDB")
 
 # Package description
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
@@ -375,8 +375,8 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
 # Contact information
-set(CPACK_PACKAGE_CONTACT "support@instantdb.com")
-set(CPACK_PACKAGE_HOMEPAGE_URL "https://instantdb.com")
+set(CPACK_PACKAGE_CONTACT "support@origindb.com")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://origindb.com")
 
 # Platform-specific package configuration
 if(WIN32)
@@ -384,7 +384,7 @@ if(WIN32)
     set(CPACK_GENERATOR "WIX;ZIP")
     set(CPACK_WIX_UPGRADE_GUID "12345678-1234-1234-1234-123456789012")
     set(CPACK_WIX_PRODUCT_GUID "87654321-4321-4321-4321-210987654321")
-    set(CPACK_WIX_PROGRAM_MENU_FOLDER "InstantDB")
+    set(CPACK_WIX_PROGRAM_MENU_FOLDER "OriginDB")
     set(CPACK_WIX_UI_BANNER "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/banner.bmp")
     set(CPACK_WIX_UI_DIALOG "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/dialog.bmp")
 
@@ -394,7 +394,7 @@ if(WIN32)
 elseif(APPLE)
     # macOS DMG
     set(CPACK_GENERATOR "DragNDrop;TGZ")
-    set(CPACK_DMG_VOLUME_NAME "InstantDB")
+    set(CPACK_DMG_VOLUME_NAME "OriginDB")
     set(CPACK_DMG_FORMAT "UDBZ")
     set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/background.png")
     set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/setup.scpt")
@@ -404,12 +404,12 @@ elseif(UNIX)
     set(CPACK_GENERATOR "DEB;RPM;TGZ")
 
     # Debian/Ubuntu package
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "InstantDB Team <support@instantdb.com>")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OriginDB Team <support@origindb.com>")
     set(CPACK_DEBIAN_PACKAGE_SECTION "database")
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://instantdb.com")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://origindb.com")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libprotobuf32, libgrpc++1.45, libssl3")
-    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "InstantDB is a high-performance, distributed database with WebAssembly module support, bringing programmable capabilities to a production SQL engine.")
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "OriginDB is a high-performance, distributed database with WebAssembly module support, bringing programmable capabilities to a production SQL engine.")
     set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
         "${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/postinst"
         "${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/prerm"
@@ -417,10 +417,10 @@ elseif(UNIX)
 
     # RPM package
     set(CPACK_RPM_PACKAGE_SUMMARY "Real-time database with WebAssembly module support")
-    set(CPACK_RPM_PACKAGE_DESCRIPTION "InstantDB is a high-performance, distributed database with WebAssembly module support, bringing programmable capabilities to a production SQL engine.")
+    set(CPACK_RPM_PACKAGE_DESCRIPTION "OriginDB is a high-performance, distributed database with WebAssembly module support, bringing programmable capabilities to a production SQL engine.")
     set(CPACK_RPM_PACKAGE_GROUP "Applications/Databases")
     set(CPACK_RPM_PACKAGE_LICENSE "MIT")
-    set(CPACK_RPM_PACKAGE_URL "https://instantdb.com")
+    set(CPACK_RPM_PACKAGE_URL "https://origindb.com")
     set(CPACK_RPM_PACKAGE_REQUIRES "protobuf >= 3.0, grpc >= 1.40, openssl >= 1.1")
     set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/rpm/postinstall.sh")
     set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/rpm/preuninstall.sh")
@@ -449,8 +449,8 @@ set(CPACK_SOURCE_IGNORE_FILES
 
 # Component-based installation
 set(CPACK_COMPONENTS_ALL Runtime Development)
-set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "InstantDB Runtime")
-set(CPACK_COMPONENT_RUNTIME_DESCRIPTION "InstantDB server and client tools")
+set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "OriginDB Runtime")
+set(CPACK_COMPONENT_RUNTIME_DESCRIPTION "OriginDB server and client tools")
 set(CPACK_COMPONENT_DEVELOPMENT_DISPLAY_NAME "Development Files")
 set(CPACK_COMPONENT_DEVELOPMENT_DESCRIPTION "Headers and development libraries")
 
@@ -459,14 +459,14 @@ install(FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
     "${CMAKE_CURRENT_SOURCE_DIR}/INSTALL.md"
     "${CMAKE_CURRENT_SOURCE_DIR}/CLI_GUIDE.md"
-    DESTINATION share/doc/instantdb
+    DESTINATION share/doc/origindb
     COMPONENT Runtime
 )
 
 # Install systemd service file (Linux only)
 if(UNIX AND NOT APPLE)
     install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/instantdb.service"
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/origindb.service"
         DESTINATION lib/systemd/system
         COMPONENT Runtime
     )
@@ -474,9 +474,9 @@ endif()
 
 # Install shell completion scripts
 install(FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/packaging/shell/instantdb.bash"
+    "${CMAKE_CURRENT_SOURCE_DIR}/packaging/shell/origindb.bash"
     DESTINATION share/bash-completion/completions
-    RENAME instantdb
+    RENAME origindb
     COMPONENT Runtime
 )
 

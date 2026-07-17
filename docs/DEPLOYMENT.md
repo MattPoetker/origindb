@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers deploying InstantDB in various environments, from development to production. The current version (v0.1.0) supports single-node deployments only.
+This guide covers deploying OriginDB in various environments, from development to production. The current version (v0.1.0) supports single-node deployments only.
 
 ## Single Node Deployment
 
@@ -15,17 +15,17 @@ cmake -B build -S .
 cmake --build build
 
 # Run demo (development/testing)
-./build/instantdb_demo 8080
+./build/origindb_demo 8080
 
 # Run production server
-./build/instantdb_server -p 8080 -d ./data
+./build/origindb_server -p 8080 -d ./data
 ```
 
 **Environment Variables:**
 ```bash
-export INSTANTDB_WS_PORT=8080
-export INSTANTDB_DATA_DIR=/var/lib/instantdb
-export INSTANTDB_LOG_LEVEL=info
+export ORIGINDB_WS_PORT=8080
+export ORIGINDB_DATA_DIR=/var/lib/origindb
+export ORIGINDB_LOG_LEVEL=info
 ```
 
 ### Production Environment
@@ -57,58 +57,58 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y build-essential cmake git libssl-dev
 
 # Create system user
-sudo useradd -r -s /bin/false instantdb
-sudo mkdir -p /var/lib/instantdb
-sudo chown instantdb:instantdb /var/lib/instantdb
+sudo useradd -r -s /bin/false origindb
+sudo mkdir -p /var/lib/origindb
+sudo chown origindb:origindb /var/lib/origindb
 
 # Create log directory
-sudo mkdir -p /var/log/instantdb
-sudo chown instantdb:instantdb /var/log/instantdb
+sudo mkdir -p /var/log/origindb
+sudo chown origindb:origindb /var/log/origindb
 ```
 
 **2. Build Application:**
 ```bash
 # Clone and build
-git clone <repository-url> /opt/instantdb
-cd /opt/instantdb
+git clone <repository-url> /opt/origindb
+cd /opt/origindb
 
 # Build for production
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 
 # Install binaries
-sudo cp build/instantdb_server /usr/local/bin/
-sudo chmod +x /usr/local/bin/instantdb_server
+sudo cp build/origindb_server /usr/local/bin/
+sudo chmod +x /usr/local/bin/origindb_server
 ```
 
 **3. Create Configuration:**
 ```bash
 # Create config directory
-sudo mkdir -p /etc/instantdb
+sudo mkdir -p /etc/origindb
 
 # Create basic configuration file
-sudo tee /etc/instantdb/config.env << EOF
-INSTANTDB_WS_PORT=8080
-INSTANTDB_DATA_DIR=/var/lib/instantdb
-INSTANTDB_LOG_LEVEL=info
+sudo tee /etc/origindb/config.env << EOF
+ORIGINDB_WS_PORT=8080
+ORIGINDB_DATA_DIR=/var/lib/origindb
+ORIGINDB_LOG_LEVEL=info
 EOF
 ```
 
 **4. Create systemd Service:**
 ```bash
-sudo tee /etc/systemd/system/instantdb.service << EOF
+sudo tee /etc/systemd/system/origindb.service << EOF
 [Unit]
-Description=InstantDB Server
+Description=OriginDB Server
 After=network.target
 Wants=network.target
 
 [Service]
 Type=simple
-User=instantdb
-Group=instantdb
-WorkingDirectory=/var/lib/instantdb
-EnvironmentFile=/etc/instantdb/config.env
-ExecStart=/usr/local/bin/instantdb_server
+User=origindb
+Group=origindb
+WorkingDirectory=/var/lib/origindb
+EnvironmentFile=/etc/origindb/config.env
+ExecStart=/usr/local/bin/origindb_server
 Restart=always
 RestartSec=5
 LimitNOFILE=65536
@@ -118,7 +118,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/lib/instantdb /var/log/instantdb
+ReadWritePaths=/var/lib/origindb /var/log/origindb
 
 [Install]
 WantedBy=multi-user.target
@@ -129,11 +129,11 @@ EOF
 ```bash
 # Reload systemd and start service
 sudo systemctl daemon-reload
-sudo systemctl enable instantdb
-sudo systemctl start instantdb
+sudo systemctl enable origindb
+sudo systemctl start origindb
 
 # Check status
-sudo systemctl status instantdb
+sudo systemctl status origindb
 ```
 
 ### Docker Deployment
@@ -169,26 +169,26 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create user
-RUN useradd -r -s /bin/false instantdb
+RUN useradd -r -s /bin/false origindb
 
 # Copy binary
-COPY --from=builder /app/build/instantdb_server /usr/local/bin/
+COPY --from=builder /app/build/origindb_server /usr/local/bin/
 
 # Create directories
-RUN mkdir -p /var/lib/instantdb /var/log/instantdb
-RUN chown instantdb:instantdb /var/lib/instantdb /var/log/instantdb
+RUN mkdir -p /var/lib/origindb /var/log/origindb
+RUN chown origindb:origindb /var/lib/origindb /var/log/origindb
 
 # Switch to non-root user
-USER instantdb
+USER origindb
 
 # Expose ports (WebSocket + gRPC)
 EXPOSE 8080 50051
 
 # Set working directory
-WORKDIR /var/lib/instantdb
+WORKDIR /var/lib/origindb
 
 # Start server
-CMD ["/usr/local/bin/instantdb_server"]
+CMD ["/usr/local/bin/origindb_server"]
 ```
 
 #### Docker Compose
@@ -198,19 +198,19 @@ CMD ["/usr/local/bin/instantdb_server"]
 version: '3.8'
 
 services:
-  instantdb:
+  origindb:
     build: .
     ports:
       - "8080:8080"      # WebSocket
       - "50051:50051"    # gRPC (SQL + WASM module deployment)
     environment:
-      - INSTANTDB_WS_PORT=8080
-      - INSTANTDB_GRPC_PORT=50051
-      - INSTANTDB_DATA_DIR=/var/lib/instantdb
-      - INSTANTDB_LOG_LEVEL=info
+      - ORIGINDB_WS_PORT=8080
+      - ORIGINDB_GRPC_PORT=50051
+      - ORIGINDB_DATA_DIR=/var/lib/origindb
+      - ORIGINDB_LOG_LEVEL=info
     volumes:
-      - instantdb_data:/var/lib/instantdb
-      - instantdb_logs:/var/log/instantdb
+      - origindb_data:/var/lib/origindb
+      - origindb_logs:/var/log/origindb
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8080"]
@@ -219,21 +219,21 @@ services:
       retries: 3
 
 volumes:
-  instantdb_data:
-  instantdb_logs:
+  origindb_data:
+  origindb_logs:
 ```
 
 #### Build and Run
 
 ```bash
 # Build image
-docker build -t instantdb:latest .
+docker build -t origindb:latest .
 
 # Run with Docker Compose
 docker-compose up -d
 
 # Check logs
-docker-compose logs -f instantdb
+docker-compose logs -f origindb
 
 # Stop service
 docker-compose down
@@ -252,19 +252,19 @@ docker-compose down
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: instantdb
+  name: origindb
 
 ---
 # k8s/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: instantdb-config
-  namespace: instantdb
+  name: origindb-config
+  namespace: origindb
 data:
-  INSTANTDB_WS_PORT: "8080"
-  INSTANTDB_DATA_DIR: "/var/lib/instantdb"
-  INSTANTDB_LOG_LEVEL: "info"
+  ORIGINDB_WS_PORT: "8080"
+  ORIGINDB_DATA_DIR: "/var/lib/origindb"
+  ORIGINDB_LOG_LEVEL: "info"
 ```
 
 #### Deployment
@@ -274,32 +274,32 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: instantdb
-  namespace: instantdb
+  name: origindb
+  namespace: origindb
 spec:
   replicas: 1  # Single node only in v0.1.0
   selector:
     matchLabels:
-      app: instantdb
+      app: origindb
   template:
     metadata:
       labels:
-        app: instantdb
+        app: origindb
     spec:
       containers:
-      - name: instantdb
-        image: instantdb:latest
+      - name: origindb
+        image: origindb:latest
         ports:
         - containerPort: 8080
           name: websocket
         envFrom:
         - configMapRef:
-            name: instantdb-config
+            name: origindb-config
         volumeMounts:
         - name: data
-          mountPath: /var/lib/instantdb
+          mountPath: /var/lib/origindb
         - name: logs
-          mountPath: /var/log/instantdb
+          mountPath: /var/log/origindb
         resources:
           requests:
             memory: "1Gi"
@@ -320,10 +320,10 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: instantdb-data
+          claimName: origindb-data
       - name: logs
         persistentVolumeClaim:
-          claimName: instantdb-logs
+          claimName: origindb-logs
 ```
 
 #### Persistent Volumes
@@ -333,8 +333,8 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: instantdb-data
-  namespace: instantdb
+  name: origindb-data
+  namespace: origindb
 spec:
   accessModes:
     - ReadWriteOnce
@@ -347,8 +347,8 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: instantdb-logs
-  namespace: instantdb
+  name: origindb-logs
+  namespace: origindb
 spec:
   accessModes:
     - ReadWriteOnce
@@ -365,11 +365,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: instantdb-service
-  namespace: instantdb
+  name: origindb-service
+  namespace: origindb
 spec:
   selector:
-    app: instantdb
+    app: origindb
   ports:
   - name: websocket
     port: 8080
@@ -384,14 +384,14 @@ spec:
 kubectl apply -f k8s/
 
 # Check deployment status
-kubectl get pods -n instantdb
-kubectl get services -n instantdb
+kubectl get pods -n origindb
+kubectl get services -n origindb
 
 # Check logs
-kubectl logs -f deployment/instantdb -n instantdb
+kubectl logs -f deployment/origindb -n origindb
 
 # Port forward for testing
-kubectl port-forward service/instantdb-service 8080:8080 -n instantdb
+kubectl port-forward service/origindb-service 8080:8080 -n origindb
 ```
 
 ## Configuration Management
@@ -400,28 +400,28 @@ kubectl port-forward service/instantdb-service 8080:8080 -n instantdb
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `INSTANTDB_WS_PORT` | 8080 | WebSocket server port |
-| `INSTANTDB_GRPC_PORT` | 50051 | gRPC server port (SQL + WASM services) |
-| `INSTANTDB_DATA_DIR` | ./instantdb_data | Data directory path (WAL + persisted WASM modules under `modules/`) |
-| `INSTANTDB_LOG_LEVEL` | info | Logging level (trace, debug, info, warn, error) |
+| `ORIGINDB_WS_PORT` | 8080 | WebSocket server port |
+| `ORIGINDB_GRPC_PORT` | 50051 | gRPC server port (SQL + WASM services) |
+| `ORIGINDB_DATA_DIR` | ./origindb_data | Data directory path (WAL + persisted WASM modules under `modules/`) |
+| `ORIGINDB_LOG_LEVEL` | info | Logging level (trace, debug, info, warn, error) |
 
 ### Command Line Options
 
 ```bash
-Usage: instantdb_server [OPTIONS]
+Usage: origindb_server [OPTIONS]
 
 Options:
   -p, --port PORT          WebSocket port (default: 8080)
   -g, --grpc-port PORT     gRPC port (default: 50051)
-  -d, --data-dir DIR       Data directory (default: ./instantdb_data)
+  -d, --data-dir DIR       Data directory (default: ./origindb_data)
   -l, --log-level LEVEL    Log level (default: info)
-  -c, --config FILE        Config file path (default: instantdb.conf)
+  -c, --config FILE        Config file path (default: origindb.conf)
   -h, --help               Show help message
 
 Examples:
-  instantdb_server                    # Start with defaults
-  instantdb_server -p 9090 -g 50052   # Custom ports
-  instantdb_server --data-dir /data   # Custom data directory
+  origindb_server                    # Start with defaults
+  origindb_server -p 9090 -g 50052   # Custom ports
+  origindb_server --data-dir /data   # Custom data directory
 ```
 
 ### File Permissions
@@ -429,17 +429,17 @@ Examples:
 **Data Directory:**
 ```bash
 # Set proper ownership and permissions
-sudo chown -R instantdb:instantdb /var/lib/instantdb
-sudo chmod 755 /var/lib/instantdb
-sudo chmod 644 /var/lib/instantdb/*
+sudo chown -R origindb:origindb /var/lib/origindb
+sudo chmod 755 /var/lib/origindb
+sudo chmod 644 /var/lib/origindb/*
 ```
 
 **Log Directory:**
 ```bash
 # Set log permissions
-sudo chown -R instantdb:instantdb /var/log/instantdb
-sudo chmod 755 /var/log/instantdb
-sudo chmod 644 /var/log/instantdb/*
+sudo chown -R origindb:origindb /var/log/origindb
+sudo chmod 755 /var/log/origindb
+sudo chmod 644 /var/log/origindb/*
 ```
 
 ## Monitoring and Observability
@@ -464,7 +464,7 @@ curl -i -N -H "Connection: Upgrade" \
 #!/bin/bash
 # health-check.sh
 
-PORT=${INSTANTDB_WS_PORT:-8080}
+PORT=${ORIGINDB_WS_PORT:-8080}
 TIMEOUT=5
 
 # Check if port is listening
@@ -495,8 +495,8 @@ fi
 
 **Log Rotation (logrotate):**
 ```bash
-# /etc/logrotate.d/instantdb
-/var/log/instantdb/*.log {
+# /etc/logrotate.d/origindb
+/var/log/origindb/*.log {
     daily
     missingok
     rotate 30
@@ -505,7 +505,7 @@ fi
     notifempty
     sharedscripts
     postrotate
-        systemctl reload instantdb
+        systemctl reload origindb
     endscript
 }
 ```
@@ -524,14 +524,14 @@ systemctl restart rsyslog
 #!/bin/bash
 # monitor.sh
 
-PID=$(pgrep instantdb_server)
+PID=$(pgrep origindb_server)
 
 if [ -z "$PID" ]; then
-    echo "InstantDB server not running"
+    echo "OriginDB server not running"
     exit 1
 fi
 
-echo "InstantDB Server Monitoring"
+echo "OriginDB Server Monitoring"
 echo "=========================="
 echo "PID: $PID"
 echo "CPU Usage: $(ps -p $PID -o %cpu --no-headers)%"
@@ -550,17 +550,17 @@ echo "Network Connections: $(netstat -pan | grep $PID | wc -l)"
 # Allow only necessary ports
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
-sudo ufw allow 8080/tcp comment "InstantDB WebSocket"
+sudo ufw allow 8080/tcp comment "OriginDB WebSocket"
 # Only open the gRPC port to trusted hosts — it is unauthenticated and
 # allows SQL execution and WASM module deployment:
-sudo ufw allow from 10.0.0.0/8 to any port 50051 comment "InstantDB gRPC"
+sudo ufw allow from 10.0.0.0/8 to any port 50051 comment "OriginDB gRPC"
 sudo ufw enable
 ```
 
 **Reverse Proxy (nginx):**
 ```nginx
-# /etc/nginx/sites-available/instantdb
-upstream instantdb {
+# /etc/nginx/sites-available/origindb
+upstream origindb {
     server 127.0.0.1:8080;
 }
 
@@ -569,7 +569,7 @@ server {
     server_name your-domain.com;
 
     location / {
-        proxy_pass http://instantdb;
+        proxy_pass http://origindb;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -586,12 +586,12 @@ server {
 **Secure Directories:**
 ```bash
 # Restrict access to data directory
-sudo chmod 700 /var/lib/instantdb
-sudo chown instantdb:instantdb /var/lib/instantdb
+sudo chmod 700 /var/lib/origindb
+sudo chown origindb:origindb /var/lib/origindb
 
 # Secure log files
-sudo chmod 640 /var/log/instantdb/*
-sudo chown instantdb:adm /var/log/instantdb/*
+sudo chmod 640 /var/log/origindb/*
+sudo chown origindb:adm /var/log/origindb/*
 ```
 
 **SELinux/AppArmor (if enabled):**
@@ -610,23 +610,23 @@ semanage port -a -t http_port_t -p tcp 8080
 #!/bin/bash
 # backup.sh
 
-DATA_DIR="/var/lib/instantdb"
-BACKUP_DIR="/backup/instantdb"
+DATA_DIR="/var/lib/origindb"
+BACKUP_DIR="/backup/origindb"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
 
 # Stop service
-systemctl stop instantdb
+systemctl stop origindb
 
 # Create backup
-tar -czf "$BACKUP_DIR/instantdb_backup_$TIMESTAMP.tar.gz" -C "$(dirname $DATA_DIR)" "$(basename $DATA_DIR)"
+tar -czf "$BACKUP_DIR/origindb_backup_$TIMESTAMP.tar.gz" -C "$(dirname $DATA_DIR)" "$(basename $DATA_DIR)"
 
 # Start service
-systemctl start instantdb
+systemctl start origindb
 
-echo "Backup completed: $BACKUP_DIR/instantdb_backup_$TIMESTAMP.tar.gz"
+echo "Backup completed: $BACKUP_DIR/origindb_backup_$TIMESTAMP.tar.gz"
 ```
 
 **Automated Backup (cron):**
@@ -649,7 +649,7 @@ echo "0 2 * * * /usr/local/bin/backup.sh" | crontab -
 # restore.sh
 
 BACKUP_FILE="$1"
-DATA_DIR="/var/lib/instantdb"
+DATA_DIR="/var/lib/origindb"
 
 if [ -z "$BACKUP_FILE" ]; then
     echo "Usage: $0 <backup_file>"
@@ -657,7 +657,7 @@ if [ -z "$BACKUP_FILE" ]; then
 fi
 
 # Stop service
-systemctl stop instantdb
+systemctl stop origindb
 
 # Backup current data (safety)
 mv "$DATA_DIR" "${DATA_DIR}.old.$(date +%s)"
@@ -667,11 +667,11 @@ mkdir -p "$(dirname $DATA_DIR)"
 tar -xzf "$BACKUP_FILE" -C "$(dirname $DATA_DIR)"
 
 # Fix permissions
-chown -R instantdb:instantdb "$DATA_DIR"
+chown -R origindb:origindb "$DATA_DIR"
 chmod 755 "$DATA_DIR"
 
 # Start service
-systemctl start instantdb
+systemctl start origindb
 
 echo "Recovery completed from $BACKUP_FILE"
 ```
@@ -683,11 +683,11 @@ echo "Recovery completed from $BACKUP_FILE"
 **Server Won't Start:**
 1. Check port availability: `netstat -tuln | grep 8080`
 2. Verify data directory permissions
-3. Check system logs: `journalctl -u instantdb -f`
+3. Check system logs: `journalctl -u origindb -f`
 4. Validate configuration
 
 **High Memory Usage:**
-1. Monitor with: `top -p $(pgrep instantdb_server)`
+1. Monitor with: `top -p $(pgrep origindb_server)`
 2. Check for memory leaks
 3. Review data volume and retention
 4. Consider memory limits
@@ -703,8 +703,8 @@ echo "Recovery completed from $BACKUP_FILE"
 **System Limits:**
 ```bash
 # Increase file descriptor limits
-echo "instantdb soft nofile 65536" >> /etc/security/limits.conf
-echo "instantdb hard nofile 65536" >> /etc/security/limits.conf
+echo "origindb soft nofile 65536" >> /etc/security/limits.conf
+echo "origindb hard nofile 65536" >> /etc/security/limits.conf
 
 # Increase network buffer sizes
 echo "net.core.rmem_max = 268435456" >> /etc/sysctl.conf

@@ -6,7 +6,7 @@
 #include "sql/sql_engine.h"
 #include "storage/table.h"
 
-namespace instantdb {
+namespace origindb {
 
 class SqlEngine;
 class StorageEngine;
@@ -84,4 +84,4 @@ private:
     std::unique_ptr<void, void(*)(void*)> service_impl_;
 };
 
-} // namespace instantdb
+} // namespace origindb

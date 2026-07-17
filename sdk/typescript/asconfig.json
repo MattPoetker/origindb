@@ -19,6 +19,6 @@
     "runtime": "minimal",
     "exportRuntime": false,
     "importMemory": false,
-    "use": ["abort=assembly/index/__instantdb_abort"]
+    "use": ["abort=assembly/index/__origindb_abort"]
   }
 }

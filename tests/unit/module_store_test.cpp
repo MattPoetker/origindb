@@ -6,7 +6,7 @@
 
 #include "wasm/module_store.h"
 
-namespace instantdb {
+namespace origindb {
 namespace {
 
 class ModuleStoreTest : public ::testing::Test {
@@ -118,4 +118,4 @@ TEST_F(ModuleStoreTest, RejectsBadNames) {
 }
 
 }  // namespace
-}  // namespace instantdb
+}  // namespace origindb

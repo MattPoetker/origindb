@@ -1,9 +1,9 @@
 // ============================================================================
 // Smoke test for the AssemblyScript SDK + todo example.
 //
-// Emulates the InstantDB host side of the WASM ABI v1 (docs/WASM_ABI.md):
+// Emulates the OriginDB host side of the WASM ABI v1 (docs/WASM_ABI.md):
 // writes invoke name/args into guest memory via the module's own
-// instantdb_alloc, provides the "env" imports, and checks describe/invoke
+// origindb_alloc, provides the "env" imports, and checks describe/invoke
 // semantics (status 0, filter 1/0, -404 for unknown names, results via
 // host_set_result).
 //
@@ -40,11 +40,11 @@ function readCStr(ptr) {
   return dec.decode(bytes.subarray(ptr, end));
 }
 
-// Host -> guest buffer, allocated with the guest's own instantdb_alloc.
+// Host -> guest buffer, allocated with the guest's own origindb_alloc.
 function writeGuestBuf(str) {
   const bytes = enc.encode(str);
-  const ptr = exp.instantdb_alloc(bytes.length);
-  assert.ok(ptr !== 0, "instantdb_alloc returned 0");
+  const ptr = exp.origindb_alloc(bytes.length);
+  assert.ok(ptr !== 0, "origindb_alloc returned 0");
   mem().set(bytes, ptr);
   return [ptr, bytes.length];
 }
@@ -99,7 +99,7 @@ const env = {
   host_abort(msg) {
     throw new Error(`host_abort: ${readCStr(msg)}`);
   },
-  host_alloc: (size) => exp.instantdb_alloc(size),
+  host_alloc: (size) => exp.origindb_alloc(size),
   host_free: () => {},
   host_set_result(ptr, len) {
     lastResult = readStr(ptr, len);
@@ -109,7 +109,7 @@ const env = {
 const { instance } = await WebAssembly.instantiate(readFileSync(wasmPath), { env });
 exp = instance.exports;
 
-for (const name of ["memory", "instantdb_alloc", "instantdb_invoke", "instantdb_free", "instantdb_describe"]) {
+for (const name of ["memory", "origindb_alloc", "origindb_invoke", "origindb_free", "origindb_describe"]) {
   assert.ok(name in exp, `missing export: ${name}`);
 }
 
@@ -117,11 +117,11 @@ function invoke(name, args = []) {
   const [np, nl] = writeGuestBuf(name);
   const [ap, al] = writeGuestBuf(JSON.stringify(args));
   lastResult = null;
-  return exp.instantdb_invoke(np, nl, ap, al);
+  return exp.origindb_invoke(np, nl, ap, al);
 }
 
 // ---- describe ----------------------------------------------------------------
-const packed = exp.instantdb_describe();
+const packed = exp.origindb_describe();
 const dPtr = Number(packed >> 32n);
 const dLen = Number(packed & 0xffffffffn);
 const meta = JSON.parse(readStr(dPtr, dLen));

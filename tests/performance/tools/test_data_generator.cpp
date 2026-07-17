@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <chrono>
 
-using namespace instantdb::performance;
+using namespace origindb::performance;
 
 void PrintUsage() {
     std::cout << R"(

@@ -1,6 +1,6 @@
-# InstantDB WASM Module ABI (v1)
+# OriginDB WASM Module ABI (v1)
 
-The contract between the InstantDB server (wasmtime host) and user modules.
+The contract between the OriginDB server (wasmtime host) and user modules.
 All SDKs (C#, TypeScript/AssemblyScript, C++) must conform to this document.
 
 ## Module requirements
@@ -16,16 +16,16 @@ All SDKs (C#, TypeScript/AssemblyScript, C++) must conform to this document.
 | Export | Signature | Purpose |
 |---|---|---|
 | `memory` | memory | linear memory |
-| `instantdb_alloc` | `(i32 size) -> i32 ptr` | Guest allocator. The host uses it for every host→guest buffer (invoke name/args, read/scan results). Return 0 on failure. |
-| `instantdb_invoke` | `(i32 name_ptr, i32 name_len, i32 args_ptr, i32 args_len) -> i32 status` | Single dispatch entry point for all reducers and lifecycle hooks. |
+| `origindb_alloc` | `(i32 size) -> i32 ptr` | Guest allocator. The host uses it for every host→guest buffer (invoke name/args, read/scan results). Return 0 on failure. |
+| `origindb_invoke` | `(i32 name_ptr, i32 name_len, i32 args_ptr, i32 args_len) -> i32 status` | Single dispatch entry point for all reducers and lifecycle hooks. |
 
 ### Optional exports
 
 | Export | Signature | Purpose |
 |---|---|---|
 | `_initialize` | `() -> ()` | WASI reactor initialization; called once per instantiation, before anything else. Register reducers here (or in static ctors it runs). |
-| `instantdb_free` | `(i32 ptr) -> ()` | Frees an `instantdb_alloc` buffer. The host currently does not call it (instance memory is reclaimed on re-instantiation), but SDKs should export it. |
-| `instantdb_describe` | `() -> i64` | Returns `(ptr << 32) \| len` of a UTF-8 JSON metadata blob: `{"name": str, "version": str, "reducers": [{"name": str, "params": [str]}], "tables": [str]}`. Called once at deploy. |
+| `origindb_free` | `(i32 ptr) -> ()` | Frees an `origindb_alloc` buffer. The host currently does not call it (instance memory is reclaimed on re-instantiation), but SDKs should export it. |
+| `origindb_describe` | `() -> i64` | Returns `(ptr << 32) \| len` of a UTF-8 JSON metadata blob: `{"name": str, "version": str, "reducers": [{"name": str, "params": [str]}], "tables": [str]}`. Called once at deploy. |
 
 ## invoke semantics
 
@@ -57,7 +57,7 @@ pointer+length (not NUL-terminated).
 
 | Import | Signature | Semantics |
 |---|---|---|
-| `host_table_read` | `(table, key, key_len, out_ptr, out_len) -> i32` | 1 = found (result JSON object written to a buffer allocated via `instantdb_alloc`; its offset stored at `*out_ptr`, length at `*out_len`), 0 = not found, <0 = error. Sees the call's own staged writes, then committed data. |
+| `host_table_read` | `(table, key, key_len, out_ptr, out_len) -> i32` | 1 = found (result JSON object written to a buffer allocated via `origindb_alloc`; its offset stored at `*out_ptr`, length at `*out_len`), 0 = not found, <0 = error. Sees the call's own staged writes, then committed data. |
 | `host_table_write` | `(table, key, key_len, value, value_len) -> i32` | Stages an upsert. `value` must be a UTF-8 JSON object (column → value). 0 ok. Not visible to other calls until commit. |
 | `host_table_delete` | `(table, key, key_len) -> i32` | Stages a delete. 0 ok. |
 | `host_table_scan` | `(table, prefix, prefix_len, limit, out_ptr, out_len) -> i32` | Prefix scan over committed rows merged with staged writes. Result: JSON array `[{"key": str, "value": obj}]`, key-ordered, at most `limit` rows (`limit <= 0` → 1000). Returns row count or <0. |
@@ -75,7 +75,7 @@ argument, `-5` limit exceeded, `-404` no handler (SDK dispatcher only).
 
 ## Transaction model
 
-Each `instantdb_invoke` call runs against a staged-write overlay:
+Each `origindb_invoke` call runs against a staged-write overlay:
 reads see the call's own writes first, then committed storage. On status
 `>= 0` and no trap, the overlay is applied atomically through one storage
 transaction (WAL-logged; changefeed events for each write are emitted by the

@@ -1,8 +1,8 @@
-# InstantDB Implementation Progress
+# OriginDB Implementation Progress
 
 ## 🚀 Current Status (IMPLEMENTED)
 
-InstantDB now has a **working SpacetimeDB-like API** with automatic change detection and real-time streaming! The system successfully implements:
+OriginDB now has a **working SpacetimeDB-like API** with automatic change detection and real-time streaming! The system successfully implements:
 
 ✅ **SpacetimeDB-like WASM API**
 - Reducers receive `ReducerContext ctx` parameter
@@ -58,7 +58,7 @@ ctx.Db.GetTable<User>().Insert(user); // Type-safe access
 
 ### WebSocket Subscriptions with WASM Filtering
 ```javascript
-const client = new InstantDBClient('ws://localhost:8080');
+const client = new OriginDBClient('ws://localhost:8080');
 await client.subscribeToRecentActivities((data) => {
     console.log('Real-time update:', data);
 });
@@ -91,7 +91,7 @@ await client.subscribeToRecentActivities((data) => {
 ```
 /src
   /cmd                    # Server executables
-    instantdb_server.cpp  # Main server with all components
+    origindb_server.cpp  # Main server with all components
     sql_demo.cpp         # SQL client demo
     grpc_client.cpp      # gRPC client
   /storage               # Storage engine with automatic changefeed
@@ -113,7 +113,7 @@ await client.subscribeToRecentActivities((data) => {
 
 /sdk                     # Developer SDKs
   /csharp
-    InstantDB.cs         # Complete C# SDK with SpacetimeDB-like API
+    OriginDB.cs         # Complete C# SDK with SpacetimeDB-like API
     /Examples
       CounterModule.cs   # Updated with ReducerContext
       SubscriptionModule.cs # WASM subscription examples
@@ -1036,7 +1036,7 @@ Perfect ✅ — let’s build a happy path prototype flow that covers the full j
 
 INSERT → WAL → Raft → Apply → Changefeed → WebSocket Client
 
-This will give you the first vertical slice of InstantDB, even if many parts are stubbed.
+This will give you the first vertical slice of OriginDB, even if many parts are stubbed.
 
 🔄 End-to-End Flow (Happy Path)
 1. Client issues SQL

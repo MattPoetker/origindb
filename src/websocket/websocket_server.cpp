@@ -11,7 +11,7 @@
 #include <regex>
 #include <fmt/format.h>
 
-namespace instantdb {
+namespace origindb {
 
 WebSocketServer::WebSocketServer(uint16_t port)
     : port_(port), running_(false), server_socket_(-1) {
@@ -196,7 +196,7 @@ void WebSocketServer::HandleClient(int client_socket) {
             // Send welcome message
             nlohmann::json welcome;
             welcome["type"] = "welcome";
-            welcome["message"] = "Connected to InstantDB changefeed";
+            welcome["message"] = "Connected to OriginDB changefeed";
             welcome["server_version"] = "0.1.0";
             welcome["client_id"] = client_id;
             welcome["features"] = nlohmann::json::array({"changefeed", "wasm_subscriptions"});
@@ -1138,4 +1138,4 @@ void WebSocketServer::SendInitialStateAllTables(int client_socket, const std::st
     }
 }
 
-} // namespace instantdb
+} // namespace origindb

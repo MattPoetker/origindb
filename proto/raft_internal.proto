@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package instantdb.internal;
+package origindb.internal;
 
 import "google/protobuf/timestamp.proto";
 

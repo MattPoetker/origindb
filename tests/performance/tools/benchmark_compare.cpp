@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 struct BenchmarkResult {
@@ -99,7 +99,7 @@ public:
             return;
         }
 
-        out << "InstantDB Performance Benchmark Report\n";
+        out << "OriginDB Performance Benchmark Report\n";
         out << "======================================\n\n";
         out << "Generated: " << GetCurrentTimestamp() << "\n";
         out << "Total Results: " << results_.size() << "\n\n";
@@ -136,7 +136,7 @@ public:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InstantDB Performance Report</title>
+    <title>OriginDB Performance Report</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background: #f5f5f5; }
         .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -160,7 +160,7 @@ public:
 </head>
 <body>
     <div class="container">
-        <h1>📊 InstantDB Performance Report</h1>
+        <h1>📊 OriginDB Performance Report</h1>
         <p><strong>Generated:</strong> )" << GetCurrentTimestamp() << R"(</p>
         <p><strong>Total Results:</strong> )" << results_.size() << R"(</p>
 
@@ -233,7 +233,7 @@ public:
             return;
         }
 
-        out << "InstantDB Top Performers Report\n";
+        out << "OriginDB Top Performers Report\n";
         out << "==============================\n\n";
 
         // Sort by different metrics and show top 10
@@ -534,11 +534,11 @@ private:
 };
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb
 
 void PrintUsage() {
     std::cout << R"(
-InstantDB Benchmark Comparison Tool
+OriginDB Benchmark Comparison Tool
 
 Usage: benchmark_compare [OPTIONS]
 
@@ -609,13 +609,13 @@ int main(int argc, char* argv[]) {
     // Configure logging
     spdlog::set_level(spdlog::level::info);
 
-    spdlog::info("📊 InstantDB Benchmark Comparison Tool");
+    spdlog::info("📊 OriginDB Benchmark Comparison Tool");
     spdlog::info("Input Directory: {}", input_dir);
     spdlog::info("Output File: {}", output_file);
     spdlog::info("Format: {}", format);
 
     // Load and process results
-    instantdb::performance::BenchmarkComparer comparer;
+    origindb::performance::BenchmarkComparer comparer;
 
     if (!comparer.LoadResultsFromDirectory(input_dir)) {
         spdlog::error("Failed to load results from directory: {}", input_dir);

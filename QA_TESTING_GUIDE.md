@@ -1,7 +1,7 @@
-# InstantDB Complete System - Manual QA Testing Guide
+# OriginDB Complete System - Manual QA Testing Guide
 
 ## Overview
-This guide provides manual testing procedures for InstantDB:
+This guide provides manual testing procedures for OriginDB:
 - **CLI Tool**: project init, server management, publish, gRPC client
 - **SQL Subscription System**: WebSocket real-time subscriptions with
   per-event WHERE evaluation
@@ -19,7 +19,7 @@ cd /Users/a12042/Development/instant_db
 cmake -B build -S .
 cmake --build build
 
-ls -la ./build/instantdb ./build/instantdb_server ./build/instantdb_client
+ls -la ./build/origindb ./build/origindb_server ./build/origindb_client
 ```
 
 Unit tests build alongside (target `unit_tests`, gtest). The e2e script
@@ -28,17 +28,17 @@ defaults to a `build_new` build directory but accepts any:
 
 ### 2. Verify CLI Tool
 ```bash
-./build/instantdb --help
-./build/instantdb --version
+./build/origindb --help
+./build/origindb --version
 ```
 
 ### 3. Testing Tools Required
-- **CLI tools**: `./build/instantdb`, `./build/instantdb_client`
+- **CLI tools**: `./build/origindb`, `./build/origindb_client`
 - **WebSocket client**: wscat, websocat, or browser dev tools
 - **Multiple terminals** for parallel testing and monitoring
 
 `grpcurl` is **not** required — all gRPC flows in this guide go through
-`instantdb_client`.
+`origindb_client`.
 
 ---
 
@@ -47,10 +47,10 @@ defaults to a `build_new` build directory but accepts any:
 ### Test Case A1.1: CLI Help and Version
 **Steps**:
 ```bash
-./build/instantdb --help
-./build/instantdb --version
-./build/instantdb logs --help
-./build/instantdb publish --help
+./build/origindb --help
+./build/origindb --version
+./build/origindb logs --help
+./build/origindb publish --help
 ```
 
 **Expected Results**:
@@ -62,7 +62,7 @@ defaults to a `build_new` build directory but accepts any:
 ### Test Case A1.2: CLI Error Handling
 **Steps**:
 ```bash
-./build/instantdb invalid_command
+./build/origindb invalid_command
 ```
 
 **Expected Results**:
@@ -71,8 +71,8 @@ defaults to a `build_new` build directory but accepts any:
 ### Test Case A2.1: Project Initialization
 **Steps**:
 ```bash
-./build/instantdb init test_ts_module --template typescript
-./build/instantdb init test_cs_module            # csharp is the default
+./build/origindb init test_ts_module --template typescript
+./build/origindb init test_cs_module            # csharp is the default
 ls test_ts_module/ test_cs_module/
 ```
 
@@ -88,11 +88,11 @@ Rust/Go/C++ templates.
 **Steps**:
 ```bash
 # Terminal 1
-./build/instantdb server -p 8080 -g 50051 -d ./qa_data
+./build/origindb server -p 8080 -g 50051 -d ./qa_data
 
 # Terminal 2
-./build/instantdb_client status
-./build/instantdb stop
+./build/origindb_client status
+./build/origindb stop
 ```
 
 **Expected Results**:
@@ -101,18 +101,18 @@ Rust/Go/C++ templates.
 - `stop` terminates the server process
 
 Note: there is no `server status` subcommand or `--daemon` flag; use
-`instantdb_client status` for liveness and a shell/process manager for
+`origindb_client status` for liveness and a shell/process manager for
 backgrounding.
 
 ### Test Case A4.1: Log Viewing
 **Steps** (server running, launched from repo root so logs land in
-`./logs/instantdb.log`):
+`./logs/origindb.log`):
 ```bash
-./build/instantdb logs -n 20
-./build/instantdb logs --follow &
+./build/origindb logs -n 20
+./build/origindb logs --follow &
 LOG_PID=$!
-./build/instantdb_client exec "CREATE TABLE test_logs (id INT64 PRIMARY KEY, data STRING)"
-./build/instantdb_client exec "INSERT INTO test_logs VALUES (1, 'test')"
+./build/origindb_client exec "CREATE TABLE test_logs (id INT64 PRIMARY KEY, data STRING)"
+./build/origindb_client exec "INSERT INTO test_logs VALUES (1, 'test')"
 kill $LOG_PID
 ```
 
@@ -122,11 +122,11 @@ kill $LOG_PID
 ### Test Case A5.1: SQL Execution via gRPC Client
 **Steps**:
 ```bash
-./build/instantdb_client exec "CREATE TABLE cli_test (id INT64 PRIMARY KEY, name STRING)"
-./build/instantdb_client exec "INSERT INTO cli_test VALUES (1, 'Alice')"
-./build/instantdb_client exec "INSERT INTO cli_test VALUES (2, 'Bob')"
-./build/instantdb_client exec "SELECT * FROM cli_test"
-./build/instantdb_client interactive        # then: SELECT * FROM cli_test / exit
+./build/origindb_client exec "CREATE TABLE cli_test (id INT64 PRIMARY KEY, name STRING)"
+./build/origindb_client exec "INSERT INTO cli_test VALUES (1, 'Alice')"
+./build/origindb_client exec "INSERT INTO cli_test VALUES (2, 'Bob')"
+./build/origindb_client exec "SELECT * FROM cli_test"
+./build/origindb_client interactive        # then: SELECT * FROM cli_test / exit
 ```
 
 **Expected Results**:
@@ -160,7 +160,7 @@ gracefully):**
 ### Test Case B1.2: WHERE-Filtered Subscription (per-event evaluation)
 **Setup**:
 ```bash
-./build/instantdb_client exec "CREATE TABLE accounts (id INT64 PRIMARY KEY, name STRING, email STRING)"
+./build/origindb_client exec "CREATE TABLE accounts (id INT64 PRIMARY KEY, name STRING, email STRING)"
 ```
 
 **Steps**:
@@ -170,8 +170,8 @@ gracefully):**
 ```
 2. Insert matching and non-matching rows:
 ```bash
-./build/instantdb_client exec "INSERT INTO accounts VALUES (1, 'Alice', 'a@x.com')"
-./build/instantdb_client exec "INSERT INTO accounts VALUES (2, 'Bob', 'b@x.com')"
+./build/origindb_client exec "INSERT INTO accounts VALUES (1, 'Alice', 'a@x.com')"
+./build/origindb_client exec "INSERT INTO accounts VALUES (2, 'Bob', 'b@x.com')"
 ```
 
 **Expected Result**:
@@ -199,7 +199,7 @@ parentheses, `LIKE`, `IS [NOT] NULL`.
 ### Test Case B1.4: UPDATE Event Matching Semantics
 **Steps** (with the `WHERE name = 'Alice'` subscription from B1.2):
 ```bash
-./build/instantdb_client exec "UPDATE accounts SET name='Alicia' WHERE id=1"
+./build/origindb_client exec "UPDATE accounts SET name='Alicia' WHERE id=1"
 ```
 
 **Expected Result**:
@@ -223,7 +223,7 @@ parentheses, `LIKE`, `IS [NOT] NULL`.
 ### Test Case B2.2: Initial State with Empty Table
 **Setup**:
 ```bash
-./build/instantdb_client exec "CREATE TABLE empty_table (id INT64 PRIMARY KEY, data STRING)"
+./build/origindb_client exec "CREATE TABLE empty_table (id INT64 PRIMARY KEY, data STRING)"
 ```
 Subscribe with `SELECT * FROM empty_table`.
 
@@ -233,7 +233,7 @@ Subscribe with `SELECT * FROM empty_table`.
 ### Test Case B2.3: Exactly-Once Event Delivery
 **Steps**:
 1. Subscribe to a table
-2. Perform one INSERT and one UPDATE via `instantdb_client exec`
+2. Perform one INSERT and one UPDATE via `origindb_client exec`
 
 **Expected Result**:
 - Exactly one event per write — no duplicates (the old duplicate SQL-layer
@@ -266,7 +266,7 @@ Subscribe with `SELECT * FROM empty_table`.
 ### Test Case B5.1: Client Disconnection Cleanup
 **Steps**:
 1. Connect, subscribe, then disconnect abruptly
-2. Watch server logs / `instantdb_client status` subscription count
+2. Watch server logs / `origindb_client status` subscription count
 
 **Expected Result**:
 - Subscription is removed; count returns to previous value
@@ -331,8 +331,8 @@ cd ../..
 **Prerequisites**: server running.
 
 ```bash
-./build/instantdb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
-./build/instantdb_client modules
+./build/origindb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
+./build/origindb_client modules
 ```
 
 **Expected Result**:
@@ -342,9 +342,9 @@ cd ../..
 
 ### Test Case C1.3: Execute Reducers
 ```bash
-./build/instantdb_client call todo addTodo '["buy milk"]'
-./build/instantdb_client call todo listTodos
-./build/instantdb_client exec "SELECT * FROM todos"
+./build/origindb_client call todo addTodo '["buy milk"]'
+./build/origindb_client call todo listTodos
+./build/origindb_client exec "SELECT * FROM todos"
 ```
 
 **Expected Result**:
@@ -357,13 +357,13 @@ cd ../..
 ### Test Case C1.4: Reducer Errors and Rollback
 ```bash
 # Module-side validation failure (empty text) -> negative status
-./build/instantdb_client call todo addTodo '[""]'
+./build/origindb_client call todo addTodo '[""]'
 
 # Unknown reducer -> -404 (no handler registered)
-./build/instantdb_client call todo noSuchReducer
+./build/origindb_client call todo noSuchReducer
 
 # Unknown module
-./build/instantdb_client call no_such_module foo
+./build/origindb_client call no_such_module foo
 ```
 
 **Expected Result**:
@@ -376,7 +376,7 @@ cd ../..
 ```json
 {"type": "sql_subscribe", "sql": "SELECT * FROM todos"}
 ```
-2. Execute `./build/instantdb_client call todo addTodo '["from wasm"]'`
+2. Execute `./build/origindb_client call todo addTodo '["from wasm"]'`
 
 **Expected Result**:
 - The client receives exactly one `sql_changefeed_event` (INSERT on
@@ -412,9 +412,9 @@ cd ../..
 3. Check the boot log and re-run:
 ```bash
 grep "Restored persisted module: todo" <server log>
-./build/instantdb_client modules
-./build/instantdb_client call todo listTodos
-./build/instantdb_client exec "SELECT * FROM todos"
+./build/origindb_client modules
+./build/origindb_client call todo listTodos
+./build/origindb_client exec "SELECT * FROM todos"
 ```
 
 **Expected Result**:
@@ -424,8 +424,8 @@ grep "Restored persisted module: todo" <server log>
 
 ### Test Case C2.2: Undeploy Removes Persisted Files
 ```bash
-./build/instantdb_client undeploy todo
-./build/instantdb_client modules
+./build/origindb_client undeploy todo
+./build/origindb_client modules
 ls <data_dir>/modules/
 ```
 
@@ -451,16 +451,16 @@ small `timeout_ms` in `DeployModuleRequest.capabilities` and call it.
   `read_only` module or access outside `allowed_tables` fail with
   permission-denied (`-2`).
 
-(`instantdb_client deploy` currently sends default capabilities; testing
+(`origindb_client deploy` currently sends default capabilities; testing
 non-default capabilities requires a direct gRPC `DeployModule` call.)
 
 ### Test Case C3.2: Concurrent Reducer Calls
 ```bash
 for i in {1..10}; do
-  ./build/instantdb_client call todo addTodo "[\"item $i\"]" &
+  ./build/origindb_client call todo addTodo "[\"item $i\"]" &
 done
 wait
-./build/instantdb_client exec "SELECT * FROM todos"
+./build/origindb_client exec "SELECT * FROM todos"
 ```
 
 **Expected Result**:
@@ -514,8 +514,8 @@ wait
 ## Test Environment Cleanup
 
 1. Stop WebSocket clients
-2. `./build/instantdb_client undeploy <module>` for test modules
-3. Stop the server (Ctrl+C or `./build/instantdb stop`)
+2. `./build/origindb_client undeploy <module>` for test modules
+3. Stop the server (Ctrl+C or `./build/origindb stop`)
 4. Remove test data dirs (`./qa_data`, generated projects)
 
 ---

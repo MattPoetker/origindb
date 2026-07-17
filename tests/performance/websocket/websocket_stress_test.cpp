@@ -5,7 +5,7 @@
 #include <chrono>
 #include <random>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // TestMessage Implementation
@@ -652,4 +652,4 @@ WebSocketClientConfig WebSocketTestFactory::GetStabilityTestConfig() {
 }
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

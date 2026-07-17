@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // Simple WebSocket client configuration
@@ -143,4 +143,4 @@ public:
 };
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

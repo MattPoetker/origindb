@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to InstantDB for Unity will be documented in this file.
+All notable changes to OriginDB for Unity will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -8,11 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2024-12-22
 
 ### Added
-- Initial release of InstantDB for Unity
+- Initial release of OriginDB for Unity
 - Real-time database integration with WebSocket connections
-- Unity singleton pattern network manager (`InstantDBNetworkManager`)
+- Unity singleton pattern network manager (`OriginDBNetworkManager`)
 - Comprehensive connection management with automatic reconnection
-- ScriptableObject configuration system (`InstantDBConfig`) with environment profiles
+- ScriptableObject configuration system (`OriginDBConfig`) with environment profiles
 - Data models for common game entities (`Player`, `GameSession`, `PlayerAction`)
 - Unity lifecycle integration (Update loop, pause/resume handling)
 - Event-driven architecture for real-time data synchronization
@@ -25,9 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dependency on Newtonsoft JSON 3.0.2
 
 ### Features
-- **Connection Interface**: `IInstantDBConnection` with WebSocket implementation
-- **Network Manager**: Singleton `InstantDBNetworkManager` with Unity lifecycle integration
-- **Configuration**: `InstantDBConfig` ScriptableObject with environment profiles
+- **Connection Interface**: `IOriginDBConnection` with WebSocket implementation
+- **Network Manager**: Singleton `OriginDBNetworkManager` with Unity lifecycle integration
+- **Configuration**: `OriginDBConfig` ScriptableObject with environment profiles
 - **Data Models**: Pre-built models for `Player`, `GameSession`, and `PlayerAction`
 - **Editor Tools**: Custom inspectors and menu items for better development experience
 - **Samples**: Basic connection example with UI integration
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Requirements
 - Unity 2021.3 or later
 - Newtonsoft JSON 3.0.2
-- InstantDB server
+- OriginDB server
 - .NET Framework 4.7.1+ or .NET Standard 2.1+
 
 ### Supported Platforms

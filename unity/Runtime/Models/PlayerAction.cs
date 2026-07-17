@@ -2,10 +2,10 @@
 using System;
 using UnityEngine;
 
-namespace InstantDB.Client
+namespace OriginDB.Client
 {
     /// <summary>
-    /// Player action data model for InstantDB integration.
+    /// Player action data model for OriginDB integration.
     /// Represents an action performed by a player in the game.
     /// </summary>
     [Serializable]

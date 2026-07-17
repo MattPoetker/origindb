@@ -1,10 +1,10 @@
 # Basic Connection Example
 
-This sample demonstrates how to establish a basic connection to InstantDB and handle connection events.
+This sample demonstrates how to establish a basic connection to OriginDB and handle connection events.
 
 ## What This Sample Shows
 
-- Setting up an InstantDBNetworkManager
+- Setting up an OriginDBNetworkManager
 - Creating and configuring connections
 - Handling connection events (connected, disconnected, error)
 - Basic UI integration with Unity
@@ -13,15 +13,15 @@ This sample demonstrates how to establish a basic connection to InstantDB and ha
 
 ## Files
 
-- **SampleGameManager.cs**: Main game manager that demonstrates InstantDB integration
+- **SampleGameManager.cs**: Main game manager that demonstrates OriginDB integration
 - **BasicConnection.unity**: Sample scene with configured UI and network manager
-- **InstantDBConfig_Sample.asset**: Sample configuration asset
+- **OriginDBConfig_Sample.asset**: Sample configuration asset
 
 ## How to Use
 
 1. Import this sample into your project from the Package Manager
 2. Open the `BasicConnection.unity` scene
-3. Configure the `InstantDBConfig_Sample` asset with your server settings
+3. Configure the `OriginDBConfig_Sample` asset with your server settings
 4. Play the scene to test the connection
 
 ## Key Features Demonstrated
@@ -29,7 +29,7 @@ This sample demonstrates how to establish a basic connection to InstantDB and ha
 ### Connection Management
 ```csharp
 // Create connection with configuration
-_connection = InstantDBNetworkManager.Instance.CreateConnection(config.CreateConnectionOptions());
+_connection = OriginDBNetworkManager.Instance.CreateConnection(config.CreateConnectionOptions());
 
 // Subscribe to events
 _connection.OnConnected += HandleConnected;
@@ -66,14 +66,14 @@ await _connection.SubscribeToTable("player_actions");
 
 ## Requirements
 
-- InstantDB server running (default: ws://localhost:8080)
+- OriginDB server running (default: ws://localhost:8080)
 - Unity 2021.3 or later
 - Newtonsoft JSON package
 
 ## Troubleshooting
 
 **Connection Fails**
-- Check that your InstantDB server is running
+- Check that your OriginDB server is running
 - Verify the server URL in the configuration
 - Check firewall/network settings
 

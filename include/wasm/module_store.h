@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace instantdb {
+namespace origindb {
 
 struct StoredModuleInfo {
     std::string name;
@@ -49,4 +49,4 @@ private:
     std::unordered_map<std::string, StoredModuleInfo> index_;
 };
 
-} // namespace instantdb
+} // namespace origindb

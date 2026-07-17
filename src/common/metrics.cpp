@@ -1,7 +1,7 @@
 #include "common/metrics.h"
 #include <spdlog/spdlog.h>
 
-namespace instantdb {
+namespace origindb {
 
 // Global metrics instance
 std::shared_ptr<MetricsExporter> g_metrics;
@@ -163,4 +163,4 @@ ScopedTimer::~ScopedTimer() {
     exporter_->ObserveHistogram(metric_name_, duration, labels_);
 }
 
-} // namespace instantdb
+} // namespace origindb

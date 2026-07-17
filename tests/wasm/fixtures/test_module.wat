@@ -16,7 +16,7 @@
   (data (i32.const 112) "secret\00")
   (data (i32.const 128) "boom\00")
 
-  (func (export "instantdb_alloc") (param $size i32) (result i32)
+  (func (export "origindb_alloc") (param $size i32) (result i32)
     (local $ptr i32)
     global.get $heap
     local.set $ptr
@@ -30,7 +30,7 @@
     global.set $heap
     local.get $ptr)
 
-  (func (export "instantdb_free") (param i32))
+  (func (export "origindb_free") (param i32))
 
   (func $do_write (result i32)
     (call $write (i32.const 16) (i32.const 32) (i32.const 2)
@@ -47,7 +47,7 @@
     (call $set_result (i32.load (i32.const 200)) (i32.load (i32.const 204)))
     (i32.const 0))
 
-  (func (export "instantdb_invoke")
+  (func (export "origindb_invoke")
         (param $np i32) (param $nl i32) (param $ap i32) (param $al i32)
         (result i32)
     (local $fb i32)

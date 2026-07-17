@@ -1,6 +1,6 @@
-# InstantDB C++ SDK
+# OriginDB C++ SDK
 
-The **InstantDB C++ SDK** enables you to write WebAssembly modules in C++ that run inside the InstantDB database server. This provides functionality with type-safe database operations, event emission, and reducer functions.
+The **OriginDB C++ SDK** enables you to write WebAssembly modules in C++ that run inside the OriginDB database server. This provides functionality with type-safe database operations, event emission, and reducer functions.
 
 ## 🚀 Quick Start
 
@@ -20,7 +20,7 @@ cd emsdk
 ./emsdk activate latest
 source ./emsdk_env.sh
 
-# Clone InstantDB
+# Clone OriginDB
 git clone <repository-url>
 cd instant_db/sdk/cpp
 ```
@@ -42,9 +42,9 @@ cmake --build build
 ### Basic Module Structure
 
 ```cpp
-#include "instantdb.hpp"
+#include "origindb.hpp"
 
-using namespace instantdb;
+using namespace origindb;
 
 // Define your data structures
 struct User {
@@ -64,7 +64,7 @@ struct User {
 };
 
 // Specialize the serializable trait
-namespace instantdb::serialization {
+namespace origindb::serialization {
 template<>
 class Serializable<User> {
 public:
@@ -79,7 +79,7 @@ public:
 }
 
 // Define reducer functions
-INSTANTDB_EXPORT int32_t create_user(const char* name, const char* email) {
+ORIGINDB_EXPORT int32_t create_user(const char* name, const char* email) {
     try {
         User user{
             .id = utils::generate_id(),
@@ -105,7 +105,7 @@ INSTANTDB_EXPORT int32_t create_user(const char* name, const char* email) {
 }
 
 // Module lifecycle hooks
-INSTANTDB_INIT() {
+ORIGINDB_INIT() {
     utils::log(utils::LogLevel::Info, "User module initialized");
     return 0;
 }
@@ -279,7 +279,7 @@ struct ComplexStruct {
 ### Lifecycle Management
 
 ```cpp
-INSTANTDB_INIT() {
+ORIGINDB_INIT() {
     // Called when module is first loaded
     // Initialize any module-global state
     utils::log(utils::LogLevel::Info, "Module starting up");
@@ -288,13 +288,13 @@ INSTANTDB_INIT() {
     return 0;
 }
 
-INSTANTDB_CLIENT_CONNECTED() {
+ORIGINDB_CLIENT_CONNECTED() {
     // Called when a WebSocket client connects
     utils::log(utils::LogLevel::Info, "Client connected");
     return 0;
 }
 
-INSTANTDB_CLIENT_DISCONNECTED() {
+ORIGINDB_CLIENT_DISCONNECTED() {
     // Called when a WebSocket client disconnects
     utils::log(utils::LogLevel::Info, "Client disconnected");
     return 0;
@@ -349,35 +349,35 @@ See `examples/counter_module.cpp` for a complete working example that demonstrat
 emcmake cmake -B build -S .
 cmake --build build
 
-# Deploy to InstantDB
-grpcurl -plaintext -import-path ../../proto -proto instantdb.proto \
+# Deploy to OriginDB
+grpcurl -plaintext -import-path ../../proto -proto origindb.proto \
   -d '{
     "name": "counter_app",
     "version": "1.0.0",
     "bytecode": "'"$(base64 < build/counter_module.wasm)"'"
   }' \
-  localhost:50051 instantdb.grpc.WasmService.DeployModule
+  localhost:50051 origindb.grpc.WasmService.DeployModule
 ```
 
 ### Testing the Module
 
 ```bash
 # Execute reducers
-grpcurl -plaintext -import-path ../../proto -proto instantdb.proto \
+grpcurl -plaintext -import-path ../../proto -proto origindb.proto \
   -d '{
     "module_name": "counter_app",
     "reducer_name": "create_counter",
     "args": [{"string_value": "global"}, {"int64_value": 0}]
   }' \
-  localhost:50051 instantdb.grpc.WasmService.ExecuteReducer
+  localhost:50051 origindb.grpc.WasmService.ExecuteReducer
 
-grpcurl -plaintext -import-path ../../proto -proto instantdb.proto \
+grpcurl -plaintext -import-path ../../proto -proto origindb.proto \
   -d '{
     "module_name": "counter_app",
     "reducer_name": "increment_counter",
     "args": [{"string_value": "global"}, {"int64_value": 1}]
   }' \
-  localhost:50051 instantdb.grpc.WasmService.ExecuteReducer
+  localhost:50051 origindb.grpc.WasmService.ExecuteReducer
 ```
 
 ## 🐛 Debugging
@@ -411,7 +411,7 @@ public:
 };
 
 // Validate inputs
-INSTANTDB_EXPORT int32_t create_user(const char* name, const char* email) {
+ORIGINDB_EXPORT int32_t create_user(const char* name, const char* email) {
     if (!name || strlen(name) == 0) {
         utils::log(utils::LogLevel::Error, "Name cannot be empty");
         return -1;
@@ -451,4 +451,4 @@ INSTANTDB_EXPORT int32_t create_user(const char* name, const char* email) {
 
 ---
 
-**InstantDB C++ SDK** - Write high-performance WASM modules in modern C++ 🚀
+**OriginDB C++ SDK** - Write high-performance WASM modules in modern C++ 🚀

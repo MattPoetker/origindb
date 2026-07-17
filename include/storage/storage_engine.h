@@ -13,7 +13,7 @@
 #include "storage/wal.h"
 #include "storage/snapshot.h"
 
-namespace instantdb {
+namespace origindb {
 
 class Transaction;
 class Index;
@@ -117,4 +117,4 @@ public:
     virtual void SetReadOnly(bool read_only) = 0;
 };
 
-} // namespace instantdb
+} // namespace origindb

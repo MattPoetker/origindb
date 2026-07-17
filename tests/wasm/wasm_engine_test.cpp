@@ -1,6 +1,6 @@
 // End-to-end tests for the wasmtime-backed WasmEngine using WAT fixtures.
 // The fixture module implements the docs/WASM_ABI.md contract by hand:
-// instantdb_invoke dispatches on (name_len, first_byte).
+// origindb_invoke dispatches on (name_len, first_byte).
 
 #include <gtest/gtest.h>
 
@@ -15,7 +15,7 @@
 #include "storage/storage_engine.h"
 #include "wasm/wasm_engine.h"
 
-namespace instantdb {
+namespace origindb {
 namespace {
 
 std::vector<uint8_t> Wat2Wasm(const std::string& wat) {
@@ -64,7 +64,7 @@ const char* kTestModuleWat = R"WAT(
   (data (i32.const 112) "secret\00")
   (data (i32.const 128) "boom\00")
 
-  (func (export "instantdb_alloc") (param $size i32) (result i32)
+  (func (export "origindb_alloc") (param $size i32) (result i32)
     (local $ptr i32)
     global.get $heap
     local.set $ptr
@@ -78,7 +78,7 @@ const char* kTestModuleWat = R"WAT(
     global.set $heap
     local.get $ptr)
 
-  (func (export "instantdb_free") (param i32))
+  (func (export "origindb_free") (param i32))
 
   (func $do_write (result i32)
     (call $write (i32.const 16) (i32.const 32) (i32.const 2)
@@ -95,7 +95,7 @@ const char* kTestModuleWat = R"WAT(
     (call $set_result (i32.load (i32.const 200)) (i32.load (i32.const 204)))
     (i32.const 0))
 
-  (func (export "instantdb_invoke")
+  (func (export "origindb_invoke")
         (param $np i32) (param $nl i32) (param $ap i32) (param $al i32)
         (result i32)
     (local $fb i32)
@@ -190,7 +190,7 @@ TEST_F(WasmEngineTest, RejectsMissingRequiredExports) {
     auto bytes = Wat2Wasm("(module (memory (export \"memory\") 1))");
     ASSERT_FALSE(bytes.empty());
     EXPECT_FALSE(engine_->LoadModule("noexports", bytes));
-    EXPECT_NE(engine_->GetLastLoadError().find("instantdb_invoke"),
+    EXPECT_NE(engine_->GetLastLoadError().find("origindb_invoke"),
               std::string::npos);
 }
 
@@ -198,8 +198,8 @@ TEST_F(WasmEngineTest, RejectsUnknownImports) {
     auto bytes = Wat2Wasm(R"((module
         (import "env" "evil_syscall" (func (param i32)))
         (memory (export "memory") 1)
-        (func (export "instantdb_alloc") (param i32) (result i32) (i32.const 0))
-        (func (export "instantdb_invoke") (param i32 i32 i32 i32) (result i32)
+        (func (export "origindb_alloc") (param i32) (result i32) (i32.const 0))
+        (func (export "origindb_invoke") (param i32 i32 i32 i32) (result i32)
           (i32.const 0))))");
     ASSERT_FALSE(bytes.empty());
     EXPECT_FALSE(engine_->LoadModule("evil", bytes));
@@ -213,7 +213,7 @@ TEST_F(WasmEngineTest, DeploysAndListsMetadata) {
     ASSERT_NE(module, nullptr);
     EXPECT_EQ(module->GetMetadata().version, "2.0.0");
     const auto& exports = module->GetMetadata().exports;
-    EXPECT_NE(std::find(exports.begin(), exports.end(), "instantdb_invoke"),
+    EXPECT_NE(std::find(exports.begin(), exports.end(), "origindb_invoke"),
               exports.end());
 }
 
@@ -338,4 +338,4 @@ TEST_F(WasmEngineTest, ModulesExecuteConcurrently) {
 }
 
 }  // namespace
-}  // namespace instantdb
+}  // namespace origindb

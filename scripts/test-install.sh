@@ -4,7 +4,7 @@
 set -e
 
 echo "========================================="
-echo "Testing InstantDB One-Liner Installation"
+echo "Testing OriginDB One-Liner Installation"
 echo "========================================="
 echo ""
 
@@ -17,26 +17,26 @@ echo ""
 
 # Verify installation
 echo "Test 2: Verify installation"
-echo "Command: instantdb_server --help"
+echo "Command: origindb_server --help"
 echo "-----------------------------------------"
-instantdb_server --help | head -10
+origindb_server --help | head -10
 echo ""
 
 echo "Test 3: Check installation path"
-echo "Command: which instantdb_server"
+echo "Command: which origindb_server"
 echo "-----------------------------------------"
-which instantdb_server
+which origindb_server
 echo ""
 
 echo "========================================="
 echo "✅ Installation tests completed!"
 echo ""
 echo "To test the actual one-liner experience:"
-echo "  curl -sSf https://install.instantdb.com | sh"
+echo "  curl -sSf https://install.origindb.com | sh"
 echo ""
 echo "For local testing with downloaded script:"
 echo "  ./scripts/install.sh --local"
 echo ""
 echo "To start the server:"
-echo "  instantdb_server"
+echo "  origindb_server"
 echo "========================================="

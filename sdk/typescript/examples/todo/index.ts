@@ -1,5 +1,5 @@
 // =============================================================================
-// Todo — example InstantDB module in AssemblyScript.
+// Todo — example OriginDB module in AssemblyScript.
 //
 // Reducers:
 //   addTodo(text)     -> {"id": "..."}
@@ -30,11 +30,11 @@ import {
 
 // Every module entry file must re-export the ABI surface implemented by the SDK.
 export {
-  instantdb_alloc,
-  instantdb_free,
-  instantdb_describe,
-  instantdb_invoke,
-  __instantdb_abort,
+  origindb_alloc,
+  origindb_free,
+  origindb_describe,
+  origindb_invoke,
+  __origindb_abort,
 } from "../../assembly/index";
 
 // Top-level statements run in the wasm start section — at instantiation,

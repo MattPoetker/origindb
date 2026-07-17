@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace instantdb {
+namespace origindb {
 namespace websocket {
 
 // Magic bytes for binary protocol
@@ -673,4 +673,4 @@ ProtocolBenchmark::BenchmarkResult ProtocolBenchmark::BenchmarkBatchOperation(
 }
 
 } // namespace websocket
-} // namespace instantdb
+} // namespace origindb

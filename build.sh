@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# InstantDB Build Script
+# OriginDB Build Script
 
 set -e
 
@@ -113,11 +113,11 @@ if [ "${DO_INSTALL}" == "1" ]; then
 fi
 
 print_info "Build completed successfully!"
-print_info "Binary location: ${BUILD_DIR}/instantdb"
+print_info "Binary location: ${BUILD_DIR}/origindb"
 
 # Print next steps
 echo ""
 echo "Next steps:"
-echo "  1. Run the server: ${BUILD_DIR}/instantdb --help"
+echo "  1. Run the server: ${BUILD_DIR}/origindb --help"
 echo "  2. Run tests: cd ${BUILD_DIR} && make test"
 echo "  3. Install: cd ${BUILD_DIR} && sudo make install"

@@ -1,5 +1,5 @@
 // =============================================================================
-// InstantDB host imports (WASM ABI v1, module "env").
+// OriginDB host imports (WASM ABI v1, module "env").
 // See docs/WASM_ABI.md for the normative contract.
 //
 // All pointers are byte offsets into this module's exported linear memory
@@ -9,7 +9,7 @@
 
 // ---- tables -----------------------------------------------------------------
 
-// 1 = found (result written to a buffer allocated via our instantdb_alloc;
+// 1 = found (result written to a buffer allocated via our origindb_alloc;
 // offset stored at *outPtr, length at *outLen), 0 = not found, <0 = error.
 @external("env", "host_table_read")
 export declare function host_table_read(
@@ -25,7 +25,7 @@ export declare function host_table_write(
 export declare function host_table_delete(
   table: usize, key: usize, keyLen: i32): i32;
 
-// Prefix scan; result JSON array written via instantdb_alloc. Returns row
+// Prefix scan; result JSON array written via origindb_alloc. Returns row
 // count or <0. limit <= 0 -> 1000.
 @external("env", "host_table_scan")
 export declare function host_table_scan(

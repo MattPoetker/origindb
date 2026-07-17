@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace instantdb {
+namespace origindb {
 
 enum class WALEntryType {
     CREATE_TABLE,
@@ -42,4 +42,4 @@ public:
     virtual uint64_t GetSize() const = 0;
 };
 
-} // namespace instantdb
+} // namespace origindb

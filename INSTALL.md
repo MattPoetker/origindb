@@ -1,6 +1,6 @@
-# InstantDB Installation Guide
+# OriginDB Installation Guide
 
-This guide covers installation methods for InstantDB across different platforms, with special focus on C# developers who want to integrate InstantDB into their projects.
+This guide covers installation methods for OriginDB across different platforms, with special focus on C# developers who want to integrate OriginDB into their projects.
 
 ## 📦 Installation Methods
 
@@ -10,23 +10,23 @@ Quick installation using our install scripts:
 
 #### macOS & Linux
 ```bash
-curl -sSf https://install.instantdb.com | sh
+curl -sSf https://install.origindb.com | sh
 ```
 
 #### Windows (PowerShell)
 ```powershell
-iwr -useb https://install.instantdb.com/windows | iex
+iwr -useb https://install.origindb.com/windows | iex
 ```
 
 #### Windows (Command Prompt)
 ```cmd
-curl -sSf https://install.instantdb.com/windows.bat | cmd
+curl -sSf https://install.origindb.com/windows.bat | cmd
 ```
 
 The install script will:
 - Detect your OS and architecture automatically
 - Download the latest stable release
-- Install InstantDB to the appropriate system location
+- Install OriginDB to the appropriate system location
 - Add it to your PATH
 - Verify the installation
 
@@ -37,89 +37,89 @@ If you prefer manual installation:
 **macOS:**
 ```bash
 # Intel Macs
-curl -L https://github.com/your-org/instantdb/releases/latest/download/instantdb-macos-x64.tar.gz | tar xz
-sudo mv instantdb /usr/local/bin/
+curl -L https://github.com/your-org/origindb/releases/latest/download/origindb-macos-x64.tar.gz | tar xz
+sudo mv origindb /usr/local/bin/
 
 # Apple Silicon Macs
-curl -L https://github.com/your-org/instantdb/releases/latest/download/instantdb-macos-arm64.tar.gz | tar xz
-sudo mv instantdb /usr/local/bin/
+curl -L https://github.com/your-org/origindb/releases/latest/download/origindb-macos-arm64.tar.gz | tar xz
+sudo mv origindb /usr/local/bin/
 ```
 
 **Linux:**
 ```bash
 # x64
-curl -L https://github.com/your-org/instantdb/releases/latest/download/instantdb-linux-x64.tar.gz | tar xz
-sudo mv instantdb /usr/local/bin/
+curl -L https://github.com/your-org/origindb/releases/latest/download/origindb-linux-x64.tar.gz | tar xz
+sudo mv origindb /usr/local/bin/
 
 # ARM64
-curl -L https://github.com/your-org/instantdb/releases/latest/download/instantdb-linux-arm64.tar.gz | tar xz
-sudo mv instantdb /usr/local/bin/
+curl -L https://github.com/your-org/origindb/releases/latest/download/origindb-linux-arm64.tar.gz | tar xz
+sudo mv origindb /usr/local/bin/
 ```
 
 **Windows:**
 ```powershell
 # Download and extract (PowerShell)
-Invoke-WebRequest -Uri "https://github.com/your-org/instantdb/releases/latest/download/instantdb-windows-x64.zip" -OutFile "instantdb.zip"
-Expand-Archive -Path "instantdb.zip" -DestinationPath "C:\tools\instantdb"
-$env:PATH += ";C:\tools\instantdb"
+Invoke-WebRequest -Uri "https://github.com/your-org/origindb/releases/latest/download/origindb-windows-x64.zip" -OutFile "origindb.zip"
+Expand-Archive -Path "origindb.zip" -DestinationPath "C:\tools\origindb"
+$env:PATH += ";C:\tools\origindb"
 ```
 
 **Verify Installation:**
 ```bash
-instantdb --version
+origindb --version
 ```
 
 ### Option 2: Package Managers
 
 #### macOS (Homebrew)
 ```bash
-brew tap your-org/instantdb
-brew install instantdb
+brew tap your-org/origindb
+brew install origindb
 ```
 
 #### Linux (APT - Ubuntu/Debian)
 ```bash
-curl -fsSL https://packages.instantdb.com/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/instantdb.gpg
-echo "deb [signed-by=/etc/apt/keyrings/instantdb.gpg] https://packages.instantdb.com/apt stable main" | sudo tee /etc/apt/sources.list.d/instantdb.list
+curl -fsSL https://packages.origindb.com/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/origindb.gpg
+echo "deb [signed-by=/etc/apt/keyrings/origindb.gpg] https://packages.origindb.com/apt stable main" | sudo tee /etc/apt/sources.list.d/origindb.list
 sudo apt update
-sudo apt install instantdb
+sudo apt install origindb
 ```
 
 #### Linux (YUM - CentOS/RHEL/Fedora)
 ```bash
-sudo tee /etc/yum.repos.d/instantdb.repo <<EOF
-[instantdb]
-name=InstantDB Repository
-baseurl=https://packages.instantdb.com/yum/
+sudo tee /etc/yum.repos.d/origindb.repo <<EOF
+[origindb]
+name=OriginDB Repository
+baseurl=https://packages.origindb.com/yum/
 enabled=1
 gpgcheck=1
-gpgkey=https://packages.instantdb.com/gpg.key
+gpgkey=https://packages.origindb.com/gpg.key
 EOF
 
-sudo yum install instantdb
+sudo yum install origindb
 ```
 
 #### Windows (Chocolatey)
 ```powershell
-choco install instantdb
+choco install origindb
 ```
 
 #### Windows (Winget)
 ```powershell
-winget install instantdb
+winget install origindb
 ```
 
 ### Option 3: Docker
 
 ```bash
-# Run InstantDB server in Docker
-docker run -p 8080:8080 -p 50051:50051 instantdb/instantdb:latest
+# Run OriginDB server in Docker
+docker run -p 8080:8080 -p 50051:50051 origindb/origindb:latest
 
 # With persistent data
-docker run -p 8080:8080 -p 50051:50051 -v instantdb_data:/data instantdb/instantdb:latest
+docker run -p 8080:8080 -p 50051:50051 -v origindb_data:/data origindb/origindb:latest
 
 # Docker Compose
-curl -O https://raw.githubusercontent.com/your-org/instantdb/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/your-org/origindb/main/docker-compose.yml
 docker-compose up -d
 ```
 
@@ -129,20 +129,20 @@ See [Building from Source](#building-from-source) section below.
 
 ## 🎯 Quick Start for C# Developers
 
-Once InstantDB is installed, here's how to integrate it with your C# project:
+Once OriginDB is installed, here's how to integrate it with your C# project:
 
-### 1. Initialize a New InstantDB Project
+### 1. Initialize a New OriginDB Project
 
 ```bash
-# Create a new C# project with InstantDB
+# Create a new C# project with OriginDB
 mkdir MyRealtimeApp
 cd MyRealtimeApp
 
-# Initialize InstantDB project
-instantdb init --lang csharp --template unity-game
+# Initialize OriginDB project
+origindb init --lang csharp --template unity-game
 
 # This creates:
-# ├── instantdb.config.json     # Project configuration
+# ├── origindb.config.json     # Project configuration
 # ├── modules/                  # WASM modules directory
 # │   └── gamelogic/           # Sample C# module
 # ├── schema.sql               # Database schema
@@ -150,42 +150,42 @@ instantdb init --lang csharp --template unity-game
 # └── client/                  # C# client code examples
 ```
 
-### 2. Start the InstantDB Server
+### 2. Start the OriginDB Server
 
 ```bash
 # Start server as daemon
-instantdb server start --daemon
+origindb server start --daemon
 
 # Or start in foreground for development
-instantdb server start --dev
+origindb server start --dev
 ```
 
-### 3. Add InstantDB to Your C# Project
+### 3. Add OriginDB to Your C# Project
 
 ```bash
 # Navigate to your existing C# project
 cd path/to/your/csharp/project
 
-# Add InstantDB NuGet package
-dotnet add package InstantDB.Client
+# Add OriginDB NuGet package
+dotnet add package OriginDB.Client
 
 # Generate C# client code from your schema
-instantdb generate --lang csharp --output ./Generated/InstantDB
+origindb generate --lang csharp --output ./Generated/OriginDB
 ```
 
 ### 4. Connect from C# Code
 
 ```csharp
-using InstantDB.Client;
+using OriginDB.Client;
 
 public class GameManager : MonoBehaviour
 {
-    private IInstantDBConnection _connection;
+    private IOriginDBConnection _connection;
 
     async void Start()
     {
-        // Connect to local InstantDB server
-        _connection = new InstantDBConnection("ws://localhost:8080");
+        // Connect to local OriginDB server
+        _connection = new OriginDBConnection("ws://localhost:8080");
         await _connection.ConnectAsync();
 
         // Register event handlers
@@ -242,21 +242,21 @@ CREATE TABLE game_events (
 
 Apply the schema:
 ```bash
-instantdb schema apply schema.sql
+origindb schema apply schema.sql
 ```
 
 ### 6. Deploy and Monitor
 
 ```bash
 # Build and deploy modules
-instantdb module build --all
-instantdb module deploy gamelogic
+origindb module build --all
+origindb module deploy gamelogic
 
 # Monitor logs
-instantdb logs --follow
+origindb logs --follow
 
 # Check server status
-instantdb status
+origindb status
 ```
 
 ## 🏗️ Building from Source
@@ -286,8 +286,8 @@ instantdb status
 brew install cmake protobuf grpc openssl
 
 # Clone repository
-git clone https://github.com/your-org/instantdb.git
-cd instantdb
+git clone https://github.com/your-org/origindb.git
+cd origindb
 
 # Build
 mkdir build
@@ -319,8 +319,8 @@ sudo apt install -y \
     pkg-config
 
 # Clone and build
-git clone https://github.com/your-org/instantdb.git
-cd instantdb
+git clone https://github.com/your-org/origindb.git
+cd origindb
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
@@ -339,8 +339,8 @@ sudo yum groupinstall -y "Development Tools"
 sudo yum install -y cmake3 git protobuf-devel grpc-devel openssl-devel
 
 # Clone and build
-git clone https://github.com/your-org/instantdb.git
-cd instantdb
+git clone https://github.com/your-org/origindb.git
+cd origindb
 mkdir build && cd build
 cmake3 .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
@@ -368,9 +368,9 @@ cd vcpkg
 .\vcpkg integrate install
 .\vcpkg install grpc:x64-windows protobuf:x64-windows openssl:x64-windows
 
-# Clone and build InstantDB
-git clone https://github.com/your-org/instantdb.git
-cd instantdb
+# Clone and build OriginDB
+git clone https://github.com/your-org/origindb.git
+cd origindb
 mkdir build
 cd build
 
@@ -390,8 +390,8 @@ cpack -G NSIS
 pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake mingw-w64-x86_64-grpc mingw-w64-x86_64-protobuf mingw-w64-x86_64-openssl
 
 # Clone and build
-git clone https://github.com/your-org/instantdb.git
-cd instantdb
+git clone https://github.com/your-org/origindb.git
+cd origindb
 mkdir build && cd build
 cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 mingw32-make -j4
@@ -431,11 +431,11 @@ devenv .
 Create a `.env` file for development:
 
 ```bash
-# InstantDB Development Environment
-INSTANTDB_DATA_DIR=./dev_data
-INSTANTDB_LOG_LEVEL=debug
-INSTANTDB_WS_PORT=8080
-INSTANTDB_GRPC_PORT=50051
+# OriginDB Development Environment
+ORIGINDB_DATA_DIR=./dev_data
+ORIGINDB_LOG_LEVEL=debug
+ORIGINDB_WS_PORT=8080
+ORIGINDB_GRPC_PORT=50051
 
 # Build configuration
 CMAKE_BUILD_TYPE=Debug
@@ -464,13 +464,13 @@ RUN mkdir build && cd build && \
     make -j$(nproc)
 
 EXPOSE 8080 50051
-CMD ["./build/instantdb_server"]
+CMD ["./build/origindb_server"]
 ```
 
 Build and run:
 ```bash
-docker build -f Dockerfile.dev -t instantdb:dev .
-docker run -p 8080:8080 -p 50051:50051 instantdb:dev
+docker build -f Dockerfile.dev -t origindb:dev .
+docker run -p 8080:8080 -p 50051:50051 origindb:dev
 ```
 
 ### Production Container
@@ -496,14 +496,14 @@ RUN apt-get update && apt-get install -y \
     libprotobuf32 libgrpc++1.45 libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /src/build/instantdb_server /usr/local/bin/
-COPY --from=builder /src/build/instantdb_sql /usr/local/bin/
-COPY --from=builder /src/build/instantdb /usr/local/bin/
+COPY --from=builder /src/build/origindb_server /usr/local/bin/
+COPY --from=builder /src/build/origindb_sql /usr/local/bin/
+COPY --from=builder /src/build/origindb /usr/local/bin/
 
 EXPOSE 8080 50051
 VOLUME ["/data"]
 
-CMD ["instantdb_server", "--data-dir", "/data"]
+CMD ["origindb_server", "--data-dir", "/data"]
 ```
 
 ## 🔍 Troubleshooting
@@ -552,7 +552,7 @@ vcpkg install openssl:x64-windows
 **"Connection refused" when connecting**
 ```bash
 # Check if server is running
-instantdb status
+origindb status
 
 # Check ports are open
 netstat -tlnp | grep :8080
@@ -566,16 +566,16 @@ sudo ufw allow 50051
 **"Permission denied" on Unix socket**
 ```bash
 # Check data directory permissions
-ls -la ./instantdb_data
-sudo chown -R $USER:$USER ./instantdb_data
+ls -la ./origindb_data
+sudo chown -R $USER:$USER ./origindb_data
 ```
 
 ### Getting Help
 
-- 📚 [Documentation](https://docs.instantdb.com)
-- 💬 [Discord Community](https://discord.gg/instantdb)
-- 🐛 [GitHub Issues](https://github.com/your-org/instantdb/issues)
-- 📧 [Support Email](mailto:support@instantdb.com)
+- 📚 [Documentation](https://docs.origindb.com)
+- 💬 [Discord Community](https://discord.gg/origindb)
+- 🐛 [GitHub Issues](https://github.com/your-org/origindb/issues)
+- 📧 [Support Email](mailto:support@origindb.com)
 
 ## 📋 Next Steps
 
@@ -588,4 +588,4 @@ After installation:
 
 ---
 
-**Happy building with InstantDB! 🚀**
+**Happy building with OriginDB! 🚀**

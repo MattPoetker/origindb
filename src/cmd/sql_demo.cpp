@@ -6,7 +6,7 @@
 #include "storage/storage_engine.h"
 #include "sql/sql_engine.h"
 
-using namespace instantdb;
+using namespace origindb;
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     try {
         // Initialize storage engine
         StorageConfig storage_config;
-        storage_config.data_dir = "./instantdb_data";
+        storage_config.data_dir = "./origindb_data";
 
         auto storage = std::make_shared<StorageEngine>(storage_config);
         if (!storage->Initialize()) {

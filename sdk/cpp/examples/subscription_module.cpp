@@ -1,8 +1,8 @@
-#include "../instantdb.hpp"
+#include "../origindb.hpp"
 #include <string>
 #include <nlohmann/json.hpp>
 
-using namespace instantdb;
+using namespace origindb;
 
 /**
  * Subscription Module Example
@@ -54,7 +54,7 @@ struct UserActivity {
 };
 
 // Specialize serialization for UserActivity
-namespace instantdb::serialization {
+namespace origindb::serialization {
 
 template<>
 class Serializable<UserActivity> {
@@ -68,7 +68,7 @@ public:
     }
 };
 
-} // namespace instantdb::serialization
+} // namespace origindb::serialization
 
 // =============================================================================
 // Subscription Functions
@@ -78,7 +78,7 @@ public:
  * Filter function for user activity subscriptions
  * Only include activities from the last hour
  */
-INSTANTDB_EXPORT bool filter_activity_by_time(const std::vector<uint8_t>& event_data) {
+ORIGINDB_EXPORT bool filter_activity_by_time(const std::vector<uint8_t>& event_data) {
     try {
         // Parse the changefeed event
         std::string json_str(event_data.begin(), event_data.end());
@@ -110,7 +110,7 @@ INSTANTDB_EXPORT bool filter_activity_by_time(const std::vector<uint8_t>& event_
  * Filter function for specific user activities
  * Only include activities for users with premium accounts
  */
-INSTANTDB_EXPORT bool filter_premium_users(const std::vector<uint8_t>& event_data) {
+ORIGINDB_EXPORT bool filter_premium_users(const std::vector<uint8_t>& event_data) {
     try {
         std::string json_str(event_data.begin(), event_data.end());
         nlohmann::json event = nlohmann::json::parse(json_str);
@@ -142,7 +142,7 @@ INSTANTDB_EXPORT bool filter_premium_users(const std::vector<uint8_t>& event_dat
 /**
  * Transform function to add computed fields
  */
-INSTANTDB_EXPORT std::vector<uint8_t> transform_add_metadata(const std::vector<uint8_t>& event_data) {
+ORIGINDB_EXPORT std::vector<uint8_t> transform_add_metadata(const std::vector<uint8_t>& event_data) {
     try {
         std::string json_str(event_data.begin(), event_data.end());
         nlohmann::json event = nlohmann::json::parse(json_str);
@@ -181,7 +181,7 @@ INSTANTDB_EXPORT std::vector<uint8_t> transform_add_metadata(const std::vector<u
 /**
  * Transform function to anonymize sensitive data
  */
-INSTANTDB_EXPORT std::vector<uint8_t> transform_anonymize(const std::vector<uint8_t>& event_data) {
+ORIGINDB_EXPORT std::vector<uint8_t> transform_anonymize(const std::vector<uint8_t>& event_data) {
     try {
         std::string json_str(event_data.begin(), event_data.end());
         nlohmann::json event = nlohmann::json::parse(json_str);
@@ -216,7 +216,7 @@ INSTANTDB_EXPORT std::vector<uint8_t> transform_anonymize(const std::vector<uint
 /**
  * Get initial data for activity subscriptions
  */
-INSTANTDB_EXPORT std::vector<uint8_t> get_initial_activities(const std::string& where_clause) {
+ORIGINDB_EXPORT std::vector<uint8_t> get_initial_activities(const std::string& where_clause) {
     try {
         nlohmann::json initial_data = nlohmann::json::array();
 
@@ -254,7 +254,7 @@ INSTANTDB_EXPORT std::vector<uint8_t> get_initial_activities(const std::string& 
 /**
  * Create a new user activity record
  */
-INSTANTDB_EXPORT int32_t create_activity(const char* user_id, const char* action, const char* details) {
+ORIGINDB_EXPORT int32_t create_activity(const char* user_id, const char* action, const char* details) {
     try {
         UserActivity activity{
             .user_id = std::string(user_id),
@@ -289,7 +289,7 @@ INSTANTDB_EXPORT int32_t create_activity(const char* user_id, const char* action
 /**
  * Get user activities with filtering
  */
-INSTANTDB_EXPORT int32_t get_user_activities(const char* user_id, int64_t since_timestamp) {
+ORIGINDB_EXPORT int32_t get_user_activities(const char* user_id, int64_t since_timestamp) {
     try {
         utils::log(utils::LogLevel::Info,
                   "Getting activities for user: " + std::string(user_id) +
@@ -310,7 +310,7 @@ INSTANTDB_EXPORT int32_t get_user_activities(const char* user_id, int64_t since_
 // Module Lifecycle
 // =============================================================================
 
-INSTANTDB_INIT() {
+ORIGINDB_INIT() {
     utils::log(utils::LogLevel::Info, "Subscription module initialized");
 
     // Create some sample users for testing
@@ -332,12 +332,12 @@ INSTANTDB_INIT() {
     return 0;
 }
 
-INSTANTDB_CLIENT_CONNECTED() {
+ORIGINDB_CLIENT_CONNECTED() {
     utils::log(utils::LogLevel::Info, "Client connected to subscription module");
     return 0;
 }
 
-INSTANTDB_CLIENT_DISCONNECTED() {
+ORIGINDB_CLIENT_DISCONNECTED() {
     utils::log(utils::LogLevel::Info, "Client disconnected from subscription module");
     return 0;
 }

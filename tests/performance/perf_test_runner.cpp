@@ -9,11 +9,11 @@
 #include <string>
 #include <memory>
 
-using namespace instantdb::performance;
+using namespace origindb::performance;
 
 void PrintUsage() {
     std::cout << R"(
-InstantDB Performance Test Runner
+OriginDB Performance Test Runner
 
 Usage: perf_test_runner [OPTIONS] --test <TEST_TYPE>
 
@@ -251,7 +251,7 @@ int main(int argc, char* argv[]) {
         spdlog::set_level(spdlog::level::info);
     }
 
-    spdlog::info("🧪 InstantDB Performance Test Runner");
+    spdlog::info("🧪 OriginDB Performance Test Runner");
     spdlog::info("Test Type: {}", args.test_type);
     spdlog::info("Threads: {}, Duration: {}s, Warmup: {}s",
                  args.num_threads, args.duration_seconds, args.warmup_seconds);

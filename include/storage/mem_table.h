@@ -3,7 +3,7 @@
 #include "storage/table.h"
 #include <memory>
 
-namespace instantdb {
+namespace origindb {
 
 // In-memory table implementation
 class MemTable : public Table {
@@ -33,4 +33,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace instantdb
+} // namespace origindb

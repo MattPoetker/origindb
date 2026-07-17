@@ -8,7 +8,7 @@
 
 #include "common/config.h"
 
-namespace instantdb {
+namespace origindb {
 
 class StorageEngine;
 
@@ -118,4 +118,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace instantdb
+} // namespace origindb

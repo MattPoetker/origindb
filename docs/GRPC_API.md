@@ -2,11 +2,11 @@
 
 ## Overview
 
-InstantDB provides a high-performance gRPC API for executing SQL statements and managing the database. This API is designed for programmatic access and integration with other systems.
+OriginDB provides a high-performance gRPC API for executing SQL statements and managing the database. This API is designed for programmatic access and integration with other systems.
 
 ## Service Definition
 
-The gRPC services are defined in `proto/instantdb.proto`:
+The gRPC services are defined in `proto/origindb.proto`:
 
 ```protobuf
 service SQLService {
@@ -80,17 +80,17 @@ gRPC not found - building without gRPC support
 
 ```bash
 # Start server with custom gRPC port
-./instantdb_server -g 50052
+./origindb_server -g 50052
 
 # Start with both WebSocket and gRPC custom ports
-./instantdb_server -p 9090 -g 50052
+./origindb_server -p 9090 -g 50052
 ```
 
 ### Environment Variables
 
 ```bash
-export INSTANTDB_GRPC_PORT=50052
-./instantdb_server
+export ORIGINDB_GRPC_PORT=50052
+./origindb_server
 ```
 
 ### Default Configuration
@@ -208,44 +208,44 @@ restart; `UndeployModule` removes them.
 
 ### Command Line Client
 
-InstantDB includes a command-line gRPC client for testing and administration:
+OriginDB includes a command-line gRPC client for testing and administration:
 
 ```bash
 # Get server status
-./instantdb_client status
+./origindb_client status
 
 # Execute SQL statement
-./instantdb_client exec "CREATE TABLE users (id INT64 PRIMARY KEY, name STRING)"
-./instantdb_client exec "INSERT INTO users VALUES (1, 'Alice')"
-./instantdb_client exec "SELECT * FROM users"
+./origindb_client exec "CREATE TABLE users (id INT64 PRIMARY KEY, name STRING)"
+./origindb_client exec "INSERT INTO users VALUES (1, 'Alice')"
+./origindb_client exec "SELECT * FROM users"
 
 # Interactive mode
-./instantdb_client interactive
+./origindb_client interactive
 
 # WASM module management
-./instantdb_client deploy user_service ./module.wasm 1.0.0
-./instantdb_client modules
-./instantdb_client call user_service CreateUser '["Alice", "alice@example.com"]'
-./instantdb_client undeploy user_service
+./origindb_client deploy user_service ./module.wasm 1.0.0
+./origindb_client modules
+./origindb_client call user_service CreateUser '["Alice", "alice@example.com"]'
+./origindb_client undeploy user_service
 ```
 
 **Interactive Mode:**
 ```
-InstantDB Interactive SQL Client
+OriginDB Interactive SQL Client
 Connected to: localhost:50051
 Type 'exit' or 'quit' to exit
 
-instantdb> CREATE TABLE products (id INT64 PRIMARY KEY, name STRING)
+origindb> CREATE TABLE products (id INT64 PRIMARY KEY, name STRING)
 ✅ SQL executed successfully
 Execution time: 1234 μs
 Rows affected: 0
 
-instantdb> INSERT INTO products VALUES (1, 'Widget')
+origindb> INSERT INTO products VALUES (1, 'Widget')
 ✅ SQL executed successfully
 Execution time: 567 μs
 Rows affected: 1
 
-instantdb> SELECT * FROM products
+origindb> SELECT * FROM products
 ✅ SQL executed successfully
 Execution time: 234 μs
 Rows affected: 1
@@ -253,17 +253,17 @@ Rows affected: 1
 Results:
   Key: 1, id: 1, name: "Widget"
 
-instantdb> exit
+origindb> exit
 ```
 
 ### Custom Server Address
 
 ```bash
 # Connect to different server
-./instantdb_client -s server.example.com:50051 status
+./origindb_client -s server.example.com:50051 status
 
 # Connect to custom port
-./instantdb_client -s localhost:50052 exec "SELECT * FROM users"
+./origindb_client -s localhost:50052 exec "SELECT * FROM users"
 ```
 
 ## Programming Examples
@@ -272,25 +272,25 @@ instantdb> exit
 
 ```cpp
 #include <grpcpp/grpcpp.h>
-#include "instantdb.grpc.pb.h"
+#include "origindb.grpc.pb.h"
 
-class InstantDBClient {
+class OriginDBClient {
 private:
-    std::unique_ptr<instantdb::grpc::SQLService::Stub> stub_;
+    std::unique_ptr<origindb::grpc::SQLService::Stub> stub_;
 
 public:
-    InstantDBClient(const std::string& server_address) {
+    OriginDBClient(const std::string& server_address) {
         auto channel = grpc::CreateChannel(server_address,
                                          grpc::InsecureChannelCredentials());
-        stub_ = instantdb::grpc::SQLService::NewStub(channel);
+        stub_ = origindb::grpc::SQLService::NewStub(channel);
     }
 
     bool CreateTable(const std::string& table_name) {
-        instantdb::grpc::SQLRequest request;
+        origindb::grpc::SQLRequest request;
         request.set_sql("CREATE TABLE " + table_name +
                        " (id INT64 PRIMARY KEY, name STRING)");
 
-        instantdb::grpc::SQLResponse response;
+        origindb::grpc::SQLResponse response;
         grpc::ClientContext context;
 
         grpc::Status status = stub_->Execute(&context, request, &response);
@@ -298,11 +298,11 @@ public:
     }
 
     bool InsertUser(int64_t id, const std::string& name) {
-        instantdb::grpc::SQLRequest request;
+        origindb::grpc::SQLRequest request;
         request.set_sql("INSERT INTO users VALUES (" +
                        std::to_string(id) + ", '" + name + "')");
 
-        instantdb::grpc::SQLResponse response;
+        origindb::grpc::SQLResponse response;
         grpc::ClientContext context;
 
         grpc::Status status = stub_->Execute(&context, request, &response);
@@ -312,10 +312,10 @@ public:
     std::vector<std::pair<int64_t, std::string>> GetAllUsers() {
         std::vector<std::pair<int64_t, std::string>> users;
 
-        instantdb::grpc::SQLRequest request;
+        origindb::grpc::SQLRequest request;
         request.set_sql("SELECT * FROM users");
 
-        instantdb::grpc::SQLResponse response;
+        origindb::grpc::SQLResponse response;
         grpc::ClientContext context;
 
         grpc::Status status = stub_->Execute(&context, request, &response);
@@ -345,7 +345,7 @@ public:
 
 // Usage
 int main() {
-    InstantDBClient client("localhost:50051");
+    OriginDBClient client("localhost:50051");
 
     // Create table
     if (!client.CreateTable("users")) {
@@ -371,16 +371,16 @@ int main() {
 
 ```python
 import grpc
-import instantdb_pb2
-import instantdb_pb2_grpc
+import origindb_pb2
+import origindb_pb2_grpc
 
-class InstantDBClient:
+class OriginDBClient:
     def __init__(self, server_address="localhost:50051"):
         self.channel = grpc.insecure_channel(server_address)
-        self.stub = instantdb_pb2_grpc.SQLServiceStub(self.channel)
+        self.stub = origindb_pb2_grpc.SQLServiceStub(self.channel)
 
     def execute_sql(self, sql):
-        request = instantdb_pb2.SQLRequest(sql=sql)
+        request = origindb_pb2.SQLRequest(sql=sql)
         try:
             response = self.stub.Execute(request)
             return response
@@ -389,7 +389,7 @@ class InstantDBClient:
             return None
 
     def get_status(self):
-        request = instantdb_pb2.StatusRequest()
+        request = origindb_pb2.StatusRequest()
         try:
             response = self.stub.GetStatus(request)
             return response
@@ -398,7 +398,7 @@ class InstantDBClient:
             return None
 
 # Usage
-client = InstantDBClient()
+client = OriginDBClient()
 
 # Create table
 response = client.execute_sql("CREATE TABLE users (id INT64 PRIMARY KEY, name STRING)")
@@ -457,7 +457,7 @@ if response and response.success:
    // Reuse connections
    auto channel = grpc::CreateChannel(server_address,
                                     grpc::InsecureChannelCredentials());
-   auto stub = instantdb::grpc::SQLService::NewStub(channel);
+   auto stub = origindb::grpc::SQLService::NewStub(channel);
    ```
 
 2. **Error Checking**
@@ -499,12 +499,12 @@ if response and response.success:
 1. **Batch Operations**
    ```cpp
    // Instead of multiple Execute calls
-   instantdb::grpc::SQLTransactionRequest request;
+   origindb::grpc::SQLTransactionRequest request;
    request.add_sql_statements("INSERT INTO users VALUES (1, 'Alice')");
    request.add_sql_statements("INSERT INTO users VALUES (2, 'Bob')");
    request.add_sql_statements("INSERT INTO users VALUES (3, 'Charlie')");
 
-   instantdb::grpc::SQLTransactionResponse response;
+   origindb::grpc::SQLTransactionResponse response;
    stub->ExecuteTransaction(&context, request, &response);
    ```
 
@@ -512,12 +512,12 @@ if response and response.success:
    ```cpp
    // Create once, use many times
    class DatabaseManager {
-       std::unique_ptr<instantdb::grpc::SQLService::Stub> stub_;
+       std::unique_ptr<origindb::grpc::SQLService::Stub> stub_;
    public:
        DatabaseManager() {
            auto channel = grpc::CreateChannel("localhost:50051",
                                             grpc::InsecureChannelCredentials());
-           stub_ = instantdb::grpc::SQLService::NewStub(channel);
+           stub_ = origindb::grpc::SQLService::NewStub(channel);
        }
    };
    ```
@@ -544,7 +544,7 @@ For production use, consider:
 1. **Network Security**
    ```bash
    # Bind to localhost only
-   ./instantdb_server -g 127.0.0.1:50051
+   ./origindb_server -g 127.0.0.1:50051
    ```
 
 2. **Firewall Rules**
@@ -592,7 +592,7 @@ protoc --version
 netstat -tuln | grep 50051
 
 # Check server logs
-./instantdb_server -l debug
+./origindb_server -l debug
 ```
 
 **Connection Refused:**
@@ -632,10 +632,10 @@ ws.send(JSON.stringify({
 
 **gRPC (Protobuf) — execute statements:**
 ```cpp
-instantdb::grpc::SQLRequest request;
+origindb::grpc::SQLRequest request;
 request.set_sql("SELECT * FROM users");
 
-instantdb::grpc::SQLResponse response;
+origindb::grpc::SQLResponse response;
 stub->Execute(&context, request, &response);
 ```
 

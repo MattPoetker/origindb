@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to InstantDB will be documented in this file.
+All notable changes to OriginDB will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   by CMake). Modules are compiled and structurally validated at deploy, imports are
   allow-listed (`env.host_*` + WASI preview 1), and required exports are enforced.
   The module ABI is documented in `docs/WASM_ABI.md` (single-dispatch
-  `instantdb_invoke`, guest allocator, `host_set_result` payloads).
+  `origindb_invoke`, guest allocator, `host_set_result` payloads).
 - **Host API implementation**: `host_table_read/write/delete/scan` (staged-write
   overlay with read-your-writes), `host_emit_event` (published post-commit),
   `host_now_ms` (fixed per call), `host_generate_id`, `host_log`, `host_abort`,
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   predicate AST and evaluated per event (comparisons, `AND`/`OR`/`NOT`, parentheses,
   `LIKE`, `IS [NOT] NULL`). Invalid predicates reject the subscription with an error.
 - **Changefeed `old_value`**: UPDATE/DELETE events now carry the previous row.
-- `instantdb_client` subcommands: `deploy`, `undeploy`, `modules`, `call`.
+- `origindb_client` subcommands: `deploy`, `undeploy`, `modules`, `call`.
 - Unit tests (googletest): WASM engine (WAT fixtures), predicate evaluator,
   module store. `scripts/e2e_verify.sh` covers deploy → execute → SQL → filtered
   websocket delivery → restart persistence → undeploy.
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (plain-text fakes) removed.
 - **BREAKING**: changefeed events are emitted once per write (by the storage commit);
   the duplicate SQL-layer emission was removed. Event counts halve for SQL writes.
-- `instantdb publish` deploys through the bundled `instantdb_client` (grpcurl no
+- `origindb publish` deploys through the bundled `origindb_client` (grpcurl no
   longer required) and supports AssemblyScript projects alongside C#.
 - gRPC WASM service returns real status codes (INVALID_ARGUMENT/NOT_FOUND/INTERNAL)
   and honest module metadata (version, sha256, deployed_at).
@@ -125,9 +125,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reliability**: WAL-based crash recovery with data integrity validation
 
 ### Configuration Options
-- WebSocket port configuration (CLI: `-p`, `--port`, env: `INSTANTDB_WS_PORT`)
-- Data directory configuration (CLI: `-d`, `--data-dir`, env: `INSTANTDB_DATA_DIR`)
-- Log level configuration (CLI: `-l`, `--log-level`, env: `INSTANTDB_LOG_LEVEL`)
+- WebSocket port configuration (CLI: `-p`, `--port`, env: `ORIGINDB_WS_PORT`)
+- Data directory configuration (CLI: `-d`, `--data-dir`, env: `ORIGINDB_DATA_DIR`)
+- Log level configuration (CLI: `-l`, `--log-level`, env: `ORIGINDB_LOG_LEVEL`)
 - Help system (CLI: `-h`, `--help`)
 
 ### Known Limitations
@@ -150,8 +150,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ```
 instant_db/
 ├── src/
-│   ├── cmd/instantdb_demo.cpp          # Interactive demo application
-│   ├── cmd/instantdb_server.cpp        # Production server
+│   ├── cmd/origindb_demo.cpp          # Interactive demo application
+│   ├── cmd/origindb_server.cpp        # Production server
 │   ├── storage/storage_engine.cpp      # Core storage implementation
 │   ├── storage/wal_impl.cpp            # Write-ahead log
 │   ├── sql/sql_engine.cpp              # SQL parser and executor

@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
-using instantdb::PredicateEvaluator;
+using origindb::PredicateEvaluator;
 using nlohmann::json;
 
 namespace {

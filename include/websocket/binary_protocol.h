@@ -8,7 +8,7 @@
 #include <variant>
 #include <memory>
 
-namespace instantdb {
+namespace origindb {
 namespace websocket {
 
 // Binary Protocol Format:
@@ -238,4 +238,4 @@ public:
 };
 
 } // namespace websocket
-} // namespace instantdb
+} // namespace origindb

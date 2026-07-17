@@ -4,7 +4,7 @@
 #include "common/config.h"
 #include <memory>
 
-namespace instantdb {
+namespace origindb {
 
 // Simple WAL implementation for prototype
 class WALImpl : public WAL {
@@ -25,4 +25,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace instantdb
+} // namespace origindb

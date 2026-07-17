@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace InstantDB.Client
+namespace OriginDB.Client
 {
     /// <summary>
-    /// Game session data model for InstantDB integration.
+    /// Game session data model for OriginDB integration.
     /// Represents a multiplayer game session with players and game state.
     /// </summary>
     [Serializable]

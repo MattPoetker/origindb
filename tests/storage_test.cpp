@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 #include "storage/storage_engine.h"
 
-using namespace instantdb;
+using namespace origindb;
 
 class StorageEngineTest : public ::testing::Test {
 protected:
     void SetUp() override {
         StorageConfig config;
-        config.data_dir = "/tmp/instantdb_test";
+        config.data_dir = "/tmp/origindb_test";
         engine = std::make_unique<StorageEngine>(config);
         ASSERT_TRUE(engine->Initialize());
     }

@@ -73,10 +73,10 @@ target_compile_features(websocket_perf_tests PRIVATE cxx_std_17)
 set(ENABLE_GRPC_TESTS OFF)
 
 # Regression benchmark suite (fixed op counts, JSON baselines)
-add_executable(instantdb_bench
-    instantdb_bench.cpp
+add_executable(origindb_bench
+    origindb_bench.cpp
 )
-target_link_libraries(instantdb_bench
+target_link_libraries(origindb_bench
     storage
     changefeed_engine
     wasm_engine
@@ -85,7 +85,7 @@ target_link_libraries(instantdb_bench
     nlohmann_json::nlohmann_json
     Threads::Threads
 )
-target_compile_features(instantdb_bench PRIVATE cxx_std_20)
+target_compile_features(origindb_bench PRIVATE cxx_std_20)
 
 # Main performance test runner executable
 add_executable(perf_test_runner

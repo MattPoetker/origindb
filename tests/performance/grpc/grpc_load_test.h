@@ -2,7 +2,7 @@
 
 #include "../framework/performance_test.h"
 #include <grpcpp/grpcpp.h>
-#include "instantdb.grpc.pb.h"
+#include "origindb.grpc.pb.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,7 +10,7 @@
 #include <queue>
 #include <mutex>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // gRPC client configuration
@@ -48,24 +48,24 @@ public:
     bool IsConnected() const;
 
     // SQL service methods
-    bool ExecuteSQL(const std::string& query, instantdb::grpc::SQLResponse* response);
+    bool ExecuteSQL(const std::string& query, origindb::grpc::SQLResponse* response);
     bool ExecuteTransaction(const std::vector<std::string>& queries,
-                          instantdb::grpc::SQLTransactionResponse* response);
-    bool GetServerStatus(instantdb::grpc::StatusResponse* response);
+                          origindb::grpc::SQLTransactionResponse* response);
+    bool GetServerStatus(origindb::grpc::StatusResponse* response);
 
     // WASM service methods
     bool DeployModule(const std::string& module_name,
                      const std::vector<uint8_t>& bytecode,
-                     instantdb::grpc::DeployModuleResponse* response);
+                     origindb::grpc::DeployModuleResponse* response);
     bool UndeployModule(const std::string& module_name,
-                       instantdb::grpc::UndeployModuleResponse* response);
-    bool ListModules(instantdb::grpc::ListModulesResponse* response);
+                       origindb::grpc::UndeployModuleResponse* response);
+    bool ListModules(origindb::grpc::ListModulesResponse* response);
     bool GetModule(const std::string& module_name,
-                  instantdb::grpc::GetModuleResponse* response);
+                  origindb::grpc::GetModuleResponse* response);
     bool ExecuteReducer(const std::string& module_name,
                        const std::string& reducer_name,
-                       const std::vector<instantdb::grpc::WasmValue>& args,
-                       instantdb::grpc::ExecuteReducerResponse* response);
+                       const std::vector<origindb::grpc::WasmValue>& args,
+                       origindb::grpc::ExecuteReducerResponse* response);
 
     // Statistics
     uint64_t GetRequestsSent() const { return requests_sent_.load(); }
@@ -77,8 +77,8 @@ private:
     GrpcClientConfig config_;
     uint32_t client_id_;
     std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<instantdb::grpc::SQLService::Stub> sql_stub_;
-    std::unique_ptr<instantdb::grpc::WasmService::Stub> wasm_stub_;
+    std::unique_ptr<origindb::grpc::SQLService::Stub> sql_stub_;
+    std::unique_ptr<origindb::grpc::WasmService::Stub> wasm_stub_;
     std::atomic<bool> connected_{false};
 
     // Statistics
@@ -114,7 +114,7 @@ protected:
 
     // WASM helper methods
     std::vector<uint8_t> GenerateTestWasmBytecode(const std::string& module_name);
-    std::vector<instantdb::grpc::WasmValue> GenerateTestReducerArgs();
+    std::vector<origindb::grpc::WasmValue> GenerateTestReducerArgs();
 };
 
 // SQL query performance test
@@ -233,7 +233,7 @@ public:
 
 private:
     uint32_t polling_interval_ms_;
-    std::vector<instantdb::grpc::StatusResponse> status_snapshots_;
+    std::vector<origindb::grpc::StatusResponse> status_snapshots_;
     std::mutex snapshots_mutex_;
 
     void MonitorServerStatus(uint32_t thread_id);
@@ -336,4 +336,4 @@ public:
 };
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

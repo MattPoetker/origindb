@@ -2,10 +2,10 @@
 using UnityEngine;
 using System;
 
-namespace InstantDB.Client
+namespace OriginDB.Client
 {
     /// <summary>
-    /// Player data model for InstantDB integration.
+    /// Player data model for OriginDB integration.
     /// Represents a player in the game with position, health, and other game state.
     /// </summary>
     [Serializable]

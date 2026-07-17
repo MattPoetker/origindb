@@ -1,8 +1,8 @@
-# InstantDB Feature Specification
+# OriginDB Feature Specification
 
 ## Overview
 
-InstantDB is a real-time, programmable database with WebAssembly (WASM) support and automatic change detection. It combines the developer experience of SpacetimeDB with real-time streaming capabilities similar to Supabase.
+OriginDB is a real-time, programmable database with WebAssembly (WASM) support and automatic change detection. It combines the developer experience of SpacetimeDB with real-time streaming capabilities similar to Supabase.
 
 ## 🎯 Core Features (Implemented)
 
@@ -95,7 +95,7 @@ public static byte[] TransformAnonymize(byte[] eventData) {
 
 **Client API:**
 ```javascript
-const client = new InstantDBClient('ws://localhost:8080');
+const client = new OriginDBClient('ws://localhost:8080');
 await client.connect();
 
 // Subscribe with WASM filtering
@@ -120,9 +120,9 @@ await client.subscribeToPremiumUsers((data) => {
 **gRPC SQL Service:**
 ```bash
 # SQL operations automatically trigger changefeed events
-grpcurl -plaintext -import-path proto -proto instantdb.proto \
+grpcurl -plaintext -import-path proto -proto origindb.proto \
   -d '{"sql": "INSERT INTO users VALUES (1, \"Alice\")"}' \
-  localhost:50051 instantdb.grpc.SqlService.ExecuteSQL
+  localhost:50051 origindb.grpc.SqlService.ExecuteSQL
 ```
 
 **Features:**
@@ -162,7 +162,7 @@ grpcurl -plaintext -import-path proto -proto instantdb.proto \
 
 ## 📚 SDK Support
 
-### C# SDK (`InstantDB.cs`)
+### C# SDK (`OriginDB.cs`)
 - Complete SpacetimeDB-like API
 - Attributes: `[Table]`, `[PrimaryKey]`, `[Reducer]`, `[SubscriptionFilter]`
 - Type-safe database operations
@@ -208,15 +208,15 @@ public static int CreateUser(ReducerContext ctx, string name, bool premium) {
 # Build WASM module
 dotnet publish UserModule.cs -c Release
 
-# Deploy to InstantDB
-grpcurl -plaintext -import-path proto -proto instantdb.proto \
+# Deploy to OriginDB
+grpcurl -plaintext -import-path proto -proto origindb.proto \
   -d '{"name": "user_module", "bytecode": "'$(base64 < UserModule.wasm)'"}' \
-  localhost:50051 instantdb.grpc.WasmService.DeployModule
+  localhost:50051 origindb.grpc.WasmService.DeployModule
 ```
 
 ### 4. Connect Clients
 ```javascript
-const client = new InstantDBClient('ws://localhost:8080');
+const client = new OriginDBClient('ws://localhost:8080');
 await client.connect();
 
 // Real-time updates
@@ -321,4 +321,4 @@ client.on('user_created', (user) => {
 
 ---
 
-**InstantDB** - Real-time, programmable database with WebAssembly 🚀
+**OriginDB** - Real-time, programmable database with WebAssembly 🚀

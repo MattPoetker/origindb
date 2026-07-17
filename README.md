@@ -1,4 +1,4 @@
-# InstantDB 🚀
+# OriginDB 🚀
 
 A realtime WebSocket database with **user-programmable WASM modules**. Clients
 subscribe to a *filtered subset* of authoritative server changes — no client
@@ -6,7 +6,7 @@ ever has to listen to the whole firehose — and application logic runs *inside*
 the database as sandboxed WebAssembly reducers.
 
 ```
-   browser / app                      InstantDB server                      disk
+   browser / app                      OriginDB server                      disk
 ┌───────────────┐   gRPC call    ┌──────────────────────┐
 │ call reducer ─┼───────────────▶│  WASM engine         │
 │               │                │  (wasmtime sandbox)  │
@@ -32,8 +32,8 @@ and a filtered changefeed before landing on the other screen.
 
 ```bash
 # 1. build (see Quick Start below), then:
-build_new/instantdb_server -d ./nightboard_data -p 8787 -g 50051 &
-build_new/instantdb_client deploy collab sdk/typescript/build/collab.wasm 1.0.0
+build_new/origindb_server -d ./nightboard_data -p 8787 -g 50051 &
+build_new/origindb_client deploy collab sdk/typescript/build/collab.wasm 1.0.0
 
 # 2. start the web frontend
 cd examples/collab && npm install && node server.js --ws-port 8787 &
@@ -51,7 +51,7 @@ module ([`sdk/typescript/examples/collab/index.ts`](sdk/typescript/examples/coll
 The web page holds no state of its own — it is a pure subscriber. The tiny
 node server ([`examples/collab/server.js`](examples/collab/server.js)) exists
 only because browsers can't speak raw gRPC; realtime data flows straight from
-InstantDB's websocket to the page.
+OriginDB's websocket to the page.
 
 ## 🏗️ How the architecture works
 
@@ -61,7 +61,7 @@ Clients don't mutate tables directly. They call named **reducers** —
 functions exported by a WASM module you deploy into the server:
 
 ```
-instantdb_client call collab addNote '["Ada", "#ffc24b", 0.31, 0.42, "hello"]'
+origindb_client call collab addNote '["Ada", "#ffc24b", 0.31, 0.42, "hello"]'
 ```
 
 The engine (wasmtime, LTS C API) runs the reducer in a sandbox:
@@ -133,13 +133,13 @@ build_new/unit_tests           # 53 tests: engine, predicate evaluator, module s
 Run a server and poke it:
 
 ```bash
-build_new/instantdb_server -d ./data -p 8787 -g 50051
+build_new/origindb_server -d ./data -p 8787 -g 50051
 
-build_new/instantdb_client status
-build_new/instantdb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
-build_new/instantdb_client call todo addTodo '["ship it"]'
-build_new/instantdb_client call todo listTodos
-build_new/instantdb_client exec "SELECT * FROM todos"
+build_new/origindb_client status
+build_new/origindb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
+build_new/origindb_client call todo addTodo '["ship it"]'
+build_new/origindb_client call todo listTodos
+build_new/origindb_client exec "SELECT * FROM todos"
 ```
 
 ## 🛠️ Writing modules
@@ -150,8 +150,8 @@ build_new/instantdb_client exec "SELECT * FROM todos"
 | **C#** | [`sdk/csharp/`](sdk/csharp/) | ⚠️ compiles against the ABI; .NET 8 `wasi-experimental` export support is flaky upstream — see the SDK README |
 | C++ | [`sdk/cpp/`](sdk/cpp/) | header available; not yet aligned to ABI v1 |
 
-Scaffold a project with `instantdb init` (templates: `typescript`, `csharp`,
-`unity`, `nodejs`) and ship it with `instantdb publish`. Guides:
+Scaffold a project with `origindb init` (templates: `typescript`, `csharp`,
+`unity`, `nodejs`) and ship it with `origindb publish`. Guides:
 [`WASM_MODULES.md`](WASM_MODULES.md), [`CLI_GUIDE.md`](CLI_GUIDE.md),
 [`docs/WASM_ABI.md`](docs/WASM_ABI.md).
 

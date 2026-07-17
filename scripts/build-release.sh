@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# InstantDB Release Build Script
-# Builds and packages InstantDB for multiple platforms
+# OriginDB Release Build Script
+# Builds and packages OriginDB for multiple platforms
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -26,7 +26,7 @@ usage() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-Build and package InstantDB for distribution.
+Build and package OriginDB for distribution.
 
 OPTIONS:
     -p, --platform PLATFORM    Target platform (linux, macos, windows, all)
@@ -149,7 +149,7 @@ build_platform() {
     local arch=$2
     local build_subdir="$BUILD_DIR/${platform}-${arch}"
 
-    log_info "Building InstantDB for $platform-$arch..."
+    log_info "Building OriginDB for $platform-$arch..."
 
     mkdir -p "$build_subdir"
     cd "$build_subdir"
@@ -197,7 +197,7 @@ build_platform() {
     cmake "$PROJECT_DIR" "${cmake_args[@]}"
 
     # Build
-    log_info "Building InstantDB for $platform-$arch..."
+    log_info "Building OriginDB for $platform-$arch..."
     if [ "$platform" = "windows" ]; then
         cmake --build . --config Release --parallel $JOBS
     else
@@ -221,14 +221,14 @@ create_package() {
     case "$type" in
         binary)
             # Create binary archive
-            local archive_name="instantdb-${platform}-${arch}"
+            local archive_name="origindb-${platform}-${arch}"
             mkdir -p "$archive_name"
 
             # Copy binaries
             if [ "$platform" = "windows" ]; then
                 cp Release/*.exe "$archive_name/"
             else
-                cp instantdb* "$archive_name/"
+                cp origindb* "$archive_name/"
             fi
 
             # Copy documentation

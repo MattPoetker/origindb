@@ -5,16 +5,16 @@
 #include <nlohmann/json.hpp>
 
 // Include protobuf headers
-#include "instantdb.grpc.pb.h"
+#include "origindb.grpc.pb.h"
 
-namespace instantdb {
+namespace origindb {
 
 namespace {
 
 constexpr size_t kMaxModuleBytes = 64 * 1024 * 1024;
 
 ModuleCapabilities CapabilitiesFromProto(
-    const instantdb::grpc::ModuleCapabilities& proto) {
+    const origindb::grpc::ModuleCapabilities& proto) {
     ModuleCapabilities caps;
     for (const auto& t : proto.allowed_tables()) caps.allowed_tables.push_back(t);
     caps.read_only = proto.read_only();
@@ -33,8 +33,8 @@ void* WasmServiceImpl::DeployModule(void* context,
                                     const void* request,
                                     void* response) {
     (void)context;
-    auto deploy_request = static_cast<const instantdb::grpc::DeployModuleRequest*>(request);
-    auto deploy_response = static_cast<instantdb::grpc::DeployModuleResponse*>(response);
+    auto deploy_request = static_cast<const origindb::grpc::DeployModuleRequest*>(request);
+    auto deploy_response = static_cast<origindb::grpc::DeployModuleResponse*>(response);
 
     static thread_local ::grpc::Status status;
 
@@ -110,8 +110,8 @@ void* WasmServiceImpl::UndeployModule(void* context,
                                       const void* request,
                                       void* response) {
     (void)context;
-    auto undeploy_request = static_cast<const instantdb::grpc::UndeployModuleRequest*>(request);
-    auto undeploy_response = static_cast<instantdb::grpc::UndeployModuleResponse*>(response);
+    auto undeploy_request = static_cast<const origindb::grpc::UndeployModuleRequest*>(request);
+    auto undeploy_response = static_cast<origindb::grpc::UndeployModuleResponse*>(response);
 
     static thread_local ::grpc::Status status;
 
@@ -145,7 +145,7 @@ void* WasmServiceImpl::ListModules(void* context,
                                    void* response) {
     (void)context;
     (void)request;
-    auto list_response = static_cast<instantdb::grpc::ListModulesResponse*>(response);
+    auto list_response = static_cast<origindb::grpc::ListModulesResponse*>(response);
 
     static thread_local ::grpc::Status status;
 
@@ -183,8 +183,8 @@ void* WasmServiceImpl::GetModule(void* context,
                                  const void* request,
                                  void* response) {
     (void)context;
-    auto get_request = static_cast<const instantdb::grpc::GetModuleRequest*>(request);
-    auto get_response = static_cast<instantdb::grpc::GetModuleResponse*>(response);
+    auto get_request = static_cast<const origindb::grpc::GetModuleRequest*>(request);
+    auto get_response = static_cast<origindb::grpc::GetModuleResponse*>(response);
 
     static thread_local ::grpc::Status status;
 
@@ -235,8 +235,8 @@ void* WasmServiceImpl::ExecuteReducer(void* context,
                                       const void* request,
                                       void* response) {
     (void)context;
-    auto exec_request = static_cast<const instantdb::grpc::ExecuteReducerRequest*>(request);
-    auto exec_response = static_cast<instantdb::grpc::ExecuteReducerResponse*>(response);
+    auto exec_request = static_cast<const origindb::grpc::ExecuteReducerRequest*>(request);
+    auto exec_response = static_cast<origindb::grpc::ExecuteReducerResponse*>(response);
 
     static thread_local ::grpc::Status status;
 
@@ -248,19 +248,19 @@ void* WasmServiceImpl::ExecuteReducer(void* context,
         std::vector<WasmValue> args;
         for (const auto& arg : exec_request->args()) {
             switch (arg.value_case()) {
-                case instantdb::grpc::WasmValue::kBoolValue:
+                case origindb::grpc::WasmValue::kBoolValue:
                     args.push_back(arg.bool_value());
                     break;
-                case instantdb::grpc::WasmValue::kInt64Value:
+                case origindb::grpc::WasmValue::kInt64Value:
                     args.push_back(arg.int64_value());
                     break;
-                case instantdb::grpc::WasmValue::kStringValue:
+                case origindb::grpc::WasmValue::kStringValue:
                     args.push_back(arg.string_value());
                     break;
-                case instantdb::grpc::WasmValue::kDoubleValue:
+                case origindb::grpc::WasmValue::kDoubleValue:
                     args.push_back(arg.double_value());
                     break;
-                case instantdb::grpc::WasmValue::kBytesValue:
+                case origindb::grpc::WasmValue::kBytesValue:
                     args.push_back(std::vector<uint8_t>(arg.bytes_value().begin(),
                                                         arg.bytes_value().end()));
                     break;
@@ -329,4 +329,4 @@ void* WasmServiceImpl::ExecuteReducer(void* context,
     return &status;
 }
 
-} // namespace instantdb
+} // namespace origindb

@@ -9,7 +9,7 @@
 #include <atomic>
 #include "storage/table.h"
 
-namespace instantdb {
+namespace origindb {
 
 class StorageEngine;
 class ChangefeedEngine;
@@ -155,4 +155,4 @@ struct WasmEngineConfig {
     bool enable_debug = false;
 };
 
-} // namespace instantdb
+} // namespace origindb

@@ -1,4 +1,4 @@
-# InstantDB for Unity
+# OriginDB for Unity
 
 Real-time database integration for Unity with WebAssembly module support. Build multiplayer games with seamless data synchronization.
 
@@ -20,15 +20,15 @@ Real-time database integration for Unity with WebAssembly module support. Build 
 **Option A: Unity Package Manager (Recommended)**
 1. Open Unity Package Manager
 2. Click "+" → "Add package from git URL"
-3. Enter: `https://github.com/your-org/instantdb-unity.git`
+3. Enter: `https://github.com/your-org/origindb-unity.git`
 
 **Option B: Download Package**
-1. Download `InstantDB.Unity.unitypackage` from [releases](https://github.com/your-org/instantdb/releases)
+1. Download `OriginDB.Unity.unitypackage` from [releases](https://github.com/your-org/origindb/releases)
 2. Import into your Unity project
 
 ### 2. Setup Scene
 
-1. **Add Network Manager**: Create an empty GameObject and add the `InstantDBNetworkManager` component
+1. **Add Network Manager**: Create an empty GameObject and add the `OriginDBNetworkManager` component
 2. **Configure Connection**: Set your server URL and module name in the inspector
 3. **Add Game Manager**: Create your game manager script (see example below)
 
@@ -36,17 +36,17 @@ Real-time database integration for Unity with WebAssembly module support. Build 
 
 ```csharp
 using UnityEngine;
-using InstantDB.Unity;
-using InstantDB.Client;
+using OriginDB.Unity;
+using OriginDB.Client;
 
 public class GameManager : MonoBehaviour
 {
-    private IInstantDBConnection connection;
+    private IOriginDBConnection connection;
 
     async void Start()
     {
         // Get connection from network manager
-        connection = InstantDBNetworkManager.Instance.CreateDefaultConnection();
+        connection = OriginDBNetworkManager.Instance.CreateDefaultConnection();
 
         // Subscribe to events
         connection.OnPlayerInsert += HandlePlayerJoined;
@@ -73,7 +73,7 @@ public class GameManager : MonoBehaviour
 
 ## 📋 Components
 
-### InstantDBNetworkManager
+### OriginDBNetworkManager
 
 The core component that manages connections and integrates with Unity's lifecycle.
 
@@ -90,7 +90,7 @@ The core component that manages connections and integrates with Unity's lifecycl
 - **Auto Reconnect**: Reconnect on connection loss
 - **Debug Logging**: Enable debug output
 
-### InstantDBConfig (ScriptableObject)
+### OriginDBConfig (ScriptableObject)
 
 Configuration asset for storing connection settings across environments.
 
@@ -100,7 +100,7 @@ Configuration asset for storing connection settings across environments.
 - Production
 
 **Create Config Asset:**
-Right-click in Project → Create → InstantDB → Configuration
+Right-click in Project → Create → OriginDB → Configuration
 
 ## 🔌 Connection Management
 
@@ -108,20 +108,20 @@ Right-click in Project → Create → InstantDB → Configuration
 
 ```csharp
 // Use default configuration
-var connection = InstantDBNetworkManager.Instance.CreateDefaultConnection();
+var connection = OriginDBNetworkManager.Instance.CreateDefaultConnection();
 
 // Use custom options
-var options = new InstantDBConnectionOptions
+var options = new OriginDBConnectionOptions
 {
     ServerUrl = "http://localhost:8080",  // Automatically converted to ws://localhost:8080
     ModuleName = "mygame",
     AutoReconnect = true,
     MaxReconnectAttempts = 5
 };
-var connection = InstantDBNetworkManager.Instance.CreateConnection(options);
+var connection = OriginDBNetworkManager.Instance.CreateConnection(options);
 
 // Use ScriptableObject config
-var connection = InstantDBNetworkManager.Instance.CreateConnection(config.CreateConnectionOptions());
+var connection = OriginDBNetworkManager.Instance.CreateConnection(config.CreateConnectionOptions());
 ```
 
 ### Connection Events
@@ -203,7 +203,7 @@ public class PlayerManager : MonoBehaviour
 
     void Start()
     {
-        var connection = InstantDBNetworkManager.Instance.CreateDefaultConnection();
+        var connection = OriginDBNetworkManager.Instance.CreateDefaultConnection();
         connection.OnPlayerInsert += SpawnPlayer;
         connection.OnPlayerUpdate += UpdatePlayer;
         connection.OnPlayerDelete += DespawnPlayer;
@@ -293,7 +293,7 @@ config.enableDebugLogging = false;
 ### Performance Tuning
 
 ```csharp
-var options = new InstantDBConnectionOptions
+var options = new OriginDBConnectionOptions
 {
     // Network settings
     ConnectionTimeout = TimeSpan.FromSeconds(30),
@@ -329,7 +329,7 @@ Debug.Log($"Connected: {connection.IsConnected}");
 Debug.Log($"State: {connection.State}");
 
 // Get connection statistics
-var stats = InstantDBNetworkManager.Instance.GetConnectionStats();
+var stats = OriginDBNetworkManager.Instance.GetConnectionStats();
 Debug.Log($"Total connections: {stats["TotalConnections"]}");
 Debug.Log($"Connected: {stats["ConnectedCount"]}");
 ```
@@ -338,7 +338,7 @@ Debug.Log($"Connected: {stats["ConnectedCount"]}");
 
 **Connection Fails**
 - Check server URL format (must start with ws:// or wss://)
-- Verify InstantDB server is running
+- Verify OriginDB server is running
 - Check firewall/network settings
 
 **Events Not Firing**
@@ -353,10 +353,10 @@ Debug.Log($"Connected: {stats["ConnectedCount"]}");
 
 ## 📚 API Reference
 
-### IInstantDBConnection
+### IOriginDBConnection
 
 ```csharp
-interface IInstantDBConnection
+interface IOriginDBConnection
 {
     // Properties
     string ServerUrl { get; }
@@ -411,10 +411,10 @@ Check the `Samples~` folder for complete examples:
 
 ## 🆘 Support
 
-- **Documentation**: [https://docs.instantdb.com/unity](https://docs.instantdb.com/unity)
-- **GitHub Issues**: [Report bugs](https://github.com/your-org/instantdb/issues)
-- **Discord**: [Join community](https://discord.gg/instantdb)
-- **Email**: [support@instantdb.com](mailto:support@instantdb.com)
+- **Documentation**: [https://docs.origindb.com/unity](https://docs.origindb.com/unity)
+- **GitHub Issues**: [Report bugs](https://github.com/your-org/origindb/issues)
+- **Discord**: [Join community](https://discord.gg/origindb)
+- **Email**: [support@origindb.com](mailto:support@origindb.com)
 
 ## 📄 License
 
@@ -422,4 +422,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Build amazing real-time multiplayer games with InstantDB! 🚀🎮**
+**Build amazing real-time multiplayer games with OriginDB! 🚀🎮**

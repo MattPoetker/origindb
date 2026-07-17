@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare two instantdb_bench JSON reports.
+"""Compare two origindb_bench JSON reports.
 
 Usage: bench_compare.py baseline.json current.json [--threshold 10]
 

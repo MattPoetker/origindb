@@ -15,12 +15,12 @@
 #include <thread>
 #include <unordered_map>
 
-namespace instantdb {
+namespace origindb {
 
 namespace {
 
-constexpr const char* kRequiredExports[] = {"memory", "instantdb_invoke",
-                                            "instantdb_alloc"};
+constexpr const char* kRequiredExports[] = {"memory", "origindb_invoke",
+                                            "origindb_alloc"};
 
 const std::unordered_map<std::string, int> kKnownEnvImports = {
     {"host_table_read", 0},  {"host_table_write", 0}, {"host_table_delete", 0},
@@ -452,21 +452,21 @@ private:
         }
         impl.memory = item.of.memory;
 
-        if (!get_func("instantdb_invoke", &impl.fn_invoke)) {
-            error = "module does not export instantdb_invoke";
+        if (!get_func("origindb_invoke", &impl.fn_invoke)) {
+            error = "module does not export origindb_invoke";
             return false;
         }
-        if (!get_func("instantdb_alloc", &impl.fn_alloc)) {
-            error = "module does not export instantdb_alloc";
+        if (!get_func("origindb_alloc", &impl.fn_alloc)) {
+            error = "module does not export origindb_alloc";
             return false;
         }
-        impl.has_free = get_func("instantdb_free", &impl.fn_free);
-        impl.has_describe = get_func("instantdb_describe", &impl.fn_describe);
+        impl.has_free = get_func("origindb_free", &impl.fn_free);
+        impl.has_describe = get_func("origindb_describe", &impl.fn_describe);
         impl.has_initialize = get_func("_initialize", &impl.fn_initialize);
         return true;
     }
 
-    // Writes a buffer into guest memory via instantdb_alloc. Returns false on
+    // Writes a buffer into guest memory via origindb_alloc. Returns false on
     // allocation failure.
     bool WriteGuestBuffer(WasmModuleImpl& impl, wasmtime_context_t* ctx,
                           const std::string& data, uint32_t& ptr_out) {
@@ -562,7 +562,7 @@ private:
         uint8_t* base = wasmtime_memory_data(ctx, &impl->memory);
         size_t size = wasmtime_memory_data_size(ctx, &impl->memory);
         if (static_cast<uint64_t>(ptr) + len > size) {
-            spdlog::warn("Module {} instantdb_describe returned out-of-bounds blob",
+            spdlog::warn("Module {} origindb_describe returned out-of-bounds blob",
                          module.name_);
             return;
         }
@@ -570,7 +570,7 @@ private:
         const char* blob = reinterpret_cast<const char*>(base + ptr);
         auto meta = nlohmann::json::parse(blob, blob + len, nullptr, false);
         if (meta.is_discarded() || !meta.is_object()) {
-            spdlog::warn("Module {} instantdb_describe returned invalid JSON",
+            spdlog::warn("Module {} origindb_describe returned invalid JSON",
                          module.name_);
             return;
         }
@@ -700,4 +700,4 @@ ReducerContext WasmEngine::CreateReducerContext(const std::string& sender_identi
     return impl_->CreateReducerContext(sender_identity, connection_id);
 }
 
-} // namespace instantdb
+} // namespace origindb

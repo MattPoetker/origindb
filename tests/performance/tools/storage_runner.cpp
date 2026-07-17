@@ -2,7 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <iostream>
 
-using namespace instantdb::performance;
+using namespace origindb::performance;
 
 void PrintUsage() {
     std::cout << R"(

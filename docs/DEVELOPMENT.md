@@ -65,7 +65,7 @@ cmake -B build -S .
 cmake --build build
 
 # Run tests
-./build/instantdb_demo
+./build/origindb_demo
 ```
 
 #### Debug Build
@@ -77,7 +77,7 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 
 # Run with debugger
-gdb ./build/instantdb_demo
+gdb ./build/origindb_demo
 ```
 
 #### Release Build
@@ -229,7 +229,7 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 
 # Run with GDB
-gdb ./build/instantdb_demo
+gdb ./build/origindb_demo
 
 # Common GDB commands
 (gdb) break StorageEngine::Initialize
@@ -247,7 +247,7 @@ gdb ./build/instantdb_demo
 sudo apt install valgrind
 
 # Run with memory checking
-valgrind --leak-check=full ./build/instantdb_demo
+valgrind --leak-check=full ./build/origindb_demo
 ```
 
 **AddressSanitizer:**
@@ -257,7 +257,7 @@ cmake -B build -S . -DCMAKE_CXX_FLAGS="-fsanitize=address -g"
 cmake --build build
 
 # Run (will detect memory errors automatically)
-./build/instantdb_demo
+./build/origindb_demo
 ```
 
 ### Testing
@@ -280,10 +280,10 @@ scripts/e2e_verify.sh build
 **Basic Functionality:**
 ```bash
 # Test demo application
-./build/instantdb_demo
+./build/origindb_demo
 
 # Test production server
-./build/instantdb_server -p 9090
+./build/origindb_server -p 9090
 
 # Test WebSocket connection
 # Use browser console or WebSocket client
@@ -294,13 +294,13 @@ ws.onmessage = console.log;
 **Crash Recovery Testing:**
 ```bash
 # Start server and insert data
-./build/instantdb_demo
+./build/origindb_demo
 
 # Kill server during operation
 kill -9 <pid>
 
 # Restart and verify data recovery
-./build/instantdb_demo
+./build/origindb_demo
 ```
 
 #### Performance Testing
@@ -337,7 +337,7 @@ std::cout << "10,000 inserts took: " << duration.count() << "ms" << std::endl;
 #include <memory>
 #include <string>
 
-namespace instantdb {
+namespace origindb {
 
 class MyEngine {
 public:
@@ -355,7 +355,7 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace instantdb
+} // namespace origindb
 ```
 
 2. **Implement Engine (source file):**
@@ -364,7 +364,7 @@ private:
 #include "myengine/my_engine.h"
 #include <spdlog/spdlog.h>
 
-namespace instantdb {
+namespace origindb {
 
 class MyEngine::Impl {
 public:
@@ -398,7 +398,7 @@ void MyEngine::Shutdown() {
     impl_->Shutdown();
 }
 
-} // namespace instantdb
+} // namespace origindb
 ```
 
 3. **Update CMakeLists.txt:**
@@ -414,7 +414,7 @@ target_link_libraries(my_engine
 )
 
 # Link to main executable
-target_link_libraries(instantdb_server
+target_link_libraries(origindb_server
     # Existing libraries
     my_engine
 )
@@ -557,7 +557,7 @@ cmake -B build -S . -DCMAKE_CXX_COMPILER=g++-10
 
 **Server Won't Start:**
 - Check port availability: `netstat -an | grep 8080`
-- Verify permissions: `ls -la ./instantdb_data/`
+- Verify permissions: `ls -la ./origindb_data/`
 - Check logs for specific errors
 
 **WebSocket Connection Fails:**
@@ -629,6 +629,6 @@ cppcheck --enable=all src/
 sudo apt install linux-perf
 
 # Profile application
-perf record ./build/instantdb_demo
+perf record ./build/origindb_demo
 perf report
 ```

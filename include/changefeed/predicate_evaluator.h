@@ -5,7 +5,7 @@
 
 #include <nlohmann/json.hpp>
 
-namespace instantdb {
+namespace origindb {
 
 namespace detail {
 struct PredicateNode;
@@ -46,4 +46,4 @@ private:
     std::unique_ptr<detail::PredicateNode> root_;
 };
 
-} // namespace instantdb
+} // namespace origindb

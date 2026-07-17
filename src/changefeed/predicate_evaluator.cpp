@@ -4,7 +4,7 @@
 #include <regex>
 #include <vector>
 
-namespace instantdb {
+namespace origindb {
 
 // ==================== AST ====================
 
@@ -551,4 +551,4 @@ bool PredicateEvaluator::Evaluate(const nlohmann::json& row) const {
     return EvaluateNode(*root_, row);
 }
 
-} // namespace instantdb
+} // namespace origindb

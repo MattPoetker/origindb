@@ -1,10 +1,10 @@
-# WASM Subscriptions in InstantDB
+# WASM Subscriptions in OriginDB
 
 WASM subscriptions let a WebSocket client route changefeed events through a
 deployed module before delivery: a **filter** function decides per event
 whether to deliver it, and a **transform** function can rewrite the payload.
 Both are ordinary reducer registrations invoked through the module's single
-`instantdb_invoke` entry point — see [WASM_ABI.md](WASM_ABI.md) for the
+`origindb_invoke` entry point — see [WASM_ABI.md](WASM_ABI.md) for the
 contract and [../WASM_MODULES.md](../WASM_MODULES.md) for the module guide.
 
 ## Architecture Overview
@@ -164,17 +164,17 @@ module returns via `host_set_result`. If the module doesn't register
 # AssemblyScript example (sdk/typescript/examples/todo)
 cd sdk/typescript && npm install && npm run asbuild
 cd ../..
-./build/instantdb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
+./build/origindb_client deploy todo sdk/typescript/build/module.wasm 1.0.0
 
 # Or from a project directory, in one step:
-instantdb publish --server=localhost:50051
+origindb publish --server=localhost:50051
 ```
 
 ### 2. Create test data
 
 ```bash
-./build/instantdb_client call todo addTodo '["buy milk"]'
-./build/instantdb_client call todo addTodo '["write docs"]'
+./build/origindb_client call todo addTodo '["buy milk"]'
+./build/origindb_client call todo addTodo '["write docs"]'
 ```
 
 ### 3. Subscribe from a WebSocket client
@@ -196,8 +196,8 @@ ws.onmessage = (m) => {
 ### 4. Trigger events
 
 ```bash
-./build/instantdb_client call todo addTodo '["from wasm"]'      # delivered
-./build/instantdb_client call todo completeTodo '["<id>"]'      # filtered out
+./build/origindb_client call todo addTodo '["from wasm"]'      # delivered
+./build/origindb_client call todo completeTodo '["<id>"]'      # filtered out
 ```
 
 ## Execution Semantics and Limits
@@ -221,10 +221,10 @@ ws.onmessage = (m) => {
 
 ```bash
 # Watch module log output (host_log) and subscription activity
-./build/instantdb server -l debug
+./build/origindb server -l debug
 
 # Confirm the module and its functions are deployed
-./build/instantdb_client modules
+./build/origindb_client modules
 ```
 
 `scripts/ws_filter_check.py` (used by `scripts/e2e_verify.sh`) is a
@@ -241,14 +241,14 @@ reference for scripted WebSocket subscription verification.
 
 ### Function semantics (ABI)
 
-- **Filter**: invoked as `instantdb_invoke(filter_name, [event])`; return
+- **Filter**: invoked as `origindb_invoke(filter_name, [event])`; return
   status `1` to include, `0` to exclude, `< 0` on error.
-- **Transform**: invoked as `instantdb_invoke(transform_name, [event])`;
+- **Transform**: invoked as `origindb_invoke(transform_name, [event])`;
   return status `0` and set the new payload via `host_set_result`.
-- **Initial data**: `instantdb_invoke("__get_initial_data",
+- **Initial data**: `origindb_invoke("__get_initial_data",
   [where_clause])`; payload via `host_set_result`.
 
 ---
 
-**InstantDB WASM Subscriptions** — real-time, programmable data streams
+**OriginDB WASM Subscriptions** — real-time, programmable data streams
 running on the server's wasmtime runtime.

@@ -17,14 +17,14 @@
 
 #include "wasm/wasm_engine.h"
 
-namespace instantdb {
+namespace origindb {
 
 // ABI error codes (negative i32 returned by host functions / reducer status)
 constexpr int32_t WASM_ERR_INTERNAL = -1;
 constexpr int32_t WASM_ERR_PERMISSION = -2;
 constexpr int32_t WASM_ERR_INVALID_ARG = -3;
 constexpr int32_t WASM_ERR_LIMIT = -5;
-// Returned by the SDK's instantdb_invoke for an unregistered name; the engine
+// Returned by the SDK's origindb_invoke for an unregistered name; the engine
 // treats it as a no-op for reserved "__" lifecycle names and an error otherwise.
 constexpr int32_t WASM_ERR_NO_HANDLER = -404;
 
@@ -117,4 +117,4 @@ std::optional<std::vector<uint8_t>> Base64Decode(const std::string& in);
 std::string ConsumeError(wasmtime_error_t* err);
 std::string ConsumeTrap(wasm_trap_t* trap);
 
-} // namespace instantdb
+} // namespace origindb

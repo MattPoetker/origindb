@@ -1,10 +1,10 @@
 #!/bin/bash
-# Deployment script for install.instantdb.com
+# Deployment script for install.origindb.com
 
 set -e
 
 # Configuration
-DOMAIN="install.instantdb.com"
+DOMAIN="install.origindb.com"
 WEB_ROOT="/var/www/$DOMAIN"
 NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
 NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
@@ -33,7 +33,7 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-log "Deploying install.instantdb.com..."
+log "Deploying install.origindb.com..."
 
 # Create web directory
 log "Creating web directory..."
@@ -72,7 +72,7 @@ systemctl reload nginx
 # Install SSL certificate (using Let's Encrypt)
 if command -v certbot >/dev/null 2>&1; then
     log "Installing SSL certificate..."
-    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email admin@instantdb.com
+    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email admin@origindb.com
 else
     log "Certbot not found. Please install SSL certificate manually."
 fi

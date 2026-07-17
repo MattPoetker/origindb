@@ -1,5 +1,5 @@
 // =============================================================================
-// CounterModule — reference example for the InstantDB C# SDK.
+// CounterModule — reference example for the OriginDB C# SDK.
 //
 // Demonstrates:
 //   * Registering reducers with Reducers.Register from a [ModuleInitializer]
@@ -8,7 +8,7 @@
 //   * Failing a call with ReducerException (negative ABI status)
 //   * A subscription filter registered with Reducers.RegisterFilter
 //
-// Build (from a project that includes this file + InstantDB.cs):
+// Build (from a project that includes this file + OriginDB.cs):
 //   dotnet publish -c Release
 //   → bin/Release/net8.0/wasi-wasm/AppBundle/<Project>.wasm
 // =============================================================================
@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using InstantDB;
+using OriginDB;
 
 namespace CounterModule
 {
@@ -30,7 +30,7 @@ namespace CounterModule
         public static void Main() { }
 
         // Runs before any export is dispatched, so the registry is always
-        // populated before the host's first instantdb_invoke/describe call.
+        // populated before the host's first origindb_invoke/describe call.
         [ModuleInitializer]
         internal static void Init()
         {

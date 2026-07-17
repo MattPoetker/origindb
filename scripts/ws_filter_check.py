@@ -3,7 +3,7 @@
 Two sql_subscribe subscriptions on table t: WHERE a = 1 must receive the
 event produced by the testmod "w" reducer; WHERE a = 99 must receive nothing.
 
-Usage: ws_filter_check.py <instantdb_client_path> <ws_port> <grpc_port>
+Usage: ws_filter_check.py <origindb_client_path> <ws_port> <grpc_port>
 """
 import base64
 import json

@@ -1,12 +1,12 @@
-# InstantDB TypeScript (AssemblyScript) SDK
+# OriginDB TypeScript (AssemblyScript) SDK
 
-Write InstantDB server-side WASM modules in **AssemblyScript** — a strict,
+Write OriginDB server-side WASM modules in **AssemblyScript** — a strict,
 TypeScript-syntax language that compiles directly to small core WASI-free
 wasm modules (the todo example builds to ~20 KB). This is the recommended
 module SDK today: it produces exactly the core preview-1-style modules the
 server's wasmtime runtime expects.
 
-The SDK implements the [InstantDB WASM ABI v1](../../docs/WASM_ABI.md):
+The SDK implements the [OriginDB WASM ABI v1](../../docs/WASM_ABI.md):
 
 - `assembly/env.ts` — typed `@external("env", ...)` declarations for every
   host import (`host_table_read`, `host_table_write`, `host_table_delete`,
@@ -14,8 +14,8 @@ The SDK implements the [InstantDB WASM ABI v1](../../docs/WASM_ABI.md):
   `host_log`, `host_abort`, `host_alloc`, `host_free`, `host_set_result`)
 - `assembly/index.ts` — the SDK: high-level wrappers, a reducer/filter
   registry, a minimal hand-rolled JSON type, and the four ABI exports
-  (`instantdb_alloc`, `instantdb_free`, `instantdb_describe`,
-  `instantdb_invoke`)
+  (`origindb_alloc`, `origindb_free`, `origindb_describe`,
+  `origindb_invoke`)
 
 > **JSON**: the SDK ships a small hand-rolled `JsonValue`
 > (parse/build/stringify, ~400 lines) instead of depending on `json-as`.
@@ -33,7 +33,7 @@ npm run asbuild          # → build/module.wasm  (todo example)
 npm test                 # asbuild + node tests/smoke.mjs (host-side ABI harness)
 ```
 
-Deploy `build/module.wasm` with `instantdb publish` (or the gRPC
+Deploy `build/module.wasm` with `origindb publish` (or the gRPC
 `DeployModule` call).
 
 ## Writing a module
@@ -48,8 +48,8 @@ import {
 
 // REQUIRED: re-export the ABI surface from your entry file.
 export {
-  instantdb_alloc, instantdb_free, instantdb_describe, instantdb_invoke,
-  __instantdb_abort,
+  origindb_alloc, origindb_free, origindb_describe, origindb_invoke,
+  __origindb_abort,
 } from "../../assembly/index";
 
 // Top-level statements run in the wasm start section (at instantiation),
@@ -80,7 +80,7 @@ Point `asconfig.json`'s `entries` at your file and run `npm run asbuild`.
 |---|---|
 | `registerReducer(name, fn, params?)` | `fn: (args: Array<JsonValue>) => JsonValue \| null`. Args arrive as the invocation's JSON array. A non-null return value is serialized and returned via `host_set_result`; the call returns status `0`. Unregistered names return `-404` per the ABI. |
 | `registerFilter(name, fn)` | `fn: (event: JsonValue) => bool` — return value maps to ABI status `1` (include) / `0` (exclude). The event arrives parsed: `{table, operation, offset, transaction_id, key, new_value, old_value}`. |
-| `setModuleInfo(name, version)` / `declareTable(table)` | Metadata reported by `instantdb_describe`. |
+| `setModuleInfo(name, version)` / `declareTable(table)` | Metadata reported by `origindb_describe`. |
 
 Lifecycle hooks are plain registrations under the reserved names `__init`,
 `__client_connected`, `__client_disconnected`, `__get_initial_data`.
@@ -126,9 +126,9 @@ AssemblyScript compiles a strict *subset* of TS syntax to wasm. The big ones:
 
 - `runtime: "minimal"` — TLSF allocator + lightweight GC; no collection
   happens mid-call, so pointers passed to host calls stay valid.
-- `exportRuntime: false` — the ABI needs only `instantdb_alloc`/`free`.
+- `exportRuntime: false` — the ABI needs only `origindb_alloc`/`free`.
 - `importMemory: false` — the module exports its own `memory` (required).
-- `use: ["abort=assembly/index/__instantdb_abort"]` — replaces
+- `use: ["abort=assembly/index/__origindb_abort"]` — replaces
   AssemblyScript's default `env.abort(msg, file, line, col)` import, which
   the server would reject, with the SDK's `host_abort`-backed handler. If
   your module lives outside this directory tree, adjust the module path but
@@ -136,7 +136,7 @@ AssemblyScript compiles a strict *subset* of TS syntax to wasm. The big ones:
 
 Buffer ownership per the ABI: results of `host_table_read`/`host_table_scan`
 are written into buffers the host obtains from this module's
-`instantdb_alloc` (`heap.alloc`); the SDK frees them with `heap.free` —
+`origindb_alloc` (`heap.alloc`); the SDK frees them with `heap.free` —
 never `host_free`.
 
 ## Layout

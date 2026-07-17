@@ -1,9 +1,9 @@
 {
-  "name": "instantdb",
+  "name": "origindb",
   "version": "0.1.0",
   "description": "Real-time database with WebAssembly module support",
-  "homepage": "https://instantdb.com",
-  "documentation": "https://docs.instantdb.com",
+  "homepage": "https://origindb.com",
+  "documentation": "https://docs.origindb.com",
   "license": "MIT",
   "dependencies": [
     {

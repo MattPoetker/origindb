@@ -1,7 +1,7 @@
 {
-  "name": "com.instantdb.unity",
+  "name": "com.origindb.unity",
   "version": "1.0.0",
-  "displayName": "InstantDB for Unity",
+  "displayName": "OriginDB for Unity",
   "description": "Real-time database integration for Unity with WebAssembly module support. Build multiplayer games with real-time data synchronization.",
   "keywords": [
     "database",
@@ -12,9 +12,9 @@
     "websocket"
   ],
   "author": {
-    "name": "InstantDB Team",
-    "email": "support@instantdb.com",
-    "url": "https://instantdb.com"
+    "name": "OriginDB Team",
+    "email": "support@origindb.com",
+    "url": "https://origindb.com"
   },
   "license": "MIT",
   "unity": "2021.3",
@@ -25,7 +25,7 @@
   "samples": [
     {
       "displayName": "Basic Connection Example",
-      "description": "Shows how to connect to InstantDB and handle basic events",
+      "description": "Shows how to connect to OriginDB and handle basic events",
       "path": "Samples~/BasicConnection"
     },
     {
@@ -35,16 +35,16 @@
     },
     {
       "displayName": "Chat System Example",
-      "description": "Real-time chat system using InstantDB",
+      "description": "Real-time chat system using OriginDB",
       "path": "Samples~/ChatSystem"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/instantdb-unity.git"
+    "url": "https://github.com/your-org/origindb-unity.git"
   },
-  "documentationUrl": "https://docs.instantdb.com/unity",
-  "changelogUrl": "https://github.com/your-org/instantdb-unity/blob/main/CHANGELOG.md",
-  "licensesUrl": "https://github.com/your-org/instantdb-unity/blob/main/LICENSE",
+  "documentationUrl": "https://docs.origindb.com/unity",
+  "changelogUrl": "https://github.com/your-org/origindb-unity/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/your-org/origindb-unity/blob/main/LICENSE",
   "type": "library"
 }

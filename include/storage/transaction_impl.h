@@ -3,7 +3,7 @@
 #include "storage/storage_engine.h"
 #include <vector>
 
-namespace instantdb {
+namespace origindb {
 
 enum class WriteOp {
     INSERT,
@@ -60,4 +60,4 @@ private:
     std::vector<WriteOperation> write_set_;
 };
 
-} // namespace instantdb
+} // namespace origindb

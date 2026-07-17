@@ -11,7 +11,7 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // WebSocket client configuration
@@ -300,4 +300,4 @@ public:
 };
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

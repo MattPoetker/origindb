@@ -7,7 +7,7 @@
 #include <chrono>
 #include <fstream>
 
-namespace instantdb {
+namespace origindb {
 
 namespace {
 
@@ -209,4 +209,4 @@ std::optional<std::vector<uint8_t>> ModuleStore::LoadBytecode(
     return bytes;
 }
 
-} // namespace instantdb
+} // namespace origindb

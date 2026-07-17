@@ -12,7 +12,7 @@
 #include <chrono>
 #include <cstring>
 
-namespace instantdb {
+namespace origindb {
 
 namespace {
 
@@ -65,7 +65,7 @@ struct GuestMem {
     }
 };
 
-// Calls the guest's exported instantdb_alloc. Returns 0 on failure.
+// Calls the guest's exported origindb_alloc. Returns 0 on failure.
 uint32_t GuestAlloc(wasmtime_context_t* ctx, WasmModuleImpl* mod, uint32_t size) {
     wasmtime_val_t arg;
     arg.kind = WASMTIME_I32;
@@ -75,19 +75,19 @@ uint32_t GuestAlloc(wasmtime_context_t* ctx, WasmModuleImpl* mod, uint32_t size)
     wasmtime_error_t* err =
         wasmtime_func_call(ctx, &mod->fn_alloc, &arg, 1, &result, 1, &trap);
     if (err) {
-        spdlog::warn("[wasm:{}] instantdb_alloc failed: {}", mod->module_name,
+        spdlog::warn("[wasm:{}] origindb_alloc failed: {}", mod->module_name,
                      ConsumeError(err));
         return 0;
     }
     if (trap) {
-        spdlog::warn("[wasm:{}] instantdb_alloc trapped: {}", mod->module_name,
+        spdlog::warn("[wasm:{}] origindb_alloc trapped: {}", mod->module_name,
                      ConsumeTrap(trap));
         return 0;
     }
     return static_cast<uint32_t>(result.of.i32);
 }
 
-// Allocates guest memory via instantdb_alloc, writes `data` into it, and
+// Allocates guest memory via origindb_alloc, writes `data` into it, and
 // stores the pointer/length into *out_ptr / *out_len. Returns false on any
 // failure (allocation, bounds).
 bool WriteOut(wasmtime_context_t* ctx, WasmModuleImpl* mod,
@@ -704,4 +704,4 @@ std::string ConsumeTrap(wasm_trap_t* trap) {
     return out;
 }
 
-} // namespace instantdb
+} // namespace origindb

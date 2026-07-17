@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace instantdb {
+namespace origindb {
 
 class WasmEngine;
 class ModuleStore;
@@ -24,4 +24,4 @@ private:
     std::shared_ptr<ModuleStore> module_store_;
 };
 
-} // namespace instantdb
+} // namespace origindb

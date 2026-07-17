@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cctype>
 
-namespace instantdb {
+namespace origindb {
 
 // Transaction entry for Raft log
 struct TxnEntry {
@@ -391,19 +391,19 @@ std::optional<SqlStatement> SqlParser::Parse(const std::string& sql) {
         stmt.table_schema.name = original_text(match, 1);
 
         // Simplified column parsing for prototype
-        instantdb::Column id_col;
+        origindb::Column id_col;
         id_col.name = "id";
         id_col.type = DataType::INT64;
         id_col.nullable = false;
         id_col.is_primary_key = true;
 
-        instantdb::Column name_col;
+        origindb::Column name_col;
         name_col.name = "name";
         name_col.type = DataType::STRING;
         name_col.nullable = false;
         name_col.is_primary_key = false;
 
-        instantdb::Column email_col;
+        origindb::Column email_col;
         email_col.name = "email";
         email_col.type = DataType::STRING;
         email_col.nullable = false;
@@ -538,4 +538,4 @@ std::vector<std::string> SqlEngine::ListSubscriptions() const {
     return {};
 }
 
-} // namespace instantdb
+} // namespace origindb

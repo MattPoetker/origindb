@@ -1,4 +1,4 @@
-# InstantDB API Reference
+# OriginDB API Reference
 
 ## WebSocket API
 
@@ -133,7 +133,7 @@ a dropped connection or a server restart (data does, via the WAL).
 ## SQL Interface
 
 SQL executes over gRPC (`SQLService.Execute`, default port 50051) — use
-`instantdb_client exec "SQL"` or `instantdb_client interactive`.
+`origindb_client exec "SQL"` or `origindb_client interactive`.
 
 ### Supported operations
 
@@ -162,7 +162,7 @@ write to a new table.
 
 Modules are managed over gRPC (`WasmService`): `DeployModule`,
 `UndeployModule`, `ListModules`, `GetModule`, `ExecuteReducer`. Use
-`instantdb_client deploy/undeploy/modules/call` or call the service
+`origindb_client deploy/undeploy/modules/call` or call the service
 directly. See [../WASM_MODULES.md](../WASM_MODULES.md) and
 [GRPC_API.md](GRPC_API.md).
 

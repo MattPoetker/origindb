@@ -10,7 +10,7 @@
 #include "changefeed/changefeed_engine.h"
 #include "websocket/websocket_server.h"
 
-using namespace instantdb;
+using namespace origindb;
 
 // Simple prototype demo showing the end-to-end flow:
 // INSERT → WAL → Raft → Apply → Changefeed → WebSocket Client
@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     // Set log level to debug to see our detailed debugging output
     spdlog::set_level(spdlog::level::debug);
 
-    std::cout << "🚀 InstantDB Prototype Demo\n";
+    std::cout << "🚀 OriginDB Prototype Demo\n";
     std::cout << "==============================\n\n";
 
     // Parse command line arguments
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
     // Initialize configuration
     ServerConfig config;
-    config.storage.data_dir = "/tmp/instantdb_demo";
+    config.storage.data_dir = "/tmp/origindb_demo";
     config.websocket.listen_address = "127.0.0.1:" + std::to_string(websocket_port);
 
     try {
@@ -243,8 +243,8 @@ int main(int argc, char* argv[]) {
 
         std::cout << "🔗 WebSocket Endpoint: ws://localhost:" << websocket_port << "\n";
         std::cout << "   Connect with Postman or your WebSocket client!\n\n";
-        std::cout << "💡 Usage: ./instantdb_demo [port]\n";
-        std::cout << "   Example: ./instantdb_demo 9090\n\n";
+        std::cout << "💡 Usage: ./origindb_demo [port]\n";
+        std::cout << "   Example: ./origindb_demo 9090\n\n";
 
         std::cout << "Press Enter to shutdown...\n";
         std::cin.get();

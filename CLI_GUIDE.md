@@ -1,10 +1,10 @@
-# InstantDB CLI Tool Guide
+# OriginDB CLI Tool Guide
 
-The InstantDB CLI (`instantdb`) is the front door to the toolchain: it
+The OriginDB CLI (`origindb`) is the front door to the toolchain: it
 initializes module projects, starts/stops the server, tails logs, builds and
 publishes WASM modules, and dispatches to the bundled gRPC client. Most
 subcommands are thin wrappers that locate and exec the corresponding binary
-(`instantdb_server`, `instantdb_client`, `instantdb_init`, ...) from the same
+(`origindb_server`, `origindb_client`, `origindb_init`, ...) from the same
 directory or `PATH`.
 
 ## Installation
@@ -13,7 +13,7 @@ Build the CLI and its companion binaries:
 
 ```bash
 cmake -B build -S .
-cmake --build build --target instantdb instantdb_server instantdb_client instantdb_init
+cmake --build build --target origindb origindb_server origindb_client origindb_init
 ```
 
 The binaries land in `./build/`.
@@ -22,9 +22,9 @@ The binaries land in `./build/`.
 
 | Command | What it does |
 |---|---|
-| `init` | Initialize a new module/client project (via `instantdb_init`) |
-| `server` / `start` | Start the InstantDB server (via `instantdb_server`) |
-| `stop` | Stop a running server (`pkill instantdb_server`) |
+| `init` | Initialize a new module/client project (via `origindb_init`) |
+| `server` / `start` | Start the OriginDB server (via `origindb_server`) |
+| `stop` | Stop a running server (`pkill origindb_server`) |
 | `logs` | View/follow the server log file |
 | `publish` | Build the module project in the current directory and deploy it |
 | `client` | gRPC client: SQL, status, and WASM module management |
@@ -39,10 +39,10 @@ Global options: `-h/--help`, `-v/--version`, `--verbose`.
 ### Project Initialization
 
 ```bash
-instantdb init myproject                       # C# WASM module (default)
-instantdb init mymodule --template typescript  # AssemblyScript WASM module
-instantdb init mygame --template unity         # Unity client project
-instantdb init myapp --template nodejs         # Node.js client application
+origindb init myproject                       # C# WASM module (default)
+origindb init mymodule --template typescript  # AssemblyScript WASM module
+origindb init mygame --template unity         # Unity client project
+origindb init myapp --template nodejs         # Node.js client application
 ```
 
 **Options:**
@@ -51,7 +51,7 @@ instantdb init myapp --template nodejs         # Node.js client application
 - `--no-git` — don't initialize a git repository
 
 The `csharp` and `typescript` templates produce WASM module projects that
-`instantdb publish` can build and deploy directly. The C# template requires
+`origindb publish` can build and deploy directly. The C# template requires
 the .NET 8 SDK with the `wasi-experimental` workload; the TypeScript
 template requires npm (AssemblyScript). Note the C# toolchain caveat in
 [sdk/csharp/README.md](sdk/csharp/README.md) — AssemblyScript is the fully
@@ -61,52 +61,52 @@ verified module path today.
 
 ```bash
 # Start server (foreground)
-instantdb server
+origindb server
 
 # Custom ports and data directory
-instantdb server -p 9090 -g 50052 -d ./mydata -l debug
+origindb server -p 9090 -g 50052 -d ./mydata -l debug
 
 # Stop server
-instantdb stop
+origindb stop
 ```
 
-**Server options** (passed through to `instantdb_server`):
+**Server options** (passed through to `origindb_server`):
 - `-p, --port PORT` — WebSocket port (default: 8080)
 - `-g, --grpc-port PORT` — gRPC port (default: 50051)
-- `-d, --data-dir DIR` — data directory (default: `./instantdb_data`)
+- `-d, --data-dir DIR` — data directory (default: `./origindb_data`)
 - `-l, --log-level LEVEL` — `trace`, `debug`, `info`, `warn`, `error`
 - `-c, --config FILE` — config file path
 
 **Environment variables** (read by the server):
-- `INSTANTDB_WS_PORT`, `INSTANTDB_GRPC_PORT`, `INSTANTDB_DATA_DIR`,
-  `INSTANTDB_LOG_LEVEL`
+- `ORIGINDB_WS_PORT`, `ORIGINDB_GRPC_PORT`, `ORIGINDB_DATA_DIR`,
+  `ORIGINDB_LOG_LEVEL`
 
 There is no built-in daemon mode; use your shell (`... &`), `systemd`, or a
-process manager for background operation. `instantdb stop` simply kills any
-running `instantdb_server` process.
+process manager for background operation. `origindb stop` simply kills any
+running `origindb_server` process.
 
 ### Log Viewing
 
 ```bash
-instantdb logs                 # last 50 lines of ./logs/instantdb.log
-instantdb logs -n 100          # last 100 lines
-instantdb logs --follow        # follow (tail -f)
-instantdb logs --file ./path/to/other.log
+origindb logs                 # last 50 lines of ./logs/origindb.log
+origindb logs -n 100          # last 100 lines
+origindb logs --follow        # follow (tail -f)
+origindb logs --file ./path/to/other.log
 ```
 
 ### Publishing WASM Modules
 
-`instantdb publish` builds the module project in the target directory and
+`origindb publish` builds the module project in the target directory and
 deploys the resulting `.wasm` to a running server over gRPC. Deployment goes
-through the bundled `instantdb_client` — **no `grpcurl` required**.
+through the bundled `origindb_client` — **no `grpcurl` required**.
 
 ```bash
-instantdb publish
-instantdb publish --path=./my-module --server=prod.example.com:50051 --version=1.2.0
+origindb publish
+origindb publish --path=./my-module --server=prod.example.com:50051 --version=1.2.0
 ```
 
 **Options:**
-- `--server HOST:PORT` — InstantDB gRPC endpoint (default: `localhost:50051`)
+- `--server HOST:PORT` — OriginDB gRPC endpoint (default: `localhost:50051`)
 - `--path PATH` — project path (default: current directory)
 - `--version VERSION` — module version (default: `1.0.0`)
 
@@ -122,17 +122,17 @@ directory name for AssemblyScript projects). After a successful publish,
 test it with:
 
 ```bash
-instantdb client -s localhost:50051 modules
-instantdb client -s localhost:50051 call <module> <Reducer> '["arg1", 2]'
+origindb client -s localhost:50051 modules
+origindb client -s localhost:50051 call <module> <Reducer> '["arg1", 2]'
 ```
 
-### gRPC Client (`instantdb client`)
+### gRPC Client (`origindb client`)
 
-`instantdb client` dispatches to `instantdb_client`, which talks to the
+`origindb client` dispatches to `origindb_client`, which talks to the
 server's gRPC API (SQL + WASM services).
 
 ```bash
-instantdb client [-s HOST:PORT] COMMAND [ARGS]
+origindb client [-s HOST:PORT] COMMAND [ARGS]
 ```
 
 **Options:**
@@ -153,15 +153,15 @@ instantdb client [-s HOST:PORT] COMMAND [ARGS]
 **Examples:**
 
 ```bash
-instantdb client status
-instantdb client exec "CREATE TABLE users (id INT64 PRIMARY KEY, name STRING)"
-instantdb client exec "INSERT INTO users VALUES (1, 'Alice')"
-instantdb client exec "SELECT * FROM users"
+origindb client status
+origindb client exec "CREATE TABLE users (id INT64 PRIMARY KEY, name STRING)"
+origindb client exec "INSERT INTO users VALUES (1, 'Alice')"
+origindb client exec "SELECT * FROM users"
 
-instantdb client deploy user_service ./UserService.wasm 1.0.0
-instantdb client call user_service CreateUser '["Alice", "alice@example.com"]'
-instantdb client modules
-instantdb client undeploy user_service
+origindb client deploy user_service ./UserService.wasm 1.0.0
+origindb client call user_service CreateUser '["Alice", "alice@example.com"]'
+origindb client modules
+origindb client undeploy user_service
 ```
 
 JSON argument mapping: booleans, integers, floats, and strings map to the
@@ -181,30 +181,30 @@ The SQL layer is intentionally minimal (regex-based) right now:
   the column definitions you write.
 - Identifiers preserve case.
 
-`instantdb sql "STATEMENT"` runs a single statement against a throwaway
+`origindb sql "STATEMENT"` runs a single statement against a throwaway
 in-process engine — useful for syntax experiments only. Use
-`instantdb client exec` / `instantdb client interactive` to talk to a real
+`origindb client exec` / `origindb client interactive` to talk to a real
 server.
 
 ## Typical Development Flow
 
 ```bash
 # 1. Create a module project
-./build/instantdb init todo --template typescript
+./build/origindb init todo --template typescript
 cd todo && npm install
 
 # 2. Start the server (separate terminal)
-./build/instantdb server -d ./data
+./build/origindb server -d ./data
 
 # 3. Build + deploy the module
-../build/instantdb publish
+../build/origindb publish
 
 # 4. Call reducers and inspect state
-../build/instantdb client call todo addTodo '["buy milk"]'
-../build/instantdb client exec "SELECT * FROM todos"
+../build/origindb client call todo addTodo '["buy milk"]'
+../build/origindb client exec "SELECT * FROM todos"
 
 # 5. Watch logs
-../build/instantdb logs --follow
+../build/origindb logs --follow
 ```
 
 For real-time subscriptions, connect a WebSocket client to
@@ -214,7 +214,7 @@ For real-time subscriptions, connect a WebSocket client to
 
 ## Troubleshooting
 
-1. **`Could not find 'instantdb_server' binary`** — the CLI looks in its own
+1. **`Could not find 'origindb_server' binary`** — the CLI looks in its own
    directory, `PATH`, and a few common install locations. Build the missing
    target or run the CLI from the build directory.
 2. **Publish build fails (C#)** — requires .NET 8 SDK with
@@ -225,10 +225,10 @@ For real-time subscriptions, connect a WebSocket client to
    project first.
 4. **Deployment fails** — is the server running, and is `--server` pointing
    at the gRPC port (default 50051, not the WebSocket port)?
-5. **Log file not found** — `instantdb logs` defaults to
-   `./logs/instantdb.log` relative to the current directory; pass `--file`
+5. **Log file not found** — `origindb logs` defaults to
+   `./logs/origindb.log` relative to the current directory; pass `--file`
    if your server logs elsewhere.
 
 ---
 
-For per-command help, use `instantdb <command> --help`.
+For per-command help, use `origindb <command> --help`.

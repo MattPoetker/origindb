@@ -1,22 +1,22 @@
-# InstantDB Installation Scripts
+# OriginDB Installation Scripts
 
-This directory contains the one-liner installation scripts and deployment infrastructure for `install.instantdb.com`.
+This directory contains the one-liner installation scripts and deployment infrastructure for `install.origindb.com`.
 
 ## 🚀 One-Liner Install Commands
 
 ### macOS & Linux
 ```bash
-curl -sSf https://install.instantdb.com | sh
+curl -sSf https://install.origindb.com | sh
 ```
 
 ### Windows (PowerShell)
 ```powershell
-iwr -useb https://install.instantdb.com/windows | iex
+iwr -useb https://install.origindb.com/windows | iex
 ```
 
 ### Windows (Command Prompt)
 ```cmd
-curl -sSf https://install.instantdb.com/windows.bat | cmd
+curl -sSf https://install.origindb.com/windows.bat | cmd
 ```
 
 ## 📁 Files
@@ -27,7 +27,7 @@ curl -sSf https://install.instantdb.com/windows.bat | cmd
 - **`install.bat`** - Windows Batch/Command Prompt installation script
 
 ### Web Infrastructure
-- **`web/index.html`** - Landing page for install.instantdb.com
+- **`web/index.html`** - Landing page for install.origindb.com
 - **`web/nginx.conf`** - Nginx configuration for hosting the install site
 - **`deploy.sh`** - Deployment script for setting up the install server
 
@@ -38,21 +38,21 @@ The install scripts:
 1. **Auto-detect** the user's OS and architecture
 2. **Download** the latest release from GitHub releases
 3. **Extract** and install to the appropriate system location
-4. **Add** InstantDB to the user's PATH
+4. **Add** OriginDB to the user's PATH
 5. **Verify** the installation works correctly
 
 ## 🌐 Hosting Setup
 
-The install scripts are hosted at `install.instantdb.com` with the following URL routing:
+The install scripts are hosted at `install.origindb.com` with the following URL routing:
 
-- `https://install.instantdb.com/` → `install.sh` (Unix/Linux/macOS)
-- `https://install.instantdb.com/windows` → `install.ps1` (PowerShell)
-- `https://install.instantdb.com/windows.bat` → `install.bat` (Batch)
+- `https://install.origindb.com/` → `install.sh` (Unix/Linux/macOS)
+- `https://install.origindb.com/windows` → `install.ps1` (PowerShell)
+- `https://install.origindb.com/windows.bat` → `install.bat` (Batch)
 
 ### Deploy to Server
 
 1. Set up a server with Nginx installed
-2. Configure DNS for `install.instantdb.com`
+2. Configure DNS for `install.origindb.com`
 3. Run the deployment script:
 
 ```bash
@@ -99,7 +99,7 @@ Analytics are privacy-focused and don't collect personal information.
 
 ## 🔄 Updates
 
-When a new version of InstantDB is released:
+When a new version of OriginDB is released:
 
 1. GitHub Actions automatically builds and releases binaries
 2. The install scripts automatically fetch the latest version

@@ -1,6 +1,6 @@
-# InstantDB API Guide
+# OriginDB API Guide
 
-InstantDB exposes three surfaces:
+OriginDB exposes three surfaces:
 
 1. **Module API** — reducers, filters, and lifecycle hooks running inside
    the server as WASM modules (SpacetimeDB-inspired programming model).
@@ -15,7 +15,7 @@ The module-side contract is normatively defined in
 
 Modules are written against an SDK that implements the ABI's registry
 pattern: register named reducers/filters at initialization; the host
-dispatches every call through `instantdb_invoke(name, json_args)`.
+dispatches every call through `origindb_invoke(name, json_args)`.
 
 - **AssemblyScript** (`sdk/typescript/`) — recommended, verified
   end-to-end. See [../sdk/typescript/README.md](../sdk/typescript/README.md).
@@ -32,7 +32,7 @@ not built. The real API is an explicit registry:
 ```csharp
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using InstantDB;
+using OriginDB;
 
 public static class Program
 {
@@ -70,8 +70,8 @@ public static class Program
 ```ts
 import { JsonValue, registerReducer, setModuleInfo, declareTable,
          writeTable, generateId, nowMs, abortCall } from "../../assembly/index";
-export { instantdb_alloc, instantdb_free, instantdb_describe,
-         instantdb_invoke, __instantdb_abort } from "../../assembly/index";
+export { origindb_alloc, origindb_free, origindb_describe,
+         origindb_invoke, __origindb_abort } from "../../assembly/index";
 
 setModuleInfo("todo", "1.0.0");
 declareTable("todos");
@@ -187,16 +187,16 @@ Use the bundled client (`grpcurl` is not required):
 
 ```bash
 # SQL
-./build/instantdb_client exec "INSERT INTO users VALUES (1, 'Alice')"
+./build/origindb_client exec "INSERT INTO users VALUES (1, 'Alice')"
 
 # Modules
-./build/instantdb_client deploy user_module ./UserModule.wasm 1.0.0
-./build/instantdb_client call user_module CreateUser '["Alice", "alice@example.com"]'
-./build/instantdb_client modules
-./build/instantdb_client undeploy user_module
+./build/origindb_client deploy user_module ./UserModule.wasm 1.0.0
+./build/origindb_client call user_module CreateUser '["Alice", "alice@example.com"]'
+./build/origindb_client modules
+./build/origindb_client undeploy user_module
 ```
 
-Services (`proto/instantdb.proto`): `SQLService`
+Services (`proto/origindb.proto`): `SQLService`
 (`Execute`, `ExecuteTransaction`, `GetStatus`) and `WasmService`
 (`DeployModule`, `UndeployModule`, `ListModules`, `GetModule`,
 `ExecuteReducer`). `DeployModuleRequest` carries optional

@@ -1,6 +1,6 @@
 #!/bin/bash
-# InstantDB Installation Script for macOS and Linux
-# Usage: curl -sSf https://install.instantdb.com | sh
+# OriginDB Installation Script for macOS and Linux
+# Usage: curl -sSf https://install.origindb.com | sh
 
 set -e
 
@@ -12,14 +12,14 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-GITHUB_REPO="${GITHUB_REPO:-instantdb/instantdb}"  # Allow override via environment
-MAIN_BINARY="instantdb"  # Main CLI wrapper
-BINARIES="instantdb instantdb_server instantdb_sql instantdb_client instantdb_demo instantdb_init"  # All binaries to install
+GITHUB_REPO="${GITHUB_REPO:-origindb/origindb}"  # Allow override via environment
+MAIN_BINARY="origindb"  # Main CLI wrapper
+BINARIES="origindb origindb_server origindb_sql origindb_client origindb_demo origindb_init"  # All binaries to install
 INSTALL_DIR="/usr/local/bin"
-SHARE_DIR="/usr/local/share/instantdb"  # Directory for proto files and other resources
-TMP_DIR="/tmp/instantdb-install"
+SHARE_DIR="/usr/local/share/origindb"  # Directory for proto files and other resources
+TMP_DIR="/tmp/origindb-install"
 LOCAL_BUILD_DIR="$(dirname "$0")/.."  # Path to root directory (where current binaries are)
-LOCAL_PROTO_FILE="$(dirname "$0")/../instantdb.proto"  # Path to proto file in repo root
+LOCAL_PROTO_FILE="$(dirname "$0")/../origindb.proto"  # Path to proto file in repo root
 
 # Logging functions
 log() {
@@ -116,7 +116,7 @@ download_and_extract() {
     local platform="$1"
     local version="$2"
 
-    log "Downloading InstantDB for $platform..."
+    log "Downloading OriginDB for $platform..."
 
     # Create temporary directory
     mkdir -p "$TMP_DIR"
@@ -125,16 +125,16 @@ download_and_extract() {
     # Download URL
     local download_url=""
     if [ "$version" = "latest" ]; then
-        download_url="https://github.com/${GITHUB_REPO}/releases/latest/download/instantdb-${platform}.tar.gz"
+        download_url="https://github.com/${GITHUB_REPO}/releases/latest/download/origindb-${platform}.tar.gz"
     else
-        download_url="https://github.com/${GITHUB_REPO}/releases/download/${version}/instantdb-${platform}.tar.gz"
+        download_url="https://github.com/${GITHUB_REPO}/releases/download/${version}/origindb-${platform}.tar.gz"
     fi
 
     # Download and extract
     if curl -sSfL "$download_url" | tar xz; then
         success "Download completed"
     else
-        error "Failed to download InstantDB"
+        error "Failed to download OriginDB"
         exit 1
     fi
 }
@@ -152,27 +152,27 @@ install_proto() {
     fi
 
     # Install proto file if it exists
-    if [ -f "$TMP_DIR/instantdb.proto" ]; then
-        log "Installing instantdb.proto..."
+    if [ -f "$TMP_DIR/origindb.proto" ]; then
+        log "Installing origindb.proto..."
 
         if [ -w "$SHARE_DIR" ]; then
-            cp "$TMP_DIR/instantdb.proto" "$SHARE_DIR/"
-            chmod 644 "$SHARE_DIR/instantdb.proto"
+            cp "$TMP_DIR/origindb.proto" "$SHARE_DIR/"
+            chmod 644 "$SHARE_DIR/origindb.proto"
         else
             log "Installing to system directory requires sudo privileges"
-            sudo cp "$TMP_DIR/instantdb.proto" "$SHARE_DIR/"
-            sudo chmod 644 "$SHARE_DIR/instantdb.proto"
+            sudo cp "$TMP_DIR/origindb.proto" "$SHARE_DIR/"
+            sudo chmod 644 "$SHARE_DIR/origindb.proto"
         fi
 
-        success "Proto file installed to $SHARE_DIR/instantdb.proto"
+        success "Proto file installed to $SHARE_DIR/origindb.proto"
     else
-        warn "instantdb.proto not found in package"
+        warn "origindb.proto not found in package"
     fi
 }
 
 # Install binaries
 install_binaries() {
-    log "Installing InstantDB tools..."
+    log "Installing OriginDB tools..."
 
     for binary in $BINARIES; do
         if [ -f "$TMP_DIR/$binary" ]; then
@@ -194,7 +194,7 @@ install_binaries() {
         fi
     done
 
-    success "InstantDB tools installed"
+    success "OriginDB tools installed"
 }
 
 # Verify installation
@@ -202,7 +202,7 @@ verify_installation() {
     log "Verifying installation..."
 
     if command_exists "$MAIN_BINARY"; then
-        success "InstantDB installed successfully!"
+        success "OriginDB installed successfully!"
         success "Location: $(which $MAIN_BINARY)"
 
         # Try to get version
@@ -211,7 +211,7 @@ verify_installation() {
         else
             # Show available commands
             if "$MAIN_BINARY" --help >/dev/null 2>&1; then
-                success "Binary verified. Run 'instantdb --help' for available commands"
+                success "Binary verified. Run 'origindb --help' for available commands"
             fi
         fi
     else
@@ -252,7 +252,7 @@ install_local() {
     # Copy proto file if it exists
     if [ -f "$LOCAL_PROTO_FILE" ]; then
         cp "$LOCAL_PROTO_FILE" "$TMP_DIR/"
-        log "Found instantdb.proto"
+        log "Found origindb.proto"
     else
         warn "Proto file not found at $LOCAL_PROTO_FILE"
     fi
@@ -262,7 +262,7 @@ install_local() {
 
 # Main installation function
 main() {
-    log "Starting InstantDB installation..."
+    log "Starting OriginDB installation..."
 
     # Parse arguments
     local use_local=false
@@ -272,7 +272,7 @@ main() {
                 use_local=true
                 ;;
             --help|-h)
-                echo "InstantDB Installation Script"
+                echo "OriginDB Installation Script"
                 echo ""
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
@@ -318,14 +318,14 @@ main() {
     # Verify installation
     verify_installation
 
-    success "🚀 InstantDB installation completed!"
+    success "🚀 OriginDB installation completed!"
     echo ""
     echo "Next steps:"
-    echo "  1. Start the InstantDB server: instantdb server"
-    echo "  2. Open the SQL shell: instantdb sql"
-    echo "  3. See all commands: instantdb --help"
-    echo "  4. Check out the documentation: https://docs.instantdb.com"
-    echo "  5. Try the C# quickstart: https://docs.instantdb.com/csharp"
+    echo "  1. Start the OriginDB server: origindb server"
+    echo "  2. Open the SQL shell: origindb sql"
+    echo "  3. See all commands: origindb --help"
+    echo "  4. Check out the documentation: https://docs.origindb.com"
+    echo "  5. Try the C# quickstart: https://docs.origindb.com/csharp"
     echo ""
 }
 

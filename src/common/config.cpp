@@ -3,7 +3,7 @@
 #include <fstream>
 #include <cstring>
 
-namespace instantdb {
+namespace origindb {
 
 bool ParseCommandLine(int argc, char* argv[], ServerConfig& config) {
     for (int i = 1; i < argc; i++) {
@@ -49,4 +49,4 @@ bool LoadConfigFile(const std::string& path, ServerConfig& config) {
     return true;
 }
 
-} // namespace instantdb
+} // namespace origindb

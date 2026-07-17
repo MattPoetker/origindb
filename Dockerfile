@@ -1,4 +1,4 @@
-# Multi-stage build for InstantDB
+# Multi-stage build for OriginDB
 FROM ubuntu:22.04 as builder
 
 # Install build dependencies
@@ -20,7 +20,7 @@ WORKDIR /src
 # Copy source code
 COPY . .
 
-# Build InstantDB
+# Build OriginDB
 RUN mkdir build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release -GNinja && \
     ninja
@@ -36,22 +36,22 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Create InstantDB user
-RUN groupadd -r instantdb && useradd -r -g instantdb instantdb
+# Create OriginDB user
+RUN groupadd -r origindb && useradd -r -g origindb origindb
 
 # Create data directory
-RUN mkdir -p /data && chown instantdb:instantdb /data
+RUN mkdir -p /data && chown origindb:origindb /data
 
 # Copy binaries from builder
-COPY --from=builder /src/build/instantdb_server /usr/local/bin/
-COPY --from=builder /src/build/instantdb_sql /usr/local/bin/
-COPY --from=builder /src/build/instantdb /usr/local/bin/
+COPY --from=builder /src/build/origindb_server /usr/local/bin/
+COPY --from=builder /src/build/origindb_sql /usr/local/bin/
+COPY --from=builder /src/build/origindb /usr/local/bin/
 
 # Make binaries executable
-RUN chmod +x /usr/local/bin/instantdb*
+RUN chmod +x /usr/local/bin/origindb*
 
 # Switch to non-root user
-USER instantdb
+USER origindb
 
 # Expose ports
 EXPOSE 8080 50051
@@ -61,7 +61,7 @@ VOLUME ["/data"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD instantdb_sql "SELECT 1" || exit 1
+    CMD origindb_sql "SELECT 1" || exit 1
 
 # Default command
-CMD ["instantdb_server", "--data-dir", "/data", "--log-level", "info"]
+CMD ["origindb_server", "--data-dir", "/data", "--log-level", "info"]

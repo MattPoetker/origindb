@@ -7,7 +7,7 @@
 #include <thread>
 #include <cstring>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 SimpleWebSocketClient::SimpleWebSocketClient(const SimpleWebSocketConfig& config, uint32_t client_id)
@@ -212,7 +212,7 @@ std::string SimpleWebSocketClient::CreateHandshakeRequest() {
     request << "Connection: Upgrade\r\n";
     request << "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"; // Fixed key for simplicity
     request << "Sec-WebSocket-Version: 13\r\n";
-    request << "User-Agent: InstantDB-PerfTest-Client/" << client_id_ << "\r\n";
+    request << "User-Agent: OriginDB-PerfTest-Client/" << client_id_ << "\r\n";
     request << "\r\n";
 
     return request.str();
@@ -455,4 +455,4 @@ SimpleWebSocketConfig SimpleWebSocketTestFactory::GetDefaultClientConfig() {
 }
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

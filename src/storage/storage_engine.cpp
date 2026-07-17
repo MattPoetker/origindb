@@ -10,7 +10,7 @@
 #include <filesystem>
 #include <fstream>
 
-namespace instantdb {
+namespace origindb {
 
 class StorageEngine::Impl {
 public:
@@ -800,4 +800,4 @@ void StorageEngine::Scan(const std::string& table, const std::string& start_key,
     table_ptr->Scan(start_key, end_key, callback);
 }
 
-} // namespace instantdb
+} // namespace origindb

@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace InstantDB.Client
+namespace OriginDB.Client
 {
     /// <summary>
-    /// Result returned from executing a reducer on the InstantDB server.
+    /// Result returned from executing a reducer on the OriginDB server.
     /// </summary>
     [Serializable]
     public class ReducerResult
@@ -196,7 +196,7 @@ namespace InstantDB.Client
     }
 
     /// <summary>
-    /// Result returned from executing a SQL query on the InstantDB server.
+    /// Result returned from executing a SQL query on the OriginDB server.
     /// </summary>
     [Serializable]
     public class QueryResult

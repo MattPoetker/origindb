@@ -1,6 +1,6 @@
 # WASM Module System
 
-InstantDB runs user-supplied WebAssembly modules inside the database server
+OriginDB runs user-supplied WebAssembly modules inside the database server
 on **wasmtime** (LTS C API). Modules implement *reducers* — atomic,
 transactional functions that read and write tables, emit changefeed events,
 and can filter or transform real-time subscriptions.
@@ -12,14 +12,14 @@ practical guide: how to build, deploy, call, and troubleshoot modules.
 ## Overview
 
 - **Single dispatch entry point**: every reducer and lifecycle hook goes
-  through one export, `instantdb_invoke(name, args)`. Args are a UTF-8 JSON
+  through one export, `origindb_invoke(name, args)`. Args are a UTF-8 JSON
   array; results come back through `host_set_result`.
 - **Real sandboxing**: epoch-based CPU deadlines (default 5000 ms/call) and
   a per-module memory limiter (default 256 MiB), both configurable per
   module at deploy time.
 - **Deploy-time capabilities**: `allowed_tables`, `read_only`,
   `max_memory_mb`, `timeout_ms` (`ModuleCapabilities` in
-  `proto/instantdb.proto`). Capability violations return error `-2` from
+  `proto/origindb.proto`). Capability violations return error `-2` from
   table operations.
 - **Transactional writes**: each call runs against a staged-write overlay
   that commits atomically only when the call returns a non-negative status
@@ -44,8 +44,8 @@ import {
 } from "../../assembly/index";
 
 export {
-  instantdb_alloc, instantdb_free, instantdb_describe, instantdb_invoke,
-  __instantdb_abort,
+  origindb_alloc, origindb_free, origindb_describe, origindb_invoke,
+  __origindb_abort,
 } from "../../assembly/index";
 
 setModuleInfo("todo", "1.0.0");
@@ -74,7 +74,7 @@ The complete buildable example is `sdk/typescript/examples/todo/`.
 ```csharp
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using InstantDB;
+using OriginDB;
 
 public static class Program
 {
@@ -120,20 +120,20 @@ The complete buildable example is `examples/csharp/UserService/`.
 
 ## Deploy lifecycle
 
-### Option 1: `instantdb publish` (build + deploy)
+### Option 1: `origindb publish` (build + deploy)
 
-From a module project directory, `instantdb publish` detects the project
+From a module project directory, `origindb publish` detects the project
 type, builds it, and deploys the resulting `.wasm` over gRPC (via the
-bundled `instantdb_client`; `grpcurl` is not needed):
+bundled `origindb_client`; `grpcurl` is not needed):
 
 ```bash
-instantdb publish
-instantdb publish --path=./my-module --server=prod.example.com:50051 --version=1.2.0
+origindb publish
+origindb publish --path=./my-module --server=prod.example.com:50051 --version=1.2.0
 ```
 
 | Flag | Meaning |
 |---|---|
-| `--server HOST:PORT` | InstantDB gRPC endpoint (default `localhost:50051`) |
+| `--server HOST:PORT` | OriginDB gRPC endpoint (default `localhost:50051`) |
 | `--path PATH` | Project path (default: current directory) |
 | `--version VERSION` | Module version (default `1.0.0`) |
 
@@ -150,35 +150,35 @@ Supported project types:
 The module name is the project name (`.csproj` stem, or the directory name
 for AssemblyScript projects).
 
-### Option 2: `instantdb_client` (deploy a prebuilt .wasm)
+### Option 2: `origindb_client` (deploy a prebuilt .wasm)
 
 ```bash
-instantdb_client [-s HOST:PORT] deploy NAME FILE.wasm [VERSION]
-instantdb_client modules                       # list deployed modules (name, version, sha256)
-instantdb_client call MODULE REDUCER '[json, args]'
-instantdb_client undeploy NAME
+origindb_client [-s HOST:PORT] deploy NAME FILE.wasm [VERSION]
+origindb_client modules                       # list deployed modules (name, version, sha256)
+origindb_client call MODULE REDUCER '[json, args]'
+origindb_client undeploy NAME
 ```
 
 Example:
 
 ```bash
-instantdb_client deploy user_service ./UserService.wasm 1.0.0
-instantdb_client call user_service CreateUser '["Alice", "alice@example.com"]'
-instantdb_client modules
-instantdb_client undeploy user_service
+origindb_client deploy user_service ./UserService.wasm 1.0.0
+origindb_client call user_service CreateUser '["Alice", "alice@example.com"]'
+origindb_client modules
+origindb_client undeploy user_service
 ```
 
 `call` arguments are a JSON array; booleans, integers, floats, and strings
 map to the corresponding reducer argument types.
 
 Both paths use the gRPC `WasmService` (`DeployModule`, `UndeployModule`,
-`ListModules`, `ExecuteReducer` in `proto/instantdb.proto`), which you can
+`ListModules`, `ExecuteReducer` in `proto/origindb.proto`), which you can
 also call directly from your own client.
 
 ### What happens at deploy
 
 1. Bytecode is validated (core module; imports checked against the ABI).
-2. `instantdb_describe` (if exported) is called once to collect module
+2. `origindb_describe` (if exported) is called once to collect module
    metadata (name, version, reducers, tables).
 3. The module is instantiated; `_initialize` (or the start section) runs,
    and the `__init` lifecycle hook is invoked if registered.
@@ -255,7 +255,7 @@ host treats as a harmless no-op:
 ## Subscriptions (filter / transform)
 
 WebSocket clients can create module-backed subscriptions. The module's
-filter and transform functions are invoked through `instantdb_invoke`
+filter and transform functions are invoked through `origindb_invoke`
 under the names the subscription registered:
 
 ```javascript
@@ -289,7 +289,7 @@ ws.send(JSON.stringify({
 ## Debugging
 
 - `host_log` output from modules goes to the server log
-  (`instantdb server -l debug` for debug-level detail).
+  (`origindb server -l debug` for debug-level detail).
 - `host_abort` messages are recorded and included in the reducer error.
 - Module stdout/stderr are discarded unless the server runs with WASM
   debug enabled.
@@ -303,7 +303,7 @@ ws.send(JSON.stringify({
 |---|---|
 | Deploy rejected: unsupported import | Module imports something outside `env` / `wasi_snapshot_preview1` (e.g. AssemblyScript's default `env.abort` — use the SDK's abort handler wiring in `asconfig.json`). |
 | Deploy rejected: not a core module | The toolchain emitted a WASI preview 2 *component* (e.g. .NET 9+ / componentize-dotnet). Pin .NET 8 + `wasi-experimental`, or use AssemblyScript. |
-| Reducer returns `-404` | No handler registered under that name (check spelling; registration must happen in `_initialize` / start section / `[ModuleInitializer]`). C# only: your `wasi-experimental` workload build may not support `[UnmanagedCallersOnly]` exports at all — verify `instantdb_invoke` is exported (`wasm-tools print module.wasm | grep export`). |
+| Reducer returns `-404` | No handler registered under that name (check spelling; registration must happen in `_initialize` / start section / `[ModuleInitializer]`). C# only: your `wasi-experimental` workload build may not support `[UnmanagedCallersOnly]` exports at all — verify `origindb_invoke` is exported (`wasm-tools print module.wasm | grep export`). |
 | Reducer returns `-2` | Capability violation: table not in `allowed_tables`, or a write in a `read_only` module. |
 | Reducer returns `-3` | Invalid argument (module-side validation). |
 | Call fails with timeout | Exceeded the per-module `timeout_ms` (default 5000 ms). The instance is discarded and recreated on the next call. |

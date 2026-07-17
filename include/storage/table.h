@@ -7,7 +7,7 @@
 #include <chrono>
 #include <unordered_map>
 
-namespace instantdb {
+namespace origindb {
 
 // Data types supported by the storage engine
 enum class DataType {
@@ -101,4 +101,4 @@ public:
     virtual std::vector<std::string> GetIndexNames() const = 0;
 };
 
-} // namespace instantdb
+} // namespace origindb

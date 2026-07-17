@@ -8,7 +8,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include "changefeed/changefeed_engine.h"
 
-namespace instantdb {
+namespace origindb {
 
 class PredicateEvaluator;
 
@@ -115,4 +115,4 @@ private:
     void UnindexSubscription(const SqlSubscription& subscription);
 };
 
-} // namespace instantdb
+} // namespace origindb

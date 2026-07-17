@@ -4,7 +4,7 @@
 #include <chrono>
 #include <fstream>
 
-namespace instantdb {
+namespace origindb {
 namespace performance {
 
 // GrpcClient Implementation
@@ -45,8 +45,8 @@ bool GrpcClient::Connect() {
             return false;
         }
 
-        sql_stub_ = instantdb::grpc::SQLService::NewStub(channel_);
-        wasm_stub_ = instantdb::grpc::WasmService::NewStub(channel_);
+        sql_stub_ = origindb::grpc::SQLService::NewStub(channel_);
+        wasm_stub_ = origindb::grpc::WasmService::NewStub(channel_);
 
         if (!sql_stub_ || !wasm_stub_) {
             spdlog::error("Client {}: Failed to create gRPC stubs", client_id_);
@@ -79,14 +79,14 @@ bool GrpcClient::IsConnected() const {
     return connected_.load() && channel_ && channel_->GetState(false) == GRPC_CHANNEL_READY;
 }
 
-bool GrpcClient::ExecuteSQL(const std::string& query, instantdb::grpc::SQLResponse* response) {
+bool GrpcClient::ExecuteSQL(const std::string& query, origindb::grpc::SQLResponse* response) {
     if (!IsConnected()) {
         RecordRequest(false);
         return false;
     }
 
     try {
-        instantdb::grpc::SQLRequest request;
+        origindb::grpc::SQLRequest request;
         request.set_query(query);
 
         grpc::ClientContext context;
@@ -111,14 +111,14 @@ bool GrpcClient::ExecuteSQL(const std::string& query, instantdb::grpc::SQLRespon
 }
 
 bool GrpcClient::ExecuteTransaction(const std::vector<std::string>& queries,
-                                  instantdb::grpc::SQLTransactionResponse* response) {
+                                  origindb::grpc::SQLTransactionResponse* response) {
     if (!IsConnected()) {
         RecordRequest(false);
         return false;
     }
 
     try {
-        instantdb::grpc::SQLTransactionRequest request;
+        origindb::grpc::SQLTransactionRequest request;
         for (const auto& query : queries) {
             request.add_queries(query);
         }
@@ -144,14 +144,14 @@ bool GrpcClient::ExecuteTransaction(const std::vector<std::string>& queries,
     }
 }
 
-bool GrpcClient::GetServerStatus(instantdb::grpc::StatusResponse* response) {
+bool GrpcClient::GetServerStatus(origindb::grpc::StatusResponse* response) {
     if (!IsConnected()) {
         RecordRequest(false);
         return false;
     }
 
     try {
-        instantdb::grpc::StatusRequest request;
+        origindb::grpc::StatusRequest request;
 
         grpc::ClientContext context;
         auto deadline = std::chrono::system_clock::now() + std::chrono::milliseconds(config_.request_timeout_ms);
@@ -172,14 +172,14 @@ bool GrpcClient::GetServerStatus(instantdb::grpc::StatusResponse* response) {
 
 bool GrpcClient::DeployModule(const std::string& module_name,
                              const std::vector<uint8_t>& bytecode,
-                             instantdb::grpc::DeployModuleResponse* response) {
+                             origindb::grpc::DeployModuleResponse* response) {
     if (!IsConnected()) {
         RecordRequest(false);
         return false;
     }
 
     try {
-        instantdb::grpc::DeployModuleRequest request;
+        origindb::grpc::DeployModuleRequest request;
         request.set_module_name(module_name);
         request.set_bytecode(bytecode.data(), bytecode.size());
 
@@ -206,15 +206,15 @@ bool GrpcClient::DeployModule(const std::string& module_name,
 
 bool GrpcClient::ExecuteReducer(const std::string& module_name,
                                const std::string& reducer_name,
-                               const std::vector<instantdb::grpc::WasmValue>& args,
-                               instantdb::grpc::ExecuteReducerResponse* response) {
+                               const std::vector<origindb::grpc::WasmValue>& args,
+                               origindb::grpc::ExecuteReducerResponse* response) {
     if (!IsConnected()) {
         RecordRequest(false);
         return false;
     }
 
     try {
-        instantdb::grpc::ExecuteReducerRequest request;
+        origindb::grpc::ExecuteReducerRequest request;
         request.set_module_name(module_name);
         request.set_reducer_name(reducer_name);
 
@@ -356,10 +356,10 @@ std::vector<uint8_t> GrpcPerformanceTest::GenerateTestWasmBytecode(const std::st
     return bytecode;
 }
 
-std::vector<instantdb::grpc::WasmValue> GrpcPerformanceTest::GenerateTestReducerArgs() {
-    std::vector<instantdb::grpc::WasmValue> args;
+std::vector<origindb::grpc::WasmValue> GrpcPerformanceTest::GenerateTestReducerArgs() {
+    std::vector<origindb::grpc::WasmValue> args;
 
-    instantdb::grpc::WasmValue arg1, arg2;
+    origindb::grpc::WasmValue arg1, arg2;
     arg1.set_i32_value(10);
     arg2.set_i32_value(32);
 
@@ -421,7 +421,7 @@ void SqlQueryPerformanceTest::ExecuteQueries(uint32_t thread_id) {
                 break;
         }
 
-        instantdb::grpc::SQLResponse response;
+        origindb::grpc::SQLResponse response;
 
         auto op_start = std::chrono::high_resolution_clock::now();
         bool success = client->ExecuteSQL(query, &response);
@@ -471,7 +471,7 @@ void TransactionPerformanceTest::ExecuteTransactions(uint32_t thread_id) {
             queries.push_back(GenerateInsertQuery("txn_test", base_sequence + i));
         }
 
-        instantdb::grpc::SQLTransactionResponse response;
+        origindb::grpc::SQLTransactionResponse response;
 
         auto op_start = std::chrono::high_resolution_clock::now();
         bool success = client->ExecuteTransaction(queries, &response);
@@ -524,7 +524,7 @@ void WasmDeploymentPerformanceTest::DeployModules(uint32_t thread_id) {
             bytecode.resize(target_size, 0x00);
         }
 
-        instantdb::grpc::DeployModuleResponse response;
+        origindb::grpc::DeployModuleResponse response;
 
         auto op_start = std::chrono::high_resolution_clock::now();
         bool success = client->DeployModule(module_name, bytecode, &response);
@@ -554,7 +554,7 @@ bool WasmReducerPerformanceTest::Setup() {
     // Deploy test module first
     if (!clients_.empty()) {
         auto bytecode = GenerateTestWasmBytecode(test_module_name_);
-        instantdb::grpc::DeployModuleResponse response;
+        origindb::grpc::DeployModuleResponse response;
 
         bool success = clients_[0]->DeployModule(test_module_name_, bytecode, &response);
         if (!success) {
@@ -597,7 +597,7 @@ void WasmReducerPerformanceTest::ExecuteReducers(uint32_t thread_id) {
             args[0].set_i32_value(sequence % 100);
         }
 
-        instantdb::grpc::ExecuteReducerResponse response;
+        origindb::grpc::ExecuteReducerResponse response;
 
         auto op_start = std::chrono::high_resolution_clock::now();
         bool success = client->ExecuteReducer(test_module_name_, "add_two", args, &response);
@@ -628,7 +628,7 @@ bool MixedWorkloadTest::Setup() {
     // Deploy test module for WASM operations
     if (!clients_.empty()) {
         auto bytecode = GenerateTestWasmBytecode(test_module_name_);
-        instantdb::grpc::DeployModuleResponse response;
+        origindb::grpc::DeployModuleResponse response;
 
         bool success = clients_[0]->DeployModule(test_module_name_, bytecode, &response);
         if (!success) {
@@ -674,7 +674,7 @@ void MixedWorkloadTest::ExecuteMixedWorkload(uint32_t thread_id) {
         if (op_type < sql_ratio_) {
             // SQL operation
             std::string query = GenerateSelectQuery("mixed_test");
-            instantdb::grpc::SQLResponse response;
+            origindb::grpc::SQLResponse response;
             success = client->ExecuteSQL(query, &response);
         } else if (op_type < sql_ratio_ + wasm_ratio_) {
             // WASM operation
@@ -682,11 +682,11 @@ void MixedWorkloadTest::ExecuteMixedWorkload(uint32_t thread_id) {
             if (!args.empty()) {
                 args[0].set_i32_value(sequence % 100);
             }
-            instantdb::grpc::ExecuteReducerResponse response;
+            origindb::grpc::ExecuteReducerResponse response;
             success = client->ExecuteReducer(test_module_name_, "add_two", args, &response);
         } else {
             // Status check operation
-            instantdb::grpc::StatusResponse response;
+            origindb::grpc::StatusResponse response;
             success = client->GetServerStatus(&response);
         }
 
@@ -744,7 +744,7 @@ void ConcurrentConnectionTest::TestConcurrentConnections(uint32_t thread_id) {
     while (std::chrono::steady_clock::now() < end_time) {
         for (auto& client : thread_clients) {
             if (client && client->IsConnected()) {
-                instantdb::grpc::StatusResponse response;
+                origindb::grpc::StatusResponse response;
                 client->GetServerStatus(&response);
             }
         }
@@ -849,4 +849,4 @@ GrpcClientConfig GrpcTestFactory::GetStressTestConfig() {
 }
 
 } // namespace performance
-} // namespace instantdb
+} // namespace origindb

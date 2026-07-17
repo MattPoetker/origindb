@@ -1,8 +1,8 @@
 {
-  "name": "instantdb-collab-demo",
+  "name": "origindb-collab-demo",
   "version": "1.0.0",
   "private": true,
-  "description": "Realtime collaborative workspace demo backed by InstantDB",
+  "description": "Realtime collaborative workspace demo backed by OriginDB",
   "type": "module",
   "main": "server.js",
   "scripts": {

@@ -10,9 +10,9 @@ cd "$ROOT"
 BUILD_DIR="${BUILD_DIR:-build_new}"
 
 mkdir -p benchmarks
-cmake --build "$BUILD_DIR" --target instantdb_bench -j8 > /dev/null
+cmake --build "$BUILD_DIR" --target origindb_bench -j8 > /dev/null
 
-"$BUILD_DIR/tests/performance/instantdb_bench" --out benchmarks/latest.json
+"$BUILD_DIR/tests/performance/origindb_bench" --out benchmarks/latest.json
 
 if [[ "${1:-}" == "--baseline" ]]; then
     cp benchmarks/latest.json benchmarks/baseline.json

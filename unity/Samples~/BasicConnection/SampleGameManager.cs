@@ -1,16 +1,16 @@
 using UnityEngine;
-using InstantDB.Unity;
-using InstantDB.Client;
+using OriginDB.Unity;
+using OriginDB.Client;
 using System.Collections.Generic;
 
 /// <summary>
-/// Example GameManager that demonstrates how to use InstantDB in Unity.
-/// This script shows the recommended pattern for integrating InstantDB into your game.
+/// Example GameManager that demonstrates how to use OriginDB in Unity.
+/// This script shows the recommended pattern for integrating OriginDB into your game.
 /// </summary>
 public class SampleGameManager : MonoBehaviour
 {
     [Header("Configuration")]
-    [SerializeField] private InstantDBConfig config;
+    [SerializeField] private OriginDBConfig config;
     [SerializeField] private bool connectOnStart = true;
 
     [Header("UI References")]
@@ -21,7 +21,7 @@ public class SampleGameManager : MonoBehaviour
     [SerializeField] private UnityEngine.UI.Button joinGameButton;
 
     // Connection management
-    private IInstantDBConnection _connection;
+    private IOriginDBConnection _connection;
     private bool _isConnected = false;
 
     // Game state
@@ -36,11 +36,11 @@ public class SampleGameManager : MonoBehaviour
     private void Awake()
     {
         // Ensure we have a network manager in the scene
-        if (InstantDBNetworkManager.Instance == null)
+        if (OriginDBNetworkManager.Instance == null)
         {
-            Debug.LogWarning("[Sample] No InstantDBNetworkManager found in scene. Creating one automatically.");
-            var managerObj = new GameObject("InstantDB Network Manager");
-            managerObj.AddComponent<InstantDBNetworkManager>();
+            Debug.LogWarning("[Sample] No OriginDBNetworkManager found in scene. Creating one automatically.");
+            var managerObj = new GameObject("OriginDB Network Manager");
+            managerObj.AddComponent<OriginDBNetworkManager>();
         }
 
         // Set up UI button listeners
@@ -59,17 +59,17 @@ public class SampleGameManager : MonoBehaviour
     private void Start()
     {
         // Wait for network manager to initialize
-        if (InstantDBNetworkManager.Instance != null && InstantDBNetworkManager.Instance.IsInitialized)
+        if (OriginDBNetworkManager.Instance != null && OriginDBNetworkManager.Instance.IsInitialized)
         {
             OnNetworkManagerReady();
         }
         else
         {
-            InstantDBNetworkManager.OnManagerInitialized += OnNetworkManagerReady;
+            OriginDBNetworkManager.OnManagerInitialized += OnNetworkManagerReady;
         }
     }
 
-    private void OnNetworkManagerReady(InstantDBNetworkManager manager = null)
+    private void OnNetworkManagerReady(OriginDBNetworkManager manager = null)
     {
         Debug.Log("[Sample] Network manager ready, setting up connection");
 
@@ -99,12 +99,12 @@ public class SampleGameManager : MonoBehaviour
                     return;
                 }
 
-                _connection = InstantDBNetworkManager.Instance.CreateConnection(config.CreateConnectionOptions());
+                _connection = OriginDBNetworkManager.Instance.CreateConnection(config.CreateConnectionOptions());
             }
             else
             {
                 Debug.LogWarning("[Sample] No configuration set, using default connection");
-                _connection = InstantDBNetworkManager.Instance.CreateDefaultConnection();
+                _connection = OriginDBNetworkManager.Instance.CreateDefaultConnection();
             }
 
             // Subscribe to connection events
@@ -118,7 +118,7 @@ public class SampleGameManager : MonoBehaviour
             _connection.OnPlayerDelete += HandlePlayerLeft;
 
             UpdateStatusText("Connecting...");
-            Debug.Log("[Sample] Connecting to InstantDB server...");
+            Debug.Log("[Sample] Connecting to OriginDB server...");
         }
         catch (System.Exception ex)
         {
@@ -190,10 +190,10 @@ public class SampleGameManager : MonoBehaviour
     private void HandleConnected()
     {
         _isConnected = true;
-        UpdateStatusText("Connected to InstantDB");
+        UpdateStatusText("Connected to OriginDB");
         UpdateUI();
         OnConnectionStateChanged?.Invoke(true);
-        Debug.Log("[Sample] Successfully connected to InstantDB");
+        Debug.Log("[Sample] Successfully connected to OriginDB");
     }
 
     private void HandleDisconnected(System.Exception ex)
@@ -212,7 +212,7 @@ public class SampleGameManager : MonoBehaviour
         _players.Clear();
         _localPlayerId = -1;
 
-        Debug.Log($"[Sample] Disconnected from InstantDB: {ex?.Message}");
+        Debug.Log($"[Sample] Disconnected from OriginDB: {ex?.Message}");
     }
 
     private void HandleConnectionError(System.Exception ex)
@@ -342,7 +342,7 @@ public class SampleGameManager : MonoBehaviour
 
     public bool IsConnected => _isConnected;
     public int LocalPlayerId => _localPlayerId;
-    public IInstantDBConnection Connection => _connection;
+    public IOriginDBConnection Connection => _connection;
 
     public async void SendPlayerAction(string actionType, object data = null)
     {
@@ -374,7 +374,7 @@ public class SampleGameManager : MonoBehaviour
     private void OnDestroy()
     {
         // Clean up event subscriptions
-        InstantDBNetworkManager.OnManagerInitialized -= OnNetworkManagerReady;
+        OriginDBNetworkManager.OnManagerInitialized -= OnNetworkManagerReady;
 
         if (_connection != null)
         {

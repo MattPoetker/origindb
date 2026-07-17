@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <chrono>
 
-namespace instantdb {
+namespace origindb {
 
 class WALImpl::Impl {
 public:
@@ -261,4 +261,4 @@ uint64_t WALImpl::GetSize() const {
     return impl_->GetSize();
 }
 
-} // namespace instantdb
+} // namespace origindb

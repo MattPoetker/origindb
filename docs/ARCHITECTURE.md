@@ -1,8 +1,8 @@
-# InstantDB Architecture
+# OriginDB Architecture
 
 ## Overview
 
-InstantDB is designed as a high-performance, in-memory SQL database with real-time changefeed capabilities. The architecture prioritizes simplicity, performance, and real-time data streaming.
+OriginDB is designed as a high-performance, in-memory SQL database with real-time changefeed capabilities. The architecture prioritizes simplicity, performance, and real-time data streaming.
 
 ## Core Components
 
@@ -186,7 +186,7 @@ struct WebSocketFrame {
 
 Runs user modules on **wasmtime** (LTS C API). Each module gets one
 long-lived instance; calls are serialized per module and dispatched
-through the single `instantdb_invoke` export defined in
+through the single `origindb_invoke` export defined in
 [WASM_ABI.md](WASM_ABI.md).
 
 - **Sandboxing**: epoch-based CPU deadlines (default 5000 ms/call) and a

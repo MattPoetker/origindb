@@ -6,7 +6,7 @@
 #include <variant>
 #include <chrono>
 
-using namespace instantdb::websocket;
+using namespace origindb::websocket;
 
 void PrintBytes(const std::vector<uint8_t>& bytes, const std::string& label) {
     std::cout << label << " (" << bytes.size() << " bytes): ";
@@ -251,7 +251,7 @@ int main() {
     spdlog::set_level(spdlog::level::info);
 
     std::cout << "====================================" << std::endl;
-    std::cout << "InstantDB Binary Protocol Test Suite" << std::endl;
+    std::cout << "OriginDB Binary Protocol Test Suite" << std::endl;
     std::cout << "====================================" << std::endl;
 
     TestBasicSerialization();

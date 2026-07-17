@@ -1,14 +1,14 @@
 @echo off
-REM InstantDB Installation Script for Windows (Batch)
-REM Usage: curl -sSf https://install.instantdb.com/windows.bat | cmd
+REM OriginDB Installation Script for Windows (Batch)
+REM Usage: curl -sSf https://install.origindb.com/windows.bat | cmd
 
 setlocal EnableDelayedExpansion
 
 REM Configuration
-set "GITHUB_REPO=your-org/instantdb"
-set "BINARY_NAME=instantdb.exe"
-set "INSTALL_DIR=%ProgramFiles%\InstantDB"
-set "TMP_DIR=%TEMP%\instantdb-install"
+set "GITHUB_REPO=your-org/origindb"
+set "BINARY_NAME=origindb.exe"
+set "INSTALL_DIR=%ProgramFiles%\OriginDB"
+set "TMP_DIR=%TEMP%\origindb-install"
 
 REM Colors (basic support)
 set "COLOR_INFO=echo [94m[INFO][0m"
@@ -16,7 +16,7 @@ set "COLOR_WARN=echo [93m[WARN][0m"
 set "COLOR_ERROR=echo [91m[ERROR][0m"
 set "COLOR_SUCCESS=echo [92m[SUCCESS][0m"
 
-echo Starting InstantDB installation...
+echo Starting OriginDB installation...
 
 REM Check if curl is available
 where curl >nul 2>nul
@@ -49,13 +49,13 @@ if exist "%TMP_DIR%" rmdir /s /q "%TMP_DIR%"
 mkdir "%TMP_DIR%"
 
 REM Download latest release
-%COLOR_INFO% Downloading InstantDB for Windows %ARCH%...
-set "DOWNLOAD_URL=https://github.com/%GITHUB_REPO%/releases/latest/download/instantdb-windows-%ARCH%.zip"
-set "ZIP_FILE=%TMP_DIR%\instantdb.zip"
+%COLOR_INFO% Downloading OriginDB for Windows %ARCH%...
+set "DOWNLOAD_URL=https://github.com/%GITHUB_REPO%/releases/latest/download/origindb-windows-%ARCH%.zip"
+set "ZIP_FILE=%TMP_DIR%\origindb.zip"
 
 curl -sSfL "%DOWNLOAD_URL%" -o "%ZIP_FILE%"
 if %errorlevel% neq 0 (
-    %COLOR_ERROR% Failed to download InstantDB
+    %COLOR_ERROR% Failed to download OriginDB
     goto cleanup
 )
 
@@ -75,7 +75,7 @@ if %errorlevel% neq 0 (
 )
 
 REM Create install directory
-%COLOR_INFO% Installing InstantDB...
+%COLOR_INFO% Installing OriginDB...
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 
 REM Copy binary
@@ -85,18 +85,18 @@ if %errorlevel% neq 0 (
     goto cleanup
 )
 
-%COLOR_SUCCESS% InstantDB installed to %INSTALL_DIR%\%BINARY_NAME%
+%COLOR_SUCCESS% OriginDB installed to %INSTALL_DIR%\%BINARY_NAME%
 
 REM Add to PATH
-%COLOR_INFO% Adding InstantDB to PATH...
+%COLOR_INFO% Adding OriginDB to PATH...
 echo %PATH% | findstr /C:"%INSTALL_DIR%" >nul
 if %errorlevel% equ 0 (
-    %COLOR_INFO% InstantDB is already in PATH
+    %COLOR_INFO% OriginDB is already in PATH
 ) else (
     REM Add to system PATH (requires admin privileges)
     reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /d "%PATH%;%INSTALL_DIR%" /f >nul 2>nul
     if !errorlevel! equ 0 (
-        %COLOR_SUCCESS% Added InstantDB to system PATH
+        %COLOR_SUCCESS% Added OriginDB to system PATH
         set "PATH=%PATH%;%INSTALL_DIR%"
     ) else (
         %COLOR_WARN% Could not add to system PATH (requires administrator privileges)
@@ -110,7 +110,7 @@ REM Verify installation
 if exist "%INSTALL_DIR%\%BINARY_NAME%" (
     "%INSTALL_DIR%\%BINARY_NAME%" --version >nul 2>nul
     if !errorlevel! equ 0 (
-        %COLOR_SUCCESS% InstantDB installed successfully!
+        %COLOR_SUCCESS% OriginDB installed successfully!
         %COLOR_SUCCESS% Location: %INSTALL_DIR%\%BINARY_NAME%
     ) else (
         %COLOR_WARN% Binary installed but version check failed
@@ -120,13 +120,13 @@ if exist "%INSTALL_DIR%\%BINARY_NAME%" (
     goto cleanup
 )
 
-%COLOR_SUCCESS% 🚀 InstantDB installation completed!
+%COLOR_SUCCESS% 🚀 OriginDB installation completed!
 echo.
 echo Next steps:
 echo   1. Restart your command prompt or open a new one
-echo   2. Start the InstantDB server: instantdb server
-echo   3. Check out the documentation: https://docs.instantdb.com
-echo   4. Try the C# quickstart: https://docs.instantdb.com/csharp
+echo   2. Start the OriginDB server: origindb server
+echo   3. Check out the documentation: https://docs.origindb.com
+echo   4. Try the C# quickstart: https://docs.origindb.com/csharp
 echo.
 
 goto end

@@ -5,7 +5,7 @@
 #include <memory>
 #include <chrono>
 
-namespace instantdb {
+namespace origindb {
 
 class Table;
 
@@ -46,4 +46,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace instantdb
+} // namespace origindb

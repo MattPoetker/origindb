@@ -1,7 +1,7 @@
-#include "../instantdb.hpp"
+#include "../origindb.hpp"
 #include <string>
 
-using namespace instantdb;
+using namespace origindb;
 
 /**
  * Counter Module Example
@@ -100,7 +100,7 @@ struct CounterEvent {
 };
 
 // Specialize serialization for our types
-namespace instantdb::serialization {
+namespace origindb::serialization {
 
 template<>
 class Serializable<Counter> {
@@ -127,7 +127,7 @@ public:
     }
 };
 
-} // namespace instantdb::serialization
+} // namespace origindb::serialization
 
 // =============================================================================
 // Reducer Functions
@@ -136,7 +136,7 @@ public:
 /**
  * Create a new counter with initial value
  */
-INSTANTDB_EXPORT int32_t create_counter(const char* counter_id, int64_t initial_value) {
+ORIGINDB_EXPORT int32_t create_counter(const char* counter_id, int64_t initial_value) {
     try {
         std::string id(counter_id);
 
@@ -191,7 +191,7 @@ INSTANTDB_EXPORT int32_t create_counter(const char* counter_id, int64_t initial_
 /**
  * Increment a counter by the specified amount
  */
-INSTANTDB_EXPORT int32_t increment_counter(const char* counter_id, int64_t amount) {
+ORIGINDB_EXPORT int32_t increment_counter(const char* counter_id, int64_t amount) {
     try {
         std::string id(counter_id);
 
@@ -248,7 +248,7 @@ INSTANTDB_EXPORT int32_t increment_counter(const char* counter_id, int64_t amoun
 /**
  * Get current counter value
  */
-INSTANTDB_EXPORT int32_t get_counter_value(const char* counter_id, int64_t* out_value) {
+ORIGINDB_EXPORT int32_t get_counter_value(const char* counter_id, int64_t* out_value) {
     try {
         std::string id(counter_id);
 
@@ -278,7 +278,7 @@ INSTANTDB_EXPORT int32_t get_counter_value(const char* counter_id, int64_t* out_
 /**
  * Delete a counter
  */
-INSTANTDB_EXPORT int32_t delete_counter(const char* counter_id) {
+ORIGINDB_EXPORT int32_t delete_counter(const char* counter_id) {
     try {
         std::string id(counter_id);
 
@@ -336,7 +336,7 @@ INSTANTDB_EXPORT int32_t delete_counter(const char* counter_id) {
 /**
  * Module initialization - called when module is loaded
  */
-INSTANTDB_INIT() {
+ORIGINDB_INIT() {
     utils::log(utils::LogLevel::Info, "Counter module initialized");
     return 0;
 }
@@ -344,7 +344,7 @@ INSTANTDB_INIT() {
 /**
  * Client connection handler
  */
-INSTANTDB_CLIENT_CONNECTED() {
+ORIGINDB_CLIENT_CONNECTED() {
     utils::log(utils::LogLevel::Info, "Client connected to counter module");
     return 0;
 }
@@ -352,7 +352,7 @@ INSTANTDB_CLIENT_CONNECTED() {
 /**
  * Client disconnection handler
  */
-INSTANTDB_CLIENT_DISCONNECTED() {
+ORIGINDB_CLIENT_DISCONNECTED() {
     utils::log(utils::LogLevel::Info, "Client disconnected from counter module");
     return 0;
 }

@@ -5,23 +5,23 @@
 #include <vector>
 #include <grpcpp/grpcpp.h>
 #include <nlohmann/json.hpp>
-#include "instantdb.grpc.pb.h"
+#include "origindb.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
-class InstantDBClient {
+class OriginDBClient {
 public:
-    InstantDBClient(std::shared_ptr<Channel> channel)
-        : stub_(instantdb::grpc::SQLService::NewStub(channel)),
-          wasm_stub_(instantdb::grpc::WasmService::NewStub(channel)) {}
+    OriginDBClient(std::shared_ptr<Channel> channel)
+        : stub_(origindb::grpc::SQLService::NewStub(channel)),
+          wasm_stub_(origindb::grpc::WasmService::NewStub(channel)) {}
 
     std::string ExecuteSQL(const std::string& sql) {
-        instantdb::grpc::SQLRequest request;
+        origindb::grpc::SQLRequest request;
         request.set_sql(sql);
 
-        instantdb::grpc::SQLResponse response;
+        origindb::grpc::SQLResponse response;
         ClientContext context;
 
         Status status = stub_->Execute(&context, request, &response);
@@ -65,8 +65,8 @@ public:
     }
 
     std::string GetStatus() {
-        instantdb::grpc::StatusRequest request;
-        instantdb::grpc::StatusResponse response;
+        origindb::grpc::StatusRequest request;
+        origindb::grpc::StatusResponse response;
         ClientContext context;
 
         Status status = stub_->GetStatus(&context, request, &response);
@@ -106,12 +106,12 @@ public:
         std::string bytecode((std::istreambuf_iterator<char>(in)),
                              std::istreambuf_iterator<char>());
 
-        instantdb::grpc::DeployModuleRequest request;
+        origindb::grpc::DeployModuleRequest request;
         request.set_name(name);
         request.set_bytecode(bytecode);
         request.set_version(version);
 
-        instantdb::grpc::DeployModuleResponse response;
+        origindb::grpc::DeployModuleResponse response;
         ClientContext context;
         Status status = wasm_stub_->DeployModule(&context, request, &response);
 
@@ -122,9 +122,9 @@ public:
     }
 
     std::string UndeployModule(const std::string& name) {
-        instantdb::grpc::UndeployModuleRequest request;
+        origindb::grpc::UndeployModuleRequest request;
         request.set_name(name);
-        instantdb::grpc::UndeployModuleResponse response;
+        origindb::grpc::UndeployModuleResponse response;
         ClientContext context;
         Status status = wasm_stub_->UndeployModule(&context, request, &response);
 
@@ -134,8 +134,8 @@ public:
     }
 
     std::string ListModules() {
-        instantdb::grpc::ListModulesRequest request;
-        instantdb::grpc::ListModulesResponse response;
+        origindb::grpc::ListModulesRequest request;
+        origindb::grpc::ListModulesResponse response;
         ClientContext context;
         Status status = wasm_stub_->ListModules(&context, request, &response);
 
@@ -155,10 +155,10 @@ public:
 
     std::string CallReducer(const std::string& module, const std::string& reducer,
                             const std::string& args_json) {
-        instantdb::grpc::ExecuteReducerRequest request;
+        origindb::grpc::ExecuteReducerRequest request;
         request.set_module_name(module);
         request.set_reducer_name(reducer);
-        request.set_sender_identity("instantdb_client");
+        request.set_sender_identity("origindb_client");
 
         if (!args_json.empty()) {
             auto args = nlohmann::json::parse(args_json, nullptr, false);
@@ -174,7 +174,7 @@ public:
             }
         }
 
-        instantdb::grpc::ExecuteReducerResponse response;
+        origindb::grpc::ExecuteReducerResponse response;
         ClientContext context;
         Status status = wasm_stub_->ExecuteReducer(&context, request, &response);
 
@@ -196,8 +196,8 @@ public:
     }
 
 private:
-    std::unique_ptr<instantdb::grpc::SQLService::Stub> stub_;
-    std::unique_ptr<instantdb::grpc::WasmService::Stub> wasm_stub_;
+    std::unique_ptr<origindb::grpc::SQLService::Stub> stub_;
+    std::unique_ptr<origindb::grpc::WasmService::Stub> wasm_stub_;
 };
 
 void PrintUsage(const char* program_name) {
@@ -256,7 +256,7 @@ int main(int argc, char* argv[]) {
     try {
         // Create gRPC channel
         auto channel = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
-        InstantDBClient client(channel);
+        OriginDBClient client(channel);
 
         if (command == "status") {
             std::cout << client.GetStatus() << std::endl;
@@ -267,13 +267,13 @@ int main(int argc, char* argv[]) {
             }
             std::cout << client.ExecuteSQL(sql) << std::endl;
         } else if (command == "interactive") {
-            std::cout << "InstantDB Interactive SQL Client\n";
+            std::cout << "OriginDB Interactive SQL Client\n";
             std::cout << "Connected to: " << server_address << "\n";
             std::cout << "Type 'exit' or 'quit' to exit\n\n";
 
             std::string line;
             while (true) {
-                std::cout << "instantdb> ";
+                std::cout << "origindb> ";
                 if (!std::getline(std::cin, line)) {
                     break;
                 }
