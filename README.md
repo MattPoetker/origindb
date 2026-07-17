@@ -112,7 +112,8 @@ Clients subscribe over the websocket with SQL:
 ### 4. Storage: in-memory tables + write-ahead log
 
 Tables live in memory (hash maps under shared mutexes); durability comes from
-a JSON-lines WAL that is fully replayed on startup. Transactions are
+a compact binary write-ahead log (length-prefixed records, a self-describing
+row codec) that is fully replayed on startup. Transactions are
 write-buffered and applied atomically at commit under a global lock — simple,
 correct for a single node. Raft-based replication is a future goal.
 

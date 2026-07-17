@@ -66,9 +66,9 @@ group commit.
 ## Non-goals (this phase)
 
 - Replication / multi-node durability (Raft). Separate effort.
-- WAL encryption, compression, or switching off JSON-lines. The single-pass
-  encoder/decoder from the recent optimization pass is fast enough; format
-  changes are a later, independent step.
+- WAL encryption or compression. (The JSON-lines format has since been
+  replaced with a compact binary codec — see row_codec.{h,cpp} — which cut WAL
+  size ~57% and sped recovery ~4x; encryption/compression remain future work.)
 - Checksums per record (worth doing eventually to detect torn tails; noted as
   a follow-up, not required for group commit).
 
