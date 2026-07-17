@@ -233,6 +233,11 @@ public:
             spdlog::info("✅ WebSocket server stopped");
         }
 
+        if (wasm_subscription_manager_) {
+            wasm_subscription_manager_->Stop();
+            spdlog::info("✅ WASM subscription manager stopped");
+        }
+
         if (wasm_engine_) {
             wasm_engine_->RequestShutdown();
             wasm_engine_->Shutdown();

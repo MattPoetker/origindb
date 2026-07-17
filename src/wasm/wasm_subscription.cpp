@@ -25,6 +25,12 @@ public:
         , is_running_(false) {
     }
 
+    ~Impl() {
+        // Destroying a joinable std::thread calls std::terminate; make sure
+        // the processing thread is stopped even if Stop() was never called.
+        Stop();
+    }
+
     bool Initialize() {
         spdlog::info("Initializing WASM subscription manager");
 
