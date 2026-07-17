@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <future>
 
 namespace origindb {
 
@@ -35,6 +36,15 @@ public:
 
     virtual bool Initialize() = 0;
     virtual bool Append(const WALEntry& entry) = 0;
+
+    // Group-commit path. Assigns sequence numbers + timestamps to `entries`
+    // in-order (call while holding the engine's commit lock so file order ==
+    // sequence order), enqueues them to the background writer, and returns a
+    // future that resolves true once the batch is durable per the configured
+    // SyncMode. The caller should release the commit lock BEFORE waiting on
+    // the future so the durability wait doesn't serialize other committers.
+    virtual std::future<bool> AppendBatchAsync(std::vector<WALEntry>& entries) = 0;
+
     virtual std::vector<WALEntry> ReadAll() = 0;
     virtual bool Truncate(uint64_t sequence) = 0;
     virtual void Flush() = 0;

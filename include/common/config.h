@@ -6,12 +6,23 @@
 
 namespace origindb {
 
+// WAL durability level. Higher = safer, slower per lone commit (group commit
+// amortizes the cost under concurrency).
+enum class SyncMode {
+    None,   // append only; OS decides when to flush (tests / throwaway data)
+    Flush,  // flush userspace buffer to OS per group (survives process crash,
+            // NOT power loss)
+    Fsync   // fdatasync/F_FULLFSYNC per group before acking (survives power loss)
+};
+
 struct StorageConfig {
     std::string data_dir = "./data";
     size_t max_memory_bytes = 4ULL * 1024 * 1024 * 1024; // 4GB
     size_t wal_buffer_size = 64 * 1024 * 1024; // 64MB
     size_t snapshot_interval = 10000; // entries
-    bool sync_wal = true;
+    bool sync_wal = true;               // legacy: true->Fsync, false->Flush
+    SyncMode sync_mode = SyncMode::Fsync;   // durability level (group commit)
+    uint32_t group_commit_window_us = 0;    // 0 = opportunistic batching only
     size_t page_size = 4096;
 };
 

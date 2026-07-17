@@ -498,6 +498,7 @@ if(BUILD_TESTS)
         tests/wasm/wasm_engine_test.cpp
         tests/unit/predicate_evaluator_test.cpp
         tests/unit/module_store_test.cpp
+        tests/unit/wal_durability_test.cpp
     )
     target_link_libraries(unit_tests PRIVATE
         wasm_engine

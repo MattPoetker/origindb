@@ -116,6 +116,21 @@ a JSON-lines WAL that is fully replayed on startup. Transactions are
 write-buffered and applied atomically at commit under a global lock — simple,
 correct for a single node. Raft-based replication is a future goal.
 
+The WAL is written by a dedicated writer thread with **group commit**: each
+transaction's entries are enqueued under the commit lock, then the committer
+releases the lock and waits for durability while the writer coalesces all queued
+commits behind a single `fdatasync` (Linux) / `F_FULLFSYNC` (macOS). Under
+concurrency, fsync cost is paid once per batch, so durable throughput rises with
+load instead of flatlining. Changefeed events publish only *after* the write is
+durable, so subscribers never observe data a crash could lose. Durability is
+configurable via `--sync-mode`:
+
+| Mode | Guarantee |
+|---|---|
+| `fsync` (default) | survives power loss (fdatasync/F_FULLFSYNC per group) |
+| `flush` | survives process crash, not power loss (no fsync) |
+| `none` | OS decides; tests / throwaway data |
+
 ## 🚀 Quick Start
 
 Prereqs: CMake ≥ 3.20, a C++20 compiler, OpenSSL, and (optional, for gRPC)
@@ -362,12 +377,16 @@ docs/              WASM_ABI.md (normative), architecture & API guides
 - **Auth is bearer-token only** (two static scopes, no per-user identity,
   no revocation beyond rotating the file). TLS covers gRPC but not yet the
   raw websocket endpoint — front it with a TLS proxy for real deployments.
-- **Single node**: no replication yet; **WAL flush is not fsync'd** — a
-  power loss can drop recently "committed" writes (group-commit + fsync is
-  the next durability work).
-- Cursor-grade write volume runs the full commit+WAL pipeline (~1 ms per
-  reducer call) — fine for demos and moderate loads; an ephemeral table class
-  is on the roadmap.
+- **Single node**: no replication yet. Durability is real — the WAL is
+  fsync'd per group commit by default (`--sync-mode fsync`), so acked writes
+  survive power loss; a disk write/fsync error is treated as fatal (the server
+  refuses further writes rather than diverge silently). Replication (Raft) is
+  the next durability tier.
+- A reducer call that writes runs the full commit + durable-WAL pipeline. In
+  `fsync` mode a lone commit is fsync-bound (single-digit ms on a good SSD, up
+  to ~20 ms with macOS `F_FULLFSYNC`); concurrent commits amortize this via
+  group commit, and `--sync-mode flush` (~0.1 ms) suits demos. An ephemeral
+  (non-durable) table class is on the roadmap.
 - Subscription delivery is best-effort (at-most-once) with a single delivery
   thread; backpressure handling is planned.
 

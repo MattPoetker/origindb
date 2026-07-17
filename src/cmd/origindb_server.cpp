@@ -477,6 +477,7 @@ void PrintUsage(const char* program_name) {
     std::cout << "  -d, --data-dir DIR       Data directory (default: ./origindb_data)\n";
     std::cout << "  --tls-cert FILE          TLS certificate (PEM) for the gRPC endpoint\n";
     std::cout << "  --tls-key FILE           TLS private key (PEM) for the gRPC endpoint\n";
+    std::cout << "  --sync-mode MODE         WAL durability: none|flush|fsync (default: fsync)\n";
     std::cout << "  --no-auth                Disable token auth (dev only; insecure)\n";
     std::cout << "  -l, --log-level LEVEL    Log level: trace,debug,info,warn,error (default: info)\n";
     std::cout << "  -c, --config FILE        Config file path (default: origindb.conf)\n";
@@ -503,6 +504,7 @@ int main(int argc, char* argv[]) {
         std::string log_level_arg;
         std::string tls_cert_arg;
         std::string tls_key_arg;
+        std::string sync_mode_arg;
         bool no_auth = false;
 
         for (int i = 1; i < argc; i++) {
@@ -552,6 +554,9 @@ int main(int argc, char* argv[]) {
             } else if (arg == "--tls-key") {
                 if (i + 1 < argc) tls_key_arg = argv[++i];
                 else { std::cerr << "Error: --tls-key requires a path\n"; return 1; }
+            } else if (arg == "--sync-mode") {
+                if (i + 1 < argc) sync_mode_arg = argv[++i];
+                else { std::cerr << "Error: --sync-mode requires none|flush|fsync\n"; return 1; }
             } else if (arg == "--no-auth") {
                 no_auth = true;
             } else if (arg[0] != '-') {
@@ -578,6 +583,12 @@ int main(int argc, char* argv[]) {
         }
         if (!tls_cert_arg.empty()) config.grpc.tls_cert = tls_cert_arg;
         if (!tls_key_arg.empty()) config.grpc.tls_key = tls_key_arg;
+        if (!sync_mode_arg.empty()) {
+            if (sync_mode_arg == "none")  config.storage.sync_mode = SyncMode::None;
+            else if (sync_mode_arg == "flush") config.storage.sync_mode = SyncMode::Flush;
+            else if (sync_mode_arg == "fsync") config.storage.sync_mode = SyncMode::Fsync;
+            else { std::cerr << "Error: --sync-mode must be none|flush|fsync\n"; return 1; }
+        }
         if (const char* t = std::getenv("ORIGINDB_ADMIN_TOKEN"))
             config.auth.admin_token = t;
         if (const char* t = std::getenv("ORIGINDB_CLIENT_TOKEN"))

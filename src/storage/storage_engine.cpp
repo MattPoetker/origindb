@@ -249,132 +249,125 @@ public:
         spdlog::debug("StorageEngine::Commit: Write set has {} operations", write_set.size());
 
         if (!write_set.empty()) {
-            // Validate and apply writes
-            spdlog::debug("StorageEngine::Commit: Acquiring tables lock");
-            std::unique_lock lock(tables_mutex_);
-            spdlog::debug("StorageEngine::Commit: Tables lock acquired");
+            // Buffer the WAL entries and changefeed events built under the lock;
+            // the batch is submitted to the WAL writer while still holding the
+            // lock (so sequence order == commit order) but the durability wait
+            // and event publish happen AFTER releasing it.
+            std::vector<WALEntry> wal_entries;
+            std::vector<ChangefeedEvent> pending_events;
+            wal_entries.reserve(write_set.size());
+            std::future<bool> durable;
 
-            for (const auto& write : write_set) {
-                spdlog::debug("StorageEngine::Commit: Processing write for table {}", write.table_name);
+            {
+                spdlog::debug("StorageEngine::Commit: Acquiring tables lock");
+                std::unique_lock lock(tables_mutex_);
+                spdlog::debug("StorageEngine::Commit: Tables lock acquired");
 
-                spdlog::debug("StorageEngine::Commit: Getting table {}", write.table_name);
-                // Don't call GetTable() here since we already hold tables_mutex_ lock
-                auto it = tables_.find(write.table_name);
-                if (it == tables_.end()) {
-                    spdlog::error("Table {} not found during commit",
-                                 write.table_name);
-                    return false;
-                }
-                auto table = it->second;
+                for (const auto& write : write_set) {
+                    // Don't call GetTable() here since we already hold tables_mutex_
+                    auto it = tables_.find(write.table_name);
+                    if (it == tables_.end()) {
+                        spdlog::error("Table {} not found during commit",
+                                     write.table_name);
+                        return false;
+                    }
+                    auto table = it->second;
 
-                spdlog::debug("StorageEngine::Commit: Table found, applying write operation {}", static_cast<int>(write.op));
+                    // Capture the existing row for UPDATE/DELETE before applying
+                    // the write, so changefeed consumers receive old_value
+                    std::optional<Row> old_row;
+                    if (write.op == WriteOp::UPDATE || write.op == WriteOp::DELETE) {
+                        old_row = table->Get(write.row.key);
+                    }
 
-                // Capture the existing row for UPDATE/DELETE before applying
-                // the write, so changefeed consumers receive old_value
-                std::optional<Row> old_row;
-                if (write.op == WriteOp::UPDATE || write.op == WriteOp::DELETE) {
-                    old_row = table->Get(write.row.key);
-                }
-
-                // Apply write based on operation type
-                bool success = false;
-                switch (write.op) {
-                    case WriteOp::INSERT:
-                        spdlog::debug("StorageEngine::Commit: Calling table->Insert for key {}", write.row.key);
-                        success = table->Insert(write.row);
-                        if (success) {
-                            stats_.total_rows++;
-                        } else if (table->Get(write.row.key)) {
-                            // Key was committed by a concurrent transaction after
-                            // this write was staged; resolve the upsert as UPDATE.
-                            old_row = table->Get(write.row.key);
-                            success = table->Update(write.row.key, write.row);
-                        }
-                        spdlog::debug("StorageEngine::Commit: table->Insert returned {}", success);
-                        break;
-                    case WriteOp::UPDATE:
-                        success = table->Update(write.row.key, write.row);
-                        break;
-                    case WriteOp::DELETE:
-                        success = table->Delete(write.row.key);
-                        if (success) stats_.total_rows--;
-                        break;
-                }
-
-                if (!success) {
-                    spdlog::error("Failed to apply write to table {}",
-                                 write.table_name);
-                    return false;
-                }
-
-                spdlog::debug("StorageEngine::Commit: Write applied successfully, logging to WAL");
-                // Log to WAL
-                WALEntry entry;
-
-                // Map WriteOp to WALEntryType correctly
-                switch (write.op) {
-                    case WriteOp::INSERT:
-                        entry.type = WALEntryType::INSERT;
-                        break;
-                    case WriteOp::UPDATE:
-                        entry.type = WALEntryType::UPDATE;
-                        break;
-                    case WriteOp::DELETE:
-                        entry.type = WALEntryType::DELETE;
-                        break;
-                }
-
-                entry.table_name = write.table_name;
-                entry.key = write.row.key;
-
-                spdlog::debug("StorageEngine::Commit: Serializing row for WAL");
-                entry.data = SerializeRow(write.row);
-                spdlog::debug("StorageEngine::Commit: Row serialized, appending to WAL");
-
-                entry.transaction_id = txn->GetTimestamp(); // Use timestamp as ID
-                entry.timestamp = txn->GetTimestamp();
-                wal_->Append(entry);
-                spdlog::debug("StorageEngine::Commit: WAL append completed");
-
-                // Emit changefeed event if changefeed engine is available
-                if (changefeed_engine_) {
-                    ChangefeedEvent cf_event;
-                    cf_event.offset = 0; // Will be assigned by changefeed engine
-                    cf_event.transaction_id = std::to_string(txn->GetTimestamp());
-                    cf_event.table = write.table_name;
-
-                    // Map WriteOp to operation string
+                    // Apply write based on operation type
+                    bool success = false;
                     switch (write.op) {
                         case WriteOp::INSERT:
-                            cf_event.operation = "INSERT";
+                            success = table->Insert(write.row);
+                            if (success) {
+                                stats_.total_rows++;
+                            } else if (table->Get(write.row.key)) {
+                                // Key was committed by a concurrent transaction
+                                // after this write was staged; resolve as UPDATE.
+                                old_row = table->Get(write.row.key);
+                                success = table->Update(write.row.key, write.row);
+                            }
                             break;
                         case WriteOp::UPDATE:
-                            cf_event.operation = "UPDATE";
+                            success = table->Update(write.row.key, write.row);
                             break;
                         case WriteOp::DELETE:
-                            cf_event.operation = "DELETE";
+                            success = table->Delete(write.row.key);
+                            if (success) stats_.total_rows--;
                             break;
                     }
 
-                    // Convert key to bytes
-                    cf_event.key = std::vector<uint8_t>(write.row.key.begin(), write.row.key.end());
-
-                    // For INSERT/UPDATE operations, set new_value
-                    if (write.op == WriteOp::INSERT || write.op == WriteOp::UPDATE) {
-                        cf_event.new_value = SerializeRow(write.row);
+                    if (!success) {
+                        spdlog::error("Failed to apply write to table {}",
+                                     write.table_name);
+                        return false;
                     }
 
-                    // For UPDATE/DELETE operations, set old_value from the row
-                    // captured before the write was applied
-                    if (old_row) {
-                        cf_event.old_value = SerializeRow(*old_row);
+                    // Build the WAL entry (sequence assigned at submit time)
+                    WALEntry entry;
+                    switch (write.op) {
+                        case WriteOp::INSERT: entry.type = WALEntryType::INSERT; break;
+                        case WriteOp::UPDATE: entry.type = WALEntryType::UPDATE; break;
+                        case WriteOp::DELETE: entry.type = WALEntryType::DELETE; break;
                     }
+                    entry.table_name = write.table_name;
+                    entry.key = write.row.key;
+                    entry.data = SerializeRow(write.row);
+                    entry.transaction_id = txn->GetTimestamp();
+                    wal_entries.push_back(std::move(entry));
 
-                    cf_event.timestamp = std::chrono::system_clock::now();
+                    // Buffer the changefeed event; published only after durable.
+                    if (changefeed_engine_) {
+                        ChangefeedEvent cf_event;
+                        cf_event.offset = 0;  // assigned at publish time
+                        cf_event.transaction_id = std::to_string(txn->GetTimestamp());
+                        cf_event.table = write.table_name;
+                        switch (write.op) {
+                            case WriteOp::INSERT: cf_event.operation = "INSERT"; break;
+                            case WriteOp::UPDATE: cf_event.operation = "UPDATE"; break;
+                            case WriteOp::DELETE: cf_event.operation = "DELETE"; break;
+                        }
+                        cf_event.key = std::vector<uint8_t>(
+                            write.row.key.begin(), write.row.key.end());
+                        if (write.op == WriteOp::INSERT || write.op == WriteOp::UPDATE) {
+                            cf_event.new_value = SerializeRow(write.row);
+                        }
+                        if (old_row) {
+                            cf_event.old_value = SerializeRow(*old_row);
+                        }
+                        cf_event.timestamp = std::chrono::system_clock::now();
+                        pending_events.push_back(std::move(cf_event));
+                    }
+                }
 
-                    changefeed_engine_->PublishEvent(cf_event);
-                    spdlog::debug("StorageEngine::Commit: Changefeed event emitted for table {}, operation {}",
-                                write.table_name, cf_event.operation);
+                // Submit the whole transaction's WAL entries as one batch while
+                // still under the lock: this assigns in-order sequence numbers
+                // and enqueues to the writer. IO/fsync happen on the writer
+                // thread; we wait below, after unlocking.
+                durable = wal_->AppendBatchAsync(wal_entries);
+            }  // release tables_mutex_
+
+            // Block until the batch is durable per the configured SyncMode.
+            // Other committers proceed concurrently and coalesce behind the
+            // same fsync (group commit).
+            if (!durable.get()) {
+                spdlog::critical("StorageEngine::Commit: WAL not durable; commit "
+                                 "failed (memtable now ahead of WAL — restart to "
+                                 "recover from last-good WAL)");
+                return false;
+            }
+
+            // Publish changefeed events only now that the data is durable, so
+            // subscribers never observe a write a later crash could lose.
+            if (changefeed_engine_) {
+                for (const auto& ev : pending_events) {
+                    changefeed_engine_->PublishEvent(ev);
                 }
             }
         }

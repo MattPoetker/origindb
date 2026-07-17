@@ -14,6 +14,7 @@ public:
 
     bool Initialize() override;
     bool Append(const WALEntry& entry) override;
+    std::future<bool> AppendBatchAsync(std::vector<WALEntry>& entries) override;
     std::vector<WALEntry> ReadAll() override;
     bool Truncate(uint64_t sequence) override;
     void Flush() override;

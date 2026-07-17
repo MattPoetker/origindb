@@ -98,6 +98,23 @@ std::filesystem::path FreshDir(const std::string& tag) {
 std::shared_ptr<StorageEngine> MakeStorage(const std::filesystem::path& dir) {
     StorageConfig config;
     config.data_dir = dir.string();
+    // Non-durable control: flush mode keeps the general benchmarks comparable
+    // to the flush-era baseline. Durable (fsync) throughput is measured
+    // separately in BenchDurability.
+    config.sync_mode = SyncMode::Flush;
+    auto storage = std::make_shared<StorageEngine>(config);
+    if (!storage->Initialize()) {
+        std::cerr << "storage init failed" << std::endl;
+        exit(1);
+    }
+    return storage;
+}
+
+std::shared_ptr<StorageEngine> MakeStorageMode(const std::filesystem::path& dir,
+                                               SyncMode mode) {
+    StorageConfig config;
+    config.data_dir = dir.string();
+    config.sync_mode = mode;
     auto storage = std::make_shared<StorageEngine>(config);
     if (!storage->Initialize()) {
         std::cerr << "storage init failed" << std::endl;
@@ -192,6 +209,61 @@ void BenchStorage() {
 
     storage->Shutdown();
     std::filesystem::remove_all(dir);
+}
+
+// ---------------------------------------------------------------------------
+// durability / group commit
+// ---------------------------------------------------------------------------
+
+// Concurrent committers at flush vs fsync, 1 vs 8 threads. The point: at fsync
+// mode, 8t throughput should far exceed 1t (many commits coalesce behind one
+// fdatasync = group commit). If they were equal, batching isn't working.
+void BenchDurability() {
+    std::cout << "\ndurability (group commit)" << std::endl;
+    struct Case { SyncMode mode; const char* name; };
+    for (Case c : {Case{SyncMode::Flush, "flush"}, Case{SyncMode::Fsync, "fsync"}}) {
+        for (int threads : {1, 8}) {
+            auto dir = FreshDir("durable");
+            auto storage = MakeStorageMode(dir, c.mode);
+            CreateBenchTable(*storage);
+
+            // fsync on macOS (F_FULLFSYNC) is genuinely slow; use fewer ops so
+            // the single-thread case still finishes quickly.
+            const uint64_t per_thread = (c.mode == SyncMode::Fsync) ? 1000 : 5000;
+            std::atomic<uint64_t> next_key{0};
+            std::vector<double> lat;      // p99 collected for the 1-thread case
+            std::mutex lat_mu;
+
+            Timer total;
+            std::vector<std::thread> ths;
+            for (int th = 0; th < threads; th++) {
+                ths.emplace_back([&] {
+                    for (uint64_t i = 0; i < per_thread; i++) {
+                        uint64_t k = next_key.fetch_add(1);
+                        Timer t;
+                        storage->Insert("bench", MakeRow(k));
+                        if (threads == 1) {
+                            double us = t.Us();
+                            std::lock_guard<std::mutex> g(lat_mu);
+                            lat.push_back(us);
+                        }
+                    }
+                });
+            }
+            for (auto& t : ths) t.join();
+
+            BenchResult r{.name = std::string("wal_commit_") + c.name + "_" +
+                                  std::to_string(threads) + "t"};
+            r.ops = per_thread * threads;
+            r.seconds = total.Seconds();
+            r.latencies_us = std::move(lat);
+            r.notes = std::to_string(threads) + " threads, " + c.name;
+            Report(std::move(r));
+
+            storage->Shutdown();
+            std::filesystem::remove_all(dir);
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -455,6 +527,7 @@ int main(int argc, char** argv) {
     auto module_bytes = LoadFixture(fixture);
 
     BenchStorage();
+    BenchDurability();
     std::cout << "\nrecovery" << std::endl;
     BenchWalRecovery(10000, false);
     BenchWalRecovery(100000, false);
