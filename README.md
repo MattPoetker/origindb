@@ -36,7 +36,7 @@ build_new/origindb_server -d ./nightboard_data -p 8787 -g 50051 &
 build_new/origindb_client deploy collab sdk/typescript/build/collab.wasm 1.0.0
 
 # 2. start the web frontend
-cd examples/collab && npm install && node server.js --ws-port 8787 &
+cd examples/collab && npm install && npm run build && node server.js --ws-port 8787 &
 
 # 3. open http://<your-lan-ip>:9090 on every device
 ```

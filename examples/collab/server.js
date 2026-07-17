@@ -75,7 +75,10 @@ const MIME = {
 };
 
 // Reducers the frontend may invoke.
-const ALLOWED = new Set(["join", "moveCursor", "addNote", "removeNote", "clearBoard"]);
+const ALLOWED = new Set([
+  "join", "moveCursor", "addNote", "removeNote", "clearBoard",
+  "moveNote", "editNote", "sendChat",
+]);
 
 const server = http.createServer(async (req, res) => {
   try {

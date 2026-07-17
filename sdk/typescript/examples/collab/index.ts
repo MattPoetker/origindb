@@ -26,6 +26,7 @@ import {
   generateId,
   logInfo,
   nowMs,
+  readTable,
   registerReducer,
   scanTable,
   setModuleInfo,
@@ -40,11 +41,12 @@ export {
   __origindb_abort,
 } from "../../assembly/index";
 
-setModuleInfo("collab", "1.0.0");
+setModuleInfo("collab", "2.0.0");
 declareTable("presence");
 declareTable("cursors");
 declareTable("notes");
 declareTable("activity");
+declareTable("chat");
 
 function requireString(args: Array<JsonValue>, index: i32, name: string): string {
   const v = index < args.length ? args[index].asString() : "";
@@ -79,6 +81,8 @@ registerReducer(
       JsonValue.newObject().setString("id", "__seed").toString());
     writeTable("activity", "__seed",
       JsonValue.newObject().setString("id", "__seed").toString());
+    writeTable("chat", "__seed",
+      JsonValue.newObject().setString("id", "__seed").toString());
     logInfo("collab board initialized");
     return null;
   }
@@ -107,16 +111,22 @@ registerReducer(
     const color = requireString(args, 1, "color");
     const x = args.length > 2 ? args[2].asNumber() : 0;
     const y = args.length > 3 ? args[3].asNumber() : 0;
+    // Optional Figma-style cursor message, streamed with the position.
+    const msg = args.length > 4 ? args[4].asString() : "";
+    if (msg.length > 140) {
+      abortCall("cursor message exceeds 140 characters");
+    }
     const row = JsonValue.newObject()
       .setString("user", user)
       .setString("color", color)
       .setNumber("x", x)
       .setNumber("y", y)
+      .setString("msg", msg)
       .setNumber("ts", <f64>nowMs());
     writeTable("cursors", user, row.toString());
     return null;
   },
-  ["user", "color", "x", "y"]
+  ["user", "color", "x", "y", "msg"]
 );
 
 registerReducer(
@@ -160,6 +170,93 @@ registerReducer(
     return null;
   },
   ["id", "user"]
+);
+
+registerReducer(
+  "moveNote",
+  (args: Array<JsonValue>): JsonValue | null => {
+    const id = requireString(args, 0, "id");
+    const x = args.length > 1 ? args[1].asNumber() : 0.5;
+    const y = args.length > 2 ? args[2].asNumber() : 0.5;
+    if (id.startsWith("__")) {
+      abortCall("cannot move seed rows");
+    }
+    const existing = readTable("notes", id);
+    if (existing == null) {
+      abortCall("note not found: " + id);
+    }
+    const row = JsonValue.parse(existing!);
+    row.setNumber("x", x).setNumber("y", y);
+    writeTable("notes", id, row.toString());
+    return null;
+  },
+  ["id", "x", "y"]
+);
+
+registerReducer(
+  "editNote",
+  (args: Array<JsonValue>): JsonValue | null => {
+    const id = requireString(args, 0, "id");
+    const user = args.length > 1 ? args[1].asString() : "someone";
+    const text = args.length > 2 ? args[2].asString() : "";
+    if (id.startsWith("__")) {
+      abortCall("cannot edit seed rows");
+    }
+    if (text.length > 280) {
+      abortCall("note text exceeds 280 characters");
+    }
+    const existing = readTable("notes", id);
+    if (existing == null) {
+      abortCall("note not found: " + id);
+    }
+    const row = JsonValue.parse(existing!);
+    row.setString("text", text);
+    row.setString("edited_by", user);
+    row.setNumber("edited_at", <f64>nowMs());
+    writeTable("notes", id, row.toString());
+    return null;
+  },
+  ["id", "user", "text"]
+);
+
+registerReducer(
+  "sendChat",
+  (args: Array<JsonValue>): JsonValue | null => {
+    const user = requireString(args, 0, "user");
+    const color = requireString(args, 1, "color");
+    const text = requireString(args, 2, "text");
+    if (text.length > 500) {
+      abortCall("chat message exceeds 500 characters");
+    }
+    const id = generateId().toString();
+    const row = JsonValue.newObject()
+      .setString("id", id)
+      .setString("user", user)
+      .setString("color", color)
+      .setString("text", text)
+      .setNumber("ts", <f64>nowMs());
+    writeTable("chat", id, row.toString());
+    return JsonValue.newObject().setString("id", id);
+  },
+  ["user", "color", "text"]
+);
+
+registerReducer(
+  "__migrate",
+  (args: Array<JsonValue>): JsonValue | null => {
+    const oldVersion = args.length > 0 ? args[0].asString() : "";
+    const newVersion = args.length > 1 ? args[1].asString() : "";
+    // v2 introduces the chat table; seed it so subscriptions get a valid
+    // initial_state (clients skip "__*" keys).
+    if (readTable("chat", "__seed") == null) {
+      writeTable("chat", "__seed",
+        JsonValue.newObject().setString("id", "__seed").toString());
+    }
+    logInfo("collab migrated " + oldVersion + " -> " + newVersion);
+    logActivity("system", "", "board upgraded",
+                oldVersion + " → " + newVersion);
+    return null;
+  }
 );
 
 registerReducer(

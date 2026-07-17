@@ -56,3 +56,4 @@ tests/performance/perf_test_runner
 tests/performance/storage_perf_runner
 tests/performance/test_data_generator
 benchmarks/latest.json
+examples/collab/public/

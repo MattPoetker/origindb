@@ -1,15 +1,24 @@
 {
   "name": "origindb-collab-demo",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Realtime collaborative workspace demo backed by OriginDB",
+  "description": "NIGHTBOARD — realtime collaborative workspace demo backed by OriginDB",
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "vite build",
+    "dev": "vite"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
     "@grpc/grpc-js": "^1.12.0",
-    "@grpc/proto-loader": "^0.7.13"
+    "@grpc/proto-loader": "^0.7.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.0"
   }
 }
