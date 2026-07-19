@@ -63,6 +63,16 @@ public:
         events_.push(timestamped_event);
         all_events_.push_back(timestamped_event);
 
+        // Bound the retained history so a high-write workload can't grow it
+        // without limit. Trim in batches (drop the oldest 25% once over the
+        // cap) so the amortized cost per event stays O(1). Retention-by-time
+        // (CompactEvents) still applies on top of this hard ceiling.
+        if (config_.max_lag_entries > 0 &&
+            all_events_.size() > config_.max_lag_entries) {
+            size_t drop = all_events_.size() - (config_.max_lag_entries * 3 / 4);
+            all_events_.erase(all_events_.begin(), all_events_.begin() + drop);
+        }
+
         spdlog::debug("Published changefeed event: offset={}, table={}, op={}",
                      timestamped_event.offset, timestamped_event.table,
                      timestamped_event.operation);

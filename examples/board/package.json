@@ -1,0 +1,7 @@
+{
+  "name": "board-demo",
+  "private": true,
+  "type": "module",
+  "description": "Board — a minimal realtime OriginDB MVP (Getting Started tutorial)",
+  "scripts": { "start": "node server.js" }
+}

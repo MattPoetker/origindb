@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>TERRITORIES · OriginDB RTS</title>
+<style>
+  :root {
+    --bg: #0b0f16;
+    --panel: rgba(14, 20, 30, 0.86);
+    --edge: #1d2b3f;
+    --ink: #cfe3f7;
+    --dim: #6d8199;
+    --gold: #ffcf4d;
+    --wood: #7ec86a;
+    --food: #ff8f5a;
+    --accent: #41d6ff;
+    --danger: #ff5d73;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); }
+  body {
+    font-family: "SFMono-Regular", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+    color: var(--ink);
+    -webkit-user-select: none; user-select: none;
+    cursor: crosshair;
+  }
+  #game { position: fixed; inset: 0; display: block; }
+
+  /* ---- HUD ---- */
+  .hud { position: fixed; z-index: 10; pointer-events: none; }
+  .hud > * { pointer-events: auto; }
+
+  #top {
+    top: 0; left: 0; right: 0; height: 46px;
+    display: flex; align-items: center; gap: 18px;
+    padding: 0 16px;
+    background: linear-gradient(180deg, rgba(9,13,20,.96), rgba(9,13,20,.62) 70%, transparent);
+    border-bottom: 1px solid var(--edge);
+    font-size: 13px; letter-spacing: .5px;
+  }
+  #brand { font-weight: 700; letter-spacing: 3px; color: #eaf4ff; }
+  #brand small { color: var(--accent); letter-spacing: 2px; font-weight: 400; }
+  .res { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+  .res .dot { width: 9px; height: 9px; border-radius: 2px; }
+  .res b { font-weight: 700; }
+  .res.gold .dot { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+  .res.wood .dot { background: var(--wood); box-shadow: 0 0 8px var(--wood); }
+  .res.food .dot { background: var(--food); box-shadow: 0 0 8px var(--food); }
+  #conn { margin-left: auto; color: var(--dim); font-size: 12px; }
+  #conn.ok { color: var(--wood); }
+
+  /* ---- build palette ---- */
+  #palette {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 14px; z-index: 10;
+    display: flex; gap: 8px; padding: 8px;
+    background: var(--panel); border: 1px solid var(--edge); border-radius: 10px;
+    backdrop-filter: blur(6px);
+  }
+  .pbtn {
+    min-width: 96px; padding: 8px 10px; border-radius: 7px; cursor: pointer;
+    background: #101a28; border: 1px solid var(--edge); color: var(--ink);
+    font: inherit; font-size: 12px; text-align: left; line-height: 1.25;
+    transition: border-color .12s, background .12s, transform .06s;
+  }
+  .pbtn:hover { border-color: var(--accent); background: #12233a; }
+  .pbtn:active { transform: translateY(1px); }
+  .pbtn.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .pbtn .k { display: block; font-weight: 700; letter-spacing: 1px; }
+  .pbtn .c { display: block; color: var(--dim); font-size: 10.5px; margin-top: 2px; }
+
+  /* ---- selection panel ---- */
+  #sel {
+    position: fixed; left: 14px; bottom: 14px; z-index: 10; width: 220px;
+    background: var(--panel); border: 1px solid var(--edge); border-radius: 10px;
+    padding: 10px 12px; font-size: 12px; display: none; backdrop-filter: blur(6px);
+  }
+  #sel h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: 2px; color: var(--accent); font-weight: 700; }
+  #sel .sbtn {
+    display: block; width: 100%; margin-top: 6px; padding: 7px 9px; cursor: pointer;
+    background: #101a28; border: 1px solid var(--edge); color: var(--ink); border-radius: 6px;
+    font: inherit; font-size: 11.5px; text-align: left;
+  }
+  #sel .sbtn:hover { border-color: var(--accent); background: #12233a; }
+  #sel .meta { color: var(--dim); }
+
+  /* ---- minimap ---- */
+  #minimap {
+    position: fixed; right: 14px; bottom: 14px; z-index: 10;
+    width: 172px; height: 172px; border: 1px solid var(--edge); border-radius: 8px;
+    background: #060a10; box-shadow: 0 6px 24px rgba(0,0,0,.5);
+  }
+
+  /* ---- toast ---- */
+  #toast {
+    position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 20;
+    background: rgba(20,10,14,.92); border: 1px solid var(--danger); color: #ffd9df;
+    padding: 8px 14px; border-radius: 8px; font-size: 12px; opacity: 0;
+    transition: opacity .2s; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+
+  /* ---- start overlay ---- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(1200px 600px at 50% -10%, rgba(65,214,255,.08), transparent 60%), rgba(6,9,14,.92);
+    backdrop-filter: blur(3px);
+  }
+  .card {
+    width: min(440px, 92vw); background: var(--panel); border: 1px solid var(--edge);
+    border-radius: 16px; padding: 26px 26px 22px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  }
+  .card h1 { margin: 0 0 4px; font-size: 30px; letter-spacing: 8px; color: #eaf4ff; }
+  .card .sub { color: var(--dim); font-size: 12px; letter-spacing: 1px; margin-bottom: 18px; }
+  .card input {
+    width: 100%; padding: 11px 12px; border-radius: 8px; background: #0c1420;
+    border: 1px solid var(--edge); color: var(--ink); font: inherit; font-size: 14px; margin-bottom: 14px;
+  }
+  .card input:focus { outline: none; border-color: var(--accent); }
+  #swatches { display: flex; gap: 9px; justify-content: center; margin-bottom: 18px; }
+  .sw { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
+  .sw.sel { border-color: #fff; box-shadow: 0 0 12px currentColor; }
+  .play {
+    width: 100%; padding: 12px; border: none; border-radius: 9px; cursor: pointer;
+    background: linear-gradient(90deg, #2aa9d6, #41d6ff); color: #04121a; font: inherit;
+    font-weight: 800; letter-spacing: 3px; font-size: 15px;
+  }
+  .play:hover { filter: brightness(1.08); }
+  .hint { color: var(--dim); font-size: 11px; margin-top: 14px; line-height: 1.5; }
+  .hint b { color: var(--ink); font-weight: 700; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div class="hud">
+    <div id="top">
+      <span id="brand">TERRITORIES <small>· OriginDB RTS</small></span>
+      <span class="res gold"><span class="dot"></span>gold <b id="rGold">0</b></span>
+      <span class="res wood"><span class="dot"></span>wood <b id="rWood">0</b></span>
+      <span class="res food"><span class="dot"></span>food <b id="rFood">0</b></span>
+      <span id="conn">connecting…</span>
+    </div>
+  </div>
+
+  <div id="palette">
+    <button class="pbtn" data-build="barracks"><span class="k">BARRACKS</span><span class="c">120w · 40g — trains soldiers</span></button>
+    <button class="pbtn" data-build="mine"><span class="k">MINE</span><span class="c">80w · 20g — makes gold</span></button>
+    <button class="pbtn" data-build="farm"><span class="k">FARM</span><span class="c">70w — makes food</span></button>
+  </div>
+
+  <div id="sel"></div>
+  <canvas id="minimap" width="172" height="172"></canvas>
+  <div id="toast"></div>
+
+  <div class="overlay" id="start">
+    <div class="card">
+      <h1>TERRITORIES</h1>
+      <div class="sub">CLAIM · BUILD · CONQUER — A PERSISTENT WORLD</div>
+      <input id="name" maxlength="18" placeholder="commander name" />
+      <div id="swatches"></div>
+      <button class="play" id="playBtn">DEPLOY EMPIRE</button>
+      <div class="hint">
+        <b>Left-drag</b> select · <b>Right-click</b> move / gather / attack<br />
+        Build from the bottom bar · <b>WASD</b> pan · <b>Wheel</b> zoom<br />
+        Your empire persists by session — restarts survive.
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

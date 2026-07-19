@@ -24,6 +24,20 @@ struct StorageConfig {
     SyncMode sync_mode = SyncMode::Fsync;   // durability level (group commit)
     uint32_t group_commit_window_us = 0;    // 0 = opportunistic batching only
     size_t page_size = 4096;
+
+    // Runtime WAL checkpointing. A background thread periodically snapshots all
+    // tables and truncates the WAL, so the log can't grow without bound while
+    // the server runs (previously the WAL was only truncated on clean shutdown,
+    // letting a long-lived high-write workload fill the disk). A snapshot + a
+    // short WAL tail replaces replaying every write ever made.
+    bool checkpoint_enabled = true;
+    // Size trigger: checkpoint once the WAL reaches this many bytes.
+    size_t checkpoint_wal_bytes = 256ULL * 1024 * 1024; // 256MB
+    // Time trigger: also checkpoint at least this often if the WAL has grown.
+    // 0 disables the time trigger (size trigger still applies).
+    uint32_t checkpoint_interval_sec = 300; // 5 min
+    // How often the checkpoint thread wakes to evaluate the triggers.
+    uint32_t checkpoint_poll_sec = 5;
 };
 
 struct RaftConfig {
@@ -98,6 +112,19 @@ struct AuthConfig {
     std::string client_token;        // explicit override; else load-or-generate
 };
 
+// Native in-server tick driver for sharded modules (e.g. game arenas). When
+// `count > 0`, the server drives modules "<module_prefix>0".."<prefix>N-1" by
+// calling `reducer` at `hz` from a worker pool, passing args [frameMs, substeps,
+// shardIndex]. Replaces an external process polling ticks over gRPC.
+struct TickConfig {
+    std::string module_prefix;      // empty = disabled
+    uint32_t count = 0;             // number of sharded modules
+    std::string reducer = "tick";
+    uint32_t hz = 60;
+    uint32_t substeps = 1;
+    uint32_t threads = 0;           // 0 = hardware_concurrency
+};
+
 struct ServerConfig {
     std::string node_id;
     StorageConfig storage;
@@ -110,6 +137,7 @@ struct ServerConfig {
     MetricsConfig metrics;
     LoggingConfig logging;
     AuthConfig auth;
+    TickConfig tick;
 };
 
 bool ParseCommandLine(int argc, char* argv[], ServerConfig& config);

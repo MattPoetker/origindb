@@ -1,0 +1,16 @@
+{
+  "entries": ["./index.ts"],
+  "targets": {
+    "release": {
+      "outFile": "../../build/board.wasm",
+      "textFile": "../../build/board.wat",
+      "optimizeLevel": 3,
+      "shrinkLevel": 1
+    }
+  },
+  "options": {
+    "runtime": "incremental",
+    "exportRuntime": true,
+    "use": ["abort=assembly/index/__origindb_abort"]
+  }
+}

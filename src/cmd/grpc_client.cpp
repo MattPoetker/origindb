@@ -48,18 +48,23 @@ public:
                         result += "  Key: " + row.key();
                         for (const auto& [col_name, col_value] : row.columns()) {
                             result += ", " + col_name + ": ";
-                            if (col_value.has_int64_value()) {
-                                result += std::to_string(col_value.int64_value());
-                            } else if (col_value.has_string_value()) {
-                                result += "\"" + col_value.string_value() + "\"";
-                            } else if (col_value.has_double_value()) {
-                                result += std::to_string(col_value.double_value());
-                            } else if (col_value.has_bool_value()) {
-                                result += col_value.bool_value() ? "true" : "false";
-                            } else if (col_value.has_bytes_value()) {
-                                result += "[binary data]";
-                            } else {
-                                result += "NULL";
+                            // Use the oneof discriminator (value_case) rather
+                            // than has_<field>() — portable across protobuf
+                            // versions.
+                            using CV = std::decay_t<decltype(col_value)>;
+                            switch (col_value.value_case()) {
+                                case CV::kInt64Value:
+                                    result += std::to_string(col_value.int64_value()); break;
+                                case CV::kStringValue:
+                                    result += "\"" + col_value.string_value() + "\""; break;
+                                case CV::kDoubleValue:
+                                    result += std::to_string(col_value.double_value()); break;
+                                case CV::kBoolValue:
+                                    result += col_value.bool_value() ? "true" : "false"; break;
+                                case CV::kBytesValue:
+                                    result += "[binary data]"; break;
+                                default:
+                                    result += "NULL"; break;
                             }
                         }
                         result += "\n";
@@ -200,12 +205,15 @@ public:
                              std::to_string(response.execution_time_micros()) + " μs)";
         for (const auto& value : response.results()) {
             result += "\n  → ";
-            if (value.has_int64_value()) result += std::to_string(value.int64_value());
-            else if (value.has_string_value()) result += value.string_value();
-            else if (value.has_double_value()) result += std::to_string(value.double_value());
-            else if (value.has_bool_value()) result += value.bool_value() ? "true" : "false";
-            else if (value.has_bytes_value()) result += value.bytes_value();
-            else result += "null";
+            using WV = std::decay_t<decltype(value)>;
+            switch (value.value_case()) {
+                case WV::kInt64Value: result += std::to_string(value.int64_value()); break;
+                case WV::kStringValue: result += value.string_value(); break;
+                case WV::kDoubleValue: result += std::to_string(value.double_value()); break;
+                case WV::kBoolValue: result += value.bool_value() ? "true" : "false"; break;
+                case WV::kBytesValue: result += value.bytes_value(); break;
+                default: result += "null"; break;
+            }
         }
         return result;
     }

@@ -1,5 +1,7 @@
 #include "storage/mem_table.h"
 #include <spdlog/spdlog.h>
+#include <map>
+#include <mutex>
 #include <unordered_map>
 #include <shared_mutex>
 
@@ -46,6 +48,7 @@ public:
         }
 
         rows_[row.key] = row;
+        InvalidateJson(row.key);
         spdlog::debug("Inserted row with key {} into table {}", row.key, schema_.name);
         return true;
     }
@@ -66,6 +69,7 @@ public:
             std::chrono::system_clock::now().time_since_epoch()).count();
 
         rows_[key] = updated_row;
+        InvalidateJson(key);
         spdlog::debug("Updated row with key {} in table {}", key, schema_.name);
         return true;
     }
@@ -80,6 +84,7 @@ public:
         }
 
         rows_.erase(it);
+        InvalidateJson(key);
         spdlog::debug("Deleted row with key {} from table {}", key, schema_.name);
         return true;
     }
@@ -98,13 +103,30 @@ public:
     void Scan(const std::string& start_key, const std::string& end_key,
               ScanCallback callback) const {
         std::shared_lock lock(mutex_);
+        // Ordered container: seek to start_key and stop past end_key instead of
+        // iterating the whole table (universal win for range/prefix scans).
+        auto it = start_key.empty() ? rows_.begin() : rows_.lower_bound(start_key);
+        for (; it != rows_.end(); ++it) {
+            if (!end_key.empty() && it->first > end_key) break;
+            if (!callback(it->first, it->second)) break;
+        }
+    }
 
-        for (const auto& [key, row] : rows_) {
-            if (key >= start_key && (end_key.empty() || key <= end_key)) {
-                if (!callback(key, row)) {
-                    break; // Callback returned false, stop scanning
-                }
-            }
+    std::optional<std::string> GetJsonCached(const std::string& key,
+                                             const JsonSerializer& ser) const {
+        std::shared_lock lock(mutex_);
+        auto it = rows_.find(key);
+        if (it == rows_.end()) return std::nullopt;
+        return CachedJson(it->first, it->second, ser);
+    }
+
+    void ScanJsonCached(const std::string& start_key, const std::string& end_key,
+                        const JsonSerializer& ser, const JsonRowCallback& cb) const {
+        std::shared_lock lock(mutex_);
+        auto it = start_key.empty() ? rows_.begin() : rows_.lower_bound(start_key);
+        for (; it != rows_.end(); ++it) {
+            if (!end_key.empty() && it->first > end_key) break;
+            if (!cb(it->first, CachedJson(it->first, it->second, ser))) break;
         }
     }
 
@@ -134,10 +156,30 @@ public:
     }
 
 private:
+    // Return the row's cached value-JSON, computing + caching it on a miss.
+    // Callers hold at least a shared lock on mutex_, so no write can invalidate
+    // concurrently; the cache map itself is guarded by cache_mutex_ so parallel
+    // readers filling the same entry don't race.
+    const std::string& CachedJson(const std::string& key, const Row& row,
+                                  const JsonSerializer& ser) const {
+        std::lock_guard<std::mutex> clock(cache_mutex_);
+        auto it = json_cache_.find(key);
+        if (it != json_cache_.end()) return it->second;
+        return json_cache_.emplace(key, ser(row)).first->second;
+    }
+
+    void InvalidateJson(const std::string& key) {
+        std::lock_guard<std::mutex> clock(cache_mutex_);
+        json_cache_.erase(key);
+    }
+
     TableSchema schema_;
     mutable std::shared_mutex mutex_;
-    std::unordered_map<std::string, Row> rows_;
+    std::map<std::string, Row> rows_;                 // ordered: efficient scans
     std::unordered_map<std::string, IndexSchema> indexes_;
+
+    mutable std::mutex cache_mutex_;
+    mutable std::unordered_map<std::string, std::string> json_cache_;  // key -> value JSON
 };
 
 MemTable::MemTable(const TableSchema& schema)
@@ -176,6 +218,17 @@ std::optional<Row> MemTable::Get(const std::string& key) const {
 void MemTable::Scan(const std::string& start_key, const std::string& end_key,
                     ScanCallback callback) const {
     impl_->Scan(start_key, end_key, callback);
+}
+
+std::optional<std::string> MemTable::GetJsonCached(
+    const std::string& key, const JsonSerializer& ser) const {
+    return impl_->GetJsonCached(key, ser);
+}
+
+void MemTable::ScanJsonCached(const std::string& start_key, const std::string& end_key,
+                              const JsonSerializer& ser,
+                              const JsonRowCallback& cb) const {
+    impl_->ScanJsonCached(start_key, end_key, ser, cb);
 }
 
 bool MemTable::CreateIndex(const IndexSchema& schema) {

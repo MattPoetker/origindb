@@ -1,0 +1,15 @@
+{
+  "name": "origindb-cubeio-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "cube.io — an agar.io-style game whose authoritative sim runs as OriginDB WASM reducers",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.12.0",
+    "@grpc/proto-loader": "^0.7.13"
+  }
+}

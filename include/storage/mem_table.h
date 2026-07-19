@@ -24,6 +24,12 @@ public:
     void Scan(const std::string& start_key, const std::string& end_key,
               ScanCallback callback) const override;
 
+    std::optional<std::string> GetJsonCached(
+        const std::string& key, const JsonSerializer& ser) const override;
+    void ScanJsonCached(const std::string& start_key, const std::string& end_key,
+                        const JsonSerializer& ser,
+                        const JsonRowCallback& cb) const override;
+
     bool CreateIndex(const IndexSchema& schema) override;
     bool DropIndex(const std::string& index_name) override;
     std::vector<std::string> GetIndexNames() const override;

@@ -109,6 +109,10 @@ bool CommitHostCall(HostCallContext& call, std::string& error);
 
 // Shared JSON <-> storage conversions (also used for metadata/results).
 nlohmann::json RowToJson(const Row& row);
+// The canonical row -> value-JSON serializer used by the cached host read/scan
+// path (Table::GetJsonCached / ScanJsonCached). Stable across calls so the
+// per-row cache stays valid.
+const Table::JsonSerializer& RowJsonSerializer();
 Row JsonToRow(const std::string& key, const nlohmann::json& columns);
 std::string Base64Encode(const uint8_t* data, size_t len);
 std::optional<std::vector<uint8_t>> Base64Decode(const std::string& in);

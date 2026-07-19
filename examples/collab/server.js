@@ -11,6 +11,7 @@
 // Usage: node server.js [--port 9090] [--grpc localhost:50051] [--ws-port 8080]
 
 import http from "node:http";
+import net from "node:net";
 import { readFile } from "node:fs/promises";
 import { extname, join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -94,6 +95,13 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    // CORS — the marketing site (origindb.org) embeds a live board that calls
+    // /api/config + /api/call cross-origin. Reads flow over the websocket (no CORS).
+    res.setHeader("access-control-allow-origin", "*");
+    res.setHeader("access-control-allow-headers", "content-type");
+    res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
+    if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
+
     if (req.method === "GET" && url.pathname === "/api/config") {
       // The client token is low-privilege (call/subscribe only) and the
       // browser needs it for the websocket ?token=. Admin tokens never leave
@@ -147,8 +155,27 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+// Websocket proxy: transparently pipe any Upgrade request through to OriginDB's
+// websocket (WS_PORT). This lets a SINGLE public hostname (e.g. a Cloudflare
+// tunnel to db.origindb.org) serve both reducer calls over HTTP (/api/*) and
+// realtime reads over wss://…/. Dependency-free — we just replay the handshake
+// bytes to a raw TCP socket and pipe frames both ways.
+server.on("upgrade", (req, clientSocket, head) => {
+  const upstream = net.connect(WS_PORT, "127.0.0.1", () => {
+    let raw = `${req.method} ${req.url} HTTP/1.1\r\n`;
+    for (let i = 0; i < req.rawHeaders.length; i += 2) raw += `${req.rawHeaders[i]}: ${req.rawHeaders[i + 1]}\r\n`;
+    upstream.write(raw + "\r\n");
+    if (head && head.length) upstream.write(head);
+    upstream.pipe(clientSocket);
+    clientSocket.pipe(upstream);
+  });
+  const kill = () => { try { upstream.destroy(); } catch {} try { clientSocket.destroy(); } catch {} };
+  upstream.on("error", kill);
+  clientSocket.on("error", kill);
+});
+
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`collab demo:  http://localhost:${PORT}`);
   console.log(`gRPC target:  ${GRPC_TARGET}`);
-  console.log(`realtime ws:  ws://<this-host>:${WS_PORT}`);
+  console.log(`realtime ws:  proxied at ws://localhost:${PORT}/  →  :${WS_PORT}  (also direct :${WS_PORT})`);
 });

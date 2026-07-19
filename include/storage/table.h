@@ -5,6 +5,8 @@
 #include <memory>
 #include <variant>
 #include <chrono>
+#include <functional>
+#include <optional>
 #include <unordered_map>
 
 namespace origindb {
@@ -94,6 +96,31 @@ public:
     using ScanCallback = std::function<bool(const std::string&, const Row&)>;
     virtual void Scan(const std::string& start_key, const std::string& end_key,
                      ScanCallback callback) const = 0;
+
+    // Cached value-JSON access. `ser` renders a row to its canonical JSON
+    // "value" form; an implementation may memoize the result per row and
+    // invalidate it on write, so repeated scans/reads of unchanged rows skip
+    // re-serialization entirely. Universal: every WASM module scan and point
+    // read flows through here. The default is a non-caching passthrough so
+    // other Table implementations keep working unchanged. NOTE: the cache
+    // assumes a single stable serializer format across calls.
+    using JsonSerializer = std::function<std::string(const Row&)>;
+    using JsonRowCallback =
+        std::function<bool(const std::string& key, const std::string& value_json)>;
+
+    virtual std::optional<std::string> GetJsonCached(
+        const std::string& key, const JsonSerializer& ser) const {
+        auto r = Get(key);
+        if (!r) return std::nullopt;
+        return ser(*r);
+    }
+    virtual void ScanJsonCached(const std::string& start_key,
+                                const std::string& end_key,
+                                const JsonSerializer& ser,
+                                const JsonRowCallback& cb) const {
+        Scan(start_key, end_key,
+             [&](const std::string& k, const Row& row) { return cb(k, ser(row)); });
+    }
 
     // Index operations
     virtual bool CreateIndex(const IndexSchema& schema) = 0;

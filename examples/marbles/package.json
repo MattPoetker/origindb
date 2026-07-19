@@ -1,0 +1,9 @@
+{
+  "name": "marble-clash",
+  "private": true,
+  "type": "module",
+  "description": "Marble Clash — 60Hz physics sumo on OriginDB WASM reducers",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

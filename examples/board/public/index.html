@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Board — an OriginDB MVP</title>
+<style>
+  :root { --bg:#0b0f17; --panel:#111827; --line:#1e2a3d; --ink:#e8eefc; --dim:#8ba0c4; --accent:#4da3ff; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; height: 52px; display: flex; align-items: center; gap: 14px;
+    padding: 0 18px; background: rgba(17,24,39,.85); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); z-index: 5; }
+  #bar b { color: var(--accent); }
+  #bar .hint { color: var(--dim); font-size: 13px; }
+  #bar .sp { margin-left: auto; }
+  button { font: inherit; color: var(--ink); background: #16233c; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  #wall { position: fixed; inset: 52px 0 0 0; cursor: crosshair; }
+  .note { position: absolute; transform: translate(-50%, -50%); max-width: 220px; padding: 10px 12px;
+    background: var(--panel); border-left: 3px solid var(--accent); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+  .note .u { font-size: 11px; color: var(--dim); margin-bottom: 3px; }
+  .note .t { font-size: 14px; line-height: 1.4; word-break: break-word; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <span>Board <b>·</b> OriginDB MVP</span>
+    <span class="hint">click the wall to pin a note — it appears live on every open tab</span>
+    <span class="sp"></span>
+    <span class="hint" id="conn">connecting…</span>
+    <button id="clear">Clear</button>
+  </div>
+  <div id="wall"></div>
+
+<script type="module">
+// 1. config (which websocket port to subscribe to)
+const cfg = await fetch("/api/config").then((r) => r.json());
+const conn = document.getElementById("conn");
+const wall = document.getElementById("wall");
+const notes = new Map();       // id -> element
+
+// 2. call a reducer through the bridge (browsers can't speak gRPC directly)
+const call = (reducer, args) =>
+  fetch("/api/call", { method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ reducer, args }) });
+
+// 3. render one note row
+function render(id, n) {
+  let el = notes.get(id);
+  if (!el) { el = document.createElement("div"); el.className = "note"; wall.appendChild(el); notes.set(id, el); }
+  el.style.left = (n.x * 100) + "%";
+  el.style.top = (n.y * 100) + "%";
+  el.style.borderLeftColor = n.color || "#4da3ff";
+  el.innerHTML = `<div class="u"></div><div class="t"></div>`;
+  el.querySelector(".u").textContent = n.user || "anon";
+  el.querySelector(".t").textContent = n.text || "";
+}
+function remove(id) { const el = notes.get(id); if (el) { el.remove(); notes.delete(id); } }
+
+// 4. subscribe to the changefeed: snapshot + every live commit to `notes`
+function connect() {
+  const ws = new WebSocket(`ws://${location.hostname}:${cfg.wsPort}`);
+  ws.onopen = () => { conn.textContent = "● live"; ws.send(JSON.stringify({ type: "sql_subscribe", sql: "SELECT * FROM notes" })); };
+  ws.onclose = () => { conn.textContent = "reconnecting…"; setTimeout(connect, 1000); };
+  ws.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.type === "initial_state") for (const row of m.rows || []) render(row.key, row.data);
+    else if (m.type === "sql_changefeed_event") {
+      if (m.operation === "DELETE") remove(m.key);
+      else { const p = JSON.parse(m.new_value); render(m.key, p.columns ?? p); }
+    }
+  };
+}
+connect();
+
+// 5. click the wall -> addNote at that fractional position
+wall.addEventListener("click", (e) => {
+  const text = prompt("Note text:");
+  if (!text) return;
+  const x = e.clientX / wall.clientWidth;
+  const y = (e.clientY - 52) / wall.clientHeight;
+  const user = localStorage.getItem("board_user") || (localStorage.setItem("board_user", "user-" + Math.random().toString(36).slice(2, 6)), localStorage.getItem("board_user"));
+  call("addNote", [user, text, x, y, "#4da3ff"]);
+});
+document.getElementById("clear").addEventListener("click", () => call("clearNotes", []));
+</script>
+</body>
+</html>

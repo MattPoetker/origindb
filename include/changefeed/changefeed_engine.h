@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include <chrono>
+#include <optional>
 
 #include "common/config.h"
 

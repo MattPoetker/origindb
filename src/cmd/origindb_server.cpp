@@ -4,6 +4,8 @@
 #include <thread>
 #include <fstream>
 #include <atomic>
+#include <algorithm>
+#include <chrono>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -17,6 +19,7 @@
 #include "wasm/wasm_engine.h"
 #include "wasm/wasm_subscription.h"
 #include "wasm/module_store.h"
+#include "wasm/tick_scheduler.h"
 #include "common/auth.h"
 
 #include <filesystem>
@@ -186,6 +189,39 @@ public:
         spdlog::info("ℹ️  gRPC Server not available (compiled without gRPC support)");
 #endif
 
+        // Native tick scheduler — drive sharded modules at a fixed rate in-process
+        // (no external gRPC tick driver). Ticks fan out across a worker pool.
+        if (config_.tick.count > 0 && !config_.tick.module_prefix.empty()) {
+            unsigned workers = config_.tick.threads > 0
+                ? config_.tick.threads
+                : std::max(1u, std::thread::hardware_concurrency());
+            uint32_t hz = config_.tick.hz > 0 ? config_.tick.hz : 60;
+            auto period = std::chrono::nanoseconds(1000000000ULL / hz);
+            int64_t frame_ms = static_cast<int64_t>(1000 / hz);
+            std::string reducer = config_.tick.reducer.empty() ? "tick" : config_.tick.reducer;
+            tick_scheduler_ = std::make_unique<TickScheduler>(wasm_engine_, workers);
+            uint32_t added = 0;
+            for (uint32_t idx = 0; idx < config_.tick.count; ++idx) {
+                std::string mod = config_.tick.module_prefix + std::to_string(idx);
+                if (!wasm_engine_->GetModule(mod)) {
+                    spdlog::warn("⏱️  tick: module {} not loaded; skipping", mod);
+                    continue;
+                }
+                TickScheduler::Entry e;
+                e.module = mod;
+                e.reducer = reducer;
+                e.args = {WasmValue(frame_ms),
+                          WasmValue(static_cast<int64_t>(config_.tick.substeps)),
+                          WasmValue(static_cast<int64_t>(idx))};
+                e.period = period;
+                tick_scheduler_->AddEntry(std::move(e));
+                ++added;
+            }
+            tick_scheduler_->Start();
+            spdlog::info("⏱️  Native tick: {} modules '{}*' @ {} Hz, {} workers, substeps {}",
+                         added, config_.tick.module_prefix, hz, workers, config_.tick.substeps);
+        }
+
         spdlog::info("");
         spdlog::info("🎯 OriginDB Server fully initialized!");
         spdlog::info("=====================================");
@@ -261,6 +297,11 @@ public:
         if (websocket_server_) {
             websocket_server_->Stop();
             spdlog::info("✅ WebSocket server stopped");
+        }
+
+        if (tick_scheduler_) {
+            tick_scheduler_->Stop();
+            spdlog::info("✅ Tick scheduler stopped");
         }
 
         if (wasm_subscription_manager_) {
@@ -364,6 +405,19 @@ private:
                         stats.active_connections, stats.active_subscriptions, stats.events_published, stats.loaded_modules);
             last_log = now;
         }
+
+        // Tick scheduler heartbeat (faster cadence for load tuning)
+        if (tick_scheduler_) {
+            static auto last_tick_log = std::chrono::steady_clock::now();
+            auto tick_dt = std::chrono::duration_cast<std::chrono::seconds>(now - last_tick_log).count();
+            if (tick_dt >= 5) {
+                auto ts = tick_scheduler_->SnapshotAndReset();
+                spdlog::info("⏱️  Tick: {} entries, {:.0f} ticks/s, {} skipped, {} errs, maxExec {} us",
+                             ts.entries, static_cast<double>(ts.executed) / tick_dt,
+                             ts.skipped, ts.errors, ts.max_exec_us);
+                last_tick_log = now;
+            }
+        }
     }
 
 private:
@@ -379,6 +433,7 @@ private:
     std::shared_ptr<ModuleStore> module_store_;
     std::shared_ptr<AuthManager> auth_;
     std::shared_ptr<WasmSubscriptionManager> wasm_subscription_manager_;
+    std::unique_ptr<TickScheduler> tick_scheduler_;
 #ifdef GRPC_AVAILABLE
     std::shared_ptr<GrpcServer> grpc_server_;
 #endif
@@ -478,7 +533,16 @@ void PrintUsage(const char* program_name) {
     std::cout << "  --tls-cert FILE          TLS certificate (PEM) for the gRPC endpoint\n";
     std::cout << "  --tls-key FILE           TLS private key (PEM) for the gRPC endpoint\n";
     std::cout << "  --sync-mode MODE         WAL durability: none|flush|fsync (default: fsync)\n";
+    std::cout << "  --checkpoint-mb N        Checkpoint (snapshot+truncate WAL) at N MB (default: 256)\n";
+    std::cout << "  --checkpoint-interval S  Also checkpoint every S seconds if WAL grew (default: 300)\n";
+    std::cout << "  --no-checkpoint          Disable runtime WAL checkpointing (WAL grows unbounded)\n";
     std::cout << "  --no-auth                Disable token auth (dev only; insecure)\n";
+    std::cout << "  --tick-modules PREFIX    Native tick: drive modules <PREFIX>0..<PREFIX>N-1 (see --tick-count)\n";
+    std::cout << "  --tick-count N           Number of sharded modules to tick\n";
+    std::cout << "  --tick-hz HZ             Tick rate (default: 60)\n";
+    std::cout << "  --tick-substeps N        Physics substeps per tick passed as arg (default: 1)\n";
+    std::cout << "  --tick-threads N         Tick worker pool size (default: hardware concurrency)\n";
+    std::cout << "  --tick-reducer NAME      Reducer to call per tick (default: tick)\n";
     std::cout << "  -l, --log-level LEVEL    Log level: trace,debug,info,warn,error (default: info)\n";
     std::cout << "  -c, --config FILE        Config file path (default: origindb.conf)\n";
     std::cout << "  -h, --help               Show this help message\n";
@@ -506,6 +570,10 @@ int main(int argc, char* argv[]) {
         std::string tls_key_arg;
         std::string sync_mode_arg;
         bool no_auth = false;
+        std::string checkpoint_mb_arg, checkpoint_interval_arg;
+        bool no_checkpoint = false;
+        std::string tick_modules_arg, tick_count_arg, tick_hz_arg,
+                    tick_substeps_arg, tick_threads_arg, tick_reducer_arg;
 
         for (int i = 1; i < argc; i++) {
             std::string arg = argv[i];
@@ -559,6 +627,32 @@ int main(int argc, char* argv[]) {
                 else { std::cerr << "Error: --sync-mode requires none|flush|fsync\n"; return 1; }
             } else if (arg == "--no-auth") {
                 no_auth = true;
+            } else if (arg == "--checkpoint-mb") {
+                if (i + 1 < argc) checkpoint_mb_arg = argv[++i];
+                else { std::cerr << "Error: --checkpoint-mb requires a size in MB\n"; return 1; }
+            } else if (arg == "--checkpoint-interval") {
+                if (i + 1 < argc) checkpoint_interval_arg = argv[++i];
+                else { std::cerr << "Error: --checkpoint-interval requires seconds\n"; return 1; }
+            } else if (arg == "--no-checkpoint") {
+                no_checkpoint = true;
+            } else if (arg == "--tick-modules") {
+                if (i + 1 < argc) tick_modules_arg = argv[++i];
+                else { std::cerr << "Error: --tick-modules requires a module name prefix\n"; return 1; }
+            } else if (arg == "--tick-count") {
+                if (i + 1 < argc) tick_count_arg = argv[++i];
+                else { std::cerr << "Error: --tick-count requires a number\n"; return 1; }
+            } else if (arg == "--tick-hz") {
+                if (i + 1 < argc) tick_hz_arg = argv[++i];
+                else { std::cerr << "Error: --tick-hz requires a number\n"; return 1; }
+            } else if (arg == "--tick-substeps") {
+                if (i + 1 < argc) tick_substeps_arg = argv[++i];
+                else { std::cerr << "Error: --tick-substeps requires a number\n"; return 1; }
+            } else if (arg == "--tick-threads") {
+                if (i + 1 < argc) tick_threads_arg = argv[++i];
+                else { std::cerr << "Error: --tick-threads requires a number\n"; return 1; }
+            } else if (arg == "--tick-reducer") {
+                if (i + 1 < argc) tick_reducer_arg = argv[++i];
+                else { std::cerr << "Error: --tick-reducer requires a name\n"; return 1; }
             } else if (arg[0] != '-') {
                 // Assume it's a port number (short form)
                 port_arg = arg;
@@ -594,6 +688,19 @@ int main(int argc, char* argv[]) {
         if (const char* t = std::getenv("ORIGINDB_CLIENT_TOKEN"))
             config.auth.client_token = t;
         if (no_auth) config.auth.enabled = false;
+        if (no_checkpoint) config.storage.checkpoint_enabled = false;
+        if (!checkpoint_mb_arg.empty())
+            config.storage.checkpoint_wal_bytes =
+                static_cast<size_t>(std::stoull(checkpoint_mb_arg)) * 1024 * 1024;
+        if (!checkpoint_interval_arg.empty())
+            config.storage.checkpoint_interval_sec =
+                static_cast<uint32_t>(std::stoul(checkpoint_interval_arg));
+        if (!tick_modules_arg.empty()) config.tick.module_prefix = tick_modules_arg;
+        if (!tick_count_arg.empty()) config.tick.count = static_cast<uint32_t>(std::stoul(tick_count_arg));
+        if (!tick_hz_arg.empty()) config.tick.hz = static_cast<uint32_t>(std::stoul(tick_hz_arg));
+        if (!tick_substeps_arg.empty()) config.tick.substeps = static_cast<uint32_t>(std::stoul(tick_substeps_arg));
+        if (!tick_threads_arg.empty()) config.tick.threads = static_cast<uint32_t>(std::stoul(tick_threads_arg));
+        if (!tick_reducer_arg.empty()) config.tick.reducer = tick_reducer_arg;
         if (!log_level_arg.empty()) {
             if (log_level_arg == "trace") config.logging.level = spdlog::level::trace;
             else if (log_level_arg == "debug") config.logging.level = spdlog::level::debug;

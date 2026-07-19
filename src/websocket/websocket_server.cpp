@@ -9,7 +9,11 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <regex>
+#include <algorithm>
+#include <cctype>
 #include <fmt/format.h>
+#include "changefeed/sql_subscription.h"
+#include "changefeed/predicate_evaluator.h"
 
 namespace origindb {
 
@@ -172,8 +176,14 @@ void WebSocketServer::HandleClient(int client_socket) {
     buffer[bytes_read] = '\0';
     std::string request(buffer);
 
-    // Check if it's a WebSocket upgrade request
-    if (request.find("Upgrade: websocket") != std::string::npos) {
+    // Check if it's a WebSocket upgrade request. Header names/values are
+    // case-insensitive per RFC 7230/6455 — browsers send "Upgrade: websocket"
+    // but non-browser clients (undici, load tools) may lowercase them, so match
+    // case-insensitively rather than rejecting them with a 426.
+    std::string request_lc = request;
+    std::transform(request_lc.begin(), request_lc.end(), request_lc.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    if (request_lc.find("upgrade: websocket") != std::string::npos) {
         // Auth (client scope). Browsers can't set WebSocket headers, so the
         // token rides in the GET target as ?token=... (falls back to the
         // Authorization header for non-browser clients).
@@ -345,8 +355,8 @@ size_t WebSocketServer::CompleteFrameSize(const std::string& data) {
 }
 
 bool WebSocketServer::HandleWebSocketHandshake(int client_socket, const std::string& request) {
-    // Extract WebSocket key
-    std::regex key_regex(R"(Sec-WebSocket-Key:\s*([^\r\n]+))");
+    // Extract WebSocket key (header name is case-insensitive)
+    std::regex key_regex(R"(Sec-WebSocket-Key:\s*([^\r\n]+))", std::regex::icase);
     std::smatch match;
 
     if (!std::regex_search(request, match, key_regex)) {
@@ -516,6 +526,17 @@ void WebSocketServer::HandleWebSocketMessage(int client_socket, const std::strin
         } else if (type == "sql_subscribe") {
             HandleSqlSubscriptionRequest(client_socket, message);
 
+        } else if (type == "sql_unsubscribe") {
+            // Area-of-interest clients drop their old viewport subscription when
+            // they pan, so subscriptions track the visible window instead of
+            // leaking one per pan.
+            std::string sub_id = request.value("subscription_id", "");
+            if (sql_manager_ && !sub_id.empty()) sql_manager_->Unsubscribe(sub_id);
+            nlohmann::json response;
+            response["type"] = "sql_unsubscribed";
+            response["subscription_id"] = sub_id;
+            SendWebSocketFrame(client_socket, response.dump());
+
         } else if (type == "subscribe_to_all_tables") {
             HandleSubscribeToAllTablesRequest(client_socket, message);
 
@@ -642,7 +663,9 @@ void WebSocketServer::OnChangefeedEvent(const std::string& subscription_id, cons
             }
         }
 
-        spdlog::info("Processed changefeed event: {} {} key={} - sent to {} subscribers",
+        // NOTE: one changefeed event per row-change — at 60 Hz physics this is
+        // thousands/sec, so keep it at debug (info would flood the log + burn CPU).
+        spdlog::debug("Processed changefeed event: {} {} key={} - sent to {} subscribers",
                     event.table, event.operation, std::string(event.key.begin(), event.key.end()),
                     filtered_results.size());
     } else {
@@ -985,6 +1008,24 @@ void WebSocketServer::SendInitialState(int client_socket, const std::string& sql
         // Execute the SQL query to get current state
         auto result = sql_engine_->Execute(sql_query);
 
+        // The SQL engine does not push WHERE down onto these dynamically-created
+        // (schema-less, WASM-written) tables, so the snapshot comes back
+        // unfiltered. Compile the query's WHERE clause and filter the rows here —
+        // the SAME predicate the live changefeed uses — so an area-of-interest
+        // subscription's initial_state matches its ongoing events.
+        std::unique_ptr<PredicateEvaluator> aoi_pred;
+        {
+            std::smatch wm;
+            std::regex where_re(R"(\bWHERE\b\s+(.+?)(?:\bORDER\s+BY\b|\bLIMIT\b|$))",
+                                std::regex::icase);
+            if (std::regex_search(sql_query, wm, where_re)) {
+                std::string wc = wm[1].str();
+                std::string perr;
+                aoi_pred = PredicateEvaluator::Parse(wc, perr);
+                if (!aoi_pred) spdlog::warn("initial_state: WHERE parse failed ('{}'): {}", wc, perr);
+            }
+        }
+
         if (!result.success) {
             spdlog::error("Failed to execute initial state query: {}", result.error);
             nlohmann::json error;
@@ -1046,11 +1087,14 @@ void WebSocketServer::SendInitialState(int client_socket, const std::string& sql
                     }
                 }, value);
             }
+            // Area-of-interest: drop rows the WHERE clause excludes.
+            if (aoi_pred && !aoi_pred->Evaluate(row_data)) continue;
+
             json_row["data"] = row_data;
             rows.push_back(json_row);
         }
         initial_state["rows"] = rows;
-        initial_state["rows_count"] = result.rows.size();
+        initial_state["rows_count"] = rows.size();
         initial_state["execution_time_ms"] = result.execution_time_ms;
 
         // Send the initial state to the client

@@ -27,10 +27,31 @@ compile_commands.json
 
 # Runtime data / logs / test residue
 logs/
+*.log
 origindb_data/
 nightboard_data/
+# All engine data dirs (WAL, snapshots, modules, auth tokens) — never publish
+*_data/
+**/db/wal/
+**/db/snapshots/
+**/auth/
+tokens.json
 test_results.json
 storage_results.json
+
+# Stray in-source binaries (old naming) + secrets/keys
+/instantdb
+/instantdb_client
+/instantdb_demo
+/instantdb_init
+/instantdb_server
+/instantdb_sql
+*.pem
+*.key
+id_ed25519*
+id_rsa*
+.env
+.env.*
 
 # Node
 node_modules/

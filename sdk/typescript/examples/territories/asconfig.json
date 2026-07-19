@@ -1,0 +1,16 @@
+{
+  "entries": ["./index.ts"],
+  "targets": {
+    "release": {
+      "outFile": "../../build/territories.wasm",
+      "textFile": "../../build/territories.wat",
+      "optimizeLevel": 3,
+      "shrinkLevel": 1
+    }
+  },
+  "options": {
+    "runtime": "minimal",
+    "exportRuntime": false,
+    "use": ["abort=assembly/index/__origindb_abort"]
+  }
+}

@@ -178,12 +178,14 @@ wasm_trap_t* HostTableRead(void* env, wasmtime_caller_t* caller,
         }
     }
 
-    auto row = f.call->rctx->storage->Get(*table, key);
-    if (!row) {
+    auto tbl = f.call->rctx->storage->GetTable(*table);
+    auto vj = tbl ? tbl->GetJsonCached(key, RowJsonSerializer())
+                  : std::optional<std::string>{};
+    if (!vj) {
         SetI32(results, 0);
         return nullptr;
     }
-    if (!WriteOut(f.ctx, f.mod, RowToJson(*row).dump(), args[3].of.i32, args[4].of.i32))
+    if (!WriteOut(f.ctx, f.mod, *vj, args[3].of.i32, args[4].of.i32))
         return Trap("host_table_read: result write failed");
     SetI32(results, 1);
     return nullptr;
@@ -265,8 +267,7 @@ wasm_trap_t* HostTableScan(void* env, wasmtime_caller_t* caller,
     int32_t limit = args[3].of.i32;
     if (limit <= 0) limit = WASM_DEFAULT_SCAN_LIMIT;
 
-    // Committed rows, prefix-filtered, into a sorted map for stable output.
-    std::map<std::string, nlohmann::json> rows;
+    // Compute the exclusive upper bound for the prefix range.
     std::string end = prefix;
     while (!end.empty()) {
         if (static_cast<unsigned char>(end.back()) < 0xFF) {
@@ -275,35 +276,50 @@ wasm_trap_t* HostTableScan(void* env, wasmtime_caller_t* caller,
         }
         end.pop_back();
     }
-    f.call->rctx->storage->Scan(
-        *table, prefix, end,
-        [&](const std::string& key, const Row& row) {
-            if (key.compare(0, prefix.size(), prefix) == 0)
-                rows[key] = RowToJson(row);
-            return true;
-        });
 
-    // Apply overlay for this table.
+    // Committed rows come back already-serialized (and memoized) via the
+    // cached-JSON path — unchanged rows skip re-serialization entirely. Merge
+    // into a sorted map (stable output; overlay overrides committed).
+    std::map<std::string, std::string> rows;  // key -> value JSON
+    auto tbl = f.call->rctx->storage->GetTable(*table);
+    if (tbl) {
+        tbl->ScanJsonCached(
+            prefix, end, RowJsonSerializer(),
+            [&](const std::string& key, const std::string& value_json) {
+                if (key.compare(0, prefix.size(), prefix) == 0)
+                    rows[key] = value_json;
+                return true;
+            });
+    }
+
+    // Apply this call's staged overlay (read-your-writes).
     auto tit = f.call->overlay.find(*table);
     if (tit != f.call->overlay.end()) {
         for (const auto& [key, val] : tit->second) {
             if (key.compare(0, prefix.size(), prefix) != 0) continue;
             if (val.has_value())
-                rows[key] = *val;
+                rows[key] = val->dump();
             else
                 rows.erase(key);
         }
     }
 
-    nlohmann::json out = nlohmann::json::array();
+    // Build the JSON array in a single pass, splicing pre-serialized values.
+    std::string out = "[";
     int32_t count = 0;
-    for (const auto& [key, val] : rows) {
+    for (const auto& [key, value_json] : rows) {
         if (count >= limit) break;
-        out.push_back({{"key", key}, {"value", val}});
+        if (count) out += ',';
+        out += "{\"key\":";
+        out += nlohmann::json(key).dump();
+        out += ",\"value\":";
+        out += value_json;
+        out += '}';
         count++;
     }
+    out += ']';
 
-    if (!WriteOut(f.ctx, f.mod, out.dump(), args[4].of.i32, args[5].of.i32))
+    if (!WriteOut(f.ctx, f.mod, out, args[4].of.i32, args[5].of.i32))
         return Trap("host_table_scan: result write failed");
     SetI32(results, count);
     return nullptr;
@@ -629,6 +645,12 @@ std::optional<std::vector<uint8_t>> Base64Decode(const std::string& in) {
         }
     }
     return out;
+}
+
+const Table::JsonSerializer& RowJsonSerializer() {
+    static const Table::JsonSerializer ser =
+        [](const Row& r) { return RowToJson(r).dump(); };
+    return ser;
 }
 
 nlohmann::json RowToJson(const Row& row) {

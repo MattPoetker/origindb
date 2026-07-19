@@ -8,8 +8,12 @@
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
+#include <thread>
 
 namespace origindb {
 
@@ -21,6 +25,8 @@ public:
           next_timestamp_(1),
           stats_{} {
     }
+
+    ~Impl() { Shutdown(); }  // idempotent; ensures the checkpoint thread is joined
 
     void SetChangefeedEngine(std::shared_ptr<ChangefeedEngine> changefeed) {
         changefeed_engine_ = changefeed;
@@ -55,12 +61,69 @@ public:
 
         spdlog::info("Storage engine initialized with {} tables",
                     tables_.size());
+
+        // Start the background checkpointer. Note this runs AFTER recovery, so
+        // an oversized WAL inherited from a crash (no clean-shutdown truncation)
+        // is snapshotted and truncated within one poll interval of boot.
+        if (config_.checkpoint_enabled) {
+            checkpoint_thread_ = std::thread([this] { CheckpointLoop(); });
+            spdlog::info("WAL checkpointer started (threshold {} MB, interval {}s)",
+                         config_.checkpoint_wal_bytes / (1024 * 1024),
+                         config_.checkpoint_interval_sec);
+        }
         return true;
+    }
+
+    // Background loop: periodically snapshot + truncate the WAL so it stays
+    // bounded. Triggers on WAL size crossing checkpoint_wal_bytes, or on the
+    // time interval elapsing while the WAL has grown. WriteSnapshot() is the
+    // same routine used at shutdown; the tables_mutex_ it takes as a reader is
+    // mutually exclusive with committers (writers), so the snapshot+truncate is
+    // consistent — no appended entry can slip past the whole-file truncate.
+    void CheckpointLoop() {
+        auto last_checkpoint = std::chrono::steady_clock::now();
+        uint64_t last_size = wal_ ? wal_->GetSize() : 0;
+
+        while (true) {
+            {
+                std::unique_lock<std::mutex> lk(checkpoint_mutex_);
+                checkpoint_cv_.wait_for(
+                    lk, std::chrono::seconds(std::max<uint32_t>(1, config_.checkpoint_poll_sec)),
+                    [this] { return checkpoint_stop_.load(); });
+                if (checkpoint_stop_.load()) break;
+            }
+            if (!wal_) continue;
+
+            const uint64_t size = wal_->GetSize();
+            const auto now = std::chrono::steady_clock::now();
+            const bool size_trigger = size >= config_.checkpoint_wal_bytes;
+            const bool time_trigger =
+                config_.checkpoint_interval_sec > 0 &&
+                now - last_checkpoint >=
+                    std::chrono::seconds(config_.checkpoint_interval_sec) &&
+                size > last_size;
+
+            if (size_trigger || time_trigger) {
+                if (WriteSnapshot()) {
+                    spdlog::info("WAL checkpoint: {} MB snapshotted & truncated ({})",
+                                 size / (1024 * 1024),
+                                 size_trigger ? "size" : "interval");
+                    last_checkpoint = std::chrono::steady_clock::now();
+                    last_size = wal_ ? wal_->GetSize() : 0;
+                }
+            }
+        }
     }
 
     void Shutdown() {
         if (shutdown_done_) return;
         shutdown_done_ = true;
+
+        // Stop the checkpointer and join it BEFORE the final snapshot, so its
+        // WriteSnapshot() can never overlap the one below (both truncate the WAL).
+        checkpoint_stop_.store(true);
+        checkpoint_cv_.notify_all();
+        if (checkpoint_thread_.joinable()) checkpoint_thread_.join();
 
         // Persist a snapshot on clean shutdown and truncate the WAL, so the
         // next boot loads the snapshot instead of replaying every entry.
@@ -515,7 +578,12 @@ private:
 
     std::unique_ptr<WALImpl> wal_;
     bool shutdown_done_ = false;
-    // std::unique_ptr<SnapshotManager> snapshot_manager_;
+
+    // Background WAL checkpointer (see CheckpointLoop / config checkpoint_*).
+    std::thread checkpoint_thread_;
+    std::mutex checkpoint_mutex_;
+    std::condition_variable checkpoint_cv_;
+    std::atomic<bool> checkpoint_stop_{false};
 
     std::atomic<uint64_t> next_txn_id_;
     std::atomic<uint64_t> next_timestamp_;
