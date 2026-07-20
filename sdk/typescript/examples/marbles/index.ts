@@ -53,11 +53,11 @@ declareTable("pickups");
 
 const ARENA_R: f64 = 42.0;        // arena radius (world units); rim at this dist
 const MARBLE_R: f64 = 1.1;        // marble radius
-const THRUST: f64 = 46.0;         // steer acceleration (u/s^2)
-const DAMPING: f64 = 0.86;        // linear velocity retained per second
+const THRUST: f64 = 26.0;         // steer acceleration (u/s^2) — gentler onset
+const DAMPING: f64 = 0.82;        // linear velocity retained per second — more grip
 const RESTITUTION: f64 = 0.94;    // marble-marble bounce elasticity
-const MAX_SPEED: f64 = 34.0;      // clamp (u/s)
-const BOOST_IMPULSE: f64 = 26.0;  // dash delta-v (u/s)
+const MAX_SPEED: f64 = 24.0;      // clamp (u/s) — lower top speed, less twitchy
+const BOOST_IMPULSE: f64 = 17.0;  // dash delta-v (u/s)
 const BOOST_COOLDOWN: f64 = 1500.0; // ms between boosts
 const FALL_MARGIN: f64 = 1.5;     // center-dist past rim before a marble drops
 const CELL: f64 = 2.4;            // spatial-hash cell size (~2*MARBLE_R)
