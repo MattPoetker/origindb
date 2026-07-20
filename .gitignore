@@ -78,3 +78,10 @@ tests/performance/storage_perf_runner
 tests/performance/test_data_generator
 benchmarks/latest.json
 examples/collab/public/
+
+# playwright/screenshot artifacts
+.playwright-mcp/
+/*.jpeg
+/*.png
+redesign-*.jpeg
+marble-waitroom.png
