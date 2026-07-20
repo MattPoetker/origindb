@@ -25,6 +25,8 @@ let myName = localStorage.getItem("mc_name") || "";
 
 let cfg = { wsPort: 8790, arenaR: 42, shards: 8, lobbyCap: 8 };
 let ARENA_R = 42, MARBLE_R = 1.1;
+const HEAVY_R = 1.8;                                  // matches module HEAVY_R
+const PU_COLOR = { heavy: 0xff8a3d, swift: 0x4ee1e1 }; // pickup + buff tint colors
 
 // match/session state
 let state = "name";               // name | lobby | wait | game | result
@@ -123,7 +125,7 @@ function ensureMarble(k, cols) {
       myKey = k;
     }
     m = { rx: cols.x, rz: cols.y, tx: cols.x, tz: cols.y, vx: 0, vz: 0, mesh,
-          color: cols.color, alive: true, score: 0, name: cols.name, owner: cols.owner, fall: 0 };
+          color: cols.color, alive: true, score: 0, name: cols.name, owner: cols.owner, fall: 0, buff: "" };
     marbles.set(k, m);
   }
   return m;
@@ -134,6 +136,19 @@ function applyMarble(k, cols) {
   m.vx = cols.vx || 0; m.vz = cols.vy || 0;
   m.score = cols.score || 0;
   m.name = cols.name || m.name;
+  // power-up buff → grow (heavy) + tint the marble
+  const buff = cols.buff || "";
+  if (buff !== m.buff) {
+    m.buff = buff;
+    const sc = buff === "heavy" ? HEAVY_R / MARBLE_R : 1;
+    m.mesh.scale.setScalar(sc);
+    if (m.mesh.userData.halo) m.mesh.userData.halo.scale.setScalar(sc);
+    const mine = m.owner === session;
+    const tint = buff ? PU_COLOR[buff] : (mine ? colorInt(m.color) : 0x000000);
+    m.mesh.material.emissive.setHex(tint || 0x000000);
+    m.mesh.material.emissiveIntensity = buff ? 0.7 : (mine ? 0.35 : 0);
+    if (k === myKey) showBuff(buff);
+  }
   const wasAlive = m.alive;
   m.alive = cols.alive === true || cols.alive === 1;
   if (!m.alive && wasAlive) m.fall = 1;
@@ -147,6 +162,38 @@ function removeMarble(k) {
   marbles.delete(k);
 }
 function clearMarbles() { for (const k of [...marbles.keys()]) removeMarble(k); myKey = ""; }
+
+// ---- power-up pickups ----
+const pickups = new Map(); // key -> { mesh, x, z }
+const puGeo = new THREE.IcosahedronGeometry(0.95, 0);
+function applyPickup(k, cols) {
+  if (pickups.get(k)) return;
+  const kind = cols.kind || "swift";
+  const col = PU_COLOR[kind] || 0xffffff;
+  const mesh = new THREE.Mesh(puGeo, new THREE.MeshStandardMaterial({
+    color: col, emissive: col, emissiveIntensity: 0.75, roughness: 0.3, metalness: 0.4 }));
+  mesh.position.set(cols.x, 1.4, cols.y); mesh.castShadow = true; scene.add(mesh);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(1.5, 2.0, 32),
+    new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.5 }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(cols.x, 0.03, cols.y); scene.add(ring);
+  mesh.userData.ring = ring;
+  pickups.set(k, { mesh, x: cols.x, z: cols.y });
+}
+function removePickup(k) {
+  const p = pickups.get(k); if (!p) return;
+  scene.remove(p.mesh); if (p.mesh.userData.ring) scene.remove(p.mesh.userData.ring);
+  pickups.delete(k);
+}
+function clearPickups() { for (const k of [...pickups.keys()]) removePickup(k); }
+
+// HUD buff pill
+function showBuff(buff) {
+  const b = el("buff"); if (!b) return;
+  if (!buff) { b.style.display = "none"; return; }
+  b.style.display = "inline-flex";
+  b.textContent = buff === "heavy" ? "⬣ HEAVY" : "⚡ SWIFT";
+  b.style.color = buff === "heavy" ? "#ff8a3d" : "#4ee1e1";
+}
 
 function updateBoard() {
   const arr = [...marbles.values()].sort((a, b) => (b.alive - a.alive) || (b.score - a.score)).slice(0, 8);
@@ -222,12 +269,20 @@ function connectGameWs(match) {
   ws.onopen = () => {
     el("conn").textContent = "● live"; el("conn").classList.add("ok");
     ws.send(JSON.stringify({ type: "sql_subscribe", sql: `SELECT * FROM marbles WHERE arena = '${match}'` }));
+    ws.send(JSON.stringify({ type: "sql_subscribe", sql: `SELECT * FROM pickups WHERE arena = '${match}'` }));
   };
   ws.onclose = () => { el("conn").textContent = "reconnecting…"; el("conn").classList.remove("ok"); if (gameSock === ws && state === "game") { gameSock = null; setTimeout(() => { if (state === "game") connectGameWs(myMatch); }, 1000); } };
   ws.onmessage = (e) => {
     let msg; try { msg = JSON.parse(e.data); } catch { return; }
-    if (msg.type === "initial_state") { for (const row of msg.rows || []) applyMarble(row.key, row.data); }
-    else if (msg.type === "sql_changefeed_event") {
+    if (msg.type === "initial_state") {
+      const table = /FROM\s+(\w+)/i.exec(msg.sql || "")?.[1];
+      for (const row of msg.rows || []) (table === "pickups" ? applyPickup : applyMarble)(row.key, row.data);
+    } else if (msg.type === "sql_changefeed_event") {
+      if (msg.table === "pickups") {
+        if (msg.operation === "DELETE") { removePickup(msg.key); return; }
+        try { const p = JSON.parse(msg.new_value); applyPickup(msg.key, p.columns ?? p); } catch {}
+        return;
+      }
       if (msg.table !== "marbles") return;
       if (msg.operation === "DELETE") { removeMarble(msg.key); return; }
       try { const p = JSON.parse(msg.new_value); applyMarble(msg.key, p.columns ?? p); } catch {}
@@ -239,7 +294,7 @@ function closeGameWs() { if (gameSock) { const s = gameSock; gameSock = null; tr
 // ---- state transitions ------------------------------------------------------
 function enterGame(match) {
   myMatch = match;
-  clearMarbles();
+  clearMarbles(); clearPickups(); showBuff("");
   show("game");
   connectGameWs(match);
 }
@@ -250,7 +305,7 @@ function showResult(winnerName) {
 }
 function backToLobby() {
   closeGameWs();
-  clearMarbles();
+  clearMarbles(); clearPickups(); showBuff("");
   myLobbyId = ""; iAmHost = false; myMatch = ""; joined = false;
   show("lobby");
   renderLobbyUI();
@@ -389,19 +444,26 @@ function animate() {
   if (state === "game") maybeSendSteer(me);
 
   for (const [k, m] of marbles) {
+    const ry = m.buff === "heavy" ? HEAVY_R : MARBLE_R; // heavy marble sits higher
     if (m.alive) {
       m.rx += (m.tx - m.rx) * Math.min(1, dt * 18);
       m.rz += (m.tz - m.rz) * Math.min(1, dt * 18);
-      m.mesh.position.set(m.rx, MARBLE_R, m.rz);
+      m.mesh.position.set(m.rx, ry, m.rz);
       const sp = Math.hypot(m.vx, m.vz);
       if (sp > 0.1) { m.mesh.rotation.x += (m.vz / MARBLE_R) * dt; m.mesh.rotation.z -= (m.vx / MARBLE_R) * dt; }
       m.mesh.visible = true;
     } else if (m.fall > 0) {
       m.fall = Math.max(0, m.fall - dt * 1.2);
-      m.mesh.position.set(m.rx, MARBLE_R - (1 - m.fall) * 40, m.rz);
+      m.mesh.position.set(m.rx, ry - (1 - m.fall) * 40, m.rz);
       m.mesh.visible = m.fall > 0.02;
     } else { m.mesh.visible = false; }
     if (m.mesh.userData.halo) { m.mesh.userData.halo.position.set(m.rx, 0.03, m.rz); m.mesh.userData.halo.visible = m.mesh.visible; }
+  }
+
+  // spin + bob the floating pickups
+  for (const [, p] of pickups) {
+    p.mesh.rotation.y += dt * 1.8; p.mesh.rotation.x += dt * 0.9;
+    p.mesh.position.y = 1.4 + Math.sin(now * 0.003 + p.x) * 0.28;
   }
 
   if (state === "game" && me && me.alive) { camTarget.set(me.rx, 0, me.rz); camPos.set(me.rx, 46, me.rz + 40); }

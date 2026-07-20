@@ -47,6 +47,7 @@ declareTable("marbles");
 declareTable("players");
 declareTable("lobbies");
 declareTable("members");
+declareTable("pickups");
 
 // ---- arena + physics constants (keep in sync with public/game.js) ----------
 
@@ -61,6 +62,14 @@ const BOOST_COOLDOWN: f64 = 1500.0; // ms between boosts
 const FALL_MARGIN: f64 = 1.5;     // center-dist past rim before a marble drops
 const CELL: f64 = 2.4;            // spatial-hash cell size (~2*MARBLE_R)
 const FIXED_DT: f64 = 1.0 / 60.0; // physics substep (true 60 Hz)
+
+// ---- power-ups: pickups spawn on the arena; roll over one for a timed buff ---
+const HEAVY_MASS: f64 = 3.2;      // mass while "heavy" (base mass = 1)
+const HEAVY_R: f64 = 1.8;         // radius while "heavy" (base = MARBLE_R)
+const SWIFT_MUL: f64 = 1.6;       // thrust + top-speed multiplier while "swift"
+const BUFF_MS: f64 = 7000.0;      // buff duration
+const PICKUP_R: f64 = 1.5;        // collect radius
+const PICKUPS_TARGET: i32 = 3;    // desired live pickups per active match
 const SCAN_LIMIT: i32 = 100000;   // scan all rows (SDK default caps at 1000)
 
 const DEFAULT_CAP: i32 = 8;       // players per lobby before auto-start
@@ -93,6 +102,15 @@ function marbleKey(match: string, id: string): string { return "m:" + match + ":
 function marblePrefix(match: string): string { return "m:" + match + ":"; }
 function memberKey(lobbyId: string, session: string): string { return "lm:" + lobbyId + ":" + session; }
 function memberPrefix(lobbyId: string): string { return "lm:" + lobbyId + ":"; }
+function pickupKey(match: string, id: string): string { return "pu:" + match + ":" + id; }
+function pickupPrefix(match: string): string { return "pu:" + match + ":"; }
+
+// Pickup row: { id, arena, x, y, kind } — kind is "heavy" | "swift".
+function writePickup(match: string, id: string, x: f64, y: f64, kind: string): void {
+  writeTable("pickups", pickupKey(match, id), "{\"id\":\"" + id +
+    "\",\"arena\":\"" + esc(match) + "\",\"x\":" + x.toString() +
+    ",\"y\":" + y.toString() + ",\"kind\":\"" + kind + "\"}");
+}
 
 // ---- marble struct ----------------------------------------------------------
 
@@ -112,7 +130,14 @@ class M {
   alive: bool = true;
   lastHitBy: string = "";
   boostAt: f64 = 0;
+  buff: string = "";         // "" | "heavy" | "swift"
+  buffUntil: f64 = 0;
   dirty: bool = false;
+
+  // Physics traits scale with the active buff.
+  mass(): f64 { return this.buff == "heavy" ? HEAVY_MASS : 1.0; }
+  rad(): f64 { return this.buff == "heavy" ? HEAVY_R : MARBLE_R; }
+  speedMul(): f64 { return this.buff == "swift" ? SWIFT_MUL : 1.0; }
 
   static from(v: JsonValue): M {
     const m = new M();
@@ -131,6 +156,8 @@ class M {
     m.alive = v.getBool("alive", true);
     m.lastHitBy = v.getString("lastHitBy", "");
     m.boostAt = v.getNumber("boostAt", 0);
+    m.buff = v.getString("buff", "");
+    m.buffUntil = v.getNumber("buffUntil", 0);
     return m;
   }
 
@@ -153,7 +180,9 @@ class M {
       ",\"score\":" + this.score.toString() +
       ",\"alive\":" + (this.alive ? "true" : "false") +
       ",\"lastHitBy\":\"" + esc(this.lastHitBy) +
-      "\",\"boostAt\":" + this.boostAt.toString() + "}";
+      "\",\"boostAt\":" + this.boostAt.toString() +
+      ",\"buff\":\"" + this.buff +
+      "\",\"buffUntil\":" + this.buffUntil.toString() + "}";
   }
 }
 
@@ -358,6 +387,8 @@ function startMatch(l: Lobby): void {
 function clearMatchMarbles(match: string): void {
   const rows = JsonValue.parse(scanTable("marbles", marblePrefix(match), SCAN_LIMIT));
   for (let i = 0; i < rows.length; i++) deleteTable("marbles", rows.at(i).getString("key", ""));
+  const pu = JsonValue.parse(scanTable("pickups", pickupPrefix(match), 256));
+  for (let i = 0; i < pu.length; i++) deleteTable("pickups", pu.at(i).getString("key", ""));
 }
 function clearMembers(lobbyId: string): void {
   const rows = JsonValue.parse(scanTable("members", memberPrefix(lobbyId), 256));
@@ -468,19 +499,25 @@ function simulateMatch(match: string, subSteps: i32, now: f64): void {
 
   const rim = ARENA_R + FALL_MARGIN;
   const rim2 = rim * rim;
-  const diam = MARBLE_R * 2.0;
-  const diam2 = diam * diam;
   const damp = Math.pow(DAMPING, FIXED_DT);
+
+  // expire timed buffs once per tick
+  for (let i = 0; i < n; i++) {
+    const m = ms[i];
+    if (m.buff.length > 0 && now > m.buffUntil) { m.buff = ""; m.buffUntil = 0; m.dirty = true; }
+  }
 
   for (let step = 0; step < subSteps; step++) {
     for (let i = 0; i < n; i++) {
       const m = ms[i];
       if (!m.alive) continue;
-      m.vx += m.tx * THRUST * FIXED_DT;
-      m.vy += m.ty * THRUST * FIXED_DT;
+      const sm = m.speedMul();     // "swift" boosts thrust + top speed
+      m.vx += m.tx * THRUST * sm * FIXED_DT;
+      m.vy += m.ty * THRUST * sm * FIXED_DT;
       m.vx *= damp; m.vy *= damp;
+      const cap = MAX_SPEED * sm;
       const sp = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
-      if (sp > MAX_SPEED) { const s = MAX_SPEED / sp; m.vx *= s; m.vy *= s; }
+      if (sp > cap) { const s = cap / sp; m.vx *= s; m.vy *= s; }
       m.x += m.vx * FIXED_DT;
       m.y += m.vy * FIXED_DT;
       m.dirty = true;
@@ -509,7 +546,7 @@ function simulateMatch(match: string, subSteps: i32, now: f64): void {
             for (let ib = 0; ib < b.length; ib++) {
               const i = a[ia], j = b[ib];
               if (nk == cellIdx && j <= i) continue;
-              collide(ms[i], ms[j], diam, diam2);
+              collide(ms[i], ms[j]);
             }
           }
         }
@@ -528,6 +565,34 @@ function simulateMatch(match: string, subSteps: i32, now: f64): void {
         }
       }
     }
+  }
+
+  // ---- power-up pickups: collect on overlap, then top up toward the target ----
+  const puRows = JsonValue.parse(scanTable("pickups", pickupPrefix(match), 256));
+  let live = puRows.length;
+  for (let p = 0; p < puRows.length; p++) {
+    const pv = puRows.at(p).get("value");
+    const px = pv.getNumber("x", 0);
+    const py = pv.getNumber("y", 0);
+    const kind = pv.getString("kind", "swift");
+    for (let i = 0; i < n; i++) {
+      const m = ms[i];
+      if (!m.alive) continue;
+      const ddx = m.x - px, ddy = m.y - py;
+      const rr = m.rad() + PICKUP_R;
+      if (ddx * ddx + ddy * ddy < rr * rr) {
+        m.buff = kind; m.buffUntil = now + BUFF_MS; m.dirty = true;
+        deleteTable("pickups", pickupKey(match, pv.getString("id", "")));
+        live--;
+        break;
+      }
+    }
+  }
+  if (live < PICKUPS_TARGET && rnd() < 0.06) {
+    const id = generateId().toString();
+    const a = rnd() * 6.2831853;
+    const r = Math.sqrt(rnd()) * (ARENA_R * 0.55);
+    writePickup(match, id, Math.cos(a) * r, Math.sin(a) * r, rnd() < 0.5 ? "heavy" : "swift");
   }
 
   for (let i = 0; i < n; i++) if (ms[i].dirty) writeTable("marbles", ms[i].key(), ms[i].toJson());
@@ -551,24 +616,30 @@ function maybeGc(): void {
   if (g_tick_count >= 12) { g_tick_count = 0; __collect(); }
 }
 
-function collide(a: M, b: M, diam: f64, diam2: f64): void {
+// Unequal-mass elastic collision: a "heavy" marble has more mass + radius, so it
+// shoves lighter rivals harder and is itself barely pushed. De-penetration and
+// impulse both weight by mass (heavy takes the smaller share of each).
+function collide(a: M, b: M): void {
   if (!a.alive || !b.alive) return;
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const d2 = dx * dx + dy * dy;
-  if (d2 >= diam2 || d2 < 1e-9) return;
+  const sumR = a.rad() + b.rad();
+  if (d2 >= sumR * sumR || d2 < 1e-9) return;
   const d = Math.sqrt(d2);
   const nx = dx / d, ny = dy / d;
-  const overlap = diam - d;
-  const push = overlap * 0.5;
-  a.x -= nx * push; a.y -= ny * push;
-  b.x += nx * push; b.y += ny * push;
+  const overlap = sumR - d;
+  const ma = a.mass(), mb = b.mass();
+  const inv = 1.0 / (ma + mb);
+  // push each apart proportional to the OTHER's mass
+  a.x -= nx * overlap * (mb * inv); a.y -= ny * overlap * (mb * inv);
+  b.x += nx * overlap * (ma * inv); b.y += ny * overlap * (ma * inv);
   const rvx = b.vx - a.vx, rvy = b.vy - a.vy;
   const vn = rvx * nx + rvy * ny;
   if (vn < 0) {
-    const jImp = -(1.0 + RESTITUTION) * vn * 0.5;
-    a.vx -= jImp * nx; a.vy -= jImp * ny;
-    b.vx += jImp * nx; b.vy += jImp * ny;
+    const jImp = -(1.0 + RESTITUTION) * vn / (1.0 / ma + 1.0 / mb);
+    a.vx -= (jImp / ma) * nx; a.vy -= (jImp / ma) * ny;
+    b.vx += (jImp / mb) * nx; b.vy += (jImp / mb) * ny;
   }
   a.lastHitBy = b.owner;
   b.lastHitBy = a.owner;
