@@ -1,0 +1,106 @@
+name: Release
+
+# Build native binaries for the major platforms and attach them to the
+# GitHub Release for the pushed tag (e.g. `v1.0.0`). Also runnable manually.
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build and attach assets to (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: write   # needed to create/update the Release and upload assets
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x64
+            os: ubuntu-22.04
+          - name: linux-arm64
+            os: ubuntu-24.04-arm
+          - name: macos-x64
+            os: macos-13
+          - name: macos-arm64
+            os: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build pkg-config \
+            libprotobuf-dev protobuf-compiler \
+            libgrpc++-dev protobuf-compiler-grpc \
+            libssl-dev
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install cmake ninja protobuf grpc openssl@3
+
+      - name: Configure
+        run: |
+          EXTRA=""
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            EXTRA="-DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)"
+          fi
+          cmake -B build -S . -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTS=OFF \
+            $EXTRA
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package
+        id: pkg
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          DIST="origindb-${TAG}-${{ matrix.name }}"
+          mkdir -p "$DIST"
+          # Front-end CLI + the individual binaries it dispatches to
+          for b in origindb origindb_server origindb_client origindb_sql origindb_init; do
+            [ -f "build/$b" ] && cp "build/$b" "$DIST/" || echo "skip $b"
+          done
+          cp LICENSE README.md "$DIST/" 2>/dev/null || true
+          cat > "$DIST/INSTALL.txt" <<EOF
+          OriginDB ${TAG} — ${{ matrix.name }}
+
+          Binaries: origindb (unified CLI), origindb_server, origindb_client,
+                    origindb_sql, origindb_init.
+
+          Quick start:
+            ./origindb serve -d ./data -p 8787 -g 50051 --no-auth
+            ./origindb deploy <name> <module.wasm> <version>
+            ./origindb call <module> <reducer> '[args...]'
+            ./origindb exec "SELECT * FROM <table>"
+
+          Install: copy the binaries onto your PATH, e.g. /usr/local/bin.
+          Runtime deps (Linux): libgrpc++, libprotobuf, libssl (apt install
+          libgrpc++1 libprotobuf-dev libssl3). macOS: brew install grpc openssl@3.
+          EOF
+          tar czf "${DIST}.tar.gz" "$DIST"
+          shasum -a 256 "${DIST}.tar.gz" > "${DIST}.tar.gz.sha256"
+          echo "asset=${DIST}.tar.gz" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: |
+            ${{ steps.pkg.outputs.asset }}
+            ${{ steps.pkg.outputs.asset }}.sha256
+          fail_on_unmatched_files: true

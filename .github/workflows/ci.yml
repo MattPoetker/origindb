@@ -3,9 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
-    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
+
+# Release tags (v*) are handled by release.yml, not this pipeline.
 
 jobs:
   test:
