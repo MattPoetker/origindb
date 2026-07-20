@@ -134,6 +134,7 @@ function applyMarble(k, cols) {
   const m = ensureMarble(k, cols);
   m.tx = cols.x; m.tz = cols.y;
   m.vx = cols.vx || 0; m.vz = cols.vy || 0;
+  m.snapT = performance.now();   // snapshot arrival time, for dead-reckoning
   m.score = cols.score || 0;
   m.name = cols.name || m.name;
   // power-up buff → grow (heavy) + tint the marble
@@ -439,8 +440,12 @@ function animate() {
   for (const [k, m] of marbles) {
     const ry = m.buff === "heavy" ? HEAVY_R : MARBLE_R; // heavy marble sits higher
     if (m.alive) {
-      m.rx += (m.tx - m.rx) * Math.min(1, dt * 18);
-      m.rz += (m.tz - m.rz) * Math.min(1, dt * 18);
+      // dead-reckoning: extrapolate the last snapshot forward by its velocity
+      // (capped) so motion stays smooth between 30 Hz updates, then ease toward it.
+      const age = Math.min(0.14, (now - (m.snapT || now)) / 1000);
+      const px = m.tx + m.vx * age, pz = m.tz + m.vz * age;
+      m.rx += (px - m.rx) * Math.min(1, dt * 24);
+      m.rz += (pz - m.rz) * Math.min(1, dt * 24);
       m.mesh.position.set(m.rx, ry, m.rz);
       const sp = Math.hypot(m.vx, m.vz);
       if (sp > 0.1) { m.mesh.rotation.x += (m.vz / MARBLE_R) * dt; m.mesh.rotation.z -= (m.vx / MARBLE_R) * dt; }
