@@ -27,6 +27,7 @@ const std::unordered_map<std::string, int> kKnownEnvImports = {
     {"host_table_scan", 0},  {"host_emit_event", 0},  {"host_now_ms", 0},
     {"host_generate_id", 0}, {"host_log", 0},         {"host_abort", 0},
     {"host_alloc", 0},       {"host_free", 0},        {"host_set_result", 0},
+    {"host_sender", 0},
 };
 
 bool IsReservedName(const std::string& name) {

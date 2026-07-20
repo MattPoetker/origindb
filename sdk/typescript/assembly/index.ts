@@ -511,6 +511,23 @@ export function generateId(): i64 {
   return env.host_generate_id();
 }
 
+/**
+ * The caller's server-set identity, derived from the authenticated connection.
+ * Empty string when anonymous. Use THIS for authorization (row ownership,
+ * admin checks) — never trust an identity passed as a reducer argument.
+ */
+export function senderIdentity(): string {
+  const out = heap.alloc(8);
+  store<u32>(out, 0);
+  store<u32>(out + 4, 0);
+  const rc = env.host_sender(out, out + 4);
+  const bufPtr = <usize>load<u32>(out);
+  const bufLen = <i32>load<u32>(out + 4);
+  heap.free(out);
+  if (rc <= 0) return "";
+  return takeGuestBuffer(bufPtr, bufLen);
+}
+
 export function log(level: i32, message: string): void {
   const m = cstr(message);
   env.host_log(level, ptrOf(m));

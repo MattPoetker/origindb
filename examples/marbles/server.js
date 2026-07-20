@@ -12,6 +12,8 @@
 // Usage: node server.js [--port 9093] [--grpc localhost:50054] [--ws-port 8790]
 
 import http from "node:http";
+import net from "node:net";
+import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { extname, join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -52,23 +54,34 @@ function firstResult(response) {
   if (s == null) return null;
   try { return JSON.parse(s); } catch { return s; }
 }
-function executeReducer(reducer, argsList, timeoutMs = 5000) {
+// Derive a public identity from a client's SECRET anon token: identity =
+// sha256(token). The token stays secret (client-held, sent per request); the
+// identity is what reducers see + store as an owner. Because it's a one-way
+// hash, seeing an owner identity in a streamed row does NOT let an attacker
+// authenticate as it — they'd need the original token. (A stand-in for real
+// OIDC/JWT identities; same pattern: public identity, secret credential.)
+function identityFrom(token) {
+  if (!token) return "";
+  return "u_" + crypto.createHash("sha256").update(String(token)).digest("hex").slice(0, 24);
+}
+
+function executeReducer(reducer, argsList, sender, timeoutMs = 5000) {
   return new Promise((res, rej) => {
     wasm.ExecuteReducer(
-      { module_name: MODULE, reducer_name: reducer, sender_identity: "marbles-web", args: argsList.map(toWasmValue) },
+      { module_name: MODULE, reducer_name: reducer, sender_identity: sender || "", args: argsList.map(toWasmValue) },
       authMeta(), { deadline: Date.now() + timeoutMs }, (err, r) => (err ? rej(err) : res(r)));
   });
 }
 
 // --- HTTP --------------------------------------------------------------------
 const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
-const ALLOWED = new Set(["createLobby", "joinLobby", "startNow", "leaveLobby", "steer", "boost"]);
+const ALLOWED = new Set(["createLobby", "joinLobby", "startNow", "leaveLobby", "dissolveLobby", "steer", "boost"]);
 
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
     res.setHeader("access-control-allow-origin", "*");
-    res.setHeader("access-control-allow-headers", "content-type");
+    res.setHeader("access-control-allow-headers", "content-type, x-odb-identity");
     res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
     if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
 
@@ -86,7 +99,10 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(400, { "content-type": "application/json" });
         res.end(JSON.stringify({ success: false, error: "invalid call" })); return;
       }
-      const response = await executeReducer(reducer, callArgs);
+      // The caller's identity comes from a per-client secret token header, NOT
+      // from the payload — so it can't be spoofed by another client.
+      const sender = identityFrom(req.headers["x-odb-identity"]);
+      const response = await executeReducer(reducer, callArgs, sender);
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ success: response.success, error: response.error, result: firstResult(response) }));
       return;
@@ -96,12 +112,37 @@ const server = http.createServer(async (req, res) => {
     if (path.includes("..")) { res.writeHead(403); res.end(); return; }
     const file = join(__dirname, "public", path);
     const data = await readFile(file);
-    res.writeHead(200, { "content-type": MIME[extname(file)] ?? "application/octet-stream", "cache-control": "no-cache" });
+    // HTML must never be stored (it's the entry doc; a stale copy pins old asset
+    // URLs and breaks clients after a deploy). Assets revalidate; they're also
+    // version-busted in index.html (game.js?v=N), so a new deploy = new URL.
+    const isHtml = extname(file) === ".html";
+    res.writeHead(200, {
+      "content-type": MIME[extname(file)] ?? "application/octet-stream",
+      "cache-control": isHtml ? "no-store, must-revalidate" : "no-cache",
+    });
     res.end(data);
   } catch (err) {
     if (err.code === "ENOENT") { res.writeHead(404); res.end("not found"); }
     else { process.stderr.write(`${err.message}\n`); res.writeHead(500, { "content-type": "application/json" }); res.end(JSON.stringify({ success: false, error: err.message })); }
   }
+});
+
+// Websocket proxy: pipe any Upgrade request through to OriginDB's websocket
+// (WS_PORT). Lets ONE public hostname (marble.origindb.org via the tunnel) serve
+// both reducer calls over HTTP (/api/*) and realtime reads over wss://…/ — the
+// browser connects same-origin, so no mixed-content and no separate ws port.
+server.on("upgrade", (req, clientSocket, head) => {
+  const upstream = net.connect(WS_PORT, "127.0.0.1", () => {
+    let raw = `${req.method} ${req.url} HTTP/1.1\r\n`;
+    for (let i = 0; i < req.rawHeaders.length; i += 2) raw += `${req.rawHeaders[i]}: ${req.rawHeaders[i + 1]}\r\n`;
+    upstream.write(raw + "\r\n");
+    if (head && head.length) upstream.write(head);
+    upstream.pipe(clientSocket);
+    clientSocket.pipe(upstream);
+  });
+  const kill = () => { try { upstream.destroy(); } catch {} try { clientSocket.destroy(); } catch {} };
+  upstream.on("error", kill);
+  clientSocket.on("error", kill);
 });
 
 server.listen(PORT, "0.0.0.0", () => {

@@ -49,6 +49,13 @@ export declare function host_now_ms(): i64;
 @external("env", "host_generate_id")
 export declare function host_generate_id(): i64;
 
+// Caller identity: the host writes the server-set sender identity into a guest
+// buffer (ptr,len returned via out_ptr/out_len) and returns its byte length
+// (0 = anonymous). This is injected by the host from the authenticated
+// connection — authorize on it, never on a client-supplied argument.
+@external("env", "host_sender")
+export declare function host_sender(outPtr: usize, outLen: usize): i32;
+
 // level 0..4 = trace/debug/info/warn/error; msg NUL-terminated (max 4 KiB).
 @external("env", "host_log")
 export declare function host_log(level: i32, msg: usize): void;

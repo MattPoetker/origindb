@@ -446,6 +446,24 @@ wasm_trap_t* HostSetResult(void* env, wasmtime_caller_t* caller,
     return nullptr;
 }
 
+// (out_ptr, out_len) -> i32 : writes the caller's server-set identity
+// (ReducerContext.sender_identity) into a guest buffer and returns its byte
+// length (0 if anonymous/none). The identity is injected by the host from the
+// authenticated connection — a reducer authorizes on THIS, never on a
+// client-supplied argument, so it cannot be spoofed by the caller.
+wasm_trap_t* HostSender(void* env, wasmtime_caller_t* caller,
+                        const wasmtime_val_t* args, size_t,
+                        wasmtime_val_t* results, size_t) {
+    HostFrame f{};
+    if (auto* t = OpenFrame(env, caller, f)) return t;
+    const std::string& who = f.call->rctx->sender_identity;
+    if (who.empty()) { SetI32(results, 0); return nullptr; }
+    if (!WriteOut(f.ctx, f.mod, who, args[0].of.i32, args[1].of.i32))
+        return Trap("host_sender: result write failed");
+    SetI32(results, static_cast<int32_t>(who.size()));
+    return nullptr;
+}
+
 // ---------------------------------------------------------------------------
 // Registration
 // ---------------------------------------------------------------------------
@@ -487,6 +505,7 @@ bool RegisterHostFunctions(wasmtime_linker_t* linker, WasmModuleImpl* impl,
         {"host_alloc", {i32}, {i32}, HostAlloc},
         {"host_free", {i32}, {}, HostFree},
         {"host_set_result", {i32, i32}, {}, HostSetResult},
+        {"host_sender", {i32, i32}, {i32}, HostSender},
     };
 
     for (const auto& d : defs) {

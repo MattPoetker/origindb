@@ -10,6 +10,15 @@ import * as THREE from "three";
 // ---- identity + prefs -------------------------------------------------------
 let session = localStorage.getItem("mc_session");
 if (!session) { session = "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("mc_session", session); }
+// Secret per-browser identity token. Sent as x-odb-identity; the server hashes
+// it into a public owner identity (lobby.host) — so only the browser that
+// created a lobby can start/dissolve it. Kept secret (never rendered), unlike
+// the game `session` which appears in streamed rows.
+let idToken = localStorage.getItem("mc_token");
+if (!idToken) {
+  idToken = "t_" + (crypto?.randomUUID ? crypto.randomUUID() : (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)));
+  localStorage.setItem("mc_token", idToken);
+}
 const COLORS = ["#4da3ff", "#ff6b6b", "#ffd166", "#5ee6a8", "#c792ff", "#ff9f6b", "#4ee1e1", "#f078c8"];
 let myColor = localStorage.getItem("mc_color") || COLORS[0];
 let myName = localStorage.getItem("mc_name") || "";
@@ -155,7 +164,7 @@ function updateBoard() {
 // ---- reducer calls ----------------------------------------------------------
 async function call(reducer, args) {
   try {
-    const r = await fetch("/api/call", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ reducer, args }) });
+    const r = await fetch("/api/call", { method: "POST", headers: { "content-type": "application/json", "x-odb-identity": idToken }, body: JSON.stringify({ reducer, args }) });
     return await r.json();
   } catch { return { success: false }; }
 }
@@ -164,7 +173,8 @@ async function call(reducer, args) {
 let lobbySock = null;
 function connectLobbyWs() {
   const q = cfg.token ? `?token=${encodeURIComponent(cfg.token)}` : "";
-  const ws = new WebSocket(`ws://${location.hostname}:${cfg.wsPort}${q}`);
+  const scheme = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(`${scheme}://${location.host}/${q}`);
   lobbySock = ws;
   ws.onopen = () => {
     ws.send(JSON.stringify({ type: "sql_subscribe", sql: "SELECT * FROM lobbies" }));
@@ -206,7 +216,8 @@ function watchMyLobby(row, key) {
 let gameSock = null;
 function connectGameWs(match) {
   const q = cfg.token ? `?token=${encodeURIComponent(cfg.token)}` : "";
-  const ws = new WebSocket(`ws://${location.hostname}:${cfg.wsPort}${q}`);
+  const scheme = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(`${scheme}://${location.host}/${q}`);
   gameSock = ws;
   ws.onopen = () => {
     el("conn").textContent = "● live"; el("conn").classList.add("ok");

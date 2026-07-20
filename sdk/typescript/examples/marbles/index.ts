@@ -29,6 +29,7 @@ import {
   readTable,
   registerReducer,
   scanTable,
+  senderIdentity,
   setModuleInfo,
   writeTable,
 } from "../../assembly/index";
@@ -258,9 +259,25 @@ function createLobby(args: Array<JsonValue>): JsonValue | null {
   const id = generateId().toString();
   const now = <f64>nowMs();
   const nm = lobbyName.length > 0 ? lobbyName : ("Lobby-" + id.substring(id.length - 4));
-  writeLobby(id, nm, session, DEFAULT_CAP, 1, "waiting", now, 0, 0, "", "");
+  // Owner = the caller's SERVER-SET identity, not the client-supplied session.
+  // Only this identity can start/dissolve the lobby; it can't be spoofed by a
+  // payload arg (unlike `session`, which is streamed in the lobby row).
+  const owner = senderIdentity();
+  writeLobby(id, nm, owner, DEFAULT_CAP, 1, "waiting", now, 0, 0, "", "");
   addMember(id, session, pname, color);
   return JsonValue.newObject().setString("lobbyId", id).setString("state", "waiting");
+}
+
+// Host-only: dissolve a lobby (any state). Authorized on the caller's identity.
+function dissolveLobby(args: Array<JsonValue>): JsonValue | null {
+  const lobbyId = args.length > 0 ? args[0].asString() : "";
+  const l = Lobby.load(lobbyId);
+  if (l == null) return JsonValue.newObject().setString("error", "no such lobby");
+  const who = senderIdentity();
+  if (who.length == 0 || who != l!.host)
+    return JsonValue.newObject().setString("error", "host only");
+  purgeLobby(l!);
+  return JsonValue.newObject().setString("ok", "1");
 }
 
 function addMember(lobbyId: string, session: string, name: string, color: string): void {
@@ -303,7 +320,8 @@ function startNow(args: Array<JsonValue>): JsonValue | null {
   const lobbyId = args.length > 1 ? args[1].asString() : "";
   const l = Lobby.load(lobbyId);
   if (l == null) return JsonValue.newObject().setString("error", "no such lobby");
-  if (l!.host != session) return JsonValue.newObject().setString("error", "host only");
+  const who = senderIdentity();
+  if (who.length == 0 || who != l!.host) return JsonValue.newObject().setString("error", "host only");
   if (l!.state != "waiting") return JsonValue.newObject().setString("error", "not waiting");
   if (l!.count < MIN_START) return JsonValue.newObject().setString("error", "need >= 2 players");
   startMatch(l!);
@@ -361,7 +379,8 @@ function leaveLobby(args: Array<JsonValue>): JsonValue | null {
     deleteTable("players", session);
     // the next tick's win check will end the match if one remains
   }
-  if (l!.state == "waiting" && (l!.count <= 0 || l!.host == session)) {
+  // Dissolve on empty, or when the HOST leaves — host checked by identity.
+  if (l!.state == "waiting" && (l!.count <= 0 || senderIdentity() == l!.host)) {
     clearMembers(lobbyId);
     l!.state = "done"; l!.endMs = <f64>nowMs(); l!.save();
     return null;
@@ -569,6 +588,7 @@ registerReducer("createLobby", createLobby, ["session", "lobbyName", "name", "co
 registerReducer("joinLobby", joinLobby, ["session", "lobbyId", "name", "color"]);
 registerReducer("startNow", startNow, ["session", "lobbyId"]);
 registerReducer("leaveLobby", leaveLobby, ["session", "lobbyId"]);
+registerReducer("dissolveLobby", dissolveLobby, ["lobbyId"]);
 registerReducer("steer", steer, ["session", "dirX", "dirY"]);
 registerReducer("boost", boost, ["session"]);
 registerReducer("tick", tick, ["dtMs", "subSteps"]);
