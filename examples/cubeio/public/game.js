@@ -62,7 +62,8 @@ function applyRow(table, key, cols) {
 
 function connectWs() {
   const q = cfg.token ? `?token=${encodeURIComponent(cfg.token)}` : "";
-  const ws = new WebSocket(`ws://${location.hostname}:${cfg.wsPort}${q}`);
+  const scheme = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(`${scheme}://${location.host}/${q}`);
   const conn = document.getElementById("conn");
   ws.onopen = () => {
     conn.textContent = "● live"; conn.classList.add("ok");

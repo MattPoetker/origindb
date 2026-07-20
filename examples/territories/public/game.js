@@ -163,7 +163,8 @@ function pruneAOI() {
 
 function connectWs() {
   const q = cfg.token ? `?token=${encodeURIComponent(cfg.token)}` : "";
-  const ws = new WebSocket(`ws://${location.hostname}:${cfg.wsPort}${q}`);
+  const scheme = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(`${scheme}://${location.host}/${q}`);
   sock = ws;
   const conn = document.getElementById("conn");
   ws.onopen = () => {

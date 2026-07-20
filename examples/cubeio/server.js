@@ -12,6 +12,7 @@
 // Usage: node server.js [--port 9091] [--grpc localhost:50052] [--ws-port 8788] [--token <client>]
 
 import http from "node:http";
+import net from "node:net";
 import { readFile } from "node:fs/promises";
 import { extname, join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -150,6 +151,23 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({ success: false, error: err.message }));
     }
   }
+});
+
+// Websocket proxy: pipe Upgrade requests through to OriginDB's ws (WS_PORT) so
+// the browser connects same-origin (wss://cubeio.origindb.org/) — no mixed
+// content, no separate ws port through the tunnel.
+server.on("upgrade", (req, clientSocket, head) => {
+  const upstream = net.connect(WS_PORT, "127.0.0.1", () => {
+    let raw = `${req.method} ${req.url} HTTP/1.1\r\n`;
+    for (let i = 0; i < req.rawHeaders.length; i += 2) raw += `${req.rawHeaders[i]}: ${req.rawHeaders[i + 1]}\r\n`;
+    upstream.write(raw + "\r\n");
+    if (head && head.length) upstream.write(head);
+    upstream.pipe(clientSocket);
+    clientSocket.pipe(upstream);
+  });
+  const kill = () => { try { upstream.destroy(); } catch {} try { clientSocket.destroy(); } catch {} };
+  upstream.on("error", kill);
+  clientSocket.on("error", kill);
 });
 
 server.listen(PORT, "0.0.0.0", () => {
