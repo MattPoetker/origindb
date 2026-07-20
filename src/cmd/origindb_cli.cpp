@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <memory>
 #include <sstream>
 #include <fstream>
@@ -38,18 +39,33 @@ struct Command {
 };
 
 std::map<std::string, Command> commands = {
-    {"server", {"origindb_server", "Start the OriginDB server", "origindb server [OPTIONS]"}},
+    {"serve", {"origindb_server", "Start the OriginDB server", "origindb serve [OPTIONS]"}},
+    {"server", {"origindb_server", "Start the OriginDB server (alias for serve)", "origindb server [OPTIONS]"}},
+    {"start", {"origindb_server", "Start the OriginDB server (alias for serve)", "origindb start [OPTIONS]"}},
     {"sql", {"origindb_sql", "SQL interactive shell", "origindb sql [OPTIONS]"}},
-    {"client", {"origindb_client", "Connect as a client", "origindb client [OPTIONS]"}},
+    {"client", {"origindb_client", "Raw client passthrough (interactive, etc.)", "origindb client [OPTIONS] [COMMAND]"}},
     {"demo", {"origindb_demo", "Run the demo application", "origindb demo"}},
     {"init", {"origindb_init", "Initialize a new OriginDB project", "origindb init [PROJECT_NAME]"}},
     {"publish", {"", "Build and deploy WASM module", "origindb publish [OPTIONS]"}},
+    // ---- client verbs promoted to top-level (forwarded to origindb_client) ----
+    {"status", {"origindb_client", "Get server status", "origindb status [OPTIONS]"}},
+    {"exec", {"origindb_client", "Execute a SQL statement", "origindb exec \"SQL\" [OPTIONS]"}},
+    {"deploy", {"origindb_client", "Deploy a WASM module", "origindb deploy NAME FILE.wasm [VERSION] [OPTIONS]"}},
+    {"undeploy", {"origindb_client", "Remove a WASM module", "origindb undeploy NAME [OPTIONS]"}},
+    {"modules", {"origindb_client", "List deployed WASM modules", "origindb modules [OPTIONS]"}},
+    {"call", {"origindb_client", "Execute a reducer", "origindb call MODULE REDUCER [JSON_ARGS] [OPTIONS]"}},
+    // ---- built-ins ----
     {"migrate", {"", "Run database migrations", "origindb migrate [OPTIONS]"}},
     {"backup", {"", "Backup the database", "origindb backup [OPTIONS]"}},
     {"restore", {"", "Restore from backup", "origindb restore [BACKUP_FILE]"}},
     {"logs", {"", "View server logs", "origindb logs [OPTIONS]"}},
-    {"start", {"origindb_server", "Start the OriginDB server (alias for server)", "origindb start [OPTIONS]"}},
     {"stop", {"", "Stop the OriginDB server", "origindb stop"}},
+};
+
+// Verbs that are forwarded to origindb_client with the verb re-injected as the
+// first argument (so `origindb deploy x.wasm` -> `origindb_client deploy x.wasm`).
+const std::set<std::string> kClientVerbs = {
+    "status", "exec", "deploy", "undeploy", "modules", "call",
 };
 
 void printHeader() {
@@ -67,20 +83,26 @@ void printUsage() {
     std::cout << BOLD << "Commands:\n" << RESET;
     std::cout << "  " << GREEN << std::left << std::setw(12) << "init" << RESET
               << " Initialize a new OriginDB project\n";
-    std::cout << "  " << GREEN << std::left << std::setw(12) << "server" << RESET
+    std::cout << "  " << GREEN << std::left << std::setw(12) << "serve" << RESET
               << " Start the OriginDB server\n";
-    std::cout << "  " << GREEN << std::left << std::setw(12) << "start" << RESET
-              << " Start the OriginDB server (alias)\n";
     std::cout << "  " << GREEN << std::left << std::setw(12) << "stop" << RESET
               << " Stop the OriginDB server\n";
     std::cout << "  " << GREEN << std::left << std::setw(12) << "logs" << RESET
               << " View server logs\n";
+    std::cout << "  " << GREEN << std::left << std::setw(12) << "deploy" << RESET
+              << " Deploy a WASM module\n";
+    std::cout << "  " << GREEN << std::left << std::setw(12) << "publish" << RESET
+              << " Build and deploy a WASM module\n";
+    std::cout << "  " << GREEN << std::left << std::setw(12) << "call" << RESET
+              << " Execute a reducer\n";
+    std::cout << "  " << GREEN << std::left << std::setw(12) << "exec" << RESET
+              << " Execute a SQL statement\n";
+    std::cout << "  " << GREEN << std::left << std::setw(12) << "modules" << RESET
+              << " List deployed modules\n";
+    std::cout << "  " << GREEN << std::left << std::setw(12) << "status" << RESET
+              << " Get server status\n";
     std::cout << "  " << GREEN << std::left << std::setw(12) << "sql" << RESET
               << " SQL interactive shell\n";
-    std::cout << "  " << GREEN << std::left << std::setw(12) << "publish" << RESET
-              << " Build and deploy WASM module\n";
-    std::cout << "  " << GREEN << std::left << std::setw(12) << "client" << RESET
-              << " Connect as a client\n";
     std::cout << "  " << GREEN << std::left << std::setw(12) << "demo" << RESET
               << " Run the demo application\n";
 
@@ -90,11 +112,12 @@ void printUsage() {
     std::cout << "  " << YELLOW << "--verbose" << RESET << "      Enable verbose output\n";
 
     std::cout << "\n" << BOLD << "Examples:\n" << RESET;
-    std::cout << "  " << BLUE << "origindb init myproject" << RESET << "      # Initialize new project\n";
-    std::cout << "  " << BLUE << "origindb server -p 9090" << RESET << "      # Start server on port 9090\n";
-    std::cout << "  " << BLUE << "origindb publish" << RESET << "             # Build and deploy WASM module\n";
-    std::cout << "  " << BLUE << "origindb sql" << RESET << "                 # Open SQL shell\n";
-    std::cout << "  " << BLUE << "origindb logs --follow" << RESET << "       # View logs with live updates\n";
+    std::cout << "  " << BLUE << "origindb init myproject" << RESET << "                       # Initialize new project\n";
+    std::cout << "  " << BLUE << "origindb serve -d ./board_data -p 8787 -g 50051 --no-auth" << RESET << "\n";
+    std::cout << "  " << BLUE << "origindb deploy board ./build/board.wasm 1.0.0" << RESET << "\n";
+    std::cout << "  " << BLUE << "origindb call board addNote '[\"me\",\"hi\"]'" << RESET << "\n";
+    std::cout << "  " << BLUE << "origindb exec \"SELECT * FROM notes\"" << RESET << "\n";
+    std::cout << "  " << BLUE << "origindb logs --follow" << RESET << "                        # Tail server logs\n";
 
     std::cout << "\n" << BOLD << "Documentation:\n" << RESET;
     std::cout << "  https://docs.origindb.com\n";
@@ -120,13 +143,16 @@ void printCommandHelp(const std::string& command) {
     std::cout << BOLD << "Usage: " << RESET << cmd.usage << "\n\n";
 
     // Command-specific help
-    if (command == "server") {
+    if (command == "serve" || command == "server" || command == "start") {
         std::cout << BOLD << "Server Options:\n" << RESET;
         std::cout << "  -p, --port PORT        WebSocket port (default: 8080)\n";
         std::cout << "  -g, --grpc-port PORT   gRPC port (default: 50051)\n";
         std::cout << "  -d, --data-dir DIR     Data directory (default: ./origindb_data)\n";
+        std::cout << "  --no-auth              Disable auth (local dev only)\n";
         std::cout << "  -l, --log-level LEVEL  Log level: trace,debug,info,warn,error\n";
         std::cout << "  -c, --config FILE      Config file path\n";
+        std::cout << "\n" << BOLD << "Example:\n" << RESET;
+        std::cout << "  origindb serve -d ./board_data -p 8787 -g 50051 --no-auth\n";
     } else if (command == "sql") {
         std::cout << BOLD << "SQL Options:\n" << RESET;
         std::cout << "  -h, --host HOST        Server host (default: localhost)\n";
@@ -412,9 +438,8 @@ int handlePublishCommand(const std::vector<std::string>& args) {
         std::cout << "Module Name: " << CYAN << project_name << RESET << "\n";
         std::cout << "Server: " << CYAN << grpc_endpoint << RESET << "\n\n";
         std::cout << BOLD << "Test your reducers:" << RESET << "\n";
-        std::cout << "  origindb client -s " << grpc_endpoint << " call "
-                  << project_name << " <ReducerName> '[\"arg1\", 2]'\n";
-        std::cout << "  origindb client -s " << grpc_endpoint << " modules\n";
+        std::cout << "  origindb call " << project_name << " <ReducerName> '[\"arg1\", 2]' -s " << grpc_endpoint << "\n";
+        std::cout << "  origindb modules -s " << grpc_endpoint << "\n";
         return 0;
     } else {
         std::cerr << RED << "Error: Deployment failed. Is the OriginDB server running?" << RESET << "\n";
@@ -467,11 +492,17 @@ int executeCommand(const std::string& command, const std::vector<std::string>& a
         return 1;
     }
 
-    // Build command line
+    // Build the forwarded argument list. Promoted client verbs need the verb
+    // itself re-injected as origindb_client's first argument.
+    std::vector<std::string> fwd;
+    if (kClientVerbs.count(command)) {
+        fwd.push_back(command);
+    }
+    fwd.insert(fwd.end(), args.begin(), args.end());
+
     std::vector<char*> exec_args;
     exec_args.push_back(const_cast<char*>(binary_path.c_str()));
-
-    for (const auto& arg : args) {
+    for (const auto& arg : fwd) {
         exec_args.push_back(const_cast<char*>(arg.c_str()));
     }
     exec_args.push_back(nullptr);
