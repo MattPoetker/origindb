@@ -1,29 +1,24 @@
-// Marble Clash — a 60 Hz physics sumo whose entire authoritative simulation
-// runs as an OriginDB WASM reducer. Marbles roll on a circular arena; players
-// steer with a thrust vector, collide elastically, and try to knock rivals off
-// the rim. Last-toucher scores on a kill. Everything — positions, velocities,
-// scores — lives in OriginDB tables, so the match persists through the WAL and
-// streams to every client over the changefeed.
+// Marble Clash — a 60 Hz physics sumo with LOBBY + MATCHMAKING, running as a
+// SINGLE OriginDB WASM reducer module that hosts MANY concurrent matches.
 //
-// Why this is a hard demo: unlike an RTS where only *active* chunks move, in a
-// physics sim EVERY body moves EVERY tick, so every row is dirty every frame.
-// That is the worst case for a write-ahead-log DB. The scaling trick is to
-// SHARD BY ARENA: this same module is deployed once per arena (marble_<n>), and
-// each instance ticks on its own mutex → its own core. Tables in OriginDB are
-// server-global, so rows are ARENA-PREFIXED (m:<arena>:<id>) — every arena
-// only scans/writes its own slice, and clients subscribe WHERE arena = <n>.
-// Within an arena, a SPATIAL HASH keeps broad-phase collision at ~O(N).
+// Matchmaking model (all data-driven — no engine change, no sharding):
+//   * Players create or join a LOBBY. At capacity (or host force-start) a MATCH
+//     begins immediately — there is no fixed slot pool, matches are unbounded.
+//   * Every match is namespaced by its lobbyId: marbles are keyed
+//     m:<lobbyId>:<id> and carry an `arena=<lobbyId>` column, so a client
+//     subscribes to exactly its match with WHERE arena = '<lobbyId>'.
+//   * The native tick scheduler ticks THIS ONE module once per frame; the tick
+//     reducer walks every active match and steps its physics. One module, one
+//     mutex → every lobby/match op is serialized, so nothing can race.
+//   * Win = LAST MARBLE STANDING (one life per player, no respawn).
 //
-// Tables (server-global, arena-namespaced by key + `arena` column):
-//   marbles  key = m:<arena>:<id>   pos, vel, thrust, owner, score, arena
-//   players  key = <session>        name/color/score/marble-key/arena/alive
+// Tables (server-global, namespaced by key):
+//   lobbies  key = <lobbyId>            name/host/cap/count/state/winner
+//   members  key = lm:<lobbyId>:<sess>  lobbyId/session/name/color
+//   marbles  key = m:<lobbyId>:<id>     pos/vel/thrust/owner/score/alive/arena
+//   players  key = <session>            name/color/mkey/lobbyId
 //
-// Reducers:
-//   spawn(session, name, color, arena)   create this player's marble, return id
-//   steer(session, dirX, dirY)           set thrust direction (unit vector)
-//   boost(session)                       dash impulse (cooldown)
-//   leave(session)                       remove marble
-//   tick(dtMs, subSteps, arena)          integrate physics + collisions + score
+// Reducers: createLobby · joinLobby · startNow · leaveLobby · steer · boost · tick
 
 import {
   JsonValue,
@@ -46,9 +41,11 @@ export {
   __origindb_abort,
 } from "../../assembly/index";
 
-setModuleInfo("marbles", "1.0.0");
+setModuleInfo("marbles", "2.1.0");
 declareTable("marbles");
 declareTable("players");
+declareTable("lobbies");
+declareTable("members");
 
 // ---- arena + physics constants (keep in sync with public/game.js) ----------
 
@@ -57,48 +54,50 @@ const MARBLE_R: f64 = 1.1;        // marble radius
 const THRUST: f64 = 46.0;         // steer acceleration (u/s^2)
 const DAMPING: f64 = 0.86;        // linear velocity retained per second
 const RESTITUTION: f64 = 0.94;    // marble-marble bounce elasticity
-const MAX_SPEED: f64 = 34.0;      // clamp (u/s) — keeps the sim well-behaved
+const MAX_SPEED: f64 = 34.0;      // clamp (u/s)
 const BOOST_IMPULSE: f64 = 26.0;  // dash delta-v (u/s)
 const BOOST_COOLDOWN: f64 = 1500.0; // ms between boosts
 const FALL_MARGIN: f64 = 1.5;     // center-dist past rim before a marble drops
-const RESPAWN_MS: f64 = 1800.0;   // dead → respawn delay
 const CELL: f64 = 2.4;            // spatial-hash cell size (~2*MARBLE_R)
 const FIXED_DT: f64 = 1.0 / 60.0; // physics substep (true 60 Hz)
 const SCAN_LIMIT: i32 = 100000;   // scan all rows (SDK default caps at 1000)
 
-// ---- deterministic PRNG (seeded per call from host clock) -------------------
+const DEFAULT_CAP: i32 = 8;       // players per lobby before auto-start
+const MIN_START: i32 = 2;         // host force-start floor
+const RESULT_LINGER_MS: f64 = 8000.0;   // keep a finished match visible, then purge
+const WAITING_TTL_MS: f64 = 600000.0;   // reap abandoned waiting lobbies (10 min)
+
+// lobbies.state: "waiting" | "active" | "done"
+
+// ---- deterministic PRNG -----------------------------------------------------
 
 let g_seed: u64 = 0;
 function rnd(): f64 {
   if (g_seed == 0) g_seed = (<u64>nowMs()) ^ 0x9e3779b97f4a7c15 ^ (<u64>generateId());
   let x = g_seed;
-  x ^= x << 13;
-  x ^= x >> 7;
-  x ^= x << 17;
+  x ^= x << 13; x ^= x >> 7; x ^= x << 17;
   g_seed = x;
   return <f64>(x >> 11) / 9007199254740992.0;
 }
 
-// A random point inside the inner disc (safe spawn away from the rim).
-function spawnPoint(out: StaticArray<f64>): void {
-  const a = rnd() * 6.2831853;
-  const r = Math.sqrt(rnd()) * (ARENA_R * 0.6);
+// Evenly-spaced ring start points so a match opens fairly.
+function ringPoint(i: i32, n: i32, out: StaticArray<f64>): void {
+  const a = (6.2831853 * <f64>i) / <f64>(n < 1 ? 1 : n) + rnd() * 0.15;
+  const r = ARENA_R * 0.62;
   out[0] = Math.cos(a) * r;
   out[1] = Math.sin(a) * r;
 }
 
-function marbleKey(arena: i32, id: string): string {
-  return "m:" + arena.toString() + ":" + id;
-}
-function marblePrefix(arena: i32): string {
-  return "m:" + arena.toString() + ":";
-}
+function marbleKey(match: string, id: string): string { return "m:" + match + ":" + id; }
+function marblePrefix(match: string): string { return "m:" + match + ":"; }
+function memberKey(lobbyId: string, session: string): string { return "lm:" + lobbyId + ":" + session; }
+function memberPrefix(lobbyId: string): string { return "lm:" + lobbyId + ":"; }
 
 // ---- marble struct ----------------------------------------------------------
 
 class M {
   id: string = "";
-  arena: i32 = 0;
+  match: string = "";        // lobbyId this marble belongs to (== arena column)
   owner: string = "";        // session id
   name: string = "";
   color: string = "#4da3ff";
@@ -106,19 +105,18 @@ class M {
   y: f64 = 0;
   vx: f64 = 0;
   vy: f64 = 0;
-  tx: f64 = 0;               // thrust direction (unit)
+  tx: f64 = 0;
   ty: f64 = 0;
   score: f64 = 0;
   alive: bool = true;
-  respawnAt: f64 = 0;        // ms; when dead, time to respawn
-  lastHitBy: string = "";    // session of last marble to touch (kill credit)
-  boostAt: f64 = 0;          // ms of last boost (cooldown)
+  lastHitBy: string = "";
+  boostAt: f64 = 0;
   dirty: bool = false;
 
   static from(v: JsonValue): M {
     const m = new M();
     m.id = v.getString("id", "");
-    m.arena = <i32>v.getNumber("arena", 0);
+    m.match = v.getString("arena", "");
     m.owner = v.getString("owner", "");
     m.name = v.getString("name", "");
     m.color = v.getString("color", "#4da3ff");
@@ -130,21 +128,19 @@ class M {
     m.ty = v.getNumber("ty", 0);
     m.score = v.getNumber("score", 0);
     m.alive = v.getBool("alive", true);
-    m.respawnAt = v.getNumber("respawnAt", 0);
     m.lastHitBy = v.getString("lastHitBy", "");
     m.boostAt = v.getNumber("boostAt", 0);
     return m;
   }
 
-  key(): string { return marbleKey(this.arena, this.id); }
+  key(): string { return marbleKey(this.match, this.id); }
 
-  // Hand-rolled JSON — this runs 60x/sec per live marble in the tick writeback,
-  // so we avoid building a JsonValue object graph (which allocated ~15 objects
-  // per row and dominated tick time under load). Plain string concat only.
+  // Hand-rolled JSON — runs 60x/sec per live marble in the tick writeback.
+  // `arena` holds the lobbyId string so clients subscribe WHERE arena='<lobbyId>'.
   toJson(): string {
     return "{\"id\":\"" + this.id +
-      "\",\"arena\":" + this.arena.toString() +
-      ",\"owner\":\"" + esc(this.owner) +
+      "\",\"arena\":\"" + esc(this.match) +
+      "\",\"owner\":\"" + esc(this.owner) +
       "\",\"name\":\"" + esc(this.name) +
       "\",\"color\":\"" + esc(this.color) +
       "\",\"x\":" + this.x.toString() +
@@ -155,14 +151,11 @@ class M {
       ",\"ty\":" + this.ty.toString() +
       ",\"score\":" + this.score.toString() +
       ",\"alive\":" + (this.alive ? "true" : "false") +
-      ",\"respawnAt\":" + this.respawnAt.toString() +
       ",\"lastHitBy\":\"" + esc(this.lastHitBy) +
       "\",\"boostAt\":" + this.boostAt.toString() + "}";
   }
 }
 
-// Escape the two JSON-significant chars in a string field (names are short and
-// user-supplied; owners/colors are controlled). Keeps writeback JSON valid.
 function esc(s: string): string {
   let out = "";
   for (let i = 0; i < s.length; i++) {
@@ -173,9 +166,8 @@ function esc(s: string): string {
   return out;
 }
 
-// ---- helpers ----------------------------------------------------------------
+// ---- player / lobby helpers -------------------------------------------------
 
-// The player row stores the marble's FULL key → O(1) read, no scan.
 function findMarbleBySession(session: string): M | null {
   const p = readTable("players", session);
   if (p == null) return null;
@@ -187,52 +179,211 @@ function findMarbleBySession(session: string): M | null {
   return M.from(JsonValue.parse(v!));
 }
 
-function writePlayer(session: string, name: string, color: string, mkey: string, arena: i32, score: f64): void {
+function writePlayer(session: string, name: string, color: string, mkey: string, lobbyId: string): void {
   writeTable("players", session, JsonValue.newObject()
     .setString("session", session)
     .setString("name", name)
     .setString("color", color)
     .setString("mkey", mkey)
-    .setNumber("arena", <f64>arena)
-    .setNumber("score", score)
+    .setString("lobbyId", lobbyId)
     .setNumber("updated", <f64>nowMs())
     .toString());
 }
 
-// ---- reducers ---------------------------------------------------------------
-
-// spawn: create this session's marble in the given arena. Idempotent —
-// rejoining with the same session returns the existing marble.
-function spawn(args: Array<JsonValue>): JsonValue | null {
-  const session = args.length > 0 ? args[0].asString() : "";
-  const name = args.length > 1 ? args[1].asString() : "";
-  let color = args.length > 2 ? args[2].asString() : "";
-  const arena = <i32>(args.length > 3 ? args[3].asNumber() : 0);
-  if (session.length == 0) return null;
-  if (color.length == 0) color = "#4da3ff";
-
-  const existing = findMarbleBySession(session);
-  if (existing != null) {
-    return JsonValue.newObject().setString("id", existing!.id).setNumber("arena", <f64>existing!.arena).setBool("existing", true);
-  }
-
-  const id = generateId().toString();
-  const m = new M();
-  m.id = id;
-  m.arena = arena;
-  m.owner = session;
-  m.name = name.length > 0 ? name : ("marble-" + id.substring(id.length - 4));
-  m.color = color;
-  const p = new StaticArray<f64>(2);
-  spawnPoint(p);
-  m.x = p[0]; m.y = p[1];
-  writeTable("marbles", m.key(), m.toJson());
-  writePlayer(session, m.name, color, m.key(), arena, 0);
-  return JsonValue.newObject().setString("id", id).setNumber("arena", <f64>arena).setBool("existing", false);
+function writeLobby(id: string, name: string, host: string, cap: i32, count: i32,
+                    state: string, createdMs: f64, startMs: f64, endMs: f64,
+                    winner: string, winnerName: string): void {
+  writeTable("lobbies", id, "{\"id\":\"" + id +
+    "\",\"name\":\"" + esc(name) +
+    "\",\"host\":\"" + esc(host) +
+    "\",\"cap\":" + cap.toString() +
+    ",\"count\":" + count.toString() +
+    ",\"state\":\"" + state +
+    "\",\"createdMs\":" + createdMs.toString() +
+    ",\"startMs\":" + startMs.toString() +
+    ",\"endMs\":" + endMs.toString() +
+    ",\"winner\":\"" + esc(winner) +
+    "\",\"winnerName\":\"" + esc(winnerName) + "\"}");
 }
 
-// steer: set the thrust direction (client sends a unit vector toward the mouse
-// / movement keys). Cheap — updates two columns.
+class Lobby {
+  id: string = "";
+  name: string = "";
+  host: string = "";
+  cap: i32 = DEFAULT_CAP;
+  count: i32 = 0;
+  state: string = "waiting";
+  createdMs: f64 = 0;
+  startMs: f64 = 0;
+  endMs: f64 = 0;
+  winner: string = "";
+  winnerName: string = "";
+
+  static of(id: string, v: JsonValue): Lobby {
+    const l = new Lobby();
+    l.id = id;
+    l.name = v.getString("name", "");
+    l.host = v.getString("host", "");
+    l.cap = <i32>v.getNumber("cap", DEFAULT_CAP);
+    l.count = <i32>v.getNumber("count", 0);
+    l.state = v.getString("state", "waiting");
+    l.createdMs = v.getNumber("createdMs", 0);
+    l.startMs = v.getNumber("startMs", 0);
+    l.endMs = v.getNumber("endMs", 0);
+    l.winner = v.getString("winner", "");
+    l.winnerName = v.getString("winnerName", "");
+    return l;
+  }
+  static load(id: string): Lobby | null {
+    const v = readTable("lobbies", id);
+    if (v == null) return null;
+    return Lobby.of(id, JsonValue.parse(v!));
+  }
+  save(): void {
+    writeLobby(this.id, this.name, this.host, this.cap, this.count, this.state,
+      this.createdMs, this.startMs, this.endMs, this.winner, this.winnerName);
+  }
+}
+
+// ---- lobby reducers ---------------------------------------------------------
+
+function createLobby(args: Array<JsonValue>): JsonValue | null {
+  const session = args.length > 0 ? args[0].asString() : "";
+  const lobbyName = args.length > 1 ? args[1].asString() : "";
+  const pname = args.length > 2 ? args[2].asString() : "";
+  let color = args.length > 3 ? args[3].asString() : "";
+  if (session.length == 0) return JsonValue.newObject().setString("error", "no session");
+  if (color.length == 0) color = "#4da3ff";
+
+  const id = generateId().toString();
+  const now = <f64>nowMs();
+  const nm = lobbyName.length > 0 ? lobbyName : ("Lobby-" + id.substring(id.length - 4));
+  writeLobby(id, nm, session, DEFAULT_CAP, 1, "waiting", now, 0, 0, "", "");
+  addMember(id, session, pname, color);
+  return JsonValue.newObject().setString("lobbyId", id).setString("state", "waiting");
+}
+
+function addMember(lobbyId: string, session: string, name: string, color: string): void {
+  writeTable("members", memberKey(lobbyId, session), JsonValue.newObject()
+    .setString("lobbyId", lobbyId)
+    .setString("session", session)
+    .setString("name", name.length > 0 ? name : "guest")
+    .setString("color", color.length > 0 ? color : "#4da3ff")
+    .setNumber("joinedMs", <f64>nowMs())
+    .toString());
+}
+
+function joinLobby(args: Array<JsonValue>): JsonValue | null {
+  const session = args.length > 0 ? args[0].asString() : "";
+  const lobbyId = args.length > 1 ? args[1].asString() : "";
+  const pname = args.length > 2 ? args[2].asString() : "";
+  let color = args.length > 3 ? args[3].asString() : "";
+  if (session.length == 0 || lobbyId.length == 0) return JsonValue.newObject().setString("error", "bad args");
+  if (color.length == 0) color = "#4da3ff";
+
+  const l = Lobby.load(lobbyId);
+  if (l == null) return JsonValue.newObject().setString("error", "no such lobby");
+  if (l!.state == "active") return JsonValue.newObject().setString("error", "match in progress").setString("state", "active");
+  if (l!.state == "done") return JsonValue.newObject().setString("error", "match over").setString("state", "done");
+
+  const already = readTable("members", memberKey(lobbyId, session)) != null;
+  if (!already) {
+    if (l!.count >= l!.cap) return JsonValue.newObject().setString("error", "lobby full");
+    addMember(lobbyId, session, pname, color);
+    l!.count += 1;
+    l!.save();
+  }
+  if (l!.count >= l!.cap) startMatch(l!);
+  const cur = Lobby.load(lobbyId)!;
+  return JsonValue.newObject().setString("ok", "1").setString("state", cur.state).setString("match", lobbyId);
+}
+
+function startNow(args: Array<JsonValue>): JsonValue | null {
+  const session = args.length > 0 ? args[0].asString() : "";
+  const lobbyId = args.length > 1 ? args[1].asString() : "";
+  const l = Lobby.load(lobbyId);
+  if (l == null) return JsonValue.newObject().setString("error", "no such lobby");
+  if (l!.host != session) return JsonValue.newObject().setString("error", "host only");
+  if (l!.state != "waiting") return JsonValue.newObject().setString("error", "not waiting");
+  if (l!.count < MIN_START) return JsonValue.newObject().setString("error", "need >= 2 players");
+  startMatch(l!);
+  const cur = Lobby.load(lobbyId)!;
+  return JsonValue.newObject().setString("ok", "1").setString("state", cur.state).setString("match", lobbyId);
+}
+
+// Begin a match: spawn one marble per member (one life), flip the lobby active.
+// The match id IS the lobbyId; marbles are namespaced m:<lobbyId>:<id>.
+function startMatch(l: Lobby): void {
+  clearMatchMarbles(l.id);   // clear any stale marbles for this id
+  const members = JsonValue.parse(scanTable("members", memberPrefix(l.id), 256));
+  const n = members.length;
+  const now = <f64>nowMs();
+  const p = new StaticArray<f64>(2);
+  for (let i = 0; i < n; i++) {
+    const mv = members.at(i).get("value");
+    const sess = mv.getString("session", "");
+    if (sess.length == 0) continue;
+    const nm = mv.getString("name", "guest");
+    const col = mv.getString("color", "#4da3ff");
+    const id = generateId().toString();
+    const m = new M();
+    m.id = id; m.match = l.id; m.owner = sess; m.name = nm; m.color = col;
+    ringPoint(i, n, p);
+    m.x = p[0]; m.y = p[1]; m.alive = true;
+    writeTable("marbles", m.key(), m.toJson());
+    writePlayer(sess, nm, col, m.key(), l.id);
+  }
+  l.state = "active"; l.startMs = now;
+  l.save();
+}
+
+function clearMatchMarbles(match: string): void {
+  const rows = JsonValue.parse(scanTable("marbles", marblePrefix(match), SCAN_LIMIT));
+  for (let i = 0; i < rows.length; i++) deleteTable("marbles", rows.at(i).getString("key", ""));
+}
+function clearMembers(lobbyId: string): void {
+  const rows = JsonValue.parse(scanTable("members", memberPrefix(lobbyId), 256));
+  for (let i = 0; i < rows.length; i++) deleteTable("members", rows.at(i).getString("key", ""));
+}
+
+function leaveLobby(args: Array<JsonValue>): JsonValue | null {
+  const session = args.length > 0 ? args[0].asString() : "";
+  const lobbyId = args.length > 1 ? args[1].asString() : "";
+  const l = Lobby.load(lobbyId);
+  if (l == null) return null;
+
+  const wasMember = readTable("members", memberKey(lobbyId, session)) != null;
+  if (wasMember) { deleteTable("members", memberKey(lobbyId, session)); if (l!.count > 0) l!.count -= 1; }
+
+  if (l!.state == "active") {
+    const m = findMarbleBySession(session);
+    if (m != null) deleteTable("marbles", m!.key());
+    deleteTable("players", session);
+    // the next tick's win check will end the match if one remains
+  }
+  if (l!.state == "waiting" && (l!.count <= 0 || l!.host == session)) {
+    clearMembers(lobbyId);
+    l!.state = "done"; l!.endMs = <f64>nowMs(); l!.save();
+    return null;
+  }
+  l!.save();
+  return null;
+}
+
+function endMatch(l: Lobby, winnerSess: string, winnerName: string): void {
+  l.state = "done"; l.endMs = <f64>nowMs();
+  l.winner = winnerSess; l.winnerName = winnerName;
+  l.save();
+}
+
+function purgeLobby(l: Lobby): void {
+  clearMatchMarbles(l.id);
+  clearMembers(l.id);
+  deleteTable("lobbies", l.id);
+}
+
+// ---- gameplay reducers ------------------------------------------------------
+
 function steer(args: Array<JsonValue>): JsonValue | null {
   const session = args.length > 0 ? args[0].asString() : "";
   let dx = args.length > 1 ? args[1].asNumber() : 0;
@@ -246,7 +397,6 @@ function steer(args: Array<JsonValue>): JsonValue | null {
   return null;
 }
 
-// boost: a dash impulse in the current thrust direction, on a cooldown.
 function boost(args: Array<JsonValue>): JsonValue | null {
   const session = args.length > 0 ? args[0].asString() : "";
   const m = findMarbleBySession(session);
@@ -254,7 +404,7 @@ function boost(args: Array<JsonValue>): JsonValue | null {
   const now = <f64>nowMs();
   if (now - m!.boostAt < BOOST_COOLDOWN) return null;
   const dx = m!.tx, dy = m!.ty;
-  if (dx * dx + dy * dy < 0.0001) return null;   // no direction → no dash
+  if (dx * dx + dy * dy < 0.0001) return null;
   m!.vx += dx * BOOST_IMPULSE;
   m!.vy += dy * BOOST_IMPULSE;
   m!.boostAt = now;
@@ -262,45 +412,40 @@ function boost(args: Array<JsonValue>): JsonValue | null {
   return JsonValue.newObject().setBool("ok", true);
 }
 
-// leave: remove the marble and player row.
-function leave(args: Array<JsonValue>): JsonValue | null {
-  const session = args.length > 0 ? args[0].asString() : "";
-  const m = findMarbleBySession(session);
-  if (m != null) deleteTable("marbles", m!.key());
-  deleteTable("players", session);
-  return null;
-}
-
-// tick: the whole physics sim for ONE arena. Loads every marble in this arena,
-// runs `subSteps` fixed-dt integration + collision passes, then writes back
-// every marble once. dtMs is advisory; physics uses FIXED_DT for stability.
+// tick: step EVERY active match this frame, and reap finished/stale lobbies.
+// One module, one call — active matches are found by scanning the lobbies table
+// (tiny). Each match simulates only its own m:<lobbyId>:* slice.
 function tick(args: Array<JsonValue>): JsonValue | null {
   let subSteps = <i32>(args.length > 1 ? args[1].asNumber() : 1);
   if (subSteps < 1) subSteps = 1;
   if (subSteps > 8) subSteps = 8;
-  const arena = <i32>(args.length > 2 ? args[2].asNumber() : 0);
   const now = <f64>nowMs();
 
-  const rows = JsonValue.parse(scanTable("marbles", marblePrefix(arena), SCAN_LIMIT));
-  const n = rows.length;
-  if (n == 0) return null;
-
-  const ms = new Array<M>(n);
-  for (let i = 0; i < n; i++) {
-    ms[i] = M.from(rows.at(i).get("value"));
-  }
-
-  // respawn the dead whose timer elapsed
-  for (let i = 0; i < n; i++) {
-    const m = ms[i];
-    if (!m.alive && now >= m.respawnAt) {
-      const p = new StaticArray<f64>(2);
-      spawnPoint(p);
-      m.x = p[0]; m.y = p[1]; m.vx = 0; m.vy = 0; m.tx = 0; m.ty = 0;
-      m.alive = true; m.lastHitBy = "";
-      m.dirty = true;
+  const lobbies = JsonValue.parse(scanTable("lobbies", "", 4096));
+  for (let i = 0; i < lobbies.length; i++) {
+    const lv = lobbies.at(i).get("value");
+    const st = lv.getString("state", "");
+    if (st == "active") {
+      simulateMatch(lv.getString("id", ""), subSteps, now);
+    } else if (st == "done") {
+      if (now - lv.getNumber("endMs", 0) > RESULT_LINGER_MS) purgeLobby(Lobby.of(lv.getString("id", ""), lv));
+    } else if (st == "waiting") {
+      if (now - lv.getNumber("createdMs", 0) > WAITING_TTL_MS) purgeLobby(Lobby.of(lv.getString("id", ""), lv));
     }
   }
+  maybeGc();
+  return null;
+}
+
+// Run the physics + win check for a single match (elimination — no respawn).
+function simulateMatch(match: string, subSteps: i32, now: f64): void {
+  if (match.length == 0) return;
+  const rows = JsonValue.parse(scanTable("marbles", marblePrefix(match), SCAN_LIMIT));
+  const n = rows.length;
+  if (n == 0) return;
+
+  const ms = new Array<M>(n);
+  for (let i = 0; i < n; i++) ms[i] = M.from(rows.at(i).get("value"));
 
   const rim = ARENA_R + FALL_MARGIN;
   const rim2 = rim * rim;
@@ -309,7 +454,6 @@ function tick(args: Array<JsonValue>): JsonValue | null {
   const damp = Math.pow(DAMPING, FIXED_DT);
 
   for (let step = 0; step < subSteps; step++) {
-    // --- integrate: thrust, damping, clamp, move ---
     for (let i = 0; i < n; i++) {
       const m = ms[i];
       if (!m.alive) continue;
@@ -323,7 +467,6 @@ function tick(args: Array<JsonValue>): JsonValue | null {
       m.dirty = true;
     }
 
-    // --- broad-phase: spatial hash of live marbles ---
     const grid = new Map<i32, Array<i32>>();
     for (let i = 0; i < n; i++) {
       if (!ms[i].alive) continue;
@@ -332,17 +475,16 @@ function tick(args: Array<JsonValue>): JsonValue | null {
       grid.get(ck).push(i);
     }
 
-    // --- narrow-phase: resolve pairs in same + neighbor cells (each pair once) ---
     const keys = grid.keys();
     for (let gk = 0; gk < keys.length; gk++) {
       const cellIdx = keys[gk];
       const cxx = cellIdx >> 16;
-      const cyy = (cellIdx << 16) >> 16;   // sign-extend low 16 bits
+      const cyy = (cellIdx << 16) >> 16;
       const a = grid.get(cellIdx);
       for (let ox = -1; ox <= 1; ox++) {
         for (let oy = -1; oy <= 1; oy++) {
           const nk = packCell(cxx + ox, cyy + oy);
-          if (nk < cellIdx || !grid.has(nk)) continue;   // handle each cell-pair once
+          if (nk < cellIdx || !grid.has(nk)) continue;
           const b = grid.get(nk);
           for (let ia = 0; ia < a.length; ia++) {
             for (let ib = 0; ib < b.length; ib++) {
@@ -355,14 +497,11 @@ function tick(args: Array<JsonValue>): JsonValue | null {
       }
     }
 
-    // --- rim: knock-outs + kill credit ---
     for (let i = 0; i < n; i++) {
       const m = ms[i];
       if (!m.alive) continue;
       if (m.x * m.x + m.y * m.y > rim2) {
-        m.alive = false;
-        m.respawnAt = now + RESPAWN_MS;
-        m.dirty = true;
+        m.alive = false; m.dirty = true;
         if (m.lastHitBy.length > 0 && m.lastHitBy != m.owner) {
           for (let j = 0; j < n; j++) {
             if (ms[j].owner == m.lastHitBy) { ms[j].score += 1; ms[j].dirty = true; break; }
@@ -372,25 +511,27 @@ function tick(args: Array<JsonValue>): JsonValue | null {
     }
   }
 
-  // --- write back every changed marble (one staged upsert each) ---
-  for (let i = 0; i < n; i++) {
-    if (ms[i].dirty) writeTable("marbles", ms[i].key(), ms[i].toJson());
-  }
+  for (let i = 0; i < n; i++) if (ms[i].dirty) writeTable("marbles", ms[i].key(), ms[i].toJson());
 
-  // The long-lived instance has no automatic GC cadence, so its garbage (row
-  // parse trees, spatial-hash Map/Arrays) must be reclaimed or memory.grow will
-  // eventually fail (wasm unreachable). But a full __collect() every tick is
-  // itself expensive at 60 Hz, so we amortize: collect ~5x/sec. That bounds
-  // memory to a fraction of a second of garbage while keeping per-tick cost low.
-  g_tick_count++;
-  if (g_tick_count >= 12) { g_tick_count = 0; __collect(); }
-  return null;
+  // win check: last marble standing
+  let aliveCount = 0;
+  let lastAlive = -1;
+  for (let i = 0; i < n; i++) if (ms[i].alive) { aliveCount++; lastAlive = i; }
+  if (aliveCount <= 1) {
+    const l = Lobby.load(match);
+    if (l != null && l!.state == "active") {
+      if (lastAlive >= 0) endMatch(l!, ms[lastAlive].owner, ms[lastAlive].name);
+      else endMatch(l!, "", "draw");
+    }
+  }
 }
 
 let g_tick_count: i32 = 0;
+function maybeGc(): void {
+  g_tick_count++;
+  if (g_tick_count >= 12) { g_tick_count = 0; __collect(); }
+}
 
-// elastic collision between two equal-mass marbles: positional de-penetration
-// + velocity impulse along the contact normal. Records mutual last-hit.
 function collide(a: M, b: M, diam: f64, diam2: f64): void {
   if (!a.alive || !b.alive) return;
   const dx = b.x - a.x;
@@ -406,7 +547,7 @@ function collide(a: M, b: M, diam: f64, diam2: f64): void {
   const rvx = b.vx - a.vx, rvy = b.vy - a.vy;
   const vn = rvx * nx + rvy * ny;
   if (vn < 0) {
-    const jImp = -(1.0 + RESTITUTION) * vn * 0.5;   // equal mass
+    const jImp = -(1.0 + RESTITUTION) * vn * 0.5;
     a.vx -= jImp * nx; a.vy -= jImp * ny;
     b.vx += jImp * nx; b.vy += jImp * ny;
   }
@@ -415,18 +556,19 @@ function collide(a: M, b: M, diam: f64, diam2: f64): void {
   a.dirty = true; b.dirty = true;
 }
 
-// spatial-hash cell packing: two 16-bit signed cell coords → one i32
-function packCell(cx: i32, cy: i32): i32 {
-  return (cx << 16) | (cy & 0xffff);
-}
+function packCell(cx: i32, cy: i32): i32 { return (cx << 16) | (cy & 0xffff); }
 function cellKey(x: f64, y: f64): i32 {
   const cx = <i32>Math.floor(x / CELL);
   const cy = <i32>Math.floor(y / CELL);
   return packCell(cx, cy);
 }
 
-registerReducer("spawn", spawn, ["session", "name", "color", "arena"]);
+// ---- registration -----------------------------------------------------------
+
+registerReducer("createLobby", createLobby, ["session", "lobbyName", "name", "color"]);
+registerReducer("joinLobby", joinLobby, ["session", "lobbyId", "name", "color"]);
+registerReducer("startNow", startNow, ["session", "lobbyId"]);
+registerReducer("leaveLobby", leaveLobby, ["session", "lobbyId"]);
 registerReducer("steer", steer, ["session", "dirX", "dirY"]);
 registerReducer("boost", boost, ["session"]);
-registerReducer("leave", leave, ["session"]);
-registerReducer("tick", tick, ["dtMs", "subSteps", "arena"]);
+registerReducer("tick", tick, ["dtMs", "subSteps"]);

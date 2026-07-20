@@ -7,18 +7,20 @@
 <style>
   :root {
     --bg: #070b12; --panel: rgba(14,20,32,.82); --line: #1c2740;
-    --ink: #e8eefc; --dim: #8ba0c4; --accent: #4da3ff;
+    --ink: #e8eefc; --dim: #8ba0c4; --accent: #4da3ff; --win: #5ee6a8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink);
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   #app { position: fixed; inset: 0; }
   canvas { display: block; }
+  .hidden { display: none !important; }
 
   .hud { position: fixed; z-index: 10; font-variant-numeric: tabular-nums; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
     backdrop-filter: blur(8px); box-shadow: 0 8px 30px rgba(0,0,0,.4); }
 
+  /* ---- in-game HUD ---- */
   #topbar { top: 14px; left: 14px; padding: 10px 14px; display: flex; align-items: center; gap: 14px; }
   #topbar .title { font-weight: 700; letter-spacing: .2px; }
   #topbar .title span { color: var(--accent); }
@@ -35,6 +37,7 @@
   #board .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #board .sc { font-weight: 700; }
   #board li.me { color: var(--accent); }
+  #board li.dead { opacity: .4; text-decoration: line-through; }
 
   #tips { bottom: 14px; left: 14px; padding: 9px 13px; font-size: 12px; color: var(--dim); }
   #tips b { color: var(--ink); }
@@ -44,73 +47,150 @@
   #boostfill { height: 100%; width: 100%; background: var(--accent); transition: width .08s linear; }
 
   #dead { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center;
-    background: rgba(4,7,12,.55); backdrop-filter: blur(3px); }
+    background: rgba(4,7,12,.5); backdrop-filter: blur(3px); pointer-events: none; }
   #dead .msg { font-size: 26px; font-weight: 700; text-align: center; }
   #dead .sub { color: var(--dim); font-size: 15px; margin-top: 8px; font-weight: 400; }
 
-  /* join overlay */
-  #join { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+  /* ---- overlays (name / lobby / waiting / result) ---- */
+  .overlay { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
     background: radial-gradient(1200px 700px at 50% -10%, #0d1830 0%, #070b12 60%); }
-  #join .box { width: min(420px, 92vw); padding: 30px 30px 26px; text-align: center; }
-  #join h1 { font-size: 30px; font-weight: 800; letter-spacing: -.4px; }
-  #join h1 span { color: var(--accent); }
-  #join p { color: var(--dim); margin: 10px 0 22px; font-size: 14px; line-height: 1.5; }
-  #join input { width: 100%; padding: 12px 14px; font-size: 15px; color: var(--ink);
+  .overlay .box { width: min(560px, 94vw); padding: 28px 30px 26px; }
+  .brand { font-size: 30px; font-weight: 800; letter-spacing: -.4px; text-align: center; }
+  .brand span { color: var(--accent); }
+  .sub { color: var(--dim); font-size: 14px; line-height: 1.5; }
+
+  input.txt { width: 100%; padding: 12px 14px; font-size: 15px; color: var(--ink);
     background: #0c1526; border: 1px solid var(--line); border-radius: 10px; outline: none; }
-  #join input:focus { border-color: var(--accent); }
-  #colors { display: flex; gap: 8px; justify-content: center; margin: 16px 0 20px; }
+  input.txt:focus { border-color: var(--accent); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+    font-weight: 700; font-size: 14px; padding: 11px 18px; border-radius: 10px; border: 1px solid var(--line);
+    background: #0c1526; color: var(--ink); transition: .15s; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #04101f; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.sm { padding: 7px 14px; font-size: 13px; }
+
+  #colors { display: flex; gap: 8px; justify-content: center; margin: 14px 0 4px; }
   #colors button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-  #colors button.sel { border-color: #fff; }
-  #play { width: 100%; padding: 13px; font-size: 15px; font-weight: 700; color: #041020;
-    background: var(--accent); border: none; border-radius: 10px; cursor: pointer; transition: filter .15s; }
-  #play:hover { filter: brightness(1.08); }
-  .muted { color: var(--dim); font-size: 12px; margin-top: 14px; }
-  .hidden { display: none !important; }
+  #colors button.sel { border-color: #fff; transform: scale(1.12); }
+
+  /* lobby browser */
+  .between { justify-content: space-between; }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .lobby-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+  .lobby-head h1 { font-size: 24px; font-weight: 800; letter-spacing: -.3px; }
+  .lobby-head h1 span { color: var(--accent); }
+  .create-row { display: flex; gap: 10px; margin-bottom: 18px; }
+  .create-row input { flex: 1; }
+  .list { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; overflow-y: auto; }
+  .litem { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #0b1424;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .litem .lname { font-weight: 700; }
+  .litem .lmeta { color: var(--dim); font-size: 12px; margin-top: 2px; }
+  .litem.full { opacity: .5; }
+  .empty { color: var(--dim); font-size: 14px; text-align: center; padding: 26px 0; }
+  .cap-pill { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .cap-pill b { color: var(--ink); }
+
+  /* waiting room */
+  .seats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0; }
+  .seat { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 14px 6px;
+    border: 1px solid var(--line); border-radius: 10px; background: #0b1424; min-height: 84px; justify-content: center; }
+  .seat .mk { width: 26px; height: 26px; border-radius: 50%; }
+  .seat .snm { font-size: 12px; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .seat.open { opacity: .5; }
+  .seat.open .mk { background: transparent; border: 2px dashed var(--line); }
+  .seat.open .snm { color: var(--dim); }
+  .wait-status { text-align: center; color: var(--dim); font-size: 14px; margin: 6px 0 16px; }
+  .wait-status b { color: var(--accent); }
+
+  /* result */
+  #screen-result .trophy { font-size: 46px; text-align: center; }
+  #screen-result .who { font-size: 30px; font-weight: 800; text-align: center; margin-top: 6px; }
+  #screen-result .who span { color: var(--win); }
 </style>
 </head>
 <body>
   <div id="app"></div>
 
-  <div id="topbar" class="hud card">
+  <!-- ============ in-game HUD ============ -->
+  <div id="topbar" class="hud card hidden">
     <div class="title">Marble<span>Clash</span></div>
-    <div class="stat">arena <b id="sArena">–</b></div>
-    <div class="stat">score <b id="sScore">0</b></div>
-    <div class="stat">live <b id="sLive">0</b></div>
+    <div class="stat">alive <b id="sLive">0</b></div>
+    <div class="stat">KO <b id="sScore">0</b></div>
     <div id="conn">connecting…</div>
+    <button class="btn sm" id="btnQuit" style="margin-left:6px">Leave</button>
   </div>
 
-  <div id="board" class="hud card">
-    <h3>Leaderboard</h3>
+  <div id="board" class="hud card hidden">
+    <h3>Standing</h3>
     <ol id="boardList"></ol>
   </div>
 
-  <div id="tips" class="hud card">
-    <b>Move</b> mouse / WASD &nbsp;·&nbsp; <b>Boost</b> Space &nbsp;·&nbsp; knock rivals off the rim
-  </div>
-
-  <div id="boostwrap" class="hud card">
+  <div id="tips" class="hud card hidden"><b>Move</b> mouse / WASD · <b>Space</b> boost · knock rivals off the rim</div>
+  <div id="boostwrap" class="hud card hidden">
     <div class="lbl">Boost</div>
     <div id="boostbar"><div id="boostfill"></div></div>
   </div>
 
-  <div id="dead"><div><div class="msg" id="deadMsg">Knocked off!</div>
-    <div class="sub" id="deadSub">Respawning…</div></div></div>
+  <div id="dead">
+    <div><div class="msg">You're out</div><div class="sub">spectating — last marble standing wins</div></div>
+  </div>
 
-  <div id="join">
-    <div class="box card">
-      <h1>Marble<span>Clash</span></h1>
-      <p>A 60&nbsp;Hz physics sumo running entirely as an OriginDB&nbsp;WASM reducer.<br>
-         Roll, ram, and shove rivals off the arena.</p>
-      <input id="name" placeholder="Name your marble" maxlength="16" autocomplete="off" />
+  <!-- ============ name / color ============ -->
+  <div id="screen-name" class="overlay">
+    <div class="box card" style="text-align:center">
+      <div class="brand">Marble<span>Clash</span></div>
+      <p class="sub" style="margin:10px 0 4px">A 60&nbsp;Hz physics sumo running entirely inside OriginDB.<br/>Pick a name and colour, then jump into a lobby.</p>
       <div id="colors"></div>
-      <button id="play">Deploy marble →</button>
-      <div class="muted">Open-source realtime DB · authoritative sim in WASM</div>
+      <input class="txt" id="name" maxlength="16" placeholder="your name" autocomplete="off" style="margin-top:12px" />
+      <button class="btn primary" id="btnName" style="width:100%; margin-top:14px">Continue →</button>
     </div>
   </div>
 
-  <script type="importmap">
-  { "imports": { "three": "./vendor/three.module.min.js" } }
-  </script>
-  <script type="module" src="game.js"></script>
+  <!-- ============ lobby browser ============ -->
+  <div id="screen-lobby" class="overlay hidden">
+    <div class="box card">
+      <div class="lobby-head">
+        <h1>Marble<span>Clash</span> · Lobbies</h1>
+        <span class="cap-pill">match = <b id="capLbl">8</b> players · last standing wins</span>
+      </div>
+      <div class="create-row">
+        <input class="txt" id="lobbyName" maxlength="24" placeholder="new lobby name…" autocomplete="off" />
+        <button class="btn primary" id="btnCreate">Create</button>
+      </div>
+      <div class="list" id="lobbyList"><div class="empty">No open lobbies — create one to get started.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ waiting room ============ -->
+  <div id="screen-wait" class="overlay hidden">
+    <div class="box card">
+      <div class="lobby-head">
+        <h1 id="waitName">Lobby</h1>
+        <span class="cap-pill"><b id="waitCount">1</b>/<span id="waitCap">8</span> ready</span>
+      </div>
+      <div class="seats" id="seats"></div>
+      <div class="wait-status" id="waitStatus">Waiting for players…</div>
+      <div class="row between">
+        <button class="btn" id="btnLeave">Leave</button>
+        <button class="btn primary" id="btnStart">Start now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ result ============ -->
+  <div id="screen-result" class="overlay hidden">
+    <div class="box card">
+      <div class="trophy">🏆</div>
+      <div class="who"><span id="winnerName">—</span> wins</div>
+      <p class="sub" style="text-align:center; margin:12px 0 20px">Last marble standing.</p>
+      <button class="btn primary" id="btnAgain" style="width:100%">Back to lobbies</button>
+    </div>
+  </div>
+
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+  <script type="module" src="./game.js"></script>
 </body>
 </html>
