@@ -14,6 +14,8 @@
 #include <fmt/format.h>
 #include "changefeed/sql_subscription.h"
 #include "changefeed/predicate_evaluator.h"
+#include "wasm/wasm_engine.h"
+#include <variant>
 
 namespace origindb {
 
@@ -134,6 +136,11 @@ void WebSocketServer::SetSqlEngine(std::shared_ptr<SqlEngine> sql_engine) {
 void WebSocketServer::SetStorageEngine(std::shared_ptr<StorageEngine> storage_engine) {
     storage_engine_ = storage_engine;
     spdlog::info("WebSocket server connected to storage engine");
+}
+
+void WebSocketServer::SetWasmEngine(std::shared_ptr<WasmEngine> wasm_engine) {
+    wasm_engine_ = wasm_engine;
+    spdlog::info("WebSocket server connected to WASM engine (bidirectional call_reducer enabled)");
 }
 
 size_t WebSocketServer::GetActiveConnections() const {
@@ -543,6 +550,9 @@ void WebSocketServer::HandleWebSocketMessage(int client_socket, const std::strin
         } else if (type == "wasm_subscribe") {
             HandleSubscriptionRequest(client_socket, message);
 
+        } else if (type == "call_reducer") {
+            HandleCallReducer(client_socket, message);
+
         } else if (type == "ping") {
             nlohmann::json response;
             response["type"] = "pong";
@@ -563,6 +573,94 @@ void WebSocketServer::HandleWebSocketMessage(int client_socket, const std::strin
         error["message"] = "Invalid JSON: " + std::string(e.what());
         SendWebSocketFrame(client_socket, error.dump());
     }
+}
+
+// Execute a reducer call that arrived over the websocket. This makes the
+// changefeed socket bidirectional: a client subscribes for reads AND issues
+// writes on the same connection, so the browser needs no separate HTTP write
+// path (no per-request headers, no CORS preflight). The connection was already
+// authenticated at CLIENT scope during the handshake, so no re-check here.
+//
+// Request:  {type:"call_reducer", module, reducer, args:[...], id?}
+// Reply:    {type:"call_result", id, success, error?, result?}
+// The reply is sent on error, or on success only when the caller supplied an
+// `id` — so fire-and-forget writes (e.g. cursor moves) cost zero return traffic.
+void WebSocketServer::HandleCallReducer(int client_socket, const std::string& message) {
+    nlohmann::json response;
+    response["type"] = "call_result";
+    std::string id;
+    bool success = false;
+    try {
+        nlohmann::json request = nlohmann::json::parse(message);
+        id = request.value("id", "");
+        response["id"] = id;
+
+        if (!wasm_engine_) {
+            response["error"] = "reducer calls over websocket are disabled";
+            SendWebSocketFrame(client_socket, response.dump());
+            return;
+        }
+
+        const std::string module = request.value("module", "");
+        const std::string reducer = request.value("reducer", "");
+        if (module.empty() || reducer.empty()) {
+            response["success"] = false;
+            response["error"] = "module and reducer are required";
+            SendWebSocketFrame(client_socket, response.dump());
+            return;
+        }
+
+        // JSON args → WasmValue (mirror of the gRPC path). Integral numbers map
+        // to int64, other numbers to double, matching how reducers read args.
+        std::vector<WasmValue> args;
+        if (request.contains("args") && request["args"].is_array()) {
+            for (const auto& a : request["args"]) {
+                if (a.is_boolean()) args.push_back(a.get<bool>());
+                else if (a.is_number_integer()) args.push_back(a.get<int64_t>());
+                else if (a.is_number()) args.push_back(a.get<double>());
+                else if (a.is_string()) args.push_back(a.get<std::string>());
+                else args.push_back(std::monostate{});
+            }
+        }
+
+        std::string sender;
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex_);
+            auto it = client_ids_.find(client_socket);
+            if (it != client_ids_.end()) sender = it->second;
+        }
+
+        ReducerContext ctx = wasm_engine_->CreateReducerContext(sender, sender);
+        ctx.module_identity = module;
+        auto result = wasm_engine_->ExecuteReducer(module, reducer, ctx, args);
+
+        success = result.success;
+        response["success"] = success;
+        if (!success) {
+            response["error"] = result.error;
+        } else if (!result.values.empty()) {
+            std::visit([&response](const auto& v) {
+                using T = std::decay_t<decltype(v)>;
+                if constexpr (std::is_same_v<T, std::monostate>) { /* null */ }
+                else if constexpr (std::is_same_v<T, bool>) response["result"] = v;
+                else if constexpr (std::is_same_v<T, int32_t>) response["result"] = static_cast<int64_t>(v);
+                else if constexpr (std::is_same_v<T, int64_t>) response["result"] = v;
+                else if constexpr (std::is_same_v<T, float>) response["result"] = static_cast<double>(v);
+                else if constexpr (std::is_same_v<T, double>) response["result"] = v;
+                else if constexpr (std::is_same_v<T, std::string>) response["result"] = v;
+                else if constexpr (std::is_same_v<T, std::vector<uint8_t>>)
+                    response["result"] = std::string(v.begin(), v.end());
+            }, result.values[0]);
+        }
+    } catch (const std::exception& e) {
+        response["success"] = false;
+        response["error"] = std::string("call_reducer error: ") + e.what();
+        SendWebSocketFrame(client_socket, response.dump());
+        return;
+    }
+
+    // Ack on error, or on success only if the caller wants correlation (`id`).
+    if (!success || !id.empty()) SendWebSocketFrame(client_socket, response.dump());
 }
 
 void WebSocketServer::BroadcastToAllClients(const std::string& message) {

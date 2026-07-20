@@ -161,6 +161,7 @@ public:
         websocket_server_->SetSqlSubscriptionManager(sql_subscription_manager_);
         websocket_server_->SetSqlEngine(sql_engine_);
         websocket_server_->SetStorageEngine(storage_engine_);
+        websocket_server_->SetWasmEngine(wasm_engine_);
         websocket_server_->SetAuthManager(auth_);
         if (!websocket_server_->Start()) {
             spdlog::error("❌ Failed to start WebSocket server");

@@ -27,6 +27,7 @@ class SqlSubscriptionManager;
 class SqlEngine;
 class StorageEngine;
 class AuthManager;
+class WasmEngine;
 
 // Simple WebSocket server using raw sockets
 class WebSocketServer {
@@ -51,6 +52,11 @@ public:
 
     // Set storage engine for getting table list
     void SetStorageEngine(std::shared_ptr<StorageEngine> storage_engine);
+
+    // Set WASM engine so clients can call reducers over the same websocket they
+    // subscribe on (bidirectional: reads via changefeed, writes via call_reducer).
+    // Null = reducer calls over ws disabled (writes must go through gRPC).
+    void SetWasmEngine(std::shared_ptr<WasmEngine> wasm_engine);
 
     // Set the auth manager. Null = auth disabled (dev mode).
     void SetAuthManager(std::shared_ptr<AuthManager> auth) { auth_ = std::move(auth); }
@@ -91,6 +97,9 @@ private:
     void HandleSqlSubscriptionRequest(int client_socket, const std::string& message);
     void HandleSubscribeToAllTablesRequest(int client_socket, const std::string& message);
 
+    // Execute a reducer call arriving over the websocket (bidirectional writes).
+    void HandleCallReducer(int client_socket, const std::string& message);
+
     // Helper method to execute SQL query and send initial state
     void SendInitialState(int client_socket, const std::string& sql_query, const std::string& subscription_id);
 
@@ -108,6 +117,7 @@ private:
     std::shared_ptr<SqlEngine> sql_engine_;
     std::shared_ptr<StorageEngine> storage_engine_;
     std::shared_ptr<AuthManager> auth_;
+    std::shared_ptr<WasmEngine> wasm_engine_;
 
     mutable std::mutex clients_mutex_;
     std::vector<int> active_clients_;
