@@ -138,9 +138,12 @@ const server = http.createServer(async (req, res) => {
     }
     const file = join(__dirname, "public", path);
     const data = await readFile(file);
+    // HTML never stored (entry doc pins the hashed asset URLs); assets revalidate
+    // and are content-hashed so a rebuild changes their URL → automatic bust.
+    const isHtml = extname(file) === ".html";
     res.writeHead(200, {
       "content-type": MIME[extname(file)] ?? "application/octet-stream",
-      "cache-control": "no-cache",
+      "cache-control": isHtml ? "no-store, must-revalidate" : "no-cache",
     });
     res.end(data);
   } catch (err) {

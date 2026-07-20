@@ -26,12 +26,27 @@ const hash = (s) => {
   return h;
 };
 
-const call = (reducer, args) =>
-  fetch("/api/call", {
+// Live websocket, set by App's subscription effect. Writes go over it as
+// `call_reducer` messages so reads AND writes share ONE connection — no HTTP
+// request, headers, or CORS per write. Falls back to POST when the socket isn't
+// open yet (before connect) or an older backend lacks call_reducer support.
+let liveSocket = null;
+let wsWrites = false;
+
+const call = (reducer, args) => {
+  const ws = liveSocket;
+  if (wsWrites && ws && ws.readyState === 1) {
+    try {
+      ws.send(JSON.stringify({ type: "call_reducer", module: "collab", reducer, args }));
+      return Promise.resolve({ success: true }); // optimistic; changefeed confirms
+    } catch { /* fall through to POST */ }
+  }
+  return fetch("/api/call", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ reducer, args }),
   }).then((r) => r.json()).catch(() => ({ success: false }));
+};
 
 // Fires at most once per `ms`; trailing call flushes the last value.
 function useThrottle(fn, ms) {
@@ -113,15 +128,22 @@ export default function App() {
       } catch { /* default */ }
       if (closed) return;
 
+      // Connect same-origin through the bridge's ws-proxy (wss on the tunnel) —
+      // no mixed content, no separate ws port. One socket for reads AND writes.
       const q = token ? `?token=${encodeURIComponent(token)}` : "";
-      ws = new WebSocket(`ws://${location.hostname}:${wsPort}${q}`);
+      const scheme = location.protocol === "https:" ? "wss" : "ws";
+      ws = new WebSocket(`${scheme}://${location.host}/${q}`);
+      liveSocket = ws;
       ws.onopen = () => {
         setConnected(true);
+        wsWrites = true; // this backend supports call_reducer over the ws
         for (const t of TABLES)
           ws.send(JSON.stringify({ type: "sql_subscribe", sql: `SELECT * FROM ${t}` }));
       };
       ws.onclose = () => {
         setConnected(false);
+        wsWrites = false;
+        if (liveSocket === ws) liveSocket = null;
         if (!closed) setTimeout(connect, 1500);
       };
       ws.onmessage = (e) => {
