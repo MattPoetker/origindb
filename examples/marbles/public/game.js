@@ -385,40 +385,32 @@ async function doLeave() {
   if (id) await call("leaveLobby", [session, id]);
 }
 
-// ---- input ------------------------------------------------------------------
-const keys = { w: false, a: false, s: false, d: false };
-let pointer = new THREE.Vector2(0, 0), havePointer = false;
-const raycaster = new THREE.Raycaster();
-const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+// ---- input: arrow keys (or WASD) — direct direction, no mouse ---------------
+const keys = { up: false, down: false, left: false, right: false };
+const KEYMAP = {
+  arrowup: "up", arrowdown: "down", arrowleft: "left", arrowright: "right",
+  w: "up", s: "down", a: "left", d: "right",
+};
 let steerX = 0, steerY = 0, lastBoostAt = 0;
 const BOOST_COOLDOWN = 1500;
 
-addEventListener("mousemove", (e) => { pointer.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); havePointer = true; });
 addEventListener("keydown", (e) => {
-  const k = e.key.toLowerCase();
-  if (state === "game" && k in keys) keys[k] = true;
+  const dir = KEYMAP[e.key.toLowerCase()];
+  if (state === "game" && dir) { keys[dir] = true; e.preventDefault(); }
   if (e.code === "Space" && state === "game") { e.preventDefault(); doBoost(); }
 });
-addEventListener("keyup", (e) => { const k = e.key.toLowerCase(); if (k in keys) keys[k] = false; });
+addEventListener("keyup", (e) => { const dir = KEYMAP[e.key.toLowerCase()]; if (dir) keys[dir] = false; });
 
 function doBoost() {
   if (Date.now() - lastBoostAt < BOOST_COOLDOWN) return;
   lastBoostAt = Date.now();
   call("boost", [session]);
 }
-function computeSteer(me) {
-  let kx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
-  let ky = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
+function computeSteer() {
+  // screen: up = world −z (forward), right = world +x. Direct, no runaway.
+  const kx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  const ky = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
   if (kx !== 0 || ky !== 0) { const l = Math.hypot(kx, ky); return [kx / l, ky / l]; }
-  if (havePointer && me) {
-    raycaster.setFromCamera(pointer, camera);
-    const hit = new THREE.Vector3();
-    if (raycaster.ray.intersectPlane(groundPlane, hit)) {
-      const dx = hit.x - me.rx, dy = hit.z - me.rz;
-      const l = Math.hypot(dx, dy);
-      if (l > 0.6) return [dx / l, dy / l];
-    }
-  }
   return [0, 0];
 }
 let lastSteerSent = 0;
