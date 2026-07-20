@@ -159,6 +159,15 @@
       </div>
       <div class="create-row">
         <input class="txt" id="lobbyName" maxlength="24" placeholder="new lobby name…" autocomplete="off" />
+        <select class="txt" id="lobbyCap" title="players per match" style="flex:none;width:auto;padding:12px 10px">
+          <option value="2">2P</option>
+          <option value="3">3P</option>
+          <option value="4">4P</option>
+          <option value="5">5P</option>
+          <option value="6">6P</option>
+          <option value="7">7P</option>
+          <option value="8" selected>8P</option>
+        </select>
         <button class="btn primary" id="btnCreate">Create</button>
       </div>
       <div class="list" id="lobbyList"><div class="empty">No open lobbies — create one to get started.</div></div>
@@ -192,6 +201,6 @@
   </div>
 
   <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
-  <script type="module" src="./game.js?v=3"></script>
+  <script type="module" src="./game.js?v=4"></script>
 </body>
 </html>

@@ -282,6 +282,10 @@ function createLobby(args: Array<JsonValue>): JsonValue | null {
   const lobbyName = args.length > 1 ? args[1].asString() : "";
   const pname = args.length > 2 ? args[2].asString() : "";
   let color = args.length > 3 ? args[3].asString() : "";
+  // Host picks the player cap (clamped MIN_START..DEFAULT_CAP = 2..8).
+  let cap = <i32>(args.length > 4 ? args[4].asNumber() : DEFAULT_CAP);
+  if (cap < MIN_START) cap = MIN_START;
+  if (cap > DEFAULT_CAP) cap = DEFAULT_CAP;
   if (session.length == 0) return JsonValue.newObject().setString("error", "no session");
   if (color.length == 0) color = "#4da3ff";
 
@@ -292,7 +296,7 @@ function createLobby(args: Array<JsonValue>): JsonValue | null {
   // Only this identity can start/dissolve the lobby; it can't be spoofed by a
   // payload arg (unlike `session`, which is streamed in the lobby row).
   const owner = senderIdentity();
-  writeLobby(id, nm, owner, DEFAULT_CAP, 1, "waiting", now, 0, 0, "", "");
+  writeLobby(id, nm, owner, cap, 1, "waiting", now, 0, 0, "", "");
   addMember(id, session, pname, color);
   return JsonValue.newObject().setString("lobbyId", id).setString("state", "waiting");
 }
@@ -655,7 +659,7 @@ function cellKey(x: f64, y: f64): i32 {
 
 // ---- registration -----------------------------------------------------------
 
-registerReducer("createLobby", createLobby, ["session", "lobbyName", "name", "color"]);
+registerReducer("createLobby", createLobby, ["session", "lobbyName", "name", "color", "cap"]);
 registerReducer("joinLobby", joinLobby, ["session", "lobbyId", "name", "color"]);
 registerReducer("startNow", startNow, ["session", "lobbyId"]);
 registerReducer("leaveLobby", leaveLobby, ["session", "lobbyId"]);

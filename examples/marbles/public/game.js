@@ -362,7 +362,8 @@ function renderWaitRoom() {
 // ---- actions ----------------------------------------------------------------
 async function doCreate() {
   const lname = el("lobbyName").value.trim().slice(0, 24);
-  const res = await call("createLobby", [session, lname, myName, myColor]);
+  const cap = Math.max(2, Math.min(8, parseInt(el("lobbyCap")?.value || "8", 10) || 8));
+  const res = await call("createLobby", [session, lname, myName, myColor, cap]);
   const id = res && res.result && res.result.lobbyId;
   if (!id) return;
   myLobbyId = id; iAmHost = true;
