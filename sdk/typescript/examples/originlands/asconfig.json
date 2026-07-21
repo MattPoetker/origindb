@@ -1,0 +1,16 @@
+{
+  "entries": ["./index.ts"],
+  "targets": {
+    "release": {
+      "outFile": "../../build/originlands.wasm",
+      "textFile": "../../build/originlands.wat",
+      "optimizeLevel": 3,
+      "shrinkLevel": 1
+    }
+  },
+  "options": {
+    "runtime": "incremental",
+    "exportRuntime": true,
+    "use": ["abort=assembly/index/__origindb_abort"]
+  }
+}
