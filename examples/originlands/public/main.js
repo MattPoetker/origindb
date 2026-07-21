@@ -287,8 +287,14 @@ function tick() {
   let moving = ix || iz;
   if (moving) {
     const len = Math.hypot(ix, iz); ix /= len; iz /= len;
+    // Camera-relative basis: iz = forward/back (W/S), ix = strafe (A/D).
+    // "forward" is the direction the camera faces (away from the camera),
+    // derived from the camera azimuth so movement always tracks the view.
+    // (The camera is client-only; in M1 the resulting world-space intent is
+    // what gets sent to the authoritative move reducer.)
     const sinY = Math.sin(camYaw), cosY = Math.cos(camYaw);
-    const dx = ix * cosY - iz * sinY, dz = ix * sinY + iz * cosY;
+    const dx = ix * cosY + iz * sinY;
+    const dz = -ix * sinY + iz * cosY;
     pstate.x += dx * WALK * dt; pstate.z += dz * WALK * dt;
     pstate.yaw = Math.atan2(dx, dz);
   }
