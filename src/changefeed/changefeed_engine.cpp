@@ -2,13 +2,94 @@
 #include "storage/storage_engine.h"
 #include <spdlog/spdlog.h>
 #include <algorithm>
+#include <atomic>
+#include <functional>
 #include <thread>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
 #include <unordered_map>
+#include <vector>
 
 namespace origindb {
+
+// Fixed-size worker pool used to deliver one changefeed event to many
+// subscribers concurrently. RunBatch is a barrier: it enqueues `count` tasks
+// and blocks until every one has finished, which preserves per-subscriber
+// ordering (event K is fully delivered before the delivery loop starts K+1).
+class DeliveryPool {
+public:
+    explicit DeliveryPool(size_t threads) {
+        workers_.reserve(threads);
+        for (size_t i = 0; i < threads; ++i) {
+            workers_.emplace_back([this] { Worker(); });
+        }
+    }
+
+    ~DeliveryPool() { Shutdown(); }
+
+    size_t size() const { return workers_.size(); }
+
+    void Shutdown() {
+        {
+            std::lock_guard<std::mutex> lk(mutex_);
+            if (stop_) return;
+            stop_ = true;
+        }
+        cv_.notify_all();
+        for (auto& w : workers_) {
+            if (w.joinable()) w.join();
+        }
+        workers_.clear();
+    }
+
+    // Run fn(i) for i in [0, count) across the pool; return once all complete.
+    void RunBatch(size_t count, const std::function<void(size_t)>& fn) {
+        if (count == 0) return;
+
+        std::atomic<size_t> remaining{count};
+        std::mutex done_mutex;
+        std::condition_variable done_cv;
+
+        {
+            std::lock_guard<std::mutex> lk(mutex_);
+            for (size_t i = 0; i < count; ++i) {
+                tasks_.push([&, i] {
+                    fn(i);  // fn itself is noexcept-guarded by the caller
+                    if (remaining.fetch_sub(1, std::memory_order_acq_rel) == 1) {
+                        std::lock_guard<std::mutex> dl(done_mutex);
+                        done_cv.notify_one();
+                    }
+                });
+            }
+        }
+        cv_.notify_all();
+
+        std::unique_lock<std::mutex> dl(done_mutex);
+        done_cv.wait(dl, [&] { return remaining.load(std::memory_order_acquire) == 0; });
+    }
+
+private:
+    void Worker() {
+        for (;;) {
+            std::function<void()> task;
+            {
+                std::unique_lock<std::mutex> lk(mutex_);
+                cv_.wait(lk, [this] { return stop_ || !tasks_.empty(); });
+                if (stop_ && tasks_.empty()) return;
+                task = std::move(tasks_.front());
+                tasks_.pop();
+            }
+            task();
+        }
+    }
+
+    std::vector<std::thread> workers_;
+    std::queue<std::function<void()>> tasks_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    bool stop_ = false;
+};
 
 class ChangefeedEngine::Impl {
 public:
@@ -27,6 +108,20 @@ public:
         }
 
         running_ = true;
+
+        // Spin up the fan-out worker pool. 0 = auto: leave a core for the
+        // delivery loop + the rest of the server, cap at 8. 1 = sequential.
+        size_t threads = config_.delivery_threads;
+        if (threads == 0) {
+            unsigned hw = std::thread::hardware_concurrency();
+            threads = (hw > 2) ? std::min<unsigned>(hw - 1, 8u) : 1;
+        }
+        if (threads > 1) {
+            pool_ = std::make_unique<DeliveryPool>(threads);
+            spdlog::info("Changefeed fan-out pool: {} worker threads", threads);
+        } else {
+            spdlog::info("Changefeed fan-out: sequential (1 thread)");
+        }
 
         // Start delivery thread
         delivery_thread_ = std::thread([this]() {
@@ -49,6 +144,13 @@ public:
 
         if (delivery_thread_.joinable()) {
             delivery_thread_.join();
+        }
+
+        // Delivery loop is done — no more RunBatch calls — so the pool is safe
+        // to tear down now.
+        if (pool_) {
+            pool_->Shutdown();
+            pool_.reset();
         }
 
         spdlog::info("Changefeed engine stopped");
@@ -118,8 +220,12 @@ public:
 
         auto it = subscriptions_.find(subscription_id);
         if (it != subscriptions_.end()) {
-            // Also remove callback
-            callbacks_.erase(subscription_id);
+            // Also remove callback (same subscriptions_ -> callbacks_ lock order
+            // the delivery path uses, so parallel fan-out can't race this).
+            {
+                std::lock_guard<std::mutex> cbs_lock(callbacks_mutex_);
+                callbacks_.erase(subscription_id);
+            }
             subscriptions_.erase(it);
 
             spdlog::info("Deleted subscription {}", subscription_id);
@@ -225,6 +331,7 @@ public:
 
         ChangefeedEngine::Metrics metrics;
         metrics.total_events_published = all_events_.size();
+        metrics.total_events_delivered = delivered_.load(std::memory_order_relaxed);
         metrics.active_subscriptions = 0;
         metrics.buffer_size = config_.buffer_size;
         metrics.buffer_used = events_.size();
@@ -306,46 +413,59 @@ private:
     }
 
     void DeliverEvent(const ChangefeedEvent& event) {
-        std::vector<std::string> active_subscriptions;
-
-        // Get list of active subscriptions that match this event
+        // Phase 1 (locked): snapshot the matching subscribers and their
+        // callbacks. Lock order is subscriptions_ -> callbacks_ everywhere.
+        struct Target {
+            std::string id;
+            DeliveryCallback callback;
+        };
+        std::vector<Target> targets;
         {
-            std::lock_guard<std::mutex> lock(subscriptions_mutex_);
+            std::lock_guard<std::mutex> subs_lock(subscriptions_mutex_);
+            std::lock_guard<std::mutex> cbs_lock(callbacks_mutex_);
+            targets.reserve(subscriptions_.size());
             for (const auto& [id, sub] : subscriptions_) {
                 if (sub.is_active && MatchesFilter(id, event)) {
-                    active_subscriptions.push_back(id);
+                    auto it = callbacks_.find(id);
+                    if (it != callbacks_.end()) {
+                        targets.push_back({id, it->second});
+                    }
                 }
             }
         }
 
-        // Deliver to each matching subscription
-        for (const std::string& sub_id : active_subscriptions) {
-            DeliveryCallback callback;
+        if (targets.empty()) {
+            return;
+        }
 
-            {
-                std::lock_guard<std::mutex> lock(callbacks_mutex_);
-                auto it = callbacks_.find(sub_id);
-                if (it != callbacks_.end()) {
-                    callback = it->second;
+        // Phase 2 (unlocked, parallelizable): the expensive part — predicate
+        // eval + frame build + socket send happens inside each callback with no
+        // engine lock held, so subscribers deliver independently.
+        auto deliver_one = [this, &targets, &event](size_t i) {
+            const Target& t = targets[i];
+            try {
+                t.callback(t.id, event);
+
+                std::lock_guard<std::mutex> lock(subscriptions_mutex_);
+                auto it = subscriptions_.find(t.id);
+                if (it != subscriptions_.end()) {
+                    it->second.current_offset = event.offset;
+                    it->second.last_activity = std::chrono::system_clock::now();
                 }
+            } catch (const std::exception& e) {
+                spdlog::error("Error delivering event to subscription {}: {}",
+                             t.id, e.what());
             }
+            delivered_.fetch_add(1, std::memory_order_relaxed);
+        };
 
-            if (callback) {
-                try {
-                    callback(sub_id, event);
-
-                    // Update subscription offset
-                    std::lock_guard<std::mutex> lock(subscriptions_mutex_);
-                    auto it = subscriptions_.find(sub_id);
-                    if (it != subscriptions_.end()) {
-                        it->second.current_offset = event.offset;
-                        it->second.last_activity = std::chrono::system_clock::now();
-                    }
-
-                } catch (const std::exception& e) {
-                    spdlog::error("Error delivering event to subscription {}: {}",
-                                 sub_id, e.what());
-                }
+        if (pool_ && targets.size() > 1) {
+            // Fan out this event's subscribers across the pool; RunBatch is a
+            // barrier so ordering across events is preserved.
+            pool_->RunBatch(targets.size(), deliver_one);
+        } else {
+            for (size_t i = 0; i < targets.size(); ++i) {
+                deliver_one(i);
             }
         }
     }
@@ -392,6 +512,9 @@ private:
 
     std::mutex delivery_mutex_;
     std::condition_variable delivery_cv_;
+
+    std::unique_ptr<DeliveryPool> pool_;
+    std::atomic<uint64_t> delivered_{0};
 };
 
 ChangefeedEngine::ChangefeedEngine(std::shared_ptr<StorageEngine> storage,

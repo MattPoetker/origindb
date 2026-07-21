@@ -91,6 +91,11 @@ struct ChangefeedConfig {
     size_t max_lag_entries = 100000;
     bool persist_offsets = true;
     size_t delivery_batch_size = 100;
+    // Fan-out worker pool: number of threads used to deliver a single event to
+    // its matching subscribers in parallel. 0 = auto (min(hw_concurrency-1, 8)),
+    // 1 = sequential (no pool). Events are still delivered strictly in order —
+    // only the per-subscriber send for one event is parallelized.
+    size_t delivery_threads = 0;
 };
 
 struct MetricsConfig {
