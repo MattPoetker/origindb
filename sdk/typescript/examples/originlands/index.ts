@@ -20,7 +20,8 @@ export {
 } from "../../assembly/index";
 
 setModuleInfo("originlands", "0.1.0");
-declareTable("players");
+declareTable("players");    // PUBLIC broadcast row (name/pos/appearance) — AoI subscribes here
+declareTable("accounts");   // SECRET row (salt/hash/owner) — never subscribed, never broadcast
 
 const CHUNK: f64 = 48.0;     // world units per AoI chunk (must match the client)
 const SPAWN: f64 = 0.0;      // spawn centre; jittered per-name so players don't stack
@@ -101,7 +102,8 @@ function chunkOf(x: f64, z: f64): string {
   return cx.toString() + ":" + cz.toString();
 }
 
-function pkey(name: string): string { return "p:" + name; }
+function pkey(name: string): string { return "p:" + name; }   // players (public)
+function akey(name: string): string { return "a:" + name; }   // accounts (secret)
 
 // a stable hash of a string -> [0,1) for deterministic spawn jitter
 function frac(s: string): f64 {
@@ -142,34 +144,44 @@ function errResult(msg: string): JsonValue {
 // ======================================================================
 // reducers
 // ======================================================================
+// read the secret account row's bound owner identity ("" if no account)
+function ownerOf(name: string): string {
+  const raw = readTable("accounts", akey(name));
+  if (raw == null) return "";
+  return JsonValue.parse(raw!).getString("owner", "\x00");
+}
+
 function createCharacter(args: Array<JsonValue>): JsonValue | null {
   const name = args.length > 0 ? args[0].asString() : "";
   const password = args.length > 1 ? args[1].asString() : "";
-  const appearance = args.length > 2 ? args[2] : JsonValue.newObject();
+  // appearance arrives as a JSON string (the ws call path only forwards scalars)
+  const appStr = args.length > 2 ? args[2].asString() : "{}";
+  const appearance = JsonValue.parse(appStr.length > 0 ? appStr : "{}");
 
   if (!validName(name)) return errResult("invalid name (1-16 letters/digits/_/-)");
   if (password.length < 4) return errResult("password must be at least 4 characters");
-  if (readTable("players", pkey(name)) != null) return errResult("name already taken");
+  if (readTable("accounts", akey(name)) != null) return errResult("name already taken");
 
   const salt = generateId().toString();
   const hash = sha256Hex(salt + ":" + password);
+  const now = <f64>nowMs();
 
-  // spawn near the centre, jittered by name so newcomers don't overlap
+  // secrets live in `accounts` (never subscribed / never broadcast)
+  const acct = JsonValue.newObject()
+    .setString("salt", salt).setString("hash", hash)
+    .setString("owner", senderIdentity()).setNumber("created", now);
+  writeTable("accounts", akey(name), acct.toString());
+
+  // public row lives in `players` (this is what AoI subscribes to)
   const ang = frac(name) * 6.28318;
   const rad = 6.0 + frac(name + "r") * 18.0;
   const x = SPAWN + Math.cos(ang) * rad;
   const z = SPAWN + Math.sin(ang) * rad;
-  const now = <f64>nowMs();
-
   const row = JsonValue.newObject()
     .setString("name", name)
-    .setString("salt", salt)
-    .setString("hash", hash)
-    .setString("owner", senderIdentity())
     .setNumber("x", x).setNumber("z", z).setNumber("yaw", 0)
     .setString("chunk", chunkOf(x, z))
-    .setBool("online", true)
-    .setNumber("created", now).setNumber("lastSeen", now);
+    .setBool("online", true).setNumber("lastSeen", now);
   row.set("appearance", appearance);
   writeTable("players", pkey(name), row.toString());
 
@@ -182,17 +194,24 @@ function login(args: Array<JsonValue>): JsonValue | null {
   const name = args.length > 0 ? args[0].asString() : "";
   const password = args.length > 1 ? args[1].asString() : "";
 
-  const raw = readTable("players", pkey(name));
-  if (raw == null) return errResult("no such character");
-  const row = JsonValue.parse(raw!);
+  const araw = readTable("accounts", akey(name));
+  if (araw == null) return errResult("no such character");
+  const acct = JsonValue.parse(araw!);
 
-  const expect = sha256Hex(row.getString("salt", "") + ":" + password);
-  if (expect != row.getString("hash", "\x00")) return errResult("wrong password");
+  const expect = sha256Hex(acct.getString("salt", "") + ":" + password);
+  if (expect != acct.getString("hash", "\x00")) return errResult("wrong password");
 
-  // rebind this session + mark online
-  row.setString("owner", senderIdentity());
-  row.setBool("online", true);
-  row.setNumber("lastSeen", <f64>nowMs());
+  // rebind this session to the account (secret table)
+  acct.setString("owner", senderIdentity());
+  writeTable("accounts", akey(name), acct.toString());
+
+  // resume the public row (persisted position survives logout)
+  const praw = readTable("players", pkey(name));
+  const row = praw != null ? JsonValue.parse(praw!)
+    : JsonValue.newObject().setString("name", name)
+        .setNumber("x", SPAWN).setNumber("z", SPAWN).setNumber("yaw", 0)
+        .setString("chunk", chunkOf(SPAWN, SPAWN));
+  row.setBool("online", true).setNumber("lastSeen", <f64>nowMs());
   writeTable("players", pkey(name), row.toString());
 
   const pub = publicRow(row).setBool("ok", true);
@@ -206,15 +225,12 @@ function move(args: Array<JsonValue>): JsonValue | null {
   const nz = args.length > 2 ? args[2].asNumber() : 0;
   const yaw = args.length > 3 ? args[3].asNumber() : 0;
 
-  const raw = readTable("players", pkey(name));
-  if (raw == null) { abortCall("move: no such character"); return null; }
-  const row = JsonValue.parse(raw!);
+  // authorize: only the session bound to this account may move it
+  if (senderIdentity() != ownerOf(name)) { abortCall("move: not your character"); return null; }
 
-  // authorize: only the session that owns this character may move it
-  if (senderIdentity() != row.getString("owner", "\x00")) {
-    abortCall("move: not your character");
-    return null;
-  }
+  const praw = readTable("players", pkey(name));
+  if (praw == null) { abortCall("move: no player row"); return null; }
+  const row = JsonValue.parse(praw!);
 
   // server-authoritative clamp: no teleporting past MAX_STEP per call
   const ox = row.getNumber("x", 0), oz = row.getNumber("z", 0);
@@ -225,20 +241,18 @@ function move(args: Array<JsonValue>): JsonValue | null {
 
   row.setNumber("x", tx).setNumber("z", tz).setNumber("yaw", yaw);
   row.setString("chunk", chunkOf(tx, tz));
-  row.setBool("online", true);
-  row.setNumber("lastSeen", <f64>nowMs());
+  row.setBool("online", true).setNumber("lastSeen", <f64>nowMs());
   writeTable("players", pkey(name), row.toString());
   return null;
 }
 
 function leaveWorld(args: Array<JsonValue>): JsonValue | null {
   const name = args.length > 0 ? args[0].asString() : "";
-  const raw = readTable("players", pkey(name));
-  if (raw == null) return null;
-  const row = JsonValue.parse(raw!);
-  if (senderIdentity() != row.getString("owner", "\x00")) return null; // silent
-  row.setBool("online", false);
-  row.setNumber("lastSeen", <f64>nowMs());
+  if (senderIdentity() != ownerOf(name)) return null; // silent
+  const praw = readTable("players", pkey(name));
+  if (praw == null) return null;
+  const row = JsonValue.parse(praw!);
+  row.setBool("online", false).setNumber("lastSeen", <f64>nowMs());
   writeTable("players", pkey(name), row.toString());
   return null;
 }

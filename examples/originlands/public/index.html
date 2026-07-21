@@ -17,28 +17,111 @@
   #help { bottom: 16px; left: 50%; transform: translateX(-50%); padding: 8px 14px; font-size: 13px;
     border-radius: 999px; background: rgba(255,255,255,.6); backdrop-filter: blur(8px); box-shadow: 0 6px 18px rgba(20,40,70,.12); }
   #help b { color: #2b7fb8; }
-  #load { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
-    background: radial-gradient(1000px 600px at 50% 20%, #eaf6ff, #bfe3ff); transition: opacity .5s; }
-  #load.gone { opacity: 0; pointer-events: none; }
-  #load .b { font-size: 26px; font-weight: 800; } #load .b b { color: #2b7fb8; }
-  #load .s { margin-top: 6px; color: #4a5f7a; font-size: 14px; }
+  /* ---- gate / login-creator ---- */
+  #gate { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+    background: radial-gradient(1100px 700px at 50% 15%, #eaf6ff, #a9d8ff); transition: opacity .5s; }
+  #gate.gone { opacity: 0; pointer-events: none; }
+  .card { width: min(380px, 92vw); background: rgba(255,255,255,.86); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.9); border-radius: 18px; padding: 26px 26px 22px;
+    box-shadow: 0 24px 60px rgba(25,50,90,.22); text-align: center; }
+  .logo { font-size: 30px; font-weight: 800; letter-spacing: -.5px; } .logo b { color: #2b7fb8; }
+  .tag { color: #4a5f7a; font-size: 13px; margin: 4px 0 18px; }
+  .tabs { display: flex; gap: 6px; background: #e6eefaee; border-radius: 12px; padding: 4px; margin-bottom: 16px; }
+  .tabs button { flex: 1; border: 0; background: transparent; padding: 9px; border-radius: 9px; font-weight: 700;
+    font-size: 14px; color: #4a5f7a; cursor: pointer; }
+  .tabs button.on { background: #fff; color: #12233b; box-shadow: 0 2px 8px rgba(20,40,70,.1); }
+  .fld { width: 100%; padding: 12px 14px; margin-bottom: 10px; font-size: 15px; color: #12233b;
+    background: #fff; border: 1px solid #d3e0f2; border-radius: 11px; outline: none; }
+  .fld:focus { border-color: #4aa3d8; }
+  .look { display: none; gap: 14px; justify-content: center; margin: 6px 0 14px; }
+  .look.show { display: flex; }
+  .look .grp { text-align: left; } .look .grp span { display: block; font-size: 11px; color: #4a5f7a; margin-bottom: 5px; }
+  .sw { display: flex; gap: 6px; }
+  .sw button { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+  .sw button.sel { border-color: #12233b; transform: scale(1.15); }
+  .go { width: 100%; padding: 12px; border: 0; border-radius: 11px; background: #2b7fb8; color: #fff;
+    font-weight: 800; font-size: 15px; cursor: pointer; transition: .15s; }
+  .go:hover { background: #2670a3; } .go:disabled { opacity: .5; cursor: default; }
+  .msg { color: #d1495b; font-size: 13px; min-height: 18px; margin-top: 10px; }
 </style>
 </head>
 <body>
   <canvas id="view"></canvas>
 
-  <div id="title" class="hud">
+  <div id="title" class="hud hidden">
     <b>OriginLands</b>
-    <span>M0 · toon world preview — persistent MMO on OriginDB</span>
+    <span id="subtitle">a persistent world on OriginDB</span>
   </div>
-  <div id="help" class="hud"><b>WASD / arrows</b> move · <b>Space</b> jump · <b>drag</b> to look · <b>scroll</b> zoom</div>
+  <div id="help" class="hud hidden"><b>WASD / arrows</b> move · <b>Space</b> jump · <b>drag</b> to look · <b>scroll</b> zoom</div>
 
-  <div id="load"><div><div class="b">Origin<b>Lands</b></div><div class="s">generating the world…</div></div></div>
+  <!-- login / character creator -->
+  <div id="gate">
+    <div class="card">
+      <div class="logo">Origin<b>Lands</b></div>
+      <div class="tag">Drop into a persistent world. No lobby — just play.</div>
+      <div class="tabs">
+        <button id="tabNew" class="on">Create</button>
+        <button id="tabLogin">Log in</button>
+      </div>
+      <input id="name" class="fld" maxlength="16" placeholder="character name" autocomplete="off" />
+      <input id="pass" class="fld" type="password" maxlength="64" placeholder="password" autocomplete="off" />
+      <div id="look" class="look show">
+        <div class="grp"><span>Skin</span><div class="sw" data-part="skin"></div></div>
+        <div class="grp"><span>Shirt</span><div class="sw" data-part="shirt"></div></div>
+        <div class="grp"><span>Pants</span><div class="sw" data-part="pants"></div></div>
+      </div>
+      <button id="go" class="go">Enter the world →</button>
+      <div id="msg" class="msg"></div>
+    </div>
+  </div>
 
   <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
   <script type="module">
     import './main.js';
-    addEventListener('load', () => setTimeout(() => document.getElementById('load').classList.add('gone'), 600));
+
+    const PALETTE = {
+      skin:  [0xf0c27a, 0xd9a066, 0x9b6a43, 0x6b4a2b, 0xf2d0b0],
+      shirt: [0x4aa3d8, 0xe0556b, 0x54c07a, 0xf2b53b, 0x9c5bd6],
+      pants: [0x394a6b, 0x2b2b34, 0x6b4a2b, 0x4a5f3a, 0x7a3b52],
+    };
+    const chosen = { skin: PALETTE.skin[0], shirt: PALETTE.shirt[0], pants: PALETTE.pants[0] };
+    for (const el of document.querySelectorAll('.sw')) {
+      const part = el.dataset.part;
+      PALETTE[part].forEach((c, i) => {
+        const b = document.createElement('button');
+        b.style.background = '#' + c.toString(16).padStart(6, '0');
+        if (i === 0) b.classList.add('sel');
+        b.onclick = () => { chosen[part] = c; el.querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
+        el.appendChild(b);
+      });
+    }
+
+    let mode = 'create';
+    const $ = id => document.getElementById(id);
+    const setMode = m => {
+      mode = m;
+      $('tabNew').classList.toggle('on', m === 'create');
+      $('tabLogin').classList.toggle('on', m === 'login');
+      $('look').classList.toggle('show', m === 'create');
+      $('go').textContent = m === 'create' ? 'Enter the world →' : 'Log in →';
+      $('msg').textContent = '';
+    };
+    $('tabNew').onclick = () => setMode('create');
+    $('tabLogin').onclick = () => setMode('login');
+
+    async function submit() {
+      const name = $('name').value.trim(), pass = $('pass').value;
+      if (!name || !pass) { $('msg').textContent = 'name and password required'; return; }
+      $('go').disabled = true; $('msg').textContent = 'connecting…';
+      const res = await window.OriginLands.auth(mode, name, pass, { ...chosen });
+      $('go').disabled = false;
+      if (!res.ok) { $('msg').textContent = res.error || 'failed'; return; }
+      $('gate').classList.add('gone');
+      $('title').classList.remove('hidden'); $('help').classList.remove('hidden');
+      $('subtitle').textContent = 'playing as ' + name;
+    }
+    $('go').onclick = submit;
+    $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
   </script>
 </body>
 </html>

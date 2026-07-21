@@ -3,6 +3,10 @@
 // painterly sky/water shaders + fog. Deterministic terrain/props from worldgen.
 import * as THREE from 'three';
 import { heightAt, slopeAt, biomeColor, scatter, WORLD } from './worldgen.js';
+import { Net } from './net.js';
+
+const MODULE = 'originlands';
+const CHUNK = 48;   // must match the reducer module
 
 const canvas = document.getElementById('view');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -254,7 +258,7 @@ function buildCharacter(skin = 0xf0c27a, shirt = 0x4aa3d8, pants = 0x394a6b) {
   g.userData = { head, armL, armR, legL, legR };
   return g;
 }
-const player = buildCharacter();
+let player = buildCharacter();
 scene.add(player);
 const pstate = { x: 0, z: 0, y: 0, vy: 0, yaw: 0, grounded: true, speed: 0 };
 pstate.y = heightAt(0, 0);
@@ -262,8 +266,9 @@ player.position.set(0, pstate.y, 0);
 
 // ---- input ---------------------------------------------------------------
 const keys = {};
-addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key === ' ') e.preventDefault(); });
-addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+const typing = e => e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+addEventListener('keydown', e => { if (typing(e)) return; keys[e.key.toLowerCase()] = true; if (e.key === ' ') e.preventDefault(); });
+addEventListener('keyup', e => { if (typing(e)) return; keys[e.key.toLowerCase()] = false; });
 let camYaw = 0, camPitch = 0.5, camDist = 9, dragging = false, px = 0, py = 0;
 canvas.addEventListener('pointerdown', e => { dragging = true; px = e.clientX; py = e.clientY; });
 addEventListener('pointerup', () => dragging = false);
@@ -328,6 +333,8 @@ function tick() {
   camera.position.lerp(cp, Math.min(1, dt * 8));
   camera.lookAt(tgt);
 
+  updateMultiplayer(dt, t);
+
   water.material.uniforms.t.value = t;
   sky.position.copy(camera.position);
 
@@ -340,20 +347,149 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 renderer.setSize(innerWidth, innerHeight);
-tick();
 
-// expose a couple hooks the shell UI can call later (recolor from creator)
+// ======================================================================
+// Multiplayer — accounts + AoI streaming over the OriginDB websocket
+// ======================================================================
+let net = null, session = null, started = false, myChunk = null;
+let lastSendT = 0, lastSX = 1e9, lastSZ = 1e9, lastSYaw = 1e9;
+const remotes = new Map();   // name -> { g, tx, tz, tyaw, chunk }
+
+function chunkKey(x, z) { return Math.floor(x / CHUNK) + ':' + Math.floor(z / CHUNK); }
+function aoiChunks() {
+  const cx = Math.floor(pstate.x / CHUNK), cz = Math.floor(pstate.z / CHUNK);
+  const out = [];
+  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) out.push((cx + dx) + ':' + (cz + dz));
+  return out;
+}
+const aoiWhere = (chunks) => "SELECT * FROM players WHERE " + chunks.map(c => `chunk='${c}'`).join(' OR ');
+
+function applyAppearance(a) {
+  a = a || {};
+  const pos = player.position.clone(), ry = player.rotation.y;
+  scene.remove(player);
+  player = buildCharacter(a.skin ?? 0xf0c27a, a.shirt ?? 0x4aa3d8, a.pants ?? 0x394a6b);
+  player.position.copy(pos); player.rotation.y = ry;
+  scene.add(player);
+}
+
+// initial_state hands us the row object; changefeed hands a JSON string
+// (optionally wrapped as {columns:{...}})
+function coerceRow(raw) {
+  if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch { return null; } }
+  if (raw && raw.columns) raw = raw.columns;
+  return raw;
+}
+function upsertRemote(raw) {
+  const row = coerceRow(raw);
+  if (!row || !row.name) return;
+  if (session && row.name === session.name) return;          // that's me
+  const x = +row.x || 0, z = +row.z || 0, yaw = +row.yaw || 0;
+  const chunk = row.chunk || chunkKey(x, z);
+  let r = remotes.get(row.name);
+  if (!r) {
+    const a = row.appearance || {};
+    const g = buildCharacter(a.skin ?? 0xd9a066, a.shirt ?? 0x9c5bd6, a.pants ?? 0x394a6b);
+    g.position.set(x, heightAt(x, z), z); g.rotation.y = yaw;
+    scene.add(g);
+    remotes.set(row.name, { g, tx: x, tz: z, tyaw: yaw, chunk });
+  } else {
+    r.tx = x; r.tz = z; r.tyaw = yaw; r.chunk = chunk;
+  }
+}
+function removeRemote(name) { const r = remotes.get(name); if (r) { scene.remove(r.g); remotes.delete(name); } }
+
+function onNetEvent(m) {
+  if (m.type === 'initial_state') {
+    const aoi = new Set(aoiChunks());
+    for (const row of (m.rows || [])) {
+      const data = coerceRow(row.data != null ? row.data : row);
+      if (data && data.name && (!data.chunk || aoi.has(data.chunk))) upsertRemote(data);
+    }
+  } else if (m.type === 'sql_changefeed_event') {
+    if (m.operation === 'DELETE') { removeRemote((m.key || '').replace(/^p:/, '')); return; }
+    upsertRemote(m.new_value);
+  }
+}
+
+async function refreshAoI() {
+  if (!net) return;
+  const chunks = aoiChunks();
+  const old = net.subId;
+  await net.subscribe(aoiWhere(chunks));   // new sub + initial_state
+  if (old) net.unsubscribe(old);
+  const set = new Set(chunks);
+  for (const [name, r] of remotes) if (!set.has(r.chunk)) removeRemote(name);
+}
+
+function updateMultiplayer(dt, t) {
+  if (!started) return;
+  // interpolate remote avatars toward their last authoritative position
+  for (const r of remotes.values()) {
+    const k = Math.min(1, dt * 10);
+    const moving = Math.hypot(r.tx - r.g.position.x, r.tz - r.g.position.z) > 0.05;
+    r.g.position.x += (r.tx - r.g.position.x) * k;
+    r.g.position.z += (r.tz - r.g.position.z) * k;
+    r.g.position.y += (heightAt(r.g.position.x, r.g.position.z) - r.g.position.y) * k;
+    let d = r.tyaw - r.g.rotation.y; while (d > Math.PI) d -= 6.28318; while (d < -Math.PI) d += 6.28318;
+    r.g.rotation.y += d * k;
+    const sw = moving ? Math.sin(t * 11) * 0.5 : 0;
+    const u = r.g.userData;
+    if (u.legL) { u.legL.rotation.x = sw; u.legR.rotation.x = -sw; u.armL.rotation.x = -sw; u.armR.rotation.x = sw; }
+  }
+  // AoI: re-subscribe when we cross a chunk boundary
+  const ck = chunkKey(pstate.x, pstate.z);
+  if (ck !== myChunk) { myChunk = ck; refreshAoI(); }
+  // send our position ~12 Hz when it changed (server-authoritative write)
+  const now = performance.now();
+  if (session && now - lastSendT > 80 &&
+      (Math.hypot(pstate.x - lastSX, pstate.z - lastSZ) > 0.02 || Math.abs(pstate.yaw - lastSYaw) > 0.03)) {
+    net.call('move', [session.name, pstate.x, pstate.z, pstate.yaw]);
+    lastSX = pstate.x; lastSZ = pstate.z; lastSYaw = pstate.yaw; lastSendT = now;
+  }
+}
+
 window.OriginLands = {
   state: pstate,
   heightAt,
   setCam(yaw, pitch, dist) { camYaw = yaw; camPitch = pitch; camDist = dist; },
   teleport(x, z) { pstate.x = x; pstate.z = z; pstate.y = heightAt(x, z); pstate.vy = 0; },
-  setAppearance({ skin, shirt, pants }) {
-    scene.remove(player);
-    const np = buildCharacter(skin, shirt, pants);
-    np.position.copy(player.position); np.rotation.y = player.rotation.y;
-    scene.add(np);
-    Object.assign(player.userData, np.userData);
-    player.copy(np);
+  setAppearance: applyAppearance,
+  playerCount: () => remotes.size + (started ? 1 : 0),
+
+  // called by the login / creator UI
+  async auth(mode, name, password, appearance) {
+    try {
+      if (!net) {
+        const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+        net = new Net(`${scheme}://${location.host}/`, MODULE);
+        net.onEvent = onNetEvent;
+        net.onClose = () => { started = false; };
+        await net.connect();
+      }
+      const reducer = mode === 'create' ? 'createCharacter' : 'login';
+      // appearance goes as a JSON string — the ws call path only forwards scalars
+      const args = mode === 'create' ? [name, password, JSON.stringify(appearance)] : [name, password];
+      const res = await net.call(reducer, args, true);
+      if (!res.success) return { ok: false, error: res.error || 'call failed' };
+      let pub = null; try { pub = JSON.parse(res.result); } catch {}
+      if (!pub || pub.ok === false) return { ok: false, error: (pub && pub.error) || 'failed' };
+      // enter the world at the persisted position
+      session = { name: pub.name, appearance: pub.appearance || appearance };
+      applyAppearance(session.appearance);
+      pstate.x = +pub.x || 0; pstate.z = +pub.z || 0; pstate.y = heightAt(pstate.x, pstate.z);
+      pstate.yaw = +pub.yaw || 0; pstate.vy = 0;
+      camera.position.set(pstate.x + Math.sin(camYaw) * 9, pstate.y + 6, pstate.z + Math.cos(camYaw) * 9);
+      myChunk = chunkKey(pstate.x, pstate.z);
+      started = true;
+      await refreshAoI();
+      addEventListener('beforeunload', () => { try { net.call('leaveWorld', [session.name]); } catch {} });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: String((e && e.message) || e) };
+    }
   },
 };
+
+// start the render loop last, once every module-level binding is initialized
+tick();
