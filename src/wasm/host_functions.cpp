@@ -675,19 +675,22 @@ const Table::JsonSerializer& RowJsonSerializer() {
 nlohmann::json RowToJson(const Row& row) {
     nlohmann::json obj = nlohmann::json::object();
     for (const auto& [name, value] : row.columns) {
+        // Structured bindings can't be captured in a lambda under C++17 (Clang
+        // enforces this); bind to a normal reference the lambda can capture.
+        const auto& col = name;
         std::visit(
             [&](const auto& v) {
                 using T = std::decay_t<decltype(v)>;
                 if constexpr (std::is_same_v<T, std::monostate>) {
-                    obj[name] = nullptr;
+                    obj[col] = nullptr;
                 } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
-                    obj[name] = {{"$bytes", Base64Encode(v.data(), v.size())}};
+                    obj[col] = {{"$bytes", Base64Encode(v.data(), v.size())}};
                 } else if constexpr (std::is_same_v<T, std::chrono::system_clock::time_point>) {
-                    obj[name] = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    obj[col] = std::chrono::duration_cast<std::chrono::milliseconds>(
                                     v.time_since_epoch())
                                     .count();
                 } else {
-                    obj[name] = v;
+                    obj[col] = v;
                 }
             },
             value);

@@ -1161,27 +1161,28 @@ void WebSocketServer::SendInitialState(int client_socket, const std::string& sql
 
             nlohmann::json row_data;
             for (const auto& [col_name, value] : row.columns) {
+                const auto& col = col_name;  // C++17: can't capture a structured binding in a lambda
                 // Convert Value variant to JSON
                 std::visit([&](const auto& v) {
                     using T = std::decay_t<decltype(v)>;
                     if constexpr (std::is_same_v<T, std::monostate>) {
-                        row_data[col_name] = nullptr;
+                        row_data[col] = nullptr;
                     } else if constexpr (std::is_same_v<T, bool>) {
-                        row_data[col_name] = v;
+                        row_data[col] = v;
                     } else if constexpr (std::is_arithmetic_v<T>) {
-                        row_data[col_name] = v;
+                        row_data[col] = v;
                     } else if constexpr (std::is_same_v<T, std::string>) {
-                        row_data[col_name] = v;
+                        row_data[col] = v;
                     } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
                         // Convert binary data to base64 or hex string
                         std::string hex;
                         for (uint8_t byte : v) {
                             hex += fmt::format("{:02x}", byte);
                         }
-                        row_data[col_name] = hex;
+                        row_data[col] = hex;
                     } else if constexpr (std::is_same_v<T, std::chrono::system_clock::time_point>) {
                         auto time_t = std::chrono::system_clock::to_time_t(v);
-                        row_data[col_name] = time_t;
+                        row_data[col] = time_t;
                     }
                 }, value);
             }
@@ -1254,27 +1255,28 @@ void WebSocketServer::SendInitialStateAllTables(int client_socket, const std::st
 
                     nlohmann::json row_data;
                     for (const auto& [col_name, value] : row.columns) {
+                        const auto& col = col_name;  // C++17: can't capture a structured binding in a lambda
                         // Convert Value variant to JSON
                         std::visit([&](const auto& v) {
                             using T = std::decay_t<decltype(v)>;
                             if constexpr (std::is_same_v<T, std::monostate>) {
-                                row_data[col_name] = nullptr;
+                                row_data[col] = nullptr;
                             } else if constexpr (std::is_same_v<T, bool>) {
-                                row_data[col_name] = v;
+                                row_data[col] = v;
                             } else if constexpr (std::is_arithmetic_v<T>) {
-                                row_data[col_name] = v;
+                                row_data[col] = v;
                             } else if constexpr (std::is_same_v<T, std::string>) {
-                                row_data[col_name] = v;
+                                row_data[col] = v;
                             } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
                                 // Convert binary data to hex string
                                 std::string hex;
                                 for (uint8_t byte : v) {
                                     hex += fmt::format("{:02x}", byte);
                                 }
-                                row_data[col_name] = hex;
+                                row_data[col] = hex;
                             } else if constexpr (std::is_same_v<T, std::chrono::system_clock::time_point>) {
                                 auto time_t = std::chrono::system_clock::to_time_t(v);
-                                row_data[col_name] = time_t;
+                                row_data[col] = time_t;
                             }
                         }, value);
                     }

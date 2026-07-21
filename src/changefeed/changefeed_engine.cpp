@@ -1,6 +1,7 @@
 #include "changefeed/changefeed_engine.h"
 #include "storage/storage_engine.h"
 #include <spdlog/spdlog.h>
+#include <algorithm>
 #include <thread>
 #include <queue>
 #include <mutex>
