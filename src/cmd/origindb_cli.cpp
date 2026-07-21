@@ -29,7 +29,7 @@ const std::string BLUE = "\033[34m";
 const std::string CYAN = "\033[36m";
 
 // Version information
-const std::string VERSION = "1.0.0";
+const std::string VERSION = "0.0.6";
 
 // Command descriptions
 struct Command {
@@ -127,7 +127,7 @@ void printUsage() {
 void printVersion() {
     printHeader();
     std::cout << "OriginDB CLI version " << VERSION << "\n";
-    std::cout << "Copyright (c) 2024 OriginDB Team\n";
+    std::cout << "Copyright (c) 2026 OriginDB Team\n";
     std::cout << "MIT License\n\n";
 }
 
