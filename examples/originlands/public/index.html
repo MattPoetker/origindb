@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>OriginLands — a persistent world on OriginDB</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #cfeaff;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #12233b; }
+  #view { position: fixed; inset: 0; display: block; touch-action: none; }
+  .hud { position: fixed; z-index: 10; }
+  #title { top: 16px; left: 16px; padding: 10px 14px; border-radius: 12px;
+    background: rgba(255,255,255,.6); backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(20,40,70,.15); }
+  #title b { color: #2b7fb8; letter-spacing: .2px; }
+  #title span { display: block; font-size: 12px; color: #4a5f7a; margin-top: 2px; }
+  #help { bottom: 16px; left: 50%; transform: translateX(-50%); padding: 8px 14px; font-size: 13px;
+    border-radius: 999px; background: rgba(255,255,255,.6); backdrop-filter: blur(8px); box-shadow: 0 6px 18px rgba(20,40,70,.12); }
+  #help b { color: #2b7fb8; }
+  #load { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+    background: radial-gradient(1000px 600px at 50% 20%, #eaf6ff, #bfe3ff); transition: opacity .5s; }
+  #load.gone { opacity: 0; pointer-events: none; }
+  #load .b { font-size: 26px; font-weight: 800; } #load .b b { color: #2b7fb8; }
+  #load .s { margin-top: 6px; color: #4a5f7a; font-size: 14px; }
+</style>
+</head>
+<body>
+  <canvas id="view"></canvas>
+
+  <div id="title" class="hud">
+    <b>OriginLands</b>
+    <span>M0 · toon world preview — persistent MMO on OriginDB</span>
+  </div>
+  <div id="help" class="hud"><b>WASD / arrows</b> move · <b>Space</b> jump · <b>drag</b> to look · <b>scroll</b> zoom</div>
+
+  <div id="load"><div><div class="b">Origin<b>Lands</b></div><div class="s">generating the world…</div></div></div>
+
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+  <script type="module">
+    import './main.js';
+    addEventListener('load', () => setTimeout(() => document.getElementById('load').classList.add('gone'), 600));
+  </script>
+</body>
+</html>
