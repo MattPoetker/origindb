@@ -17,6 +17,12 @@
   #help { bottom: 16px; left: 50%; transform: translateX(-50%); padding: 8px 14px; font-size: 13px;
     border-radius: 999px; background: rgba(255,255,255,.6); backdrop-filter: blur(8px); box-shadow: 0 6px 18px rgba(20,40,70,.12); }
   #help b { color: #2b7fb8; }
+  #hud { top: 16px; right: 16px; padding: 9px 15px; font-size: 17px; border-radius: 12px;
+    background: rgba(255,255,255,.62); backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(20,40,70,.15); }
+  #hud b { color: #12233b; font-variant-numeric: tabular-nums; }
+  #pop { bottom: 76px; left: 50%; transform: translateX(-50%); padding: 8px 18px; font-size: 15px; font-weight: 700;
+    color: #1a5e34; border-radius: 999px; background: rgba(214,244,224,.92); box-shadow: 0 6px 20px rgba(30,90,50,.2);
+    opacity: 0; transition: opacity .3s; pointer-events: none; }
   /* ---- gate / login-creator ---- */
   #gate { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
     background: radial-gradient(1100px 700px at 50% 15%, #eaf6ff, #a9d8ff); transition: opacity .5s; }
@@ -52,7 +58,9 @@
     <b>OriginLands</b>
     <span id="subtitle">a persistent world on OriginDB</span>
   </div>
-  <div id="help" class="hud hidden"><b>WASD / arrows</b> move · <b>Space</b> jump · <b>drag</b> to look · <b>scroll</b> zoom</div>
+  <div id="hud" class="hud hidden">🪵 <b>0</b>&nbsp;&nbsp;🌰 <b>0</b></div>
+  <div id="pop" class="hud"></div>
+  <div id="help" class="hud hidden"><b>WASD</b> move · <b>Space</b> jump · <b>E</b> harvest · <b>Q</b> plant · <b>drag</b> look</div>
 
   <!-- login / character creator -->
   <div id="gate">
@@ -117,7 +125,7 @@
       $('go').disabled = false;
       if (!res.ok) { $('msg').textContent = res.error || 'failed'; return; }
       $('gate').classList.add('gone');
-      $('title').classList.remove('hidden'); $('help').classList.remove('hidden');
+      $('title').classList.remove('hidden'); $('help').classList.remove('hidden'); $('hud').classList.remove('hidden');
       $('subtitle').textContent = 'playing as ' + name;
     }
     $('go').onclick = submit;

@@ -170,14 +170,15 @@ function instanced(geo, mat, transforms, outlineT) {
   });
   m.instanceMatrix.needsUpdate = true;
   scene.add(m);
+  let o = null;
   if (outlineT) {
-    const o = new THREE.InstancedMesh(expand(geo, outlineT), INK, transforms.length);
+    o = new THREE.InstancedMesh(expand(geo, outlineT), INK, transforms.length);
     o.frustumCulled = false;
     for (let i = 0; i < transforms.length; i++) { m.getMatrixAt(i, dummy.matrix); o.setMatrixAt(i, dummy.matrix); }
     o.instanceMatrix.needsUpdate = true;
     scene.add(o);
   }
-  return m;
+  return { mesh: m, outline: o };
 }
 
 // paint a whole geometry one colour (baked into vertex colors so many species
@@ -239,9 +240,35 @@ const props = scatter(-TERRAIN / 2 + 8, -TERRAIN / 2 + 8, TERRAIN / 2 - 8, TERRA
 const bySub = {};
 for (const p of props) {
   const y = p.h - (p.kind === 'rock' ? 0.18 * p.scl : 0);   // sink rocks into ground
-  (bySub[p.sub] || (bySub[p.sub] = [])).push({ x: p.x, y, z: p.z, rot: p.rot, scl: p.scl });
+  (bySub[p.sub] || (bySub[p.sub] = [])).push({ x: p.x, y, z: p.z, rot: p.rot, scl: p.scl, id: p.id });
 }
-for (const sub in bySub) instanced(GEO[sub], VC, bySub[sub], OUTLINE_T[sub]);
+// treeRefs lets us hide/restore an individual harvested tree instance
+const treeRefs = new Map();   // treeId -> { mesh, outline, idx, mat, hidden }
+const treeList = [];          // harvestable procedural trees: { id, x, z }
+const TREE_SUBS = new Set(['sapling', 'round', 'cedar']);
+for (const sub in bySub) {
+  const arr = bySub[sub];
+  const { mesh, outline } = instanced(GEO[sub], VC, arr, OUTLINE_T[sub]);
+  if (TREE_SUBS.has(sub)) {
+    const tmp = new THREE.Matrix4();
+    arr.forEach((tr, i) => {
+      mesh.getMatrixAt(i, tmp);
+      treeRefs.set(tr.id, { mesh, outline, idx: i, mat: tmp.clone(), hidden: false });
+      treeList.push({ id: tr.id, x: tr.x, z: tr.z });
+    });
+  }
+}
+const ZERO_M = new THREE.Matrix4().makeScale(0, 0, 0);
+function hideTree(id) {
+  const r = treeRefs.get(id); if (!r || r.hidden) return; r.hidden = true;
+  r.mesh.setMatrixAt(r.idx, ZERO_M); r.mesh.instanceMatrix.needsUpdate = true;
+  if (r.outline) { r.outline.setMatrixAt(r.idx, ZERO_M); r.outline.instanceMatrix.needsUpdate = true; }
+}
+function showTree(id) {
+  const r = treeRefs.get(id); if (!r || !r.hidden) return; r.hidden = false;
+  r.mesh.setMatrixAt(r.idx, r.mat); r.mesh.instanceMatrix.needsUpdate = true;
+  if (r.outline) { r.outline.setMatrixAt(r.idx, r.mat); r.outline.instanceMatrix.needsUpdate = true; }
+}
 
 // ---- character -----------------------------------------------------------
 function buildCharacter(skin = 0xf0c27a, shirt = 0x4aa3d8, pants = 0x394a6b) {
@@ -351,7 +378,7 @@ renderer.setSize(innerWidth, innerHeight);
 // ======================================================================
 // Multiplayer — accounts + AoI streaming over the OriginDB websocket
 // ======================================================================
-let net = null, session = null, started = false, myChunk = null;
+let net = null, session = null, started = false, myChunk = null, aoiSubIds = [];
 let lastSendT = 0, lastSX = 1e9, lastSZ = 1e9, lastSYaw = 1e9;
 const remotes = new Map();   // name -> { g, tx, tz, tyaw, chunk }
 
@@ -399,27 +426,135 @@ function upsertRemote(raw) {
 }
 function removeRemote(name) { const r = remotes.get(name); if (r) { scene.remove(r.g); remotes.delete(name); } }
 
+// ---- M2 sustainability: harvest / seeds / plant / grow --------------------
+const GROW_MS = 45000, RESPAWN_MS = 180000, REACH = 4.5;   // GROW/RESPAWN match the module
+const inv = { wood: 0, seeds: 0 };
+const harvestedAt = new Map();   // procedural treeId -> epoch ms harvested
+const plantedTrees = new Map();  // plantId -> { group, plantedAt, x, z }
+
+function makePlantedTree() {
+  const g = new THREE.Group();
+  const m = new THREE.Mesh(GEO.round, VC); m.castShadow = true;
+  g.add(m, new THREE.Mesh(expand(GEO.round, 0.05), INK));
+  return g;
+}
+function onHarvested(id, row) {
+  const at = +row.at || Date.now();
+  harvestedAt.set(id, at);
+  if (Date.now() - at < RESPAWN_MS) hideTree(id); else showTree(id);
+}
+function onPlanted(id, row) {
+  const x = +row.x || 0, z = +row.z || 0, plantedAt = +row.plantedAt || Date.now();
+  let pt = plantedTrees.get(id);
+  if (!pt) {
+    const group = makePlantedTree();
+    group.position.set(x, heightAt(x, z), z);
+    group.rotation.y = (x * 13.1 + z * 7.7) % 6.28;
+    scene.add(group);
+    plantedTrees.set(id, { group, plantedAt, x, z });
+  } else { pt.plantedAt = plantedAt; pt.x = x; pt.z = z; }
+}
+function removePlanted(id) { const pt = plantedTrees.get(id); if (pt) { scene.remove(pt.group); plantedTrees.delete(id); } }
+
+function routeRow(key, raw, aoi) {
+  const pfx = key ? key[0] : '';
+  const row = coerceRow(raw);
+  if (!row) return;
+  if (aoi && row.chunk && !aoi.has(row.chunk)) return;   // AoI filter for snapshots
+  if (pfx === 'p') { if (row.name) upsertRemote(row); }
+  else if (pfx === 'h') onHarvested(key.slice(2), row);
+  else if (pfx === 'g') onPlanted(key.slice(2), row);
+}
+
 function onNetEvent(m) {
   if (m.type === 'initial_state') {
     const aoi = new Set(aoiChunks());
-    for (const row of (m.rows || [])) {
-      const data = coerceRow(row.data != null ? row.data : row);
-      if (data && data.name && (!data.chunk || aoi.has(data.chunk))) upsertRemote(data);
-    }
+    for (const row of (m.rows || [])) routeRow(row.key, row.data != null ? row.data : row, aoi);
   } else if (m.type === 'sql_changefeed_event') {
-    if (m.operation === 'DELETE') { removeRemote((m.key || '').replace(/^p:/, '')); return; }
-    upsertRemote(m.new_value);
+    const key = m.key || '';
+    if (m.operation === 'DELETE') {
+      const pfx = key[0];
+      if (pfx === 'p') removeRemote(key.slice(2));
+      else if (pfx === 'g') removePlanted(key.slice(2));
+      else if (pfx === 'h') { harvestedAt.delete(key.slice(2)); showTree(key.slice(2)); }
+      return;
+    }
+    routeRow(key, m.new_value, null);
   }
+}
+
+// interaction ---------------------------------------------------------------
+function nearestProcTree() {
+  let best = null, bd = REACH * REACH;
+  for (const t of treeList) {
+    const r = treeRefs.get(t.id); if (r && r.hidden) continue;
+    const dx = t.x - pstate.x, dz = t.z - pstate.z, d = dx * dx + dz * dz;
+    if (d < bd) { bd = d; best = t; }
+  }
+  return best;
+}
+function nearestMaturePlanted() {
+  let best = null, bd = REACH * REACH;
+  for (const [id, pt] of plantedTrees) {
+    if (Date.now() - pt.plantedAt < GROW_MS) continue;
+    const dx = pt.x - pstate.x, dz = pt.z - pstate.z, d = dx * dx + dz * dz;
+    if (d < bd) { bd = d; best = { id, pt }; }
+  }
+  return best;
+}
+function onGain(res) {
+  if (!res || res.success === false) { if (res && res.error) popup(res.error.replace(/^aborted:\s*/, '')); return; }
+  let j = null; try { j = JSON.parse(res.result); } catch {}
+  if (!j || j.ok === false) { popup((j && j.error) || 'failed'); return; }
+  if (j.wood != null) inv.wood = j.wood;
+  if (j.seeds != null) inv.seeds = j.seeds;
+  updateHud();
+  if (j.gotWood || j.gotSeeds) popup(`+${j.gotWood || 0} wood   +${j.gotSeeds || 0} seeds`);
+  else if (j.plantId) popup('planted a seed 🌱');
+}
+async function tryHarvest() {
+  if (!session) return;
+  const mp = nearestMaturePlanted();
+  if (mp) { onGain(await net.call('harvestPlanted', [session.name, mp.id], true)); return; }
+  const t = nearestProcTree();
+  if (t) onGain(await net.call('harvestTree', [session.name, t.id, t.x, t.z], true));
+  else popup('nothing to harvest nearby');
+}
+async function tryPlant() {
+  if (!session) return;
+  if (inv.seeds < 1) { popup('no seeds — harvest a tree first'); return; }
+  onGain(await net.call('plantSeed', [session.name, pstate.x, pstate.z], true));
+}
+addEventListener('keydown', e => {
+  if (typing(e) || !started) return;
+  const k = e.key.toLowerCase();
+  if (k === 'e') tryHarvest(); else if (k === 'q') tryPlant();
+});
+
+let hudEl = null, popEl = null, popT = 0;
+function updateHud() {
+  if (!hudEl) hudEl = document.getElementById('hud');
+  if (hudEl) hudEl.innerHTML = `🪵 <b>${inv.wood | 0}</b>&nbsp;&nbsp;🌰 <b>${inv.seeds | 0}</b>`;
+}
+function popup(text) {
+  if (!popEl) popEl = document.getElementById('pop');
+  if (!popEl) return;
+  popEl.textContent = text; popEl.style.opacity = '1'; popT = performance.now();
 }
 
 async function refreshAoI() {
   if (!net) return;
   const chunks = aoiChunks();
-  const old = net.subId;
-  await net.subscribe(aoiWhere(chunks));   // new sub + initial_state
-  if (old) net.unsubscribe(old);
+  const where = chunks.map(c => `chunk='${c}'`).join(' OR ');
+  const old = aoiSubIds;
+  // one AoI subscription per table — players, harvested trees, planted trees
+  aoiSubIds = await Promise.all(['players', 'harvested', 'planted'].map(
+    tb => net.subscribe(`SELECT * FROM ${tb} WHERE ${where}`)));
+  for (const id of old) net.unsubscribe(id);
+  // prune anything now outside the AoI
   const set = new Set(chunks);
   for (const [name, r] of remotes) if (!set.has(r.chunk)) removeRemote(name);
+  for (const [id, pt] of plantedTrees) if (!set.has(chunkKey(pt.x, pt.z))) removePlanted(id);
 }
 
 function updateMultiplayer(dt, t) {
@@ -437,6 +572,15 @@ function updateMultiplayer(dt, t) {
     const u = r.g.userData;
     if (u.legL) { u.legL.rotation.x = sw; u.legR.rotation.x = -sw; u.armL.rotation.x = -sw; u.armR.rotation.x = sw; }
   }
+  // grow planted trees — a pure function of elapsed time, no server tick needed
+  const nowMs = Date.now();
+  for (const pt of plantedTrees.values()) {
+    pt.group.scale.setScalar(Math.max(0.08, Math.min(1, (nowMs - pt.plantedAt) / GROW_MS)));
+  }
+  // natural respawn of harvested procedural trees
+  for (const [id, at] of harvestedAt) if (nowMs - at > RESPAWN_MS) { harvestedAt.delete(id); showTree(id); }
+  // fade the action popup
+  if (popEl && popEl.style.opacity === '1' && performance.now() - popT > 1400) popEl.style.opacity = '0';
   // AoI: re-subscribe when we cross a chunk boundary
   const ck = chunkKey(pstate.x, pstate.z);
   if (ck !== myChunk) { myChunk = ck; refreshAoI(); }
@@ -456,6 +600,11 @@ window.OriginLands = {
   teleport(x, z) { pstate.x = x; pstate.z = z; pstate.y = heightAt(x, z); pstate.vy = 0; },
   setAppearance: applyAppearance,
   playerCount: () => remotes.size + (started ? 1 : 0),
+  dbg: () => ({
+    inv: { ...inv }, planted: plantedTrees.size, remotes: remotes.size,
+    nearTree: treeList.reduce((b, t) => { const d = Math.hypot(t.x - pstate.x, t.z - pstate.z); return d < b.d ? { d, id: t.id, x: t.x, z: t.z } : b; }, { d: 1e9 }),
+  }),
+  tryHarvest: () => tryHarvest(), tryPlant: () => tryPlant(),
 
   // called by the login / creator UI
   async auth(mode, name, password, appearance) {
@@ -476,6 +625,7 @@ window.OriginLands = {
       if (!pub || pub.ok === false) return { ok: false, error: (pub && pub.error) || 'failed' };
       // enter the world at the persisted position
       session = { name: pub.name, appearance: pub.appearance || appearance };
+      inv.wood = +pub.wood || 0; inv.seeds = +pub.seeds || 0; updateHud();
       applyAppearance(session.appearance);
       pstate.x = +pub.x || 0; pstate.z = +pub.z || 0; pstate.y = heightAt(pstate.x, pstate.z);
       pstate.yaw = +pub.yaw || 0; pstate.vy = 0;

@@ -11,7 +11,7 @@
 // (server-assigned, unspoofable per connection), so move/leave are authorized
 // without sending the password on every tick.
 import {
-  JsonValue, abortCall, declareTable, generateId, nowMs,
+  JsonValue, abortCall, declareTable, deleteTable, generateId, nowMs,
   readTable, registerReducer, senderIdentity, setModuleInfo, setResult, writeTable,
 } from "../../assembly/index";
 
@@ -19,13 +19,20 @@ export {
   origindb_alloc, origindb_free, origindb_describe, origindb_invoke, __origindb_abort,
 } from "../../assembly/index";
 
-setModuleInfo("originlands", "0.1.0");
+setModuleInfo("originlands", "0.2.0");
 declareTable("players");    // PUBLIC broadcast row (name/pos/appearance) — AoI subscribes here
 declareTable("accounts");   // SECRET row (salt/hash/owner) — never subscribed, never broadcast
+declareTable("harvested");  // depleted procedural trees (AoI)  key h:<treeId>
+declareTable("planted");    // player-grown trees (AoI)         key g:<id>
+declareTable("inventory");  // per-player wood/seeds            key i:<name>
 
-const CHUNK: f64 = 48.0;     // world units per AoI chunk (must match the client)
-const SPAWN: f64 = 0.0;      // spawn centre; jittered per-name so players don't stack
-const MAX_STEP: f64 = 10.0;  // anti-teleport clamp per move call (metres)
+const CHUNK: f64 = 48.0;        // world units per AoI chunk (must match the client)
+const SPAWN: f64 = 0.0;         // spawn centre; jittered per-name so players don't stack
+const MAX_STEP: f64 = 10.0;     // anti-teleport clamp per move call (metres)
+const HARVEST_RANGE: f64 = 5.5; // how close you must be to harvest/plant (+ latency margin)
+const GROW_MS: f64 = 45000.0;   // a planted seed takes this long to mature
+const RESPAWN_MS: f64 = 180000.0; // procedural trees regrow naturally after this
+const START_SEEDS: f64 = 3.0;   // starter seeds so the loop kicks off immediately
 
 // ======================================================================
 // SHA-256 (demo-grade salted password hashing; no host/engine dependency).
@@ -185,7 +192,12 @@ function createCharacter(args: Array<JsonValue>): JsonValue | null {
   row.set("appearance", appearance);
   writeTable("players", pkey(name), row.toString());
 
-  const pub = publicRow(row).setBool("ok", true);
+  // starter inventory (a few seeds so a new player can plant right away)
+  const inv = JsonValue.newObject().setNumber("wood", 0).setNumber("seeds", START_SEEDS);
+  writeTable("inventory", ikey(name), inv.toString());
+
+  const pub = publicRow(row).setBool("ok", true)
+    .setNumber("wood", 0).setNumber("seeds", START_SEEDS);
   setResult(pub.toString());
   return pub;
 }
@@ -214,7 +226,9 @@ function login(args: Array<JsonValue>): JsonValue | null {
   row.setBool("online", true).setNumber("lastSeen", <f64>nowMs());
   writeTable("players", pkey(name), row.toString());
 
-  const pub = publicRow(row).setBool("ok", true);
+  const inv = invGet(name);
+  const pub = publicRow(row).setBool("ok", true)
+    .setNumber("wood", inv.getNumber("wood", 0)).setNumber("seeds", inv.getNumber("seeds", 0));
   setResult(pub.toString());
   return pub;
 }
@@ -257,7 +271,117 @@ function leaveWorld(args: Array<JsonValue>): JsonValue | null {
   return null;
 }
 
+// ======================================================================
+// Sustainability loop: harvest -> seeds -> plant -> grow -> harvest
+// ======================================================================
+function ikey(name: string): string { return "i:" + name; }
+
+function invGet(name: string): JsonValue {
+  const raw = readTable("inventory", ikey(name));
+  if (raw == null) return JsonValue.newObject().setNumber("wood", 0).setNumber("seeds", 0);
+  return JsonValue.parse(raw!);
+}
+
+// is the player's authoritative position within reach of (x,z)?
+function playerNear(name: string, x: f64, z: f64): bool {
+  const raw = readTable("players", pkey(name));
+  if (raw == null) return false;
+  const r = JsonValue.parse(raw!);
+  const dx = r.getNumber("x", 0) - x, dz = r.getNumber("z", 0) - z;
+  return Math.sqrt(dx * dx + dz * dz) <= HARVEST_RANGE;
+}
+
+// deterministic 1..3 from a salt string
+function rngSeeds(salt: string): f64 { return 1.0 + Math.floor(frac(salt) * 3.0); }
+
+function grant(name: string, wood: f64, seeds: f64): JsonValue {
+  const inv = invGet(name);
+  inv.setNumber("wood", inv.getNumber("wood", 0) + wood);
+  inv.setNumber("seeds", inv.getNumber("seeds", 0) + seeds);
+  writeTable("inventory", ikey(name), inv.toString());
+  return inv;
+}
+
+function gainResult(inv: JsonValue, gotWood: f64, gotSeeds: f64): JsonValue {
+  const j = JsonValue.newObject().setBool("ok", true)
+    .setNumber("wood", inv.getNumber("wood", 0)).setNumber("seeds", inv.getNumber("seeds", 0))
+    .setNumber("gotWood", gotWood).setNumber("gotSeeds", gotSeeds);
+  setResult(j.toString());
+  return j;
+}
+
+// harvestTree(name, treeId, x, z): deplete a procedural tree for wood + seeds
+function harvestTree(args: Array<JsonValue>): JsonValue | null {
+  const name = args.length > 0 ? args[0].asString() : "";
+  const treeId = args.length > 1 ? args[1].asString() : "";
+  const x = args.length > 2 ? args[2].asNumber() : 0;
+  const z = args.length > 3 ? args[3].asNumber() : 0;
+
+  if (senderIdentity() != ownerOf(name)) { abortCall("harvest: not your character"); return null; }
+  if (!playerNear(name, x, z)) { abortCall("harvest: too far away"); return null; }
+
+  const now = <f64>nowMs();
+  const hraw = readTable("harvested", "h:" + treeId);
+  if (hraw != null && now - JsonValue.parse(hraw!).getNumber("at", 0) < RESPAWN_MS) {
+    abortCall("harvest: already harvested"); return null;
+  }
+  writeTable("harvested", "h:" + treeId,
+    JsonValue.newObject().setString("chunk", chunkOf(x, z)).setNumber("at", now).toString());
+
+  const gotSeeds = rngSeeds(treeId + now.toString());
+  return gainResult(grant(name, 1.0, gotSeeds), 1.0, gotSeeds);
+}
+
+// plantSeed(name, x, z): spend a seed to plant a tree that grows over time
+function plantSeed(args: Array<JsonValue>): JsonValue | null {
+  const name = args.length > 0 ? args[0].asString() : "";
+  const x = args.length > 1 ? args[1].asNumber() : 0;
+  const z = args.length > 2 ? args[2].asNumber() : 0;
+
+  if (senderIdentity() != ownerOf(name)) { abortCall("plant: not your character"); return null; }
+  if (!playerNear(name, x, z)) { abortCall("plant: too far away"); return null; }
+
+  const inv = invGet(name);
+  if (inv.getNumber("seeds", 0) < 1.0) { abortCall("plant: no seeds"); return null; }
+  inv.setNumber("seeds", inv.getNumber("seeds", 0) - 1.0);
+  writeTable("inventory", ikey(name), inv.toString());
+
+  const id = generateId().toString();
+  const now = <f64>nowMs();
+  const row = JsonValue.newObject()
+    .setString("id", id).setNumber("x", x).setNumber("z", z)
+    .setString("chunk", chunkOf(x, z)).setNumber("plantedAt", now).setString("owner", name);
+  writeTable("planted", "g:" + id, row.toString());
+
+  const j = JsonValue.newObject().setBool("ok", true)
+    .setString("plantId", id).setNumber("seeds", inv.getNumber("seeds", 0));
+  setResult(j.toString());
+  return j;
+}
+
+// harvestPlanted(name, plantId): reap a matured planted tree (more wood + seeds)
+function harvestPlanted(args: Array<JsonValue>): JsonValue | null {
+  const name = args.length > 0 ? args[0].asString() : "";
+  const plantId = args.length > 1 ? args[1].asString() : "";
+
+  if (senderIdentity() != ownerOf(name)) { abortCall("harvest: not your character"); return null; }
+  const praw = readTable("planted", "g:" + plantId);
+  if (praw == null) { abortCall("harvest: nothing there"); return null; }
+  const pr = JsonValue.parse(praw!);
+
+  const now = <f64>nowMs();
+  if (now - pr.getNumber("plantedAt", now) < GROW_MS) { abortCall("harvest: still growing"); return null; }
+  if (!playerNear(name, pr.getNumber("x", 0), pr.getNumber("z", 0))) { abortCall("harvest: too far away"); return null; }
+
+  deleteTable("planted", "g:" + plantId);
+  const gotSeeds = rngSeeds(plantId + now.toString());
+  return gainResult(grant(name, 2.0, gotSeeds), 2.0, gotSeeds);
+}
+
 registerReducer("createCharacter", createCharacter, ["name", "password", "appearance"]);
 registerReducer("login", login, ["name", "password"]);
 registerReducer("move", move, ["name", "x", "z", "yaw"]);
 registerReducer("leaveWorld", leaveWorld, ["name"]);
+registerReducer("harvestTree", harvestTree, ["name", "treeId", "x", "z"]);
+registerReducer("plantSeed", plantSeed, ["name", "x", "z"]);
+registerReducer("harvestPlanted", harvestPlanted, ["name", "plantId"]);
