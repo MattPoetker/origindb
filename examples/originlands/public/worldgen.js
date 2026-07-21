@@ -85,27 +85,54 @@ export function biomeColor(h, slope) {
   return lerp(grass, grass2, t * 0.7 + (slope < 0.9 ? 0.3 : 0));
 }
 
-// Deterministic scatter of props (trees, rocks) over an area. Cell-based so it
-// tiles seamlessly and is stable across sessions. Skips water/beach/cliffs.
-export function scatter(minX, minZ, maxX, maxZ, cell = 7) {
+// Deterministic scatter of props over an area. Cell-based so it tiles
+// seamlessly and is stable across sessions. Emits a mix of species and size
+// classes — saplings, round trees, tall cedars; pebbles, rocks, and boulder
+// formations (a big boulder ringed by smaller debris). Skips water/beach/cliffs.
+export function scatter(minX, minZ, maxX, maxZ, cell = 6) {
   const out = [];
   const s = WORLD.seed;
+
+  // place one prop if the ground there allows it
+  const put = (x, z, kind, sub, scl, tag) => {
+    const h = heightAt(x, z);
+    if (h < WORLD.beach + 0.6 || h > 34) return;
+    if (slopeAt(x, z) < 0.86) return;
+    out.push({ x, z, h, kind, sub, scl,
+      rot: hash2(Math.round(x * 5), Math.round(z * 5), s + 71) * Math.PI * 2,
+      id: `${x.toFixed(1)}:${z.toFixed(1)}:${tag}` });
+  };
+
   for (let cx = Math.floor(minX / cell); cx <= Math.floor(maxX / cell); cx++) {
     for (let cz = Math.floor(minZ / cell); cz <= Math.floor(maxZ / cell); cz++) {
-      const r = hash2(cx, cz, s + 555);
-      if (r > 0.55) continue;                          // ~45% of cells populated
+      if (hash2(cx, cz, s + 555) > 0.6) continue;      // ~40% of cells populated
       const jx = hash2(cx, cz, s + 1) - 0.5;
       const jz = hash2(cx, cz, s + 2) - 0.5;
       const x = (cx + 0.5 + jx * 0.8) * cell;
       const z = (cz + 0.5 + jz * 0.8) * cell;
-      const h = heightAt(x, z);
-      if (h < WORLD.beach + 0.6 || h > 34) continue;   // no props on sand/snow
-      if (slopeAt(x, z) < 0.86) continue;              // no props on steep rock
-      const pick = hash2(cx, cz, s + 3);
-      const kind = pick < 0.68 ? 'tree' : 'rock';
-      const scl = 0.8 + hash2(cx, cz, s + 4) * 0.7;
-      const rot = hash2(cx, cz, s + 5) * Math.PI * 2;
-      out.push({ x, z, h, kind, scl, rot, id: `${cx}:${cz}` });
+      const kindRoll = hash2(cx, cz, s + 3);
+      const sizeRoll = hash2(cx, cz, s + 4);
+
+      if (kindRoll < 0.64) {                            // ---- trees ----
+        if (sizeRoll < 0.24)      put(x, z, 'tree', 'sapling', 0.7 + hash2(cx, cz, s + 6) * 0.5, 0);
+        else if (sizeRoll < 0.55) put(x, z, 'tree', 'cedar',   1.0 + hash2(cx, cz, s + 7) * 1.4, 0); // up to ~11 m
+        else                      put(x, z, 'tree', 'round',   0.85 + hash2(cx, cz, s + 8) * 1.0, 0);
+      } else {                                          // ---- rocks ----
+        if (sizeRoll < 0.5)       put(x, z, 'rock', 'pebble', 0.35 + hash2(cx, cz, s + 6) * 0.5, 0);
+        else if (sizeRoll < 0.83) put(x, z, 'rock', 'rock',   0.7 + hash2(cx, cz, s + 7) * 0.7, 0);
+        else {                                          // boulder formation
+          const bs = 1.7 + hash2(cx, cz, s + 7) * 1.4;
+          put(x, z, 'rock', 'boulder', bs, 0);
+          const n = 2 + Math.floor(hash2(cx, cz, s + 9) * 3);
+          for (let k = 0; k < n; k++) {
+            const ang = hash2(cx, cz, s + 20 + k) * Math.PI * 2;
+            const d = bs * (1.1 + hash2(cx, cz, s + 30 + k) * 1.3);
+            const sub = hash2(cx, cz, s + 40 + k) < 0.5 ? 'pebble' : 'rock';
+            put(x + Math.cos(ang) * d, z + Math.sin(ang) * d, 'rock', sub,
+                0.4 + hash2(cx, cz, s + 50 + k) * 0.8, 60 + k);
+          }
+        }
+      }
     }
   }
   return out;

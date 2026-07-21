@@ -176,20 +176,68 @@ function instanced(geo, mat, transforms, outlineT) {
   return m;
 }
 
+// paint a whole geometry one colour (baked into vertex colors so many species
+// share a single instanced material)
+function paint(geo, hex) {
+  const c = new THREE.Color(hex);
+  const n = geo.attributes.position.count;
+  const col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b; }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  return geo;
+}
+// merge pre-positioned geometries into one (no addons): concat position/normal/color
+function mergeGeoms(geos) {
+  const parts = geos.map(g => (g.index ? g.toNonIndexed() : g));
+  let total = 0; parts.forEach(g => total += g.attributes.position.count);
+  const pos = new Float32Array(total * 3), nor = new Float32Array(total * 3), col = new Float32Array(total * 3);
+  let o = 0;
+  for (const g of parts) {
+    const p = g.attributes.position, nn = g.attributes.normal, cc = g.attributes.color;
+    for (let i = 0; i < p.count; i++, o++) {
+      pos[o * 3] = p.getX(i); pos[o * 3 + 1] = p.getY(i); pos[o * 3 + 2] = p.getZ(i);
+      nor[o * 3] = nn.getX(i); nor[o * 3 + 1] = nn.getY(i); nor[o * 3 + 2] = nn.getZ(i);
+      col[o * 3] = cc ? cc.getX(i) : 1; col[o * 3 + 1] = cc ? cc.getY(i) : 1; col[o * 3 + 2] = cc ? cc.getZ(i) : 1;
+    }
+  }
+  const m = new THREE.BufferGeometry();
+  m.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  m.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+  m.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  return m;
+}
+
+// species geometries (base at y=0, scaled per-instance)
+const treeRound = () => mergeGeoms([
+  paint(new THREE.CylinderGeometry(0.14, 0.22, 1.4, 6).translate(0, 0.7, 0), 0x6b4a2b),
+  paint(new THREE.IcosahedronGeometry(1.1, 0).translate(0, 2.1, 0), 0x4f8f43),
+]);
+const treeCedar = () => mergeGeoms([
+  paint(new THREE.CylinderGeometry(0.12, 0.2, 2.2, 6).translate(0, 1.1, 0), 0x5b3f26),
+  paint(new THREE.ConeGeometry(1.05, 1.5, 7).translate(0, 2.5, 0), 0x2f6b3a),
+  paint(new THREE.ConeGeometry(0.82, 1.35, 7).translate(0, 3.35, 0), 0x357040),
+  paint(new THREE.ConeGeometry(0.55, 1.2, 7).translate(0, 4.15, 0), 0x3c7a46),
+]);
+const treeSapling = () => mergeGeoms([
+  paint(new THREE.CylinderGeometry(0.06, 0.09, 0.5, 5).translate(0, 0.25, 0), 0x6b4a2b),
+  paint(new THREE.IcosahedronGeometry(0.5, 0).translate(0, 0.85, 0), 0x6cc255),
+]);
+const rockBase = () => paint(new THREE.IcosahedronGeometry(0.9, 0).scale(1, 0.72, 1), 0x7d7a80);
+
+const GEO = {
+  sapling: treeSapling(), round: treeRound(), cedar: treeCedar(),
+  pebble: rockBase(), rock: rockBase(), boulder: rockBase(),
+};
+const OUTLINE_T = { sapling: 0.03, round: 0.05, cedar: 0.05, pebble: 0.03, rock: 0.04, boulder: 0.07 };
+const VC = toon(0xffffff, { vertexColors: true });
+
 const props = scatter(-TERRAIN / 2 + 8, -TERRAIN / 2 + 8, TERRAIN / 2 - 8, TERRAIN / 2 - 8);
-const trees = props.filter(p => p.kind === 'tree');
-const rocks = props.filter(p => p.kind === 'rock');
-
-// trunk (base at y=0) + canopy (baked up) share the per-instance matrix
-const trunkGeo = new THREE.CylinderGeometry(0.16, 0.24, 1.7, 6).translate(0, 0.85, 0);
-const canopyGeo = new THREE.IcosahedronGeometry(1.25, 0).translate(0, 2.5, 0);
-const treeXf = trees.map(t => ({ x: t.x, y: t.h, z: t.z, rot: t.rot, scl: t.scl }));
-instanced(trunkGeo, toon(0x6b4a2b), treeXf, 0.05);
-instanced(canopyGeo, toon(0x4f8f43), treeXf, 0.06);
-
-const rockGeo = new THREE.IcosahedronGeometry(0.9, 0).scale(1, 0.7, 1);
-const rockXf = rocks.map(r => ({ x: r.x, y: r.h + 0.2, z: r.z, rot: r.rot, scl: r.scl }));
-instanced(rockGeo, toon(0x7d7a80), rockXf, 0.05);
+const bySub = {};
+for (const p of props) {
+  const y = p.h - (p.kind === 'rock' ? 0.18 * p.scl : 0);   // sink rocks into ground
+  (bySub[p.sub] || (bySub[p.sub] = [])).push({ x: p.x, y, z: p.z, rot: p.rot, scl: p.scl });
+}
+for (const sub in bySub) instanced(GEO[sub], VC, bySub[sub], OUTLINE_T[sub]);
 
 // ---- character -----------------------------------------------------------
 function buildCharacter(skin = 0xf0c27a, shirt = 0x4aa3d8, pants = 0x394a6b) {
