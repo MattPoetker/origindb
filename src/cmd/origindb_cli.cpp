@@ -29,7 +29,7 @@ const std::string BLUE = "\033[34m";
 const std::string CYAN = "\033[36m";
 
 // Version information
-const std::string VERSION = "0.0.6";
+const std::string VERSION = "0.0.7";
 
 // Command descriptions
 struct Command {
